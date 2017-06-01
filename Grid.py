@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 
 
 class Grid:
@@ -23,7 +24,12 @@ class Grid:
 
     def apply_function(self, list_of_names, list_of_functions):
         # apply function to an array
-        # checking : list_of_keys = self.arrays.keys()
+
+        nC = collections.Counter(list_of_names)
+        sC = collections.Counter(self.arrays.keys)
+        if(nC != sC):
+            print('INVALID LIST OF NAMES')
+            return
 
         outer_mat = list_of_functions[0](self.arrays[list_of_names[0]])
 
