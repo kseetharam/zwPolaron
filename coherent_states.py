@@ -15,6 +15,9 @@ class Grid(coordinate_system):
         self.arrays[name] = grid_1d
         #self.grid_difference_1d = np.array()
 
+    def return_array1d(self, name):
+        return self.arrays[name]
+
     def print_arrays(self, name):
         print(self.arrays[name])
 
@@ -34,13 +37,14 @@ class Grid(coordinate_system):
         return outer_mat.reshape(outer_mat.size)
         # doesn't confirm with the test
 
-    def dV(self)
+    def dV(self):
         list_of_names = self.arrays.keys()
         coordinate_system = self.coordinate_system
-        if coordinate_system == "SPHERICAL_2D"
+        if coordinate_system == "SPHERICAL_2D":
             list_of_functions = [lambda k: (2 * np.pi)**(-1) * k**2, np.sin]
 
-        dV = apply_function(list_of_names, list_of_functions)
+        output = apply_function(list_of_names, list_of_functions)
+        return output
         # use simps method for integration since there is no dk and dth yet
 
 
