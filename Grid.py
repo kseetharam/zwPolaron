@@ -4,27 +4,45 @@ import collections
 
 class Grid:
 
-    def __init__(self, coordinate_system):
+    COORDINATE_SYSTEMS = ["SPHERICAL_2D"]
 
-        # creating an empty array for storing the grid
+    def __init__(self, coordinate_system):
+        # Initialization of the Grid using the hash table.
+        # The hash table self.arrays contains an information about
+        # the grid graphs in d dimentions.
+        # Thereafter the length of the self.arrays can be less or equal to d.
+        # By defining the coordinate system we later initialize the volume elements
+
         self.arrays = {}
         self.coordinate_system = coordinate_system
 
     def init1d(self, name, grid_min, grid_max, grid_step):
-        # we create a 1d grid
+        # creates 1 dimentional grid graph with equidistant spacing
+        # and adds this array to the hash table self.arrays[name]
+
         grid_1d = np.arange(grid_min, grid_max, grid_step)
         self.arrays[name] = grid_1d
-        # self.grid_difference_1d = np.array()
 
     def return_array1d(self, name):
+        # with a given key returns a corrsponding 1 dimentional array
         return self.arrays[name]
 
     def print_arrays(self, name):
+        # with a given key prints a corrsponding 1 dimentional array
+        # NOTE_ys is it nessesary?
         print(self.arrays[name])
 
     def apply_function(self, list_of_names, list_of_functions):
-        # apply function to an array
+        # caluclates a function on a grid when function is a product of function
+        # acting independently on each coordinate
+        # example:  list_of_names = [x1, x2]
+        # assume that f = f1 (x1) * f2 (x2)
+        # then we can use: list_of_functions = [f1, f2, ...]
+        # NOTE_ys: do we need to generalize it?
 
+        # chack that the order of keys in the list_of_names is ordered
+        # the same way as in self.arrays.keys
+        # otherwise thorow an error
         nC = collections.Counter(list_of_names)
         sC = collections.Counter(self.arrays.keys)
         if(nC != sC):
@@ -44,6 +62,9 @@ class Grid:
         # doesn't confirm with the test
 
     def dV(self):
+        # create an infinitisimal element of the volume that corresponds to the
+        # given coordinate_system
+
         list_of_names = self.arrays.keys()
         coordinate_system = self.coordinate_system
         if coordinate_system == "SPHERICAL_2D":
