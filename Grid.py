@@ -28,7 +28,7 @@ class Grid:
         return self.arrays[name]
 
     def function_prod(self, list_of_names, list_of_functions):
-        # caluclates a function on a grid when function is a product of function
+        # calculates a function on a grid when function is a product of function
         # acting independently on each coordinate
         # example:  list_of_names = [x1, x2]
         # assume that f = f1 (x1) * f2 (x2)
@@ -39,7 +39,7 @@ class Grid:
         # the same way as in self.arrays.keys
         # otherwise throw an error
         nC = collections.Counter(list_of_names)
-        sC = collections.Counter(self.arrays.keys)
+        sC = collections.Counter(self.arrays.keys())
         if(nC != sC):
             print('INVALID LIST OF NAMES')
             return
@@ -54,7 +54,6 @@ class Grid:
             outer_mat = np.outer(outer_mat, temp)
 
         return outer_mat.reshape(outer_mat.size)
-        # doesn't confirm with the test
 
     def dV(self):
         # create an infinitisimal element of the volume that corresponds to the
