@@ -27,12 +27,7 @@ class Grid:
         # with a given key returns a corrsponding 1 dimentional array
         return self.arrays[name]
 
-    def print_arrays(self, name):
-        # with a given key prints a corrsponding 1 dimentional array
-        # NOTE_ys is it nessesary?
-        print(self.arrays[name])
-
-    def apply_function(self, list_of_names, list_of_functions):
+    def function_prod(self, list_of_names, list_of_functions):
         # caluclates a function on a grid when function is a product of function
         # acting independently on each coordinate
         # example:  list_of_names = [x1, x2]
@@ -40,9 +35,9 @@ class Grid:
         # then we can use: list_of_functions = [f1, f2, ...]
         # NOTE_ys: do we need to generalize it?
 
-        # chack that the order of keys in the list_of_names is ordered
+        # check that the order of keys in the list_of_names is ordered
         # the same way as in self.arrays.keys
-        # otherwise thorow an error
+        # otherwise throw an error
         nC = collections.Counter(list_of_names)
         sC = collections.Counter(self.arrays.keys)
         if(nC != sC):
@@ -55,7 +50,7 @@ class Grid:
             return outer_mat
 
         for ind, name in enumerate(list_of_names[1:]):
-            temp = list_of_functions[ind](self.arrays[name])
+            temp = list_of_functions[ind + 1](self.arrays[name])
             outer_mat = np.outer(outer_mat, temp)
 
         return outer_mat.reshape(outer_mat.size)

@@ -10,8 +10,6 @@ dtheta = np.pi / (Ntheta - 1)
 grid_space = g.Grid("SPHERICAL_2D")
 grid_space.init1d('k', dk, kcutoff, dk)
 grid_space.init1d('th', dtheta, np.pi, dtheta)
-grid_space.print_arrays('k')
-grid_space.print_arrays('th')
 
 names = ['k', 'th']
 
@@ -23,7 +21,7 @@ def square(k):
 functions = [lambda k: k**2, np.cos]
 # functions = [square, np.cos]
 
-mat = grid_space.apply_function(names, functions)
+mat = grid_space.function_prod(names, functions)
 
 
 k = grid_space.return_array1d('k')
