@@ -27,29 +27,29 @@ class Grid:
         # with a given key returns a corrsponding 1 dimentional array
         return self.arrays[name]
 
-    def function_prod(self, list_of_names, list_of_functions):
+    def function_prod(self, list_of_unit_vectors, list_of_functions):
         # calculates a function on a grid when function is a product of function
         # acting independently on each coordinate
-        # example:  list_of_names = [x1, x2]
+        # example:  list_of_unit_vectors = [x1, x2]
         # assume that f = f1 (x1) * f2 (x2)
         # then we can use: list_of_functions = [f1, f2, ...]
         # NOTE_ys: do we need to generalize it?
 
-        # check that the order of keys in the list_of_names is ordered
+        # check that the order of keys in the list_of_unit_vectors is ordered
         # the same way as in self.arrays.keys
         # otherwise throw an error
-        nC = collections.Counter(list_of_names)
+        nC = collections.Counter(list_of_unit_vectors)
         sC = collections.Counter(self.arrays.keys())
         if(nC != sC):
             print('INVALID LIST OF NAMES')
             return
 
-        outer_mat = list_of_functions[0](self.arrays[list_of_names[0]])
+        outer_mat = list_of_functions[0](self.arrays[list_of_unit_vectors[0]])
 
-        if(len(list_of_names) == 1):
+        if(len(list_of_unit_vectors) == 1):
             return outer_mat
 
-        for ind, name in enumerate(list_of_names[1:]):
+        for ind, name in enumerate(list_of_unit_vectors[1:]):
             temp = list_of_functions[ind + 1](self.arrays[name])
             outer_mat = np.outer(outer_mat, temp)
 
@@ -59,11 +59,32 @@ class Grid:
         # create an infinitisimal element of the volume that corresponds to the
         # given coordinate_system
 
-        list_of_names = self.arrays.keys()
+        list_of_names = list(self.arrays.keys())
         coordinate_system = self.coordinate_system
         if coordinate_system == "SPHERICAL_2D":
             list_of_functions = [lambda k: (2 * np.pi)**(-1) * k**2, np.sin]
 
-        output = self.apply_function(list_of_names, list_of_functions)
+        output = self.function_prod(list_of_names, list_of_functions)
         return output
         # use simps method for integration since there is no dk and dth yet
+
+    def construct_grid(self):
+        # construct grid from self.arrays
+        # comment: we can use function_prod here with list_of_functions
+        # filled with identity functions (need to write such function)
+
+        list_of_unit_vectors = list(self.arrays.keys())
+
+        outer_product = self.arrays[list_of_unit_vectors[0]]
+
+        if(len(list_of_unit_vectors) == 1):
+            return outer_product
+
+        for ind, name in enumerate(list_of_unit_vectors[1:]):
+            temp = self.arrays[name]
+            outer_product = np.outer(outer_product, temp)
+
+        return outer_product.reshape(outer_product.size)
+
+    def integrate_on_grid(self):
+        # takes an array on a grid and integrates it
