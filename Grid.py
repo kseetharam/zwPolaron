@@ -68,23 +68,31 @@ class Grid:
         return output
         # use simps method for integration since there is no dk and dth yet
 
-    def construct_grid(self):
-        # construct grid from self.arrays
-        # comment: we can use function_prod here with list_of_functions
-        # filled with identity functions (need to write such function)
-
+    def size(self):
+        # this method returns the number of grid points
         list_of_unit_vectors = list(self.arrays.keys())
+        grid_size = 1
+        for unit in list_of_unit_vectors:
+            grid_size = grid_size * len(self.arrays[unit])
+        return grid_size
 
-        outer_product = self.arrays[list_of_unit_vectors[0]]
+    # def construct_grid(self):
+    #     # construct grid from self.arrays
+    #     # comment: we can use function_prod here with list_of_functions
+    #     # filled with identity functions (need to write such function)
 
-        if(len(list_of_unit_vectors) == 1):
-            return outer_product
+    #     list_of_unit_vectors = list(self.arrays.keys())
 
-        for ind, name in enumerate(list_of_unit_vectors[1:]):
-            temp = self.arrays[name]
-            outer_product = np.outer(outer_product, temp)
+    #     outer_product = self.arrays[list_of_unit_vectors[0]]
 
-        return outer_product.reshape(outer_product.size)
+    #     if(len(list_of_unit_vectors) == 1):
+    #         return outer_product
+
+    #     for ind, name in enumerate(list_of_unit_vectors[1:]):
+    #         temp = self.arrays[name]
+    #         outer_product = np.outer(outer_product, temp)
+
+    #     return outer_product.reshape(outer_product.size)
 
     # def integrate_on_grid(self, array):
         # takes an array on a grid and integrates it
