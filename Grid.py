@@ -62,7 +62,7 @@ class Grid:
         list_of_names = list(self.arrays.keys())
         coordinate_system = self.coordinate_system
         if coordinate_system == "SPHERICAL_2D":
-            list_of_functions = [lambda k: (2 * np.pi)**(-1) * k**2, np.sin]
+            list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
 
         output = self.function_prod(list_of_names, list_of_functions)
         return output
@@ -86,5 +86,5 @@ class Grid:
 
         return outer_product.reshape(outer_product.size)
 
-    def integrate_on_grid(self):
+    # def integrate_on_grid(self, array):
         # takes an array on a grid and integrates it
