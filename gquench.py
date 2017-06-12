@@ -36,7 +36,7 @@ ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
 
 # Time evolution
-tMax = 3
+tMax = 1
 dt = 1e-5
 
 start = timer()
@@ -55,7 +55,7 @@ for ind, t in enumerate(tVec):
 
 
 # save data
-data = [cs.Params, tVec, PB_Vec, NB_Vec, DynOv_Vec]
+data = [ham.Params, tVec, PB_Vec, NB_Vec, DynOv_Vec]
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 np.save(dirpath + '/data/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
@@ -135,4 +135,4 @@ figN.savefig('quench_PhononNumber.pdf')
 # axes[1].set_title(r'Spectral Function')
 # fig.savefig('quench_DynOverlap&SpectFunction.pdf')
 
-# plt.show()
+plt.show()
