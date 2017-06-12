@@ -15,8 +15,10 @@ class PolaronHamiltonian:
         self.gnum = pf.g(self.grid, *Params)
         self.Omega0_grid = pf.omega0(self.grid, *Params)
         self.Wk_grid = pf.Wk(self.grid, *Params)
-        self.Wki_grid = (pf.Wk(self.grid, *Params))**(-1.)
+        self.Wki_grid = 1 / self.Wk_grid
         self.kcos = pf.kcos_func(self.grid)
+
+        # print(self.Omega0_grid.shape)
 
     def phi_update(self, coherent_state):
 
@@ -25,9 +27,12 @@ class PolaronHamiltonian:
         dv = self.grid.dV()
 
         amplitude_t = coherent_state.amplitude
-        PB_t = coherent_state.Phonon_momentum(self.grid)
+        PB_t = coherent_state.get_PhononMomentum()
 
         betaSum = amplitude_t + np.conjugate(amplitude_t)
+        # print(betaSum.shape)
+        # print(dv.shape)
+        # print(self.Wk_grid.shape)
         xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dv)
 
         return self.gnum * n0 + self.gnum * np.sqrt(n0) * xp_t + (P**2 - PB_t**2) / (2 * mI)
@@ -40,7 +45,7 @@ class PolaronHamiltonian:
         dv = self.grid.dV()
 
         amplitude_t = coherent_state.amplitude
-        PB_t = coherent_state.Phonon_momentum(self.grid)
+        PB_t = coherent_state.get_PhononMomentum()
 
         betaSum = amplitude_t + np.conjugate(amplitude_t)
         xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dv)

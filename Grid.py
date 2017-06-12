@@ -83,7 +83,7 @@ class Grid:
 
         output = self.function_prod(list_of_unit_vectors, list_of_functions)
 
-        print(len(output))
+        #print(len(output))
         return output * grid_diff.reshape(grid_diff.size)
         # use simps method for integration since there is no dk and dth yet
 
