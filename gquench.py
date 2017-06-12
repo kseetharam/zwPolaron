@@ -10,13 +10,14 @@ import matplotlib.pyplot as plt
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
 # Initialization Grid
-k_max = 1
-dk = 0.1
+kcutoff = 20
+dk = 0.05
+
 Ntheta = 10
 dtheta = np.pi / (Ntheta - 1)
 
 grid_space = Grid.Grid("SPHERICAL_2D")
-grid_space.init1d('k', dk, k_max, dk)
+grid_space.init1d('k', dk, kcutoff, dk)
 grid_space.init1d('th', dtheta, np.pi, dtheta)
 
 # Initialization CoherentState
@@ -36,7 +37,7 @@ ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
 
 # Time evolution
-tMax = 1
+tMax = 3
 dt = 1e-5
 
 start = timer()
@@ -49,7 +50,7 @@ DynOv_Vec = np.zeros(tVec.size, dtype=complex)
 for ind, t in enumerate(tVec):
     PB_Vec[ind] = cs.get_PhononMomentum()
     NB_Vec[ind] = cs.get_PhononNumber()
-    DynOv_Vec[ind] = cs.get_DynOverlap()
+    # DynOv_Vec[ind] = cs.get_DynOverlap()
 
     cs.evolve(dt, ham)
 
