@@ -12,6 +12,7 @@ class CoherentState:
         self.phase = 0 + 0j
         self.grid = grid_space
 
+        self.dV = grid_space.dV()
         self.kcos = kcos_func(self.grid)
     # EVOLUTION
 
@@ -24,15 +25,12 @@ class CoherentState:
     def get_PhononNumber(self):
 
         coherent_amplitude = self.amplitude
-        dv = self.grid.dV()
-        return np.dot(coherent_amplitude * np.conjugate(coherent_amplitude), dv)
+        return np.dot(coherent_amplitude * np.conjugate(coherent_amplitude), self.dV)
 
     def get_PhononMomentum(self):
 
         coherent_amplitude = self.amplitude
-        dv = self.grid.dV()
-
-        return np.dot(self.kcos, coherent_amplitude * np.conjugate(coherent_amplitude) * dv)
+        return np.dot(self.kcos, coherent_amplitude * np.conjugate(coherent_amplitude) * self.dV)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal

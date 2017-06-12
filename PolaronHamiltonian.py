@@ -24,7 +24,7 @@ class PolaronHamiltonian:
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params
 
-        dv = self.grid.dV()
+        dv = coherent_state.dV
 
         amplitude_t = coherent_state.amplitude
         PB_t = coherent_state.get_PhononMomentum()
@@ -42,7 +42,7 @@ class PolaronHamiltonian:
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params
 
-        dv = self.grid.dV()
+        dv = coherent_state.dV
 
         amplitude_t = coherent_state.amplitude
         PB_t = coherent_state.get_PhononMomentum()
