@@ -1,4 +1,5 @@
 import numpy as np
+from polaron_functions import kcos_func
 
 
 class Coherent:
@@ -9,34 +10,32 @@ class Coherent:
         size = grid_space.size()
         self.amplitude = np.zeros(size, dtype=complex)
         self.phase = 0 + 0j
+        self.grid = grid_space
 
+        self.kcos = kcos_func(self.grid)
     # EVOLUTION
-    def evolve(self, dt):
 
-        dt = grid_time.dV()
-        self.phase = self.phase + dt * self.phi_update()
-        self.amplitude = self.amplitude + dt * self.amplitude_update()
+    def evolve(self, dt, hamiltonian):
 
-    def phi_update(self, Hamiltonian):
-        # here on can write any method induding Runge-Kutta 4
-        return
-
-    def amplitude_update(self, Hamiltonian):
-        # here on can write any method induding Runge-Kutta 4
-
-        return
+        self.phase = self.phase + dt * hamiltonian.phi_update(self)
+        self.amplitude = self.amplitude + dt * hamiltonian.amplitude_update(self)
 
     # OBSERVABLES
-    def Number_of_phonons(self, grid_space)
+    def get_PhononNumber(self):
 
         coherent_amplitude = self.amplitude
-        dv = grid_space.dV()
+        dv = self.grid.dV()
         return np.dot(coherent_amplitude * np.conjugate(coherent_amplitude), dv)
 
+    def get_PhononMomentum(self):
 
-class Hamiltonian:
-        # """ This is a class that stores information about the Hamiltonian"""
+        coherent_amplitude = self.amplitude
+        dv = self.grid.dV()
 
-    def __init__(self, grid_space):
+        return np.dot(self.kcos, coherent_amplitude * np.conjugate(coherent_amplitude) * dv)
 
-        self.update
+    def get_DynOverlap(self):
+        # dynamical overlap/Ramsey interferometry signal
+        NB_vec = self.get_PhononNumber()
+        exparg = -1j * self.phase - (1 / 2) * NB_vec
+        return np.exp(exparg)

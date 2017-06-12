@@ -14,13 +14,15 @@ class Grid:
         # By defining the coordinate system we later initialize the volume elements
 
         self.arrays = {}
+        self.arrays_diff = {}
         self.coordinate_system = coordinate_system
 
     def init1d(self, name, grid_min, grid_max, grid_step):
         # creates 1 dimentional grid graph with equidistant spacing
         # and adds this array to the hash table self.arrays[name]
 
-        grid_1d = np.arange(grid_min, grid_max, grid_step)
+        grid_1d = np.arange(grid_min, grid_max + grid_step, grid_step)
+        self.arrays_diff[name] = grid_step
         self.arrays[name] = grid_1d
 
     def return_array1d(self, name):
@@ -59,13 +61,30 @@ class Grid:
         # create an infinitisimal element of the volume that corresponds to the
         # given coordinate_system
 
-        list_of_names = list(self.arrays.keys())
+        list_of_unit_vectors = list(self.arrays.keys())
+
+        # create dk, dth and modify it
+        grid_diff = self.arrays_diff[list_of_unit_vectors[0]] * np.ones(len(self.arrays[list_of_unit_vectors[0]]))
+        grid_diff[0] = 0.5 * grid_diff[0]
+        grid_diff[-1] = 0.5 * grid_diff[-1]
+
+        if(len(list_of_unit_vectors) == 1):
+            return grid_diff
+
+        for ind, name in enumerate(list_of_unit_vectors[1:]):
+            temp_grid_diff = self.arrays_diff[name] * np.ones(len(self.arrays[name]))
+            temp_grid_diff[0] = 0.5 * temp_grid_diff[0]
+            temp_grid_diff[-1] = 0.5 * temp_grid_diff[-1]
+            grid_diff = np.outer(grid_diff, temp_grid_diff)
+
         coordinate_system = self.coordinate_system
         if coordinate_system == "SPHERICAL_2D":
             list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
 
-        output = self.function_prod(list_of_names, list_of_functions)
-        return output
+        output = self.function_prod(list_of_unit_vectors, list_of_functions)
+
+        print(len(output))
+        return output * grid_diff.reshape(grid_diff.size)
         # use simps method for integration since there is no dk and dth yet
 
     def size(self):
