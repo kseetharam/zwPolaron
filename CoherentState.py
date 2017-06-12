@@ -2,7 +2,7 @@ import numpy as np
 from polaron_functions import kcos_func
 
 
-class Coherent:
+class CoherentState:
     # """ This is a class that stores information about coherent state """
 
     def __init__(self, grid_space):
