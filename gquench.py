@@ -17,8 +17,8 @@ Ntheta = 10
 dtheta = np.pi / (Ntheta - 1)
 
 grid_space = Grid.Grid("SPHERICAL_2D")
-grid_space.init1d('k', dk, kcutoff, dk)
-grid_space.init1d('th', dtheta, np.pi, dtheta)
+grid_space.initArray('k', dk, kcutoff, dk)
+grid_space.initArray('th', dtheta, np.pi, dtheta)
 
 # Initialization CoherentState
 cs = CoherentState.CoherentState(grid_space)
