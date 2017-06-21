@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
 # Initialization Grid
-kcutoff = 20
+kcutoff = 10
 dk = 0.05
 
 Ntheta = 10
@@ -37,7 +37,7 @@ ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
 
 # Time evolution
-tMax = 3
+tMax = 1
 dt = 1e-5
 
 start = timer()

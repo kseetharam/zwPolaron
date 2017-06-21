@@ -20,7 +20,7 @@ class PolaronHamiltonian:
 
         # print(self.Omega0_grid.shape)
 
-    def phi_update(self, coherent_state):
+    def phase_update(self, t, phi0, coherent_state):
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params
 
@@ -37,7 +37,7 @@ class PolaronHamiltonian:
 
         return self.gnum * n0 + self.gnum * np.sqrt(n0) * xp_t + (P**2 - PB_t**2) / (2 * mI)
 
-    def amplitude_update(self, coherent_state):
+    def amplitude_update(self, t, amp0, coherent_state):
         # here on can write any method induding Runge-Kutta 4
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params

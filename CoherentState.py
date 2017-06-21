@@ -1,5 +1,6 @@
 import numpy as np
 from polaron_functions import kcos_func
+from scipy.integrate import ode
 
 
 class CoherentState:
@@ -10,27 +11,43 @@ class CoherentState:
         size = grid_space.size()
         self.amplitude = np.zeros(size, dtype=complex)
         self.phase = 0 + 0j
+        self.time = 0
         self.grid = grid_space
 
         self.dV = grid_space.dV()
         self.kcos = kcos_func(self.grid)
+
+        self.abs_error = 1.0e-8
+        self.rel_error = 1.0e-6
+
     # EVOLUTION
+
+    # def evolve(self, dt, hamiltonian):
+
+    #     self.phase = self.phase + dt * hamiltonian.phi_update(self)
+    #     self.amplitude = self.amplitude + dt * hamiltonian.amplitude_update(self)
 
     def evolve(self, dt, hamiltonian):
 
-        self.phase = self.phase + dt * hamiltonian.phi_update(self)
-        self.amplitude = self.amplitude + dt * hamiltonian.amplitude_update(self)
+        amp_solver = ode(hamiltonian.amplitude_update).set_integrator('zvode', method='bdf')
+        amp_solver.set_initial_value(self.amplitude, self.time).set_f_params(self)
+        self.amplitude = amp_solver.integrate(amp_solver.t + dt)
+
+        ph_solver = ode(hamiltonian.phase_update).set_integrator('zvode', method='bdf')
+        ph_solver.set_initial_value(self.phase, self.time).set_f_params(self)
+        self.phase = ph_solver.integrate(ph_solver.t + dt)
+
+        self.time = self.time + dt
+
+        # self.phase = self.phase + dt * hamiltonian.phase_update(0, 0, self)
+        # self.amplitude = self.amplitude + dt * hamiltonian.amplitude_update(0, 0, self)
 
     # OBSERVABLES
     def get_PhononNumber(self):
-
-        coherent_amplitude = self.amplitude
-        return np.dot(coherent_amplitude * np.conjugate(coherent_amplitude), self.dV)
+        return np.dot(self.amplitude * np.conjugate(self.amplitude), self.dV)
 
     def get_PhononMomentum(self):
-
-        coherent_amplitude = self.amplitude
-        return np.dot(self.kcos, coherent_amplitude * np.conjugate(coherent_amplitude) * self.dV)
+        return np.dot(self.kcos, self.amplitude * np.conjugate(self.amplitude) * self.dV)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
