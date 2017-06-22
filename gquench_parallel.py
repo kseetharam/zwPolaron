@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # Set time evolution parameters
     tMax = 1
-    dt = 1e-4
+    dt = 1e-1
     gParams = [grid_space, tMax, dt]
 
     # Set sparams
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     aIBi = -20
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
 
-    NPVals = 3
+    NPVals = 8
     PVals = np.linspace(0, 0.95 * Pc, NPVals)
 
     cParams_List = [[P, aIBi] for P in PVals]
