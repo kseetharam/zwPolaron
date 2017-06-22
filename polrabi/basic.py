@@ -18,8 +18,8 @@ def w(k, gBB, mB, n0):
     return np.sqrt(eB(k, mB) * (eB(k, mB) + 2 * gBB * n0))
 
 
-# def Wk(k, gBB, mB, n0):
-#     return np.sqrt(eB(k, mB) / w(k, gBB, mB, n0))
+def Wk(k, gBB, mB, n0):
+    return np.sqrt(eB(k, mB) / w(k, gBB, mB, n0))
 
 
 # def Wki(k, gBB, mB, n0):

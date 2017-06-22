@@ -29,7 +29,7 @@ mI = 1
 mB = 1
 n0 = 1
 gBB = (4 * np.pi / mB) * 0.05
-P = 0.85
+P = 0.76
 aIBi = -20
 
 Params = [P, aIBi, mI, mB, n0, gBB]
@@ -38,7 +38,7 @@ ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
 # Time evolution
 tMax = 1
-dt = 1e-5
+dt = 1e-4
 
 start = timer()
 

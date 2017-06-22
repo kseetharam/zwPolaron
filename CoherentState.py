@@ -29,7 +29,7 @@ class CoherentState:
 
     def evolve(self, dt, hamiltonian):
 
-        amp_solver = ode(hamiltonian.amplitude_update).set_integrator('zvode', method='bdf')
+        amp_solver = ode(hamiltonian.amplitude_update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error)
         amp_solver.set_initial_value(self.amplitude, self.time).set_f_params(self)
         self.amplitude = amp_solver.integrate(amp_solver.t + dt)
 
