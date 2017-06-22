@@ -45,7 +45,7 @@ if __name__ == "__main__":
     kcutoff = 10
     dk = 0.05
 
-    Ntheta = 10
+    Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
 
     grid_space = Grid.Grid("SPHERICAL_2D")
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     grid_space.initArray('th', dtheta, np.pi, dtheta)
 
     # Set time evolution parameters
-    tMax = 1
+    tMax = 10
     dt = 1e-1
     gParams = [grid_space, tMax, dt]
 
