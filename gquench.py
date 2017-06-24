@@ -9,6 +9,19 @@ import matplotlib.pyplot as plt
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
+
+def spectFunc(t_Vec, S_Vec):
+    # spectral function (Fourier Transform of dynamical overlap)
+    tstep = t_Vec[1] - t_Vec[0]
+    N = t_Vec.size
+    tdecay = 3
+    decayFactor = np.exp(-1 * t_Vec / tdecay)
+    # decayFactor = 1
+    sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
+    omega = 2 * np.pi * np.fft.fftfreq(N, d=tstep)
+    return omega, sf
+
+
 # Initialization Grid
 kcutoff = 10
 dk = 0.05
@@ -50,13 +63,14 @@ DynOv_Vec = np.zeros(tVec.size, dtype=complex)
 for ind, t in enumerate(tVec):
     PB_Vec[ind] = cs.get_PhononMomentum()
     NB_Vec[ind] = cs.get_PhononNumber()
-    # DynOv_Vec[ind] = cs.get_DynOverlap()
+    DynOv_Vec[ind] = cs.get_DynOverlap()
 
     cs.evolve(dt, ham)
 
+freqVec, SpectFunc_Vec = spectFunc(tVec, DynOv_Vec)
 
 # save data
-data = [ham.Params, tVec, PB_Vec, NB_Vec, DynOv_Vec]
+data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 np.save(dirpath + '/data/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)

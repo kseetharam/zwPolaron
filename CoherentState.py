@@ -78,7 +78,7 @@ class CoherentState:
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
-        NB_vec = self.get_PhononNumber()
+        NB = self.get_PhononNumber()
         phase = self.amplitude_phase[-1]
-        exparg = -1j * phase - (1 / 2) * NB_vec
+        exparg = -1j * phase - (1 / 2) * NB
         return np.exp(exparg)

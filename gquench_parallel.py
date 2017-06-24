@@ -10,6 +10,18 @@ import itertools as it
 from joblib import Parallel, delayed
 
 
+def spectFunc(t_Vec, S_Vec):
+    # spectral function (Fourier Transform of dynamical overlap)
+    tstep = t_Vec[1] - t_Vec[0]
+    N = t_Vec.size
+    tdecay = 3
+    decayFactor = np.exp(-1 * t_Vec / tdecay)
+    # decayFactor = 1
+    sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
+    omega = 2 * np.pi * np.fft.fftfreq(N, d=tstep)
+    return omega, sf
+
+
 def dynamics(cParams, gParams, sParams):
     # takes parameters, performs dynamics, and outputs desired observables
     [P, aIBi] = cParams
@@ -30,11 +42,13 @@ def dynamics(cParams, gParams, sParams):
     for ind, t in enumerate(tVec):
         PB_Vec[ind] = cs.get_PhononMomentum()
         NB_Vec[ind] = cs.get_PhononNumber()
-        # DynOv_Vec[ind] = cs.get_DynOverlap()
+        DynOv_Vec[ind] = cs.get_DynOverlap()
         cs.evolve(dt, ham)
 
+    freqVec, SpectFunc_Vec = spectFunc(tVec, DynOv_Vec)
+
     # Save Data
-    data = [ham.Params, tVec, PB_Vec, NB_Vec, DynOv_Vec]
+    data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
     dirpath = os.path.dirname(os.path.realpath(__file__))
     np.save(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
 
@@ -66,13 +80,20 @@ if __name__ == "__main__":
 
     # create range of cParam values (P,aIBi)
 
-    aIBi = -20
-    Pc = PCrit(aIBi, gBB, mI, mB, n0)
+    NaIBiVals = 6  # must be an even number
+    posarray = np.linspace(1.5, 5, NaIBiVals / 2)
+    aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
 
-    NPVals = 8
-    PVals = np.linspace(0, 0.95 * Pc, NPVals)
+    # aIBi = -20
+    # Pc = PCrit(aIBi, gBB, mI, mB, n0)
 
-    cParams_List = [[P, aIBi] for P in PVals]
+    Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
+
+    NPVals = 4
+    PVals = np.linspace(0.1 * Pc, 0.95 * Pc, NPVals)
+
+    # cParams_List = [[P, aIBi] for P in PVals]
+    cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
 
     # create iterable over all tuples of function arguments for dynamics()
 
@@ -82,7 +103,7 @@ if __name__ == "__main__":
 
     start = timer()
 
-    num_cores = min(mp.cpu_count(), NPVals)
+    num_cores = min(mp.cpu_count(), NPVals * NaIBiVals)
     print("Running on %d cores" % num_cores)
 
     with mp.Pool(num_cores) as pool:
