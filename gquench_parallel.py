@@ -14,7 +14,7 @@ def spectFunc(t_Vec, S_Vec):
     # spectral function (Fourier Transform of dynamical overlap)
     tstep = t_Vec[1] - t_Vec[0]
     N = t_Vec.size
-    tdecay = 3
+    tdecay = 5
     decayFactor = np.exp(-1 * t_Vec / tdecay)
     # decayFactor = 1
     sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     grid_space.initArray('th', dtheta, np.pi, dtheta)
 
     # Set time evolution parameters
-    tMax = 10
+    tMax = 20
     dt = 1e-1
     gParams = [grid_space, tMax, dt]
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
-    NPVals = 20
+    NPVals = 24
     PVals = np.linspace(0, 2 * Pc, NPVals)
 
     cParams_List = [[P, aIBi] for P in PVals]
