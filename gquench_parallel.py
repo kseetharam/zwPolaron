@@ -48,9 +48,14 @@ def dynamics(cParams, gParams, sParams):
     freqVec, SpectFunc_Vec = spectFunc(tVec, DynOv_Vec)
 
     # Save Data
-    data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    np.save(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
+
+    # data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
+    # np.save(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
+
+    PVec = P * np.ones(freqVec.size)
+    sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
+    np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
 
 
 if __name__ == "__main__":
@@ -83,17 +88,16 @@ if __name__ == "__main__":
     NaIBiVals = 6  # must be an even number
     posarray = np.linspace(1.5, 5, NaIBiVals / 2)
     aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
-
-    # aIBi = -20
-    # Pc = PCrit(aIBi, gBB, mI, mB, n0)
-
     Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
+
+    aIBi = -5
+    Pc = PCrit(aIBi, gBB, mI, mB, n0)
 
     NPVals = 4
     PVals = np.linspace(0.1 * Pc, 0.95 * Pc, NPVals)
 
-    # cParams_List = [[P, aIBi] for P in PVals]
-    cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
+    cParams_List = [[P, aIBi] for P in PVals]
+    # cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
 
     # create iterable over all tuples of function arguments for dynamics()
 

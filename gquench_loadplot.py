@@ -18,7 +18,7 @@ Color = NiceRed
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 
-aIBi = 1.60
+aIBi = -1.40
 P = 0.99
 data = np.load(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P))
 
