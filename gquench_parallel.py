@@ -56,7 +56,7 @@ def dynamics(cParams, gParams, sParams):
     PVec = P * np.ones(freqVec.size)
     sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
     np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
-    np.savetxt(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), sfDat)
+    np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), sfDat)
 
 
 if __name__ == "__main__":
