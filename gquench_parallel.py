@@ -54,9 +54,11 @@ def dynamics(cParams, gParams, sParams):
     # np.save(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
 
     PVec = P * np.ones(freqVec.size)
-    sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
-    np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
-    # np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), sfDat)
+    # sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
+    # np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
+
+    SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
+    np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
 
 
 if __name__ == "__main__":
@@ -95,8 +97,8 @@ if __name__ == "__main__":
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
-    NPVals = 24
-    PVals = np.linspace(0, 2 * Pc, NPVals)
+    NPVals = 32
+    PVals = np.linspace(0, 3 * Pc, NPVals)
 
     cParams_List = [[P, aIBi] for P in PVals]
     # cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
@@ -109,7 +111,7 @@ if __name__ == "__main__":
 
     start = timer()
 
-    num_cores = min(mp.cpu_count(), NPVals * NaIBiVals)
+    num_cores = min(mp.cpu_count(), NPVals)
     print("Running on %d cores" % num_cores)
 
     with mp.Pool(num_cores) as pool:

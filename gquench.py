@@ -14,7 +14,7 @@ def spectFunc(t_Vec, S_Vec):
     # spectral function (Fourier Transform of dynamical overlap)
     tstep = t_Vec[1] - t_Vec[0]
     N = t_Vec.size
-    tdecay = 2
+    tdecay = 3
     decayFactor = np.exp(-1 * t_Vec / tdecay)
     # decayFactor = 1
     sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
@@ -26,7 +26,7 @@ def spectFunc(t_Vec, S_Vec):
 kcutoff = 10
 dk = 0.05
 
-Ntheta = 50
+Ntheta = 100
 dtheta = np.pi / (Ntheta - 1)
 
 grid_space = Grid.Grid("SPHERICAL_2D")
@@ -42,7 +42,7 @@ mI = 1
 mB = 1
 n0 = 1
 gBB = (4 * np.pi / mB) * 0.05
-P = 2
+P = 3
 aIBi = -2
 
 Params = [P, aIBi, mI, mB, n0, gBB]
@@ -73,7 +73,7 @@ freqVec, SpectFunc_Vec = spectFunc(tVec, DynOv_Vec)
 data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
-np.save(dirpath + '/data/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
+np.save(dirpath + '/data/tgquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
 
 end = timer()
 
