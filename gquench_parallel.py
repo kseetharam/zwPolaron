@@ -94,8 +94,8 @@ if __name__ == "__main__":
     aIBi = -5
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
 
-    NPVals = 4
-    PVals = np.linspace(0.1 * Pc, 0.95 * Pc, NPVals)
+    NPVals = 10
+    PVals = np.linspace(0, 2 * Pc, NPVals)
 
     cParams_List = [[P, aIBi] for P in PVals]
     # cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
