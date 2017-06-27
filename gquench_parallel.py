@@ -56,7 +56,7 @@ def dynamics(cParams, gParams, sParams):
     PVec = P * np.ones(freqVec.size)
     sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
     np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
-    np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), sfDat)
+    # np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), sfDat)
 
 
 if __name__ == "__main__":
@@ -91,10 +91,11 @@ if __name__ == "__main__":
     aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
     Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
 
-    aIBi = -5
+    aIBi = -2
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
+    print(Pc)
 
-    NPVals = 10
+    NPVals = 20
     PVals = np.linspace(0, 2 * Pc, NPVals)
 
     cParams_List = [[P, aIBi] for P in PVals]
