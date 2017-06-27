@@ -22,7 +22,8 @@ def spectFunc(t_Vec, S_Vec):
     return omega, sf
 
 
-def dynamics(cParams, gParams, sParams):
+def dynamics(cParams, gParams, sParams, datapath):
+
     # takes parameters, performs dynamics, and outputs desired observables
     [P, aIBi] = cParams
     [grid_space, tMax, dt] = gParams
@@ -48,7 +49,6 @@ def dynamics(cParams, gParams, sParams):
     freqVec, SpectFunc_Vec = spectFunc(tVec, DynOv_Vec)
 
     # Save Data
-    dirpath = os.path.dirname(os.path.realpath(__file__))
 
     # data = [ham.Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec]
     # np.save(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P), data)
@@ -58,7 +58,7 @@ def dynamics(cParams, gParams, sParams):
     # np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
 
     SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
-    np.savetxt(dirpath + '/mm/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
+    np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
 
 
 if __name__ == "__main__":
@@ -97,15 +97,22 @@ if __name__ == "__main__":
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
-    NPVals = 32
+    NPVals = 40
     PVals = np.linspace(0, 3 * Pc, NPVals)
+
+    # create data folder
+    dirpath = os.path.dirname(os.path.realpath(__file__))
+    runNum = 2
+    datafolder = dirpath + '/mm/run_%d' % runNum
+    if os.path.isdir(datafolder) is False:
+        os.mkdir(datafolder)
 
     cParams_List = [[P, aIBi] for P in PVals]
     # cParams_List = [[P, aIBi] for aIBi in aIBiVals for P in PVals]
 
     # create iterable over all tuples of function arguments for dynamics()
 
-    paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams))
+    paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams), it.repeat(datafolder))
 
     # compute data (parallel) - multiprocessing
 
