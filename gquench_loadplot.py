@@ -18,9 +18,9 @@ Color = NiceRed
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 
-aIBi = -1.40
-P = 0.99
-data = np.load(dirpath + '/pdata/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P))
+aIBi = -2
+P = 2
+data = np.load(dirpath + '/data/gquench_aIBi:%.2f_P:%.2f.npy' % (aIBi, P))
 
 [Params, tVec, freqVec, PB_Vec, NB_Vec, DynOv_Vec, SpectFunc_Vec] = data
 [P, aIBi, mI, mB, n0, gBB] = Params

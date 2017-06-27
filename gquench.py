@@ -14,7 +14,7 @@ def spectFunc(t_Vec, S_Vec):
     # spectral function (Fourier Transform of dynamical overlap)
     tstep = t_Vec[1] - t_Vec[0]
     N = t_Vec.size
-    tdecay = 3
+    tdecay = 2
     decayFactor = np.exp(-1 * t_Vec / tdecay)
     # decayFactor = 1
     sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
@@ -26,7 +26,7 @@ def spectFunc(t_Vec, S_Vec):
 kcutoff = 10
 dk = 0.05
 
-Ntheta = 10
+Ntheta = 50
 dtheta = np.pi / (Ntheta - 1)
 
 grid_space = Grid.Grid("SPHERICAL_2D")
@@ -42,15 +42,15 @@ mI = 1
 mB = 1
 n0 = 1
 gBB = (4 * np.pi / mB) * 0.05
-P = 0.76
-aIBi = -20
+P = 2
+aIBi = -2
 
 Params = [P, aIBi, mI, mB, n0, gBB]
 ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
 
 # Time evolution
-tMax = 1
+tMax = 60
 dt = 1e-1
 
 start = timer()
@@ -79,12 +79,12 @@ end = timer()
 
 print(end - start)
 
-figN, axN = plt.subplots()
-axN.plot(tVec, NB_Vec, 'k-')
-axN.set_xlabel('Time ($t$)')
-axN.set_ylabel('$N_{ph}$')
-axN.set_title('Number of Phonons')
-figN.savefig('quench_PhononNumber.pdf')
+# figN, axN = plt.subplots()
+# axN.plot(tVec, NB_Vec, 'k-')
+# axN.set_xlabel('Time ($t$)')
+# axN.set_ylabel('$N_{ph}$')
+# axN.set_title('Number of Phonons')
+# figN.savefig('quench_PhononNumber.pdf')
 
 # def dynamics(cs, ham, tMax, dt):
 #     # takes parameters, performs dynamics, and outputs desired observables
