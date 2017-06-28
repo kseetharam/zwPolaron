@@ -57,11 +57,11 @@ def dynamics(cParams, gParams, sParams, datapath):
     # sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
     # np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
 
-    # SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
-    # np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
-
-    SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], DynOv_Vec[:, np.newaxis]), axis=1)
+    SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
     np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
+
+    # SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], DynOv_Vec[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
 
 
 if __name__ == "__main__":
@@ -96,16 +96,16 @@ if __name__ == "__main__":
     aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
     Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
 
-    aIBi = -2
+    aIBi = -4
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
-    NPVals = 80
+    NPVals = 40
     PVals = np.linspace(0, 3 * Pc, NPVals)
 
     # create data folder
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    runNum = 3
+    runNum = 4
     datafolder = dirpath + '/mm/run_%d' % runNum
     if os.path.isdir(datafolder) is False:
         os.mkdir(datafolder)
