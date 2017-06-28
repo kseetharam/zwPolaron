@@ -57,7 +57,10 @@ def dynamics(cParams, gParams, sParams, datapath):
     # sfDat = np.concatenate((PVec[:, np.newaxis], freqVec[:, np.newaxis], SpectFunc_Vec[:, np.newaxis]), axis=1)
     # np.save(dirpath + '/spectdata/gquench_aIBi_%.2f_P_%.2f.npy' % (aIBi, P), sfDat)
 
-    SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
+    # SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
+
+    SDat = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], DynOv_Vec[:, np.newaxis]), axis=1)
     np.savetxt(datapath + '/gquench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), SDat)
 
 
@@ -97,12 +100,12 @@ if __name__ == "__main__":
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
-    NPVals = 40
+    NPVals = 80
     PVals = np.linspace(0, 3 * Pc, NPVals)
 
     # create data folder
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    runNum = 2
+    runNum = 3
     datafolder = dirpath + '/mm/run_%d' % runNum
     if os.path.isdir(datafolder) is False:
         os.mkdir(datafolder)
