@@ -96,7 +96,7 @@ if __name__ == "__main__":
     aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
     Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
 
-    aIBi = -4
+    aIBi = 4.5
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     # create data folder
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    runNum = 4
+    runNum = 6
     datafolder = dirpath + '/mm/run_%d' % runNum
     if os.path.isdir(datafolder) is False:
         os.mkdir(datafolder)
