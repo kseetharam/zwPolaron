@@ -1,5 +1,5 @@
 import numpy as np
-from polaron_functions import kcos_func
+from polaron_functions import kcos_func, kpow2_func
 from scipy.integrate import ode
 from copy import copy
 
@@ -16,12 +16,13 @@ class CoherentState:
 
         self.dV = grid_space.dV()
         self.kcos = kcos_func(self.grid)
+        self.kpow2 = kpow2_func(self.grid)
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
 
-        self.amplitude = np.zeros(size, dtype=complex)
-        self.phase = 0 + 0j
+        # self.amplitude = np.zeros(size, dtype=complex)
+        # self.phase = 0 + 0j
 
     # EVOLUTION
 
@@ -66,15 +67,23 @@ class CoherentState:
         self.amplitude_phase = amp_solver.integrate(amp_solver.t + dt)
         self.time = self.time + dt
 
+    # CHARACTERISTICS
+
+    def get_Amplitude(self):
+        return self.amplitude_phase[0:-1]
+
+    def get_Phase(self):
+        return self.amplitude_phase[-1].real.astype(float)
+
     # OBSERVABLES
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(amplitude * np.conjugate(amplitude), self.dV)
+        return np.dot(amplitude * np.conjugate(amplitude), self.dV).real.astype(float)
 
     def get_PhononMomentum(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(self.kcos, amplitude * np.conjugate(amplitude) * self.dV)
+        return np.dot(self.kcos, amplitude * np.conjugate(amplitude) * self.dV).real.astype(float)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
@@ -82,3 +91,7 @@ class CoherentState:
         phase = self.amplitude_phase[-1]
         exparg = -1j * phase - (1 / 2) * NB
         return np.exp(exparg)
+
+    def get_MomentumDispersion(self):
+        amplitude = self.amplitude_phase[0:-1]
+        return np.dot(self.kpow2 * amplitude * np.conjugate(amplitude), self.dV).real.astype(float)

@@ -20,39 +20,39 @@ class PolaronHamiltonian:
 
         # print(self.Omega0_grid.shape)
 
-    def phase_update(self, t, phase, coherent_state):
+    # def phase_update(self, t, phase, coherent_state):
 
-        [P, aIBi, mI, mB, n0, gBB] = self.Params
+    #     [P, aIBi, mI, mB, n0, gBB] = self.Params
 
-        dv = coherent_state.dV
+    #     dv = coherent_state.dV
 
-        amplitude_t = coherent_state.amplitude
-        PB_t = coherent_state.get_PhononMomentum()
+    #     amplitude_t = coherent_state.amplitude
+    #     PB_t = coherent_state.get_PhononMomentum()
 
-        betaSum = amplitude_t + np.conjugate(amplitude_t)
+    #     betaSum = amplitude_t + np.conjugate(amplitude_t)
 
-        xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dv)
+    #     xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dv)
 
-        return self.gnum * n0 + self.gnum * np.sqrt(n0) * xp_t + (P**2 - PB_t**2) / (2 * mI)
+    #     return self.gnum * n0 + self.gnum * np.sqrt(n0) * xp_t + (P**2 - PB_t**2) / (2 * mI)
 
-    def amplitude_update(self, t, amplitude, coherent_state):
-        # here on can write any method induding Runge-Kutta 4
+    # def amplitude_update(self, t, amplitude, coherent_state):
+    #     # here on can write any method induding Runge-Kutta 4
 
-        [P, aIBi, mI, mB, n0, gBB] = self.Params
+    #     [P, aIBi, mI, mB, n0, gBB] = self.Params
 
-        dV = coherent_state.dV
+    #     dV = coherent_state.dV
 
-        PB_t = np.dot(self.kcos, amplitude * np.conjugate(amplitude) * dV)
+    #     PB_t = np.dot(self.kcos, amplitude * np.conjugate(amplitude) * dV)
 
-        betaSum = amplitude + np.conjugate(amplitude)
-        xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dV)
+    #     betaSum = amplitude + np.conjugate(amplitude)
+    #     xp_t = 0.5 * np.dot(self.Wk_grid, betaSum * dV)
 
-        betaDiff = amplitude - np.conjugate(amplitude)
-        xm_t = 0.5 * np.dot(self.Wki_grid, betaDiff * dV)
+    #     betaDiff = amplitude - np.conjugate(amplitude)
+    #     xm_t = 0.5 * np.dot(self.Wki_grid, betaDiff * dV)
 
-        return -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                      amplitude * (self.Omega0_grid - self.kcos * (P - PB_t) / mI) +
-                      self.gnum * (self.Wk_grid * xp_t + self.Wki_grid * xm_t))
+    #     return -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+    #                   amplitude * (self.Omega0_grid - self.kcos * (P - PB_t) / mI) +
+    #                   self.gnum * (self.Wk_grid * xp_t + self.Wki_grid * xm_t))
 
     def update(self, t, amplitude_phase, coherent_state):
         # here on can write any method induding Runge-Kutta 4

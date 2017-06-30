@@ -69,7 +69,7 @@ class Grid:
         list_of_unit_vectors = list(self.arrays.keys())
         coordinate_system = self.coordinate_system
 
-        # create dk, dth and modify it
+        # create dk, dtheta and modify it
         grid_diff = self.arrays_diff[list_of_unit_vectors[0]] * np.ones(len(self.arrays[list_of_unit_vectors[0]]))
         grid_diff[0] = 0.5 * grid_diff[0]
         grid_diff[-1] = 0.5 * grid_diff[-1]

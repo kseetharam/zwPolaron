@@ -96,7 +96,7 @@ if __name__ == "__main__":
     aIBiVals = 0.1 + np.concatenate((-1 * posarray[::-1], posarray), axis=0)
     Pc = PCrit(np.max(np.absolute(aIBiVals)), gBB, mI, mB, n0)
 
-    aIBi = 4.5
+    aIBi = -4
     Pc = PCrit(aIBi, gBB, mI, mB, n0)
     print(Pc)
 
