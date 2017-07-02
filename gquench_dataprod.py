@@ -25,9 +25,14 @@ if __name__ == "__main__":
 
     # ---- SET GPARAMS ----
 
-    tMax = 1
-    dt = 1e-1
-    gParams = [grid_space, tMax, dt]
+    dt = 5e-2
+    NtPoints = 100
+    tMax = dt * np.exp(dt * NtPoints)
+    tGrid = np.zeros(NtPoints)
+    for n in range(NtPoints):
+        tGrid[n] = dt * np.exp(dt * n)
+
+    gParams = [grid_space, tGrid]
 
     # ---- SET SPARAMS ----
     mI = 1
@@ -42,7 +47,7 @@ if __name__ == "__main__":
     Pg = pf.PCrit_grid(grid_space, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(aIBi, mI, mB, n0, gBB)
 
-    NPVals = 24
+    NPVals = 64
     PVals = np.linspace(0, 4 * Pc, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
 
@@ -58,7 +63,7 @@ if __name__ == "__main__":
 
     paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams), it.repeat(datapath))
 
-    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.3f}, PCrit_true: {:0.3f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
+    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt: {:.2f}, NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.3f}, PCrit_true: {:0.3f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt, NtPoints, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
     with open(datapath + '/paramInfo.txt', 'w') as f:
         f.write(paramInfo)
 
@@ -70,10 +75,7 @@ if __name__ == "__main__":
     print("Running on %d cores" % num_cores)
 
     with mp.Pool(num_cores) as pool:
-        # pool = mp.Pool()
         pool.starmap(pf.quenchDynamics, paramsIter)
-        # pool.close()
-        # pool.join()
 
     end = timer()
     print(end - start)

@@ -118,7 +118,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     import PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
     [P, aIBi] = cParams
-    [grid_space, tMax, dt] = gParams
+    [grid_space, tGrid] = gParams
     [mI, mB, n0, gBB] = sParams
 
     # Initialization CoherentState
@@ -127,24 +127,29 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
     # Time evolution
-    tVec = np.arange(0, tMax + dt, dt)
-    PB_Vec = np.zeros(tVec.size, dtype=float)
-    NB_Vec = np.zeros(tVec.size, dtype=float)
-    DynOv_Vec = np.zeros(tVec.size, dtype=complex)
-    MomDisp_Vec = np.zeros(tVec.size, dtype=float)
-    Phase_Vec = np.zeros(tVec.size, dtype=float)
+    PB_Vec = np.zeros(tGrid.size, dtype=float)
+    NB_Vec = np.zeros(tGrid.size, dtype=float)
+    DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
+    MomDisp_Vec = np.zeros(tGrid.size, dtype=float)
+    Phase_Vec = np.zeros(tGrid.size, dtype=float)
 
-    for ind, t in enumerate(tVec):
+    for ind, t in enumerate(tGrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tGrid[ind - 1]
+            cs.evolve(dt, ham)
+
         PB_Vec[ind] = cs.get_PhononMomentum()
         NB_Vec[ind] = cs.get_PhononNumber()
         DynOv_Vec[ind] = cs.get_DynOverlap()
         MomDisp_Vec[ind] = cs.get_MomentumDispersion()
         Phase_Vec[ind] = cs.get_Phase()
-        cs.evolve(dt, ham)
 
     # Save Data
 
-    PVec = P * np.ones(tVec.size)
+    PVec = P * np.ones(tGrid.size)
     # generates data file with columns representing P, t, Phase, Phonon Momentum, Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
-    data = np.concatenate((PVec[:, np.newaxis], tVec[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], MomDisp_Vec[:, np.newaxis], NB_Vec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
+    data = np.concatenate((PVec[:, np.newaxis], tGrid[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], MomDisp_Vec[:, np.newaxis], NB_Vec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
     np.savetxt(datapath + '/quench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), data)
