@@ -62,7 +62,7 @@ class CoherentState:
 
         amp_phase0 = copy(self.amplitude_phase)
         t0 = copy(self.time)
-        amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error)
+        amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
         amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self)
         self.amplitude_phase = amp_solver.integrate(amp_solver.t + dt)
         self.time = self.time + dt

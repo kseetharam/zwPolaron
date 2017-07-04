@@ -25,12 +25,27 @@ if __name__ == "__main__":
 
     # ---- SET GPARAMS ----
 
-    dt = 5e-2
-    NtPoints = 100
+    dt = 1e-1
+    NtPoints = 94
     tMax = dt * np.exp(dt * NtPoints)
     tGrid = np.zeros(NtPoints)
     for n in range(NtPoints):
         tGrid[n] = dt * np.exp(dt * n)
+
+    # dt_exp = 1e-1
+    # NexpPoints = 70
+    # dt_lin = 10
+    # NlinPoints = 90
+    # NtPoints = NexpPoints + NlinPoints
+    # tMax = dt_exp * np.exp(dt_exp * NexpPoints) + dt_lin * (NlinPoints - 1)
+    # tGrid = np.zeros(NtPoints)
+    # for n in range(NexpPoints):
+    #     tGrid[n] = dt_exp * np.exp(dt_exp * n)
+    # for n in range(NlinPoints):
+    #     if(n + 1 < NlinPoints):
+    #         tGrid[NexpPoints + n] = tGrid[NexpPoints - 1] + dt_lin * (n + 1)
+    #     else:
+    #         tGrid[NexpPoints + n] = tGrid[NexpPoints + n - 1] + dt_lin
 
     gParams = [grid_space, tGrid]
 
@@ -47,7 +62,7 @@ if __name__ == "__main__":
     Pg = pf.PCrit_grid(grid_space, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(aIBi, mI, mB, n0, gBB)
 
-    NPVals = 64
+    NPVals = 56
     PVals = np.linspace(0, 4 * Pc, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
 
@@ -63,11 +78,11 @@ if __name__ == "__main__":
 
     paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams), it.repeat(datapath))
 
-    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt: {:.2f}, NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.3f}, PCrit_true: {:0.3f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt, NtPoints, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
+    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt: {:.3f}, NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.3f}, PCrit_true: {:0.3f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt, NtPoints, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
     with open(datapath + '/paramInfo.txt', 'w') as f:
         f.write(paramInfo)
 
-    # ---- COMPUTE DATA (MULTIPROCESSING) ----
+    # ---- COMPUTE DATA(MULTIPROCESSING) - ---
 
     start = timer()
 
