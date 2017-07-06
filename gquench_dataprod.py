@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     dt = 1e-1
     NtPoints = 94
-    tMax = dt * np.exp(dt * NtPoints)
+    tMax = dt * np.exp(dt * (NtPoints - 1))
     tGrid = np.zeros(NtPoints)
     for n in range(NtPoints):
         tGrid[n] = dt * np.exp(dt * n)
