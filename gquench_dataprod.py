@@ -12,9 +12,9 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRID ----
 
     kcutoff = 10
-    dk = 0.05
+    dk = 0.0333
 
-    Ntheta = 50
+    Ntheta = 70
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
