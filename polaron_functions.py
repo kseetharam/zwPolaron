@@ -79,7 +79,7 @@ def PCrit_grid(grid_space, P, aIBi, mI, mB, n0, gBB):
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
 
 
-def PCrit_inf(aIBi, mI, mB, n0, gBB):
+def PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB):
     #
     DP = mI * nu(gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
     # non-grid helper function
@@ -89,11 +89,11 @@ def PCrit_inf(aIBi, mI, mB, n0, gBB):
 
     # calculate aSi
     integrand = lambda k: (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
-    val, abserr = quad(integrand, 0, np.Inf, epsabs=0, epsrel=1.49e-12)
+    val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
     aSi = (1 / (2 * np.pi * ur(mI, mB))) * val
     # calculate PB (phonon momentum)
     integrand = lambda k: ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
-    val, abserr = quad(integrand, 0, np.Inf, epsabs=0, epsrel=1.49e-12)
+    val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
     PB = n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * val
 
     return DP + PB
