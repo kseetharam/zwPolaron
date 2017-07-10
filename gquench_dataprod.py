@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE P VALUES) ----
 
-    aIBi = 2
+    aIBi = 10
     Pg = pf.PCrit_grid(grid_space, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB)
 
