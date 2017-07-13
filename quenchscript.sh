@@ -2,7 +2,7 @@
 #SBATCH -J quench
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -t 0-02:00
+#SBATCH -t 1-00:00
 #SBATCH -p serial_requeue
 #SBATCH --mem=200
 #SBATCH --mail-type=ALL

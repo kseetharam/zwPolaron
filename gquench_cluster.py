@@ -1,7 +1,6 @@
 import numpy as np
 import Grid
 import polaron_functions as pf
-import multiprocessing as mp
 import os
 from timeit import default_timer as timer
 
@@ -12,10 +11,10 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRID ----
 
-    kcutoff = 10
-    dk = 0.1
+    kcutoff = 20
+    dk = 0.05
 
-    Ntheta = 50
+    Ntheta = 100
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
@@ -33,9 +32,9 @@ if __name__ == "__main__":
     # for n in range(NtPoints):
     #     tGrid[n] = dt * np.exp(dt * n)
 
-    tMax = 3
-    dt1 = 1e-1
-    dt2 = 1
+    tMax = 100
+    dt1 = 1e-2
+    dt2 = 1e-2
     tGrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
     gParams = [grid_space, tGrid]
 
@@ -48,12 +47,12 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE P VALUES) ----
 
-    aIBi = -10
+    aIBi = 4
     g = pf.g(grid_space, 0, aIBi, mI, mB, n0, gBB)
     Pg = pf.PCrit_grid(grid_space, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB)
 
-    NPVals = 3
+    NPVals = 40
     PVals = np.linspace(0, 3 * Pc, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
 
@@ -82,4 +81,4 @@ if __name__ == "__main__":
         pf.quenchDynamics(cParams_List[taskID], gParams, sParams, datapath)
 
     end = timer()
-    print('Task ID: {:d}, Time: {:.2f}'.format(taskID, end - start))
+    print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))

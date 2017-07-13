@@ -140,7 +140,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         else:
             dt = t - tGrid[ind - 1]
             cs.evolve(dt, ham)
-        print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
+        # print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
         PB_Vec[ind] = cs.get_PhononMomentum()
         NB_Vec[ind] = cs.get_PhononNumber()
         DynOv_Vec[ind] = cs.get_DynOverlap()
