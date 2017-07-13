@@ -73,8 +73,13 @@ if __name__ == "__main__":
 
     # # ---- COMPUTE DATA ----
 
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-    pf.quenchDynamics(cParams_List[taskID], gParams, sParams, datapath)
+
+    if(taskCount != NPVals):
+        print('ERROR: TASK COUNT MISMATCH')
+    else:
+        pf.quenchDynamics(cParams_List[taskID], gParams, sParams, datapath)
 
     end = timer()
     print('Task ID: {:d}, Time: {:.2f}'.formate(taskID, end - start)
