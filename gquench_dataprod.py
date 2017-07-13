@@ -5,6 +5,7 @@ import multiprocessing as mp
 import itertools as it
 import os
 from timeit import default_timer as timer
+from polrabi.wf2 import g
 
 
 if __name__ == "__main__":
@@ -55,31 +56,33 @@ if __name__ == "__main__":
     PVals = np.linspace(0, 3 * Pc, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
 
+    print(g(aIBi, kcutoff, gBB, mI, mB, n0))
+
     # ---- SET OUTPUT DATA FOLDER, CREATE PARAMETER SET, AND SAVE PARAMETER INFO FILE ----
 
-    dirpath = os.path.dirname(os.path.realpath(__file__))
-    outer_datapath = dirpath + '/data/production_data/aIBi_%.2f' % aIBi
-    if os.path.isdir(outer_datapath) is False:
-        os.mkdir(outer_datapath)
-    datapath = outer_datapath + '/NGridPoints_%.2E' % NGridPoints
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # dirpath = os.path.dirname(os.path.realpath(__file__))
+    # outer_datapath = dirpath + '/data/production_data/aIBi_%.2f' % aIBi
+    # if os.path.isdir(outer_datapath) is False:
+    #     os.mkdir(outer_datapath)
+    # datapath = outer_datapath + '/NGridPoints_%.2E' % NGridPoints
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams), it.repeat(datapath))
+    # paramsIter = zip(cParams_List, it.repeat(gParams), it.repeat(sParams), it.repeat(datapath))
 
-    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt1: {:.3f}, dt2: {:.3f} NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.5f}, PCrit_true: {:0.5f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
-    with open(datapath + '/paramInfo.txt', 'w') as f:
-        f.write(paramInfo)
+    # paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt1: {:.3f}, dt2: {:.3f} NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, PCrit_grid: {:.5f}, PCrit_true: {:0.5f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, Pg, Pc, NPVals)
+    # with open(datapath + '/paramInfo.txt', 'w') as f:
+    #     f.write(paramInfo)
 
-    # ---- COMPUTE DATA(MULTIPROCESSING) - ---
+    # # ---- COMPUTE DATA(MULTIPROCESSING) - ---
 
-    start = timer()
+    # start = timer()
 
-    num_cores = min(mp.cpu_count(), NPVals)
-    print("Running on %d cores" % num_cores)
+    # num_cores = min(mp.cpu_count(), NPVals)
+    # print("Running on %d cores" % num_cores)
 
-    with mp.Pool(num_cores) as pool:
-        pool.starmap(pf.quenchDynamics, paramsIter)
+    # with mp.Pool(num_cores) as pool:
+    #     pool.starmap(pf.quenchDynamics, paramsIter)
 
-    end = timer()
-    print(end - start)
+    # end = timer()
+    # print(end - start)
