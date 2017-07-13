@@ -82,4 +82,4 @@ if __name__ == "__main__":
         pf.quenchDynamics(cParams_List[taskID], gParams, sParams, datapath)
 
     end = timer()
-    print('Task ID: {:d}, Time: {:.2f}'.formate(taskID, end - start))
+    print('Task ID: {:d}, Time: {:.2f}'.format(taskID, end - start))
