@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "gquench_cluster.py", line 68, in <module>
-    os.mkdir(datapath)
-FileExistsError: [Errno 17] File exists: '/n/regal/demler_lab/kis/VariationalResearch/genPolaron/clusterdata/aIBi_-10.00/NGridPoints_5.00E+03'
