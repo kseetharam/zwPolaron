@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.integrate import quad
+from scipy.special import jv
 
 
 # ---- BASIC FUNCTIONS ----
@@ -52,6 +53,13 @@ def kcos_func(grid_space):
     return grid_space.function_prod(names, functions_kcos)
 
 
+def ksin_func(grid_space):
+    #
+    names = list(grid_space.arrays.keys())
+    functions_ksin = [lambda k: k, np.sin]
+    return grid_space.function_prod(names, functions_ksin)
+
+
 def kpow2_func(grid_space):
     #
     names = list(grid_space.arrays.keys())
@@ -75,6 +83,17 @@ def PCrit_grid(grid_space, P, aIBi, mI, mB, n0, gBB):
     PB = 4 * np.pi**2 * n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * np.dot(integrand, grid_space.dV())
     return DP + PB
 
+
+def FTkernal_func(kcos, ksin, xgrid):
+    names = list(xgrid.arrays.keys())
+    functions_xcos = [lambda x: x, np.cos]
+    functions_xsin = [lambda x: x, np.sin]
+    xcos = xgrid.function_prod(names, functions_xcos)
+    xsin = xgrid.function_prod(names, functions_xsin)
+    outer_mat_cos = np.outer(kcos, xcos)
+    outer_mat_sin = np.outer(ksin, xsin)
+
+    return np.exp(-1j * outer_mat_cos) * jv(0, outer_mat_sin)
 
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
 
