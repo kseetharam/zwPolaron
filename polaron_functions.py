@@ -165,6 +165,11 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         DynOv_Vec[ind] = cs.get_DynOverlap()
         MomDisp_Vec[ind] = cs.get_MomentumDispersion()
         Phase_Vec[ind] = cs.get_Phase()
+# do this for a few time values and save in a different folder
+        PD = cs.get_PositionDistribution()
+        tVals = t * np.ones(PD.size)
+        PD_data = np.concatenate((tVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
+        np.savetxt(datapath + '/quench_aIBi_%.2f_P_%.2f/___.dat' % (aIBi, P), PD_data)
 
     # Save Data
 

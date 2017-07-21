@@ -67,4 +67,4 @@ class CoherentState:
 
     def get_PositionDistribution(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(self.dV * amplitude, self.FTkernal)
+        return np.abs(np.dot(self.dV * amplitude, self.FTkernal))**2
