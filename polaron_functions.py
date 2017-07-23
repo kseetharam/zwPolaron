@@ -25,66 +25,67 @@ def nu(gBB):
 # ---- COMPOSITE FUNCTIONS ----
 
 
-def g(grid_space, P, aIBi, mI, mB, n0, gBB):
+def g(kgrid, P, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
-    k_max = grid_space.arrays['k'][-1]
+    k_max = kgrid.arrays['k'][-1]
     mR = ur(mI, mB)
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
 
-def omega0(grid_space, P, aIBi, mI, mB, n0, gBB):
+def omega0(kgrid, P, aIBi, mI, mB, n0, gBB):
     #
-    names = list(grid_space.arrays.keys())
+    names = list(kgrid.arrays.keys())
     functions_omega0 = [lambda k: w(k, gBB, mB, n0) + (k**2 / (2 * mI)), lambda th: 0 * th + 1]
-    return grid_space.function_prod(names, functions_omega0)
+    return kgrid.function_prod(names, functions_omega0)
 
 
-def Wk(grid_space, P, aIBi, mI, mB, n0, gBB):
+def Wk(kgrid, P, aIBi, mI, mB, n0, gBB):
     #
-    names = list(grid_space.arrays.keys())
+    names = list(kgrid.arrays.keys())
     functions_Wk = [lambda k: np.sqrt(eB(k, mB) / w(k, gBB, mB, n0)), lambda th: 0 * th + 1]
-    return grid_space.function_prod(names, functions_Wk)
+    return kgrid.function_prod(names, functions_Wk)
 
 
-def kcos_func(grid_space):
+def kcos_func(kgrid):
     #
-    names = list(grid_space.arrays.keys())
+    names = list(kgrid.arrays.keys())
     functions_kcos = [lambda k: k, np.cos]
-    return grid_space.function_prod(names, functions_kcos)
+    return kgrid.function_prod(names, functions_kcos)
 
 
-def ksin_func(grid_space):
+def ksin_func(kgrid):
     #
-    names = list(grid_space.arrays.keys())
+    names = list(kgrid.arrays.keys())
     functions_ksin = [lambda k: k, np.sin]
-    return grid_space.function_prod(names, functions_ksin)
+    return kgrid.function_prod(names, functions_ksin)
 
 
-def kpow2_func(grid_space):
+def kpow2_func(kgrid):
     #
-    names = list(grid_space.arrays.keys())
+    names = list(kgrid.arrays.keys())
     functions_kpow2 = [lambda k: k**2, lambda th: 0 * th + 1]
-    return grid_space.function_prod(names, functions_kpow2)
+    return kgrid.function_prod(names, functions_kpow2)
 
 
-def PCrit_grid(grid_space, P, aIBi, mI, mB, n0, gBB):
+def PCrit_grid(kgrid, P, aIBi, mI, mB, n0, gBB):
     #
     DP = mI * nu(gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
-    names = list(grid_space.arrays.keys())
-    k2 = kpow2_func(grid_space)
-    Wkf = Wk(grid_space, P, aIBi, mI, mB, n0, gBB)
-    kcos = kcos_func(grid_space)
-    wf = grid_space.function_prod(names, [lambda k: w(k, gBB, mB, n0), lambda th: 0 * th + 1])
+    names = list(kgrid.arrays.keys())
+    k2 = kpow2_func(kgrid)
+    Wkf = Wk(kgrid, P, aIBi, mI, mB, n0, gBB)
+    kcos = kcos_func(kgrid)
+    wf = kgrid.function_prod(names, [lambda k: w(k, gBB, mB, n0), lambda th: 0 * th + 1])
     # calculate aSi
     integrand = 2 * ur(mI, mB) / k2 - Wkf**2 / (wf + k2 / (2 * mI) - (DP / mI) * kcos)
-    aSi = (2 * np.pi / ur(mI, mB)) * np.dot(integrand, grid_space.dV())
+    aSi = (2 * np.pi / ur(mI, mB)) * np.dot(integrand, kgrid.dV())
     # calculate PB (phonon momentum)
     integrand = kcos * Wkf**2 / (wf + k2 / (2 * mI) - DP / mI * kcos)**2
-    PB = 4 * np.pi**2 * n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * np.dot(integrand, grid_space.dV())
+    PB = 4 * np.pi**2 * n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * np.dot(integrand, kgrid.dV())
     return DP + PB
 
 
 def FTkernal_func(kcos, ksin, xgrid):
+    #  returns matrix in x,thp
     names = list(xgrid.arrays.keys())
     functions_xcos = [lambda x: x, np.cos]
     functions_xsin = [lambda x: x, np.sin]
@@ -92,7 +93,6 @@ def FTkernal_func(kcos, ksin, xgrid):
     xsin = xgrid.function_prod(names, functions_xsin)
     outer_mat_cos = np.outer(kcos, xcos)
     outer_mat_sin = np.outer(ksin, xsin)
-
     return np.exp(-1j * outer_mat_cos) * jv(0, outer_mat_sin)
 
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
@@ -137,11 +137,11 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     import PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
     [P, aIBi] = cParams
-    [grid_space, tGrid] = gParams
+    [kgrid, xgrid, tGrid] = gParams
     [mI, mB, n0, gBB] = sParams
 
     # Initialization CoherentState
-    cs = CoherentState.CoherentState(grid_space)
+    cs = CoherentState.CoherentState(kgrid)
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
@@ -165,15 +165,22 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         DynOv_Vec[ind] = cs.get_DynOverlap()
         MomDisp_Vec[ind] = cs.get_MomentumDispersion()
         Phase_Vec[ind] = cs.get_Phase()
-# do this for a few time values and save in a different folder
-        PD = cs.get_PositionDistribution()
-        tVals = t * np.ones(PD.size)
-        PD_data = np.concatenate((tVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
-        np.savetxt(datapath + '/quench_aIBi_%.2f_P_%.2f/___.dat' % (aIBi, P), PD_data)
+
+        # save position distribution data every 10 time values
+        if ind % int(tGrid.size / 10) == 0:
+            names = list(xgrid.arrays.keys())
+            functions_x = [lambda x: x, lambda th: 0 * th + 1]
+            functions_thp = [lambda x: 0 * x + 1, lambda th: th]
+            xVals = xgrid.function_prod(names, functions_x)
+            thpVals = xgrid.function_prod(names, functions_thp)
+            PD = cs.get_PositionDistribution()
+            tVals = t * np.ones(PD.size)
+            PD_data = np.concatenate((tVals[:, np.newaxis], xVals[:, np.newaxis], thpVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
+            np.savetxt(datapath + '/PosDist/quench_P_%.2f_t_%.2f.dat' % (P, t), PD_data)
 
     # Save Data
 
     PVec = P * np.ones(tGrid.size)
     # generates data file with columns representing P, t, Phase, Phonon Momentum, Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
     data = np.concatenate((PVec[:, np.newaxis], tGrid[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], MomDisp_Vec[:, np.newaxis], NB_Vec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/quench_aIBi_%.2f_P_%.2f.dat' % (aIBi, P), data)
+    np.savetxt(datapath + '/quench_P_%.2f.dat' % P, data)

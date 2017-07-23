@@ -66,5 +66,6 @@ class CoherentState:
         return np.dot(self.kpow2 * amplitude * np.conjugate(amplitude), self.dV).real.astype(float)
 
     def get_PositionDistribution(self):
+        # outputs a matrix in x, theta
         amplitude = self.amplitude_phase[0:-1]
         return np.abs(np.dot(self.dV * amplitude, self.FTkernal))**2

@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     start = timer()
 
-    # ---- INITIALIZE GRID ----
+    # ---- INITIALIZE GRIDS ----
 
     kcutoff = 20
     dk = 0.05
@@ -19,9 +19,21 @@ if __name__ == "__main__":
 
     NGridPoints = Ntheta * kcutoff / dk
 
-    grid_space = Grid.Grid("SPHERICAL_2D")
-    grid_space.initArray('k', dk, kcutoff, dk)
-    grid_space.initArray('th', dtheta, np.pi, dtheta)
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray('k', dk, kcutoff, dk)
+    kgrid.initArray('th', dtheta, np.pi, dtheta)
+
+    xcutoff = 20
+    dx = 0.05
+
+    Nthetap = 100
+    dthetap = np.pi / (Nthetap - 1)
+
+    NGridPointsX = Nthetap * xcutoff / dx
+
+    xgrid = Grid.Grid("SPHERICAL_2D")
+    xgrid.initArray('x', dx, xcutoff, dx)
+    xgrid.initArray('th', dthetap, np.pi, dthetap)
 
     # ---- SET GPARAMS ----
 
@@ -36,7 +48,7 @@ if __name__ == "__main__":
     dt1 = 1e-2
     dt2 = 1e-2
     tGrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
-    gParams = [grid_space, tGrid]
+    gParams = [kgrid, xgrid, tGrid]
 
     # ---- SET SPARAMS ----
     mI = 1
@@ -48,8 +60,8 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE P VALUES) ----
 
     aIBi = 4
-    g = pf.g(grid_space, 0, aIBi, mI, mB, n0, gBB)
-    Pg = pf.PCrit_grid(grid_space, 0, aIBi, mI, mB, n0, gBB)
+    g = pf.g(kgrid, 0, aIBi, mI, mB, n0, gBB)
+    Pg = pf.PCrit_grid(kgrid, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB)
 
     NPVals = 40
@@ -65,6 +77,7 @@ if __name__ == "__main__":
     datapath = outer_datapath + '/NGridPoints_%.2E' % NGridPoints
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
+        os.mkdir(datapath + 'PosDist')
 
     paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt1: {:.3f}, dt2: {:.3f} NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, gIB: {:0.3f}, PCrit_grid: {:.5f}, PCrit_true: {:0.5f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, g, Pg, Pc, NPVals)
     with open(datapath + '/paramInfo.txt', 'w') as f:
