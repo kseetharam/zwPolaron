@@ -1,5 +1,5 @@
 import numpy as np
-from polaron_functions import kcos_func, ksin_func, kpow2_func, FTkernal_func
+from polaron_functions import kcos_func, ksin_func, kpow2_func, FTkernel_func
 from scipy.integrate import ode
 from copy import copy
 
@@ -23,7 +23,7 @@ class CoherentState:
         self.xgrid = xgrid
         self.xmagVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: x, lambda th: 0 * th + 1])
         self.xthetaVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: 0 * x + 1, lambda th: th])
-        self.FTkernal = FTkernal_func(self.kcos, self.ksin, xgrid)
+        self.FTkernel = FTkernel_func(self.kcos, self.ksin, xgrid)
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6

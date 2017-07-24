@@ -84,7 +84,7 @@ def PCrit_grid(kgrid, P, aIBi, mI, mB, n0, gBB):
     return DP + PB
 
 
-def FTkernal_func(kcos, ksin, xgrid):
+def FTkernel_func(kcos, ksin, xgrid):
     #  returns matrix in x,thp
     names = list(xgrid.arrays.keys())
     functions_xcos = [lambda x: x, np.cos]
@@ -170,8 +170,9 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         if ind % int(tGrid.size / 10) == 0:
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
-            PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
-            np.savetxt(datapath + '/PosDist/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
+            MD = cs.get_MomentumDistribution()
+            PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], MD[:, np.newaxis]), axis=1)
+            np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data
 
