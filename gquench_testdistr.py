@@ -9,11 +9,12 @@ import matplotlib.pyplot as plt
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
+start = timer()
 # Initialization Grid
 kcutoff = 10
-dk = 0.05
+dk = 0.1
 
-Ntheta = 50
+Ntheta = 30
 dtheta = np.pi / (Ntheta - 1)
 
 # in momentum space
@@ -47,7 +48,6 @@ ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 tMax = 3.
 dt = 0.5
 
-start = timer()
 
 tVec = np.arange(0, tMax, dt)
 PB_Vec = np.zeros(tVec.size, dtype=float)
@@ -78,7 +78,7 @@ for ind, t in enumerate(tVec):
     # np.save(dirpath + '/datatest/momdistr_aIBi:%.2f_P:%.2f_t:%.2f.npy' % (aIBi, P, t), data)
 
     momdistr = cs.get_MomentumDistribution()
-    momdistr0 = np.real(momdistr.reshape(len(grid_mom.arrays['k']), len(grid_mom.arrays['th']))[:, 0])
+    momdistr0 = np.abs(momdistr.reshape(len(grid_mom.arrays['k']), len(grid_mom.arrays['th']))[:, 0])
     axMomDist.plot(grid_mom.arrays['k'], momdistr0, settings[ind])
 
     # coorddist = cs.get_PositionDistribution()

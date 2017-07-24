@@ -12,9 +12,9 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     kcutoff = 10
-    dk = 0.5
+    dk = 0.1
 
-    Ntheta = 25
+    Ntheta = 30
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
@@ -25,16 +25,11 @@ if __name__ == "__main__":
 
     xmax = 1 / dk
     xmin = 1 / kcutoff
-    dx = 0.1
-
-    Nthetap = 25
-    dthetap = np.pi / (Nthetap - 1)
-
-    NGridPointsX = Nthetap * xmax / dx
+    dx = 1 / kcutoff
 
     xgrid = Grid.Grid("SPHERICAL_2D")
     xgrid.initArray('x', xmin, xmax, dx)
-    xgrid.initArray('th', dthetap, np.pi, dthetap)
+    xgrid.initArray('th', dtheta, np.pi, dtheta)
 
     # ---- SET GPARAMS ----
 
@@ -45,8 +40,8 @@ if __name__ == "__main__":
     # for n in range(NtPoints):
     #     tGrid[n] = dt * np.exp(dt * n)
 
-    tMax = 50
-    dt1 = 0.1
+    tMax = 10
+    dt1 = 0.5
     dt2 = dt1
     # tGrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
     tGrid = np.arange(0, tMax + dt1, dt1)
@@ -61,7 +56,7 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE P VALUES) ----
 
-    aIBi = -4
+    aIBi = -2
     g = pf.g(kgrid, 0, aIBi, mI, mB, n0, gBB)
     Pg = pf.PCrit_grid(kgrid, 0, aIBi, mI, mB, n0, gBB)
     Pc = pf.PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB)
@@ -99,5 +94,5 @@ if __name__ == "__main__":
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
 
-os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[0])
-pf.quenchDynamics(cParams_List[0], gParams, sParams, datapath)
+os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[5])
+pf.quenchDynamics(cParams_List[5], gParams, sParams, datapath)

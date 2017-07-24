@@ -171,7 +171,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
             MD = cs.get_MomentumDistribution()
-            PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], MD[:, np.newaxis]), axis=1)
+            PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
             np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data
