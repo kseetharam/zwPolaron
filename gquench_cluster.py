@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 15
+    kcutoff = 10
     dk = 0.1
 
     Ntheta = 100
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     # for n in range(NtPoints):
     #     tGrid[n] = dt * np.exp(dt * n)
 
-    tMax = 10
-    dt1 = 0.5
+    tMax = 2
+    dt1 = 0.1
     dt2 = dt1
     # tGrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
     tGrid = np.arange(0, tMax + dt1, dt1)
@@ -94,5 +94,5 @@ if __name__ == "__main__":
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
 
-os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[10])
-pf.quenchDynamics(cParams_List[10], gParams, sParams, datapath)
+os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[39])
+pf.quenchDynamics(cParams_List[39], gParams, sParams, datapath)
