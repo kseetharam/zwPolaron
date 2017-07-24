@@ -20,10 +20,14 @@ class CoherentState:
         self.ksin = ksin_func(kgrid)
         self.kpow2 = kpow2_func(kgrid)
 
+        self.th = kgrid.function_prod(list(kgrid.arrays.keys()), [lambda k: 0 * k + 1, lambda th: th])
+
         self.xgrid = xgrid
         self.xmagVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: x, lambda th: 0 * th + 1])
         self.xthetaVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: 0 * x + 1, lambda th: th])
         self.FTkernel = FTkernel_func(self.kcos, self.ksin, xgrid)
+
+        self.dVx = self.xgrid.dV()
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
@@ -78,4 +82,4 @@ class CoherentState:
     def get_MomentumDistribution(self):
         amplitude = self.amplitude_phase[0:-1]
         Nph = self.get_PhononNumber()
-        return np.dot(self.dV * np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel) - Nph), np.conjugate(self.FTkernel))
+        return (2 * np.pi)**3 * np.dot(self.dVx * np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel) - Nph), np.transpose(np.conjugate(self.FTkernel)))

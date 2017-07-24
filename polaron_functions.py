@@ -172,6 +172,13 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             tVec = t * np.ones(PD.size)
             MD = cs.get_MomentumDistribution()
             PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
+
+            Ppara = np.dot(cs.dV * cs.kcos, np.real(MD))
+            Pperp = np.dot(cs.dV * cs.ksin, np.real(MD))
+            amplitude = cs.amplitude_phase[0:-1]
+            Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude))
+            sinth = np.dot(cs.dV, np.sin(cs.th))
+            print('t: %.2f, Pph: %.2f, Ppara: %.9f, Pperp: %.9f, Bkave: %.9f, sinth: %.9f' % (t, cs.get_PhononMomentum(), Ppara, Pperp, Bkave, sinth))
             np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data
