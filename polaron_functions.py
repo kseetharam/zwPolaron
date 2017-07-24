@@ -141,7 +141,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     [mI, mB, n0, gBB] = sParams
 
     # Initialization CoherentState
-    cs = CoherentState.CoherentState(kgrid)
+    cs = CoherentState.CoherentState(kgrid, xgrid)
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
@@ -168,15 +168,10 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
 
         # save position distribution data every 10 time values
         if ind % int(tGrid.size / 10) == 0:
-            names = list(xgrid.arrays.keys())
-            functions_x = [lambda x: x, lambda th: 0 * th + 1]
-            functions_thp = [lambda x: 0 * x + 1, lambda th: th]
-            xVals = xgrid.function_prod(names, functions_x)
-            thpVals = xgrid.function_prod(names, functions_thp)
             PD = cs.get_PositionDistribution()
-            tVals = t * np.ones(PD.size)
-            PD_data = np.concatenate((tVals[:, np.newaxis], xVals[:, np.newaxis], thpVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
-            np.savetxt(datapath + '/PosDist/quench_P_%.2f_t_%.2f.dat' % (P, t), PD_data)
+            tVec = t * np.ones(PD.size)
+            PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis]), axis=1)
+            np.savetxt(datapath + '/PosDist/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data
 

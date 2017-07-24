@@ -10,7 +10,7 @@ class PolaronHamiltonian:
         # Params = [P, aIBi, mI, mB, n0, gBB]
         self.Params = Params
 
-        self.grid = coherent_state.grid
+        self.grid = coherent_state.kgrid
 
         self.gnum = pf.g(self.grid, *Params)
         self.Omega0_grid = pf.omega0(self.grid, *Params)

@@ -9,17 +9,20 @@ class CoherentState:
 
     def __init__(self, kgrid, xgrid):
 
-        size = kgrid.size()
         # last element of self.amplitude_phase is the phase, the rest is the amplitude
-        self.amplitude_phase = np.zeros(size + 1, dtype=complex)
+        self.amplitude_phase = np.zeros(kgrid.size() + 1, dtype=complex)
 
         self.time = 0
-        self.grid = kgrid
 
-        self.dV = self.grid.dV()
-        self.kcos = kcos_func(self.grid)
-        self.ksin = ksin_func(self.grid)
-        self.kpow2 = kpow2_func(self.grid)
+        self.kgrid = kgrid
+        self.dV = self.kgrid.dV()
+        self.kcos = kcos_func(kgrid)
+        self.ksin = ksin_func(kgrid)
+        self.kpow2 = kpow2_func(kgrid)
+
+        self.xgrid = xgrid
+        self.xmagVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: x, lambda th: 0 * th + 1])
+        self.xthetaVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: 0 * x + 1, lambda th: th])
         self.FTkernal = FTkernal_func(self.kcos, self.ksin, xgrid)
 
         self.abs_error = 1.0e-8
@@ -44,7 +47,7 @@ class CoherentState:
     def get_Phase(self):
         return self.amplitude_phase[-1].real.astype(float)
 
-    # OBSERVABLES
+    # MOMENTUM SPACE OBSERVABLES
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
@@ -65,7 +68,9 @@ class CoherentState:
         amplitude = self.amplitude_phase[0:-1]
         return np.dot(self.kpow2 * amplitude * np.conjugate(amplitude), self.dV).real.astype(float)
 
+    # POSITION SPACE OBSERVABLES
+
     def get_PositionDistribution(self):
-        # outputs a matrix in x, theta
+        # outputs a vector of values corresponding to x, thetap pairs
         amplitude = self.amplitude_phase[0:-1]
         return np.abs(np.dot(self.dV * amplitude, self.FTkernal))**2
