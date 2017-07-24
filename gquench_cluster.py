@@ -11,10 +11,10 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 10
+    kcutoff = 15
     dk = 0.1
 
-    Ntheta = 30
+    Ntheta = 100
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
@@ -94,5 +94,5 @@ if __name__ == "__main__":
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
 
-os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[5])
-pf.quenchDynamics(cParams_List[5], gParams, sParams, datapath)
+os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[10])
+pf.quenchDynamics(cParams_List[10], gParams, sParams, datapath)
