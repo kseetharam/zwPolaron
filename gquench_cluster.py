@@ -11,10 +11,10 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 5
-    dk = 0.1
+    kcutoff = 1
+    dk = 0.01
 
-    Ntheta = 30
+    Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
@@ -26,10 +26,14 @@ if __name__ == "__main__":
     xmax = 1 / dk
     xmin = 1 / kcutoff
     dx = 1 / kcutoff
+    # dx = 1 / kcutoff
+
+    Nthetax = 10
+    dthetax = np.pi / (Nthetax - 1)
 
     xgrid = Grid.Grid("SPHERICAL_2D")
     xgrid.initArray('x', xmin, xmax, dx)
-    xgrid.initArray('th', dtheta, np.pi, dtheta)
+    xgrid.initArray('th', dthetax, np.pi, dthetax)
 
     # ---- SET GPARAMS ----
 
@@ -40,7 +44,7 @@ if __name__ == "__main__":
     # for n in range(NtPoints):
     #     tGrid[n] = dt * np.exp(dt * n)
 
-    tMax = 2
+    tMax = 10
     dt1 = 0.1
     dt2 = dt1
     # tGrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
@@ -93,6 +97,7 @@ if __name__ == "__main__":
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
+if os.path.isdir(datapath + '/PosSpace/P_%.2f' % PVals[4]) is False:
+    os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
 
-os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
-pf.quenchDynamics(cParams_List[4], gParams, sParams, datapath)
+pf.quenchDynamics(cParams_List[9], gParams, sParams, datapath)
