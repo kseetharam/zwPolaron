@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 1
-    dk = 0.01
+    kcutoff = 20
+    dk = 0.05
 
     Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
@@ -26,14 +26,10 @@ if __name__ == "__main__":
     xmax = 1 / dk
     xmin = 1 / kcutoff
     dx = 1 / kcutoff
-    # dx = 1 / kcutoff
-
-    Nthetax = 10
-    dthetax = np.pi / (Nthetax - 1)
 
     xgrid = Grid.Grid("SPHERICAL_2D")
     xgrid.initArray('x', xmin, xmax, dx)
-    xgrid.initArray('th', dthetax, np.pi, dthetax)
+    xgrid.initArray('th', dtheta, np.pi, dtheta)
 
     # ---- SET GPARAMS ----
 

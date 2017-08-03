@@ -95,6 +95,7 @@ def FTkernel_func(kcos, ksin, xgrid):
     outer_mat_sin = np.outer(ksin, xsin)
     return np.exp(-1j * outer_mat_cos) * jv(0, outer_mat_sin)
 
+
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
 
 
