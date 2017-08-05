@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 20
-    dk = 0.05
+    kcutoff = 15
+    dk = 0.07
 
     Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
@@ -93,6 +93,7 @@ if __name__ == "__main__":
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
+
 if os.path.isdir(datapath + '/PosSpace/P_%.2f' % PVals[4]) is False:
     os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
 
