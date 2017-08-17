@@ -108,7 +108,6 @@ def FTkernel_func(grid1, grid2, exp_complex_pos):
     else:
         return np.exp(-1j * outer_mat_cos) * iv(0, 1j * outer_mat_sin)
 
-# WSL test comment
 
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
 
@@ -122,11 +121,12 @@ def PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB):
         return np.sqrt(eB(k, mB) / w(k, gBB, mB, n0))
 
     # calculate aSi
-    integrand = lambda k: (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
+    def integrand(k): return (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
     val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
     aSi = (1 / (2 * np.pi * ur(mI, mB))) * val
     # calculate PB (phonon momentum)
-    integrand = lambda k: ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
+
+    def integrand(k): return ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
     val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
     PB = n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * val
 
@@ -183,7 +183,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
 
         # save position distribution data every 10 time values
         if ind % int(tGrid.size / 10) == 0:
-            # create PB grid for specific P 
+            # create PB grid for specific P
             PBmax = P
             dPB = 0.01
             Ntheta = 50
@@ -194,13 +194,13 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
 
             dV_PB = (2 * np.pi)**3 * PBgrid.dV()
             PBcos = kcos_func(PBgrid)
-            
-            # calculate observables 
+
+            # calculate observables
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
             MD = cs.get_MomentumDistribution(PBgrid)
             # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
-            totMD = np.dot(MD,dV_PB)
+            totMD = np.dot(MD, dV_PB)
             Ppara = np.dot(dV_PB * PBcos, np.real(MD))
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude))
