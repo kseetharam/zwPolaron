@@ -85,7 +85,7 @@ class CoherentState:
         amplitude = self.amplitude_phase[0:-1]
         return (np.abs(np.dot(self.dV * amplitude, self.FTkernel_kx))**2).real.astype(float)
 
-    def get_MomentumDistribution(self,PBgrid):
+    def get_MomentumDistribution(self, PBgrid):
         amplitude = self.amplitude_phase[0:-1]
         Nph = self.get_PhononNumber()
         FTkernel_xPB = FTkernel_func(self.xgrid, PBgrid, True)
