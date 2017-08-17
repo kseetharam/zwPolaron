@@ -1,3 +1,0 @@
-kcutoff: 20, dk: 0.050, Ntheta: 50, NGridPoints: 2.00E+04, tMax: 10.0, dt1: 0.100, dt2: 0.100 NtPoints: 101
-mI: 1.0, mB: 1.0, n0: 1.0, gBB: 0.628
-aIBi: -2.00, gIB: -0.853, PCrit_grid: 1.14011, PCrit_true: 1.13898, NPVals: 40
