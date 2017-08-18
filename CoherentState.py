@@ -32,7 +32,7 @@ class CoherentState:
         # self.PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])
         # self.dV_PB = (2 * np.pi)**3 * self.PBgrid.dV()
 
-        self.FTkernel_kx = FTkernel_func(kgrid, xgrid, False)
+        self.FTkernel_kx = FTkernel_func(kgrid, xgrid, True)
         # self.FTkernel_xPB = FTkernel_func(xgrid, PBgrid, True)
 
         self.abs_error = 1.0e-8
@@ -88,5 +88,9 @@ class CoherentState:
     def get_MomentumDistribution(self, PBgrid):
         amplitude = self.amplitude_phase[0:-1]
         Nph = self.get_PhononNumber()
-        FTkernel_xPB = FTkernel_func(self.xgrid, PBgrid, True)
-        return np.dot(self.dV_x * np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph), FTkernel_xPB)
+        FTkernel_xPB = FTkernel_func(self.xgrid, PBgrid, False)
+        G = np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph)
+        Ntheta = self.xgrid.arrays['th'].size
+        G0 = G[0:Ntheta - 1]
+        MD = np.dot(self.dV_x * np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph), FTkernel_xPB)
+        return MD, G0

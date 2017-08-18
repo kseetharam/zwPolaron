@@ -85,12 +85,13 @@ def PCrit_grid(kgrid, P, aIBi, mI, mB, n0, gBB):
     return DP + PB
 
 
-def FTkernel_func(grid1, grid2, exp_complex_pos):
+def FTkernel_func(grid1, grid2, exp_complex_pos=True):
     #  order of arguments matters (due to outer product)
     #  assumes grids are SPHERICAL_2D
     #  returns matrix in grid1 coordinates X grid2 coordinates
     #  e.g. kgrid X xgrid will have rows dependent on (k,theta) and columns dependent on (x,theta_prime)
     #  exp_complex_pos is a boolean which controls whether the exponential in the output is positive or negative complex (gets a 1j or a -1j)
+    # (by default True)
 
     functions_rcos = [lambda r: r, np.cos]
     functions_rsin = [lambda r: r, np.sin]
@@ -185,28 +186,33 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         # save position distribution data every 10 time values
         if ind % int(tGrid.size / 10) == 0:
             # create PB grid for specific P
-            PBmax = P
-            dPB = 0.01
+            PBmax = 30 * P
+            dPB = 0.5
             Ntheta = 50
             dtheta = np.pi / (Ntheta - 1)
             PBgrid = Grid.Grid("SPHERICAL_2D")
-            PBgrid.initArray('PB', dPB, PBmax, dPB)
+            PBgrid.initArray('PB', 0, PBmax, dPB)
             PBgrid.initArray('th', dtheta, np.pi, dtheta)
 
-            dV_PB = (2 * np.pi)**3 * PBgrid.dV()
+            # dV_PB = (2 * np.pi)**3 * PBgrid.dV()
+            dV_PB = PBgrid.dV()
             PBcos = kcos_func(PBgrid)
 
             # calculate observables
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
-            MD = cs.get_MomentumDistribution(PBgrid)
+            MD, G0 = cs.get_MomentumDistribution(PBgrid)
             # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
             totMD = np.dot(MD, dV_PB)
+
             Ppara = np.dot(dV_PB * PBcos, np.real(MD))
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude))
             relDiff = np.abs(Ppara - Bkave) / Bkave
             print('t: %.2f, P: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Im(totMD): %.9f' % (t, P, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.imag(totMD)))
+            # print('\n')
+            # print(G0)
+            # print('\n')
             # np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data

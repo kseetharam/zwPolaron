@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 15
-    dk = 0.07
+    kcutoff = 10
+    dk = 0.5
 
     Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     kgrid.initArray('th', dtheta, np.pi, dtheta)
 
     xmax = 1 / dk
-    xmin = 1 / kcutoff
+    xmin = 0
     dx = 1 / kcutoff
 
     xgrid = Grid.Grid("SPHERICAL_2D")
@@ -64,21 +64,22 @@ if __name__ == "__main__":
     NPVals = 40
     PVals = np.linspace(0, 3 * Pc, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
+    print(Pc, Pg)
 
     # ---- SET OUTPUT DATA FOLDER, CREATE PARAMETER SET, AND SAVE PARAMETER INFO FILE ----
 
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    outer_datapath = dirpath + '/clusterdata/aIBi_%.2f' % aIBi
-    if os.path.isdir(outer_datapath) is False:
-        os.mkdir(outer_datapath)
-    datapath = outer_datapath + '/NGridPoints_%.2E' % NGridPoints
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
-        os.mkdir(datapath + '/PosSpace')
+    # outer_datapath = dirpath + '/clusterdata/aIBi_%.2f' % aIBi
+    # if os.path.isdir(outer_datapath) is False:
+    #     os.mkdir(outer_datapath)
+    # datapath = outer_datapath + '/NGridPoints_%.2E' % NGridPoints
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
+    #     os.mkdir(datapath + '/PosSpace')
 
-    paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt1: {:.3f}, dt2: {:.3f} NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, gIB: {:0.3f}, PCrit_grid: {:.5f}, PCrit_true: {:0.5f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, g, Pg, Pc, NPVals)
-    with open(datapath + '/paramInfo.txt', 'w') as f:
-        f.write(paramInfo)
+    # paramInfo = 'kcutoff: {:d}, dk: {:.3f}, Ntheta: {:d}, NGridPoints: {:.2E}, tMax: {:.1f}, dt1: {:.3f}, dt2: {:.3f} NtPoints: {:d}\nmI: {:.1f}, mB: {:.1f}, n0: {:0.1f}, gBB: {:0.3f}\naIBi: {:.2f}, gIB: {:0.3f}, PCrit_grid: {:.5f}, PCrit_true: {:0.5f}, NPVals: {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, g, Pg, Pc, NPVals)
+    # with open(datapath + '/paramInfo.txt', 'w') as f:
+    #     f.write(paramInfo)
 
     # # ---- COMPUTE DATA ----
 
@@ -94,7 +95,8 @@ if __name__ == "__main__":
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, Time: {:.2f}'.format(taskID, PVals[taskID], end - start))
 
-if os.path.isdir(datapath + '/PosSpace/P_%.2f' % PVals[4]) is False:
-    os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
+# if os.path.isdir(datapath + '/PosSpace/P_%.2f' % PVals[4]) is False:
+#     os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
 
-pf.quenchDynamics(cParams_List[9], gParams, sParams, datapath)
+datapath = dirpath + '/data'
+pf.quenchDynamics(cParams_List[15], gParams, sParams, datapath)
