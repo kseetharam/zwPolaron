@@ -62,6 +62,16 @@ class Grid:
 
         return outer_mat.reshape(outer_mat.size)
 
+    def diffArray(self, name):
+        # returns a 1D array of values of the step difference for the 'name' variable
+        # e.g. 'name' = k gives an array where each element is dk
+        # normalizes the first and last values to avoid double counting
+
+        grid_diff = self.arrays_diff[name] * np.ones(len(self.arrays[name]))
+        grid_diff[0] = 0.5 * grid_diff[0]
+        grid_diff[-1] = 0.5 * grid_diff[-1]
+        return grid_diff
+
     def dV(self):
         # create an infinitisimal element of the volume that corresponds to the
         # given coordinate_system
@@ -70,9 +80,7 @@ class Grid:
         coordinate_system = self.coordinate_system
 
         # create dk, dtheta and modify it
-        grid_diff = self.arrays_diff[list_of_unit_vectors[0]] * np.ones(len(self.arrays[list_of_unit_vectors[0]]))
-        grid_diff[0] = 0.5 * grid_diff[0]
-        grid_diff[-1] = 0.5 * grid_diff[-1]
+        grid_diff = self.diffArray(list_of_unit_vectors[0])
 
         if(coordinate_system == "1D"):
             return grid_diff
@@ -82,9 +90,7 @@ class Grid:
             return grid_diff
         else:
             for ind, name in enumerate(list_of_unit_vectors[1:]):
-                temp_grid_diff = self.arrays_diff[name] * np.ones(len(self.arrays[name]))
-                temp_grid_diff[0] = 0.5 * temp_grid_diff[0]
-                temp_grid_diff[-1] = 0.5 * temp_grid_diff[-1]
+                temp_grid_diff = self.diffArray(name)
                 grid_diff = np.outer(grid_diff, temp_grid_diff)
 
         if coordinate_system == "SPHERICAL_2D":
@@ -104,23 +110,59 @@ class Grid:
             grid_size = grid_size * len(self.arrays[unit])
         return grid_size
 
-    # def construct_grid(self):
-    #     # construct grid from self.arrays
-    #     # comment: we can use function_prod here with list_of_functions
-    #     # filled with identity functions (need to write such function)
+    def integrateFunc(self, functionValues, name):
+        # takes an array of values of some function on the grid
+        # where the function has been constructed from an outer product
+        # of grid arrays in order
+        # e.g. grid with arrays k & theta, 'functionValues' = array of k^2 * cos(th) values
+        # returns array of values representing function integrated over variable 'name'
+        # SHOULD PROBABLY GENERALIZE THIS TO 'name' BEING A LIST AND INTEGRATING IN ANY NUMBER OF VARIABLES
 
-    #     list_of_unit_vectors = list(self.arrays.keys())
+        coordinate_system = self.coordinate_system
+        list_of_unit_vectors = list(self.arrays.keys())
+        # finding out which index in grid variable keys is the integration variable
+        # in order to get array reshaping correct - can probably do this better with Counter
+        varInd = -1
+        for ind, var in enumerate(list_of_unit_vectors):
+            if var == name:
+                varInd = ind
+        if varInd == -1:
+            print('INVALID LIST OF NAMES')
+            return
 
-    #     outer_product = self.arrays[list_of_unit_vectors[0]]
+        # 2D spherical grid case
 
-    #     if(len(list_of_unit_vectors) == 1):
-    #         return outer_product
+        if coordinate_system == "SPHERICAL_2D":
+            k_array = self.arrays[0].size
+            th_array = self.arrays[1].size
+            functionValues_mat = functionValues.reshape((k_array.size, th_array.size))
+            grid_diff = self.diffArray(self.arrays[varInd])
+            if varInd == 0:
+                # what is the appropriate prefactor griddiff vector? aka k^2*dk or sin(th)*dtheta?
+                functionValues_mat = np.transpose(functionValues_mat)  # transpose so we can integrate over 'k'
+                prefactor = (2 * np.pi)**(-2) * k_array**2
+            else:
+                prefactor = np.sin(th_array)
 
-    #     for ind, name in enumerate(list_of_unit_vectors[1:]):
-    #         temp = self.arrays[name]
-    #         outer_product = np.outer(outer_product, temp)
+            return np.dot(functionValues_mat, prefactor * grid_diff)
 
-    #     return outer_product.reshape(outer_product.size)
+        # def construct_grid(self):
+        #     # construct grid from self.arrays
+        #     # comment: we can use function_prod here with list_of_functions
+        #     # filled with identity functions (need to write such function)
 
-    # def integrate_on_grid(self, array):
+        #     list_of_unit_vectors = list(self.arrays.keys())
+
+        #     outer_product = self.arrays[list_of_unit_vectors[0]]
+
+        #     if(len(list_of_unit_vectors) == 1):
+        #         return outer_product
+
+        #     for ind, name in enumerate(list_of_unit_vectors[1:]):
+        #         temp = self.arrays[name]
+        #         outer_product = np.outer(outer_product, temp)
+
+        #     return outer_product.reshape(outer_product.size)
+
+        # def integrate_on_grid(self, array):
         # takes an array on a grid and integrates it

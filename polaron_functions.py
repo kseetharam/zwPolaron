@@ -186,7 +186,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         # save position distribution data every 10 time values
         if ind % int(tGrid.size / 10) == 0:
             # create PB grid for specific P
-            PBmax = 30 * P
+            PBmax = 40 * P
             dPB = 0.5
             Ntheta = 50
             dtheta = np.pi / (Ntheta - 1)

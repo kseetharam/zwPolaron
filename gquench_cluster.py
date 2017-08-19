@@ -99,4 +99,4 @@ if __name__ == "__main__":
 #     os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
 
 datapath = dirpath + '/data'
-pf.quenchDynamics(cParams_List[15], gParams, sParams, datapath)
+pf.quenchDynamics(cParams_List[10], gParams, sParams, datapath)
