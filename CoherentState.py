@@ -89,8 +89,8 @@ class CoherentState:
         amplitude = self.amplitude_phase[0:-1]
         Nph = self.get_PhononNumber()
         FTkernel_xPB = FTkernel_func(self.xgrid, PBgrid, False)
-        G = np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph)
-        Ntheta = self.xgrid.arrays['th'].size
-        G0 = G[0:Ntheta - 1]
+        # G = np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph)
+        # Ntheta = self.xgrid.arrays['th'].size
+        # G0 = G[0:Ntheta - 1]
         MD = np.dot(self.dV_x * np.exp(np.dot(self.dV * amplitude * np.conjugate(amplitude), self.FTkernel_kx) - Nph), FTkernel_xPB)
-        return MD, G0
+        return MD.real.astype(float)

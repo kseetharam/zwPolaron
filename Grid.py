@@ -133,10 +133,10 @@ class Grid:
         # 2D spherical grid case
 
         if coordinate_system == "SPHERICAL_2D":
-            k_array = self.arrays[0].size
-            th_array = self.arrays[1].size
-            functionValues_mat = functionValues.reshape((k_array.size, th_array.size))
-            grid_diff = self.diffArray(self.arrays[varInd])
+            k_array = self.arrays[list_of_unit_vectors[0]]
+            th_array = self.arrays[list_of_unit_vectors[1]]
+            functionValues_mat = functionValues.reshape((len(k_array), len(th_array)))
+            grid_diff = self.diffArray(list_of_unit_vectors[varInd])
             if varInd == 0:
                 # what is the appropriate prefactor griddiff vector? aka k^2*dk or sin(th)*dtheta?
                 functionValues_mat = np.transpose(functionValues_mat)  # transpose so we can integrate over 'k'

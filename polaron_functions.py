@@ -169,6 +169,8 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     MomDisp_Vec = np.zeros(tGrid.size, dtype=float)
     Phase_Vec = np.zeros(tGrid.size, dtype=float)
 
+    print('P: %.2f' % P)
+
     for ind, t in enumerate(tGrid):
         if ind == 0:
             dt = t
@@ -201,25 +203,23 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             # calculate observables
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
-            MD, G0 = cs.get_MomentumDistribution(PBgrid)
+            MD = cs.get_MomentumDistribution(PBgrid)
             # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
             totMD = np.dot(MD, dV_PB)
             # integrating out vars
-            MD_th = PBgrid.integrateFunc(MD, 'k')
+            MD_th = PBgrid.integrateFunc(MD, 'PB')
             MD_k = PBgrid.integrateFunc(MD, 'th')
-            k_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('k') ** 2
+            PB_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('PB') ** 2
             th_prefac = np.sin(PBgrid.getArray('th'))
-            totMD_th = np.dot(MD_th, k_prefac * PBgrid.diffArray('k'))
-            totMD_k = np.dot(MD_k, th_prefac * PBgrid.diffArray('th'))
+            totMD_th = np.dot(MD_th, th_prefac * PBgrid.diffArray('th'))
+            totMD_PB = np.dot(MD_k, PB_prefac * PBgrid.diffArray('PB'))
 
-            Ppara = np.dot(dV_PB * PBcos, np.real(MD))
+            Ppara = np.dot(dV_PB * PBcos, MD)
             amplitude = cs.amplitude_phase[0:-1]
-            Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude))
+            Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude)).real.astype(float)
             relDiff = np.abs(Ppara - Bkave) / Bkave
-            print('t: %.2f, P: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Im(totMD): %.9f, Re(totMD_th): %.9f, Re(totMD_k): %.9f' % (t, P, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.imag(totMD), np.real(totMD_th), np.real(totMD_k)))
-            # print('\n')
-            # print(G0)
-            # print('\n')
+            print('t: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Re(totMD_th): %.9f, Re(totMD_PB): %.9f' % (t, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.real(totMD_th), np.real(totMD_PB)))
+
             # np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
     # Save Data
