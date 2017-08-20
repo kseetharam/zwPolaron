@@ -204,12 +204,19 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             MD, G0 = cs.get_MomentumDistribution(PBgrid)
             # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
             totMD = np.dot(MD, dV_PB)
+            # integrating out vars
+            MD_th = PBgrid.integrateFunc(MD, 'k')
+            MD_k = PBgrid.integrateFunc(MD, 'th')
+            k_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('k') ** 2
+            th_prefac = np.sin(PBgrid.getArray('th'))
+            totMD_th = np.dot(MD_th, k_prefac * PBgrid.diffArray('k'))
+            totMD_k = np.dot(MD_k, th_prefac * PBgrid.diffArray('th'))
 
             Ppara = np.dot(dV_PB * PBcos, np.real(MD))
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude))
             relDiff = np.abs(Ppara - Bkave) / Bkave
-            print('t: %.2f, P: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Im(totMD): %.9f' % (t, P, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.imag(totMD)))
+            print('t: %.2f, P: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Im(totMD): %.9f, Re(totMD_th): %.9f, Re(totMD_k): %.9f' % (t, P, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.imag(totMD), np.real(totMD_th), np.real(totMD_k)))
             # print('\n')
             # print(G0)
             # print('\n')
