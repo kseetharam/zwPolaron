@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.integrate import quad
-from scipy.special import iv
+from scipy.special import jv
 import Grid
 
 
@@ -105,9 +105,9 @@ def FTkernel_func(grid1, grid2, exp_complex_pos=True):
     outer_mat_cos = np.outer(rcos1, rcos2)
     outer_mat_sin = np.outer(rsin1, rsin2)
     if exp_complex_pos:
-        return np.exp(1j * outer_mat_cos) * iv(0, 1j * outer_mat_sin)
+        return np.exp(1j * outer_mat_cos) * jv(0, outer_mat_sin)
     else:
-        return np.exp(-1j * outer_mat_cos) * iv(0, 1j * outer_mat_sin)
+        return np.exp(-1j * outer_mat_cos) * jv(0, outer_mat_sin)
 
 # test WSL comment 2 -- addition
 
@@ -188,7 +188,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
         # save position distribution data every 10 time values
         if ind % int(tGrid.size / 10) == 0:
             # create PB grid for specific P
-            PBmax = 40 * P
+            PBmax = 40 * P  # need to go out far enough for low values of P, but if I set it too far out, then high values of P will blow up...
             dPB = 0.5
             Ntheta = 50
             dtheta = np.pi / (Ntheta - 1)
@@ -204,21 +204,23 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             PD = cs.get_PositionDistribution()
             tVec = t * np.ones(PD.size)
             MD = cs.get_MomentumDistribution(PBgrid)
-            # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
-            totMD = np.dot(MD, dV_PB)
-            # integrating out vars
             MD_th = PBgrid.integrateFunc(MD, 'PB')
             MD_k = PBgrid.integrateFunc(MD, 'th')
-            PB_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('PB') ** 2
-            th_prefac = np.sin(PBgrid.getArray('th'))
-            totMD_th = np.dot(MD_th, th_prefac * PBgrid.diffArray('th'))
-            totMD_PB = np.dot(MD_k, PB_prefac * PBgrid.diffArray('PB'))
+            # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
 
-            Ppara = np.dot(dV_PB * PBcos, MD)
+            # testing
+            # PB_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('PB') ** 2
+            # th_prefac = np.sin(PBgrid.getArray('th'))
+            # totMD_th = np.dot(MD_th, th_prefac * PBgrid.diffArray('th'))
+            # totMD_PB = np.dot(MD_k, PB_prefac * PBgrid.diffArray('PB'))
+
+            totPD = np.dot(PD, cs.dV_x)
+            totMD = np.dot(MD, dV_PB)
+            PBpara = np.dot(dV_PB * PBcos, MD)
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude)).real.astype(float)
-            relDiff = np.abs(Ppara - Bkave) / Bkave
-            print('t: %.2f, Pph: %.2f, Ppara: %.9f, Bkave: %.9f, relDiff: %.9f, Re(totMD): %.9f, Re(totMD_th): %.9f, Re(totMD_PB): %.9f' % (t, cs.get_PhononMomentum(), Ppara, Bkave, relDiff, np.real(totMD), np.real(totMD_th), np.real(totMD_PB)))
+            relDiff = np.abs(PBpara - Bkave) / Bkave
+            print('t: %.2f, Pph: %.2f, PBpara: %.7f, Bkave: %.7f, relDiff: %.7f, Re(totMD): %.7f, Re(PD): %.7f' % (t, cs.get_PhononMomentum(), PBpara, Bkave, relDiff, np.real(totMD), np.real(totPD)))
 
             # np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
 
