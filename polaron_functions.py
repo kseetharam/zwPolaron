@@ -154,7 +154,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     import PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
     [P, aIBi] = cParams
-    [kgrid, xgrid, tGrid] = gParams
+    [kgrid, xgrid, tGrid, PB_multiplier] = gParams
     [mI, mB, n0, gBB] = sParams
 
     # Initialization CoherentState
@@ -162,14 +162,27 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
-    # Time evolution
-    PB_Vec = np.zeros(tGrid.size, dtype=float)
-    NB_Vec = np.zeros(tGrid.size, dtype=float)
-    DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
-    MomDisp_Vec = np.zeros(tGrid.size, dtype=float)
-    Phase_Vec = np.zeros(tGrid.size, dtype=float)
 
-    print('P: %.2f' % P)
+    # create PB grid for specific P
+    PBmax = PB_multiplier * P  # need to go out far enough for low values of P, but if I set it too far out, then high values of P will blow up...
+    dPB = 0.5
+    Ntheta = 50
+    dtheta = np.pi / (Ntheta - 1)
+    PBgrid = Grid.Grid("SPHERICAL_2D")
+    PBgrid.initArray('PB', 0, PBmax, dPB)
+    PBgrid.initArray('th', dtheta, np.pi, dtheta)
+    PBmagVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: PB, lambda th: 0 * th + 1])
+    PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])
+    # dV_PB = (2 * np.pi)**3 * PBgrid.dV()
+    dV_PB = PBgrid.dV()
+    PBcos = kcos_func(PBgrid)
+
+    # Time evolution
+    # PB_Vec = np.zeros(tGrid.size, dtype=float)
+    # NB_Vec = np.zeros(tGrid.size, dtype=float)
+    # DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
+    # MomDisp_Vec = np.zeros(tGrid.size, dtype=float)
+    # Phase_Vec = np.zeros(tGrid.size, dtype=float)
 
     for ind, t in enumerate(tGrid):
         if ind == 0:
@@ -179,40 +192,26 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             dt = t - tGrid[ind - 1]
             cs.evolve(dt, ham)
         # print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
-        PB_Vec[ind] = cs.get_PhononMomentum()
-        NB_Vec[ind] = cs.get_PhononNumber()
-        DynOv_Vec[ind] = cs.get_DynOverlap()
-        MomDisp_Vec[ind] = cs.get_MomentumDispersion()
-        Phase_Vec[ind] = cs.get_Phase()
+        # PB_Vec[ind] = cs.get_PhononMomentum()
+        # NB_Vec[ind] = cs.get_PhononNumber()
+        # DynOv_Vec[ind] = cs.get_DynOverlap()
+        # MomDisp_Vec[ind] = cs.get_MomentumDispersion()
+        # Phase_Vec[ind] = cs.get_Phase()
 
         # save position distribution data every 10 time values
-        if ind % int(tGrid.size / 10) == 0:
-            # create PB grid for specific P
-            PBmax = 40 * P  # need to go out far enough for low values of P, but if I set it too far out, then high values of P will blow up...
-            dPB = 0.5
-            Ntheta = 50
-            dtheta = np.pi / (Ntheta - 1)
-            PBgrid = Grid.Grid("SPHERICAL_2D")
-            PBgrid.initArray('PB', 0, PBmax, dPB)
-            PBgrid.initArray('th', dtheta, np.pi, dtheta)
-
-            # dV_PB = (2 * np.pi)**3 * PBgrid.dV()
-            dV_PB = PBgrid.dV()
-            PBcos = kcos_func(PBgrid)
+        if t != 0 and ind % int(tGrid.size / 10) == 0:
 
             # calculate observables
             PD = cs.get_PositionDistribution()
-            tVec = t * np.ones(PD.size)
             MD = cs.get_MomentumDistribution(PBgrid)
             MD_th = PBgrid.integrateFunc(MD, 'PB')
-            MD_k = PBgrid.integrateFunc(MD, 'th')
-            # PD_data = np.concatenate((tVec[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], np.real(MD)[:, np.newaxis], np.imag(MD)[:, np.newaxis]), axis=1)
+            MD_PB = PBgrid.integrateFunc(MD, 'th')
 
             # testing
             # PB_prefac = (2 * np.pi)**(-2) * PBgrid.getArray('PB') ** 2
             # th_prefac = np.sin(PBgrid.getArray('th'))
             # totMD_th = np.dot(MD_th, th_prefac * PBgrid.diffArray('th'))
-            # totMD_PB = np.dot(MD_k, PB_prefac * PBgrid.diffArray('PB'))
+            # totMD_PB = np.dot(MD_PB, PB_prefac * PBgrid.diffArray('PB'))
 
             totPD = np.dot(PD, cs.dV_x)
             totMD = np.dot(MD, dV_PB)
@@ -220,13 +219,20 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude)).real.astype(float)
             relDiff = np.abs(PBpara - Bkave) / Bkave
-            print('t: %.2f, Pph: %.2f, PBpara: %.7f, Bkave: %.7f, relDiff: %.7f, Re(totMD): %.7f, Re(PD): %.7f' % (t, cs.get_PhononMomentum(), PBpara, Bkave, relDiff, np.real(totMD), np.real(totPD)))
+            print('t: %.2f, P, %.2f, Pph: %.2f, PBpara: %.5f, Bkave: %.5f, relDiff: %.5f, Re(totMD): %.5f, Re(PD): %.5f' % (t, P, cs.get_PhononMomentum(), PBpara, Bkave, relDiff, np.real(totMD), np.real(totPD)))
 
-            # np.savetxt(datapath + '/PosSpace/P_%.2f/quench_P_%.2f_t_%.2f.dat' % (P, P, t), PD_data)
+            # create and save data
+            # Dist_data = np.concatenate((t * np.ones(PD.size)[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], PBmagVals[:, np.newaxis], PBthetaVals[:, np.newaxis], MD[:, np.newaxis]), axis=1)
+            # MDth_data = np.concatenate((t * np.ones(MD_th.size)[:, np.newaxis], PBthetaVals[:, np.newaxis], MD_th[:, np.newaxis]), axis=1)
+            # MDPB_data = np.concatenate((t * np.ones(MD_PB.size)[:, np.newaxis], PBmagVals[:, np.newaxis], MD_PB[:, np.newaxis]), axis=1)
+
+            # np.savetxt(datapath + '/Dist/P_%.2f/joint_P_%.2f_PBm_%.2f_t_%.2f.dat' % (P, P, PB_multiplier, t), Dist_data)
+            # np.savetxt(datapath + '/Dist/P_%.2f/MDth_P_%.2f_PBm_%.2f_t_%.2f.dat' % (P, P, PB_multiplier, t), MDth_data)
+            # np.savetxt(datapath + '/Dist/P_%.2f/MDPB_P_%.2f_PBm_%.2f_t_%.2f.dat' % (P, P, PB_multiplier, t), MDPB_data)
 
     # Save Data
 
-    PVec = P * np.ones(tGrid.size)
+    # PVec = P * np.ones(tGrid.size)
     # generates data file with columns representing P, t, Phase, Phonon Momentum, Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
     # data = np.concatenate((PVec[:, np.newaxis], tGrid[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], MomDisp_Vec[:, np.newaxis], NB_Vec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/quench_P_%.2f.dat' % P, data)
