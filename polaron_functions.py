@@ -164,13 +164,24 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
     # create PB grid for specific P
-    PBmax = PB_multiplier * P  # need to go out far enough for low values of P, but if I set it too far out, then high values of P will blow up...
-    dPB = 0.5
+    # PBmax = PB_multiplier * P  # need to go out far enough for low values of P, but if I set it too far out, then high values of P will blow up...
+    # dPB = 0.5
+    # Ntheta = 50
+    # dtheta = np.pi / (Ntheta - 1)
+    # PBgrid = Grid.Grid("SPHERICAL_2D")
+    # PBgrid.initArray('PB', 0, PBmax, dPB)
+    # PBgrid.initArray('th', dtheta, np.pi, dtheta)
+
+    dx = xgrid.arrays_diff['x']
+    xmax = np.amax(xgrid.getArray('x'))
+    PBmax = np.pi / dx
+    dPB = np.pi / xmax
     Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
     PBgrid = Grid.Grid("SPHERICAL_2D")
     PBgrid.initArray('PB', 0, PBmax, dPB)
     PBgrid.initArray('th', dtheta, np.pi, dtheta)
+
     PBmagVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: PB, lambda th: 0 * th + 1])
     PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])
     # dV_PB = (2 * np.pi)**3 * PBgrid.dV()
@@ -218,8 +229,10 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
             PBpara = np.dot(dV_PB * PBcos, MD)
             amplitude = cs.amplitude_phase[0:-1]
             Bkave = np.dot(cs.dV * cs.kcos, amplitude * np.conjugate(amplitude)).real.astype(float)
-            relDiff = np.abs(PBpara - Bkave) / Bkave
-            print('t: %.2f, P, %.2f, Pph: %.2f, PBpara: %.5f, Bkave: %.5f, relDiff: %.5f, Re(totMD): %.5f, Re(PD): %.5f' % (t, P, cs.get_PhononMomentum(), PBpara, Bkave, relDiff, np.real(totMD), np.real(totPD)))
+            M_relDiff = np.abs(PBpara - Bkave) / Bkave
+            Nph = cs.get_PhononNumber()
+            P_relDiff = np.abs(np.real(totPD) - Nph) / Nph
+            print('t: %.2f, P, %.2f, Pph: %.2f, Nph: %.5f, Re(totMD): %.5f, M_relDiff: %.5f,  P_relDiff: %.5f' % (t, P, cs.get_PhononMomentum(), Nph, np.real(totMD), M_relDiff, P_relDiff))
 
             # create and save data
             # Dist_data = np.concatenate((t * np.ones(PD.size)[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], PBmagVals[:, np.newaxis], PBthetaVals[:, np.newaxis], MD[:, np.newaxis]), axis=1)

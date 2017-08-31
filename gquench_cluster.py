@@ -11,24 +11,45 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    kcutoff = 10
-    dk = 0.5
+    # kcutoff = 10
+    # dk = 0.5
+
+    # Ntheta = 50
+    # dtheta = np.pi / (Ntheta - 1)
+
+    # NGridPoints = Ntheta * kcutoff / dk
+
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray('k', dk, kcutoff, dk)
+    # kgrid.initArray('th', dtheta, np.pi, dtheta)
+
+    # xmax = 1 / dk
+    # dx = 1 / kcutoff
+
+    # xgrid = Grid.Grid("SPHERICAL_2D")
+    # xgrid.initArray('x', 0, xmax, dx)
+    # xgrid.initArray('th', dtheta, np.pi, dtheta)
+
+    xmax = 7
+    xmin = 0
+    dx = 0.25
+
+    kcutoff = np.pi / dx
+    dk = np.pi / xmax
+    print('kcutoff: %.2f, dk: %.2f' % (kcutoff, dk))
 
     Ntheta = 50
     dtheta = np.pi / (Ntheta - 1)
 
     NGridPoints = Ntheta * kcutoff / dk
 
+    xgrid = Grid.Grid("SPHERICAL_2D")
+    xgrid.initArray('x', xmin, xmax, dx)
+    xgrid.initArray('th', dtheta, np.pi, dtheta)
+
     kgrid = Grid.Grid("SPHERICAL_2D")
     kgrid.initArray('k', dk, kcutoff, dk)
     kgrid.initArray('th', dtheta, np.pi, dtheta)
-
-    xmax = 1 / dk
-    dx = 1 / kcutoff
-
-    xgrid = Grid.Grid("SPHERICAL_2D")
-    xgrid.initArray('x', 0, xmax, dx)
-    xgrid.initArray('th', dtheta, np.pi, dtheta)
 
     # ---- SET GPARAMS ----
 
@@ -67,7 +88,7 @@ if __name__ == "__main__":
     NPVals = 4
     PVals = np.linspace(0.1, .95 * Pg, NPVals)
     cParams_List = [[P, aIBi] for P in PVals]
-    print(Pc, Pg)
+    print('Pc_inf: %.3f, Pc_g: %.3f' % (Pc, Pg))
 
     # ---- SET OUTPUT DATA FOLDER, CREATE PARAMETER SET, AND SAVE PARAMETER INFO FILE ----
 
@@ -81,7 +102,7 @@ if __name__ == "__main__":
     #     os.mkdir(datapath)
     #     os.mkdir(datapath + '/Dist')
 
-    paramInfo = 'kcutoff - {:d}, dk - {:.3f}, Ntheta - {:d}, NGridPoints - {:.2E}, tMax - {:.1f}, dt1 - {:.3f}, dt2 - {:.3f} NtPoints - {:d}\nmI - {:.1f}, mB - {:.1f}, n0 - {:0.1f}, gBB - {:0.3f}\naIBi - {:.2f}, gIB - {:0.3f}, PCrit_grid - {:.5f}, PCrit_true - {:0.5f}, NPVals - {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, g, Pg, Pc, NPVals)
+    paramInfo = 'kcutoff - {:.2f}, dk - {:.3f}, Ntheta - {:d}, NGridPoints - {:.2E}, tMax - {:.1f}, dt1 - {:.3f}, dt2 - {:.3f} NtPoints - {:d}\nmI - {:.1f}, mB - {:.1f}, n0 - {:0.1f}, gBB - {:0.3f}\naIBi - {:.2f}, gIB - {:0.3f}, PCrit_grid - {:.5f}, PCrit_true - {:0.5f}, NPVals - {:d}'.format(kcutoff, dk, Ntheta, NGridPoints, tMax, dt1, dt2, tGrid.size, mI, mB, n0, gBB, aIBi, g, Pg, Pc, NPVals)
     # with open(datapath + '/paramInfo.txt', 'w') as f:
     #     f.write(paramInfo)
 
