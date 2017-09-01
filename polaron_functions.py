@@ -177,7 +177,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     PBmax = np.pi / dx
     dPB = np.pi / xmax
     Ntheta = 50
-    dtheta = np.pi / (Ntheta - 1)
+    dtheta = np.pi / Ntheta
     PBgrid = Grid.Grid("SPHERICAL_2D")
     PBgrid.initArray('PB', 0, PBmax, dPB)
     PBgrid.initArray('th', 0, np.pi, dtheta)
