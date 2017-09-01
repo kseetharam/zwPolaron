@@ -236,9 +236,8 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
 
             # create and save data
             # Dist_data = np.concatenate((t * np.ones(PD.size)[:, np.newaxis], cs.xmagVals[:, np.newaxis], cs.xthetaVals[:, np.newaxis], PD[:, np.newaxis], PBmagVals[:, np.newaxis], PBthetaVals[:, np.newaxis], MD[:, np.newaxis]), axis=1)
-            # MDth_data = np.concatenate((t * np.ones(MD_th.size)[:, np.newaxis], PBthetaVals[:, np.newaxis], MD_th[:, np.newaxis]), axis=1)
-            PBmagVals = PBgrid.getArray('PB')
-            MDPB_data = np.concatenate((t * np.ones(MD_PB.size)[:, np.newaxis], PBmagVals[:, np.newaxis], MD_PB[:, np.newaxis]), axis=1)
+            # MDth_data = np.concatenate((t * np.ones(MD_th.size)[:, np.newaxis], PBgrid.getArray('th')[:, np.newaxis], MD_th[:, np.newaxis]), axis=1)
+            MDPB_data = np.concatenate((t * np.ones(MD_PB.size)[:, np.newaxis], PBgrid.getArray('PB')[:, np.newaxis], MD_PB[:, np.newaxis]), axis=1)
 
             # np.savetxt(datapath + '/Dist/P_%.2f/joint_P_%.2f_PBm_%.2f_t_%.2f.dat' % (P, P, PB_multiplier, t), Dist_data)
             # np.savetxt(datapath + '/Dist/P_%.2f/MDth_P_%.2f_PBm_%.2f_t_%.2f.dat' % (P, P, PB_multiplier, t), MDth_data)

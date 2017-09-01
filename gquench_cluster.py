@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     xmax = 7
     xmin = 0
-    dx = 0.2
+    dx = 0.05
 
     kcutoff = np.pi / dx
     dk = np.pi / xmax
