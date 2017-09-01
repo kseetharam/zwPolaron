@@ -123,7 +123,8 @@ if __name__ == "__main__":
 # if os.path.isdir(datapath + '/PosSpace/P_%.2f' % PVals[4]) is False:
 #     os.mkdir(datapath + '/PosSpace/P_%.2f' % PVals[4])
 
-datapath = dirpath + '/data' + '/NGridPoints_%.2E' % NGridPoints
+
+datapath = dirpath + '/data' + '/theta' + '/NGridPoints_%.2E' % NGridPoints
 if os.path.isdir(datapath) is False:
     os.mkdir(datapath)
 
