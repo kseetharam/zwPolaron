@@ -180,7 +180,7 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     dtheta = np.pi / (Ntheta - 1)
     PBgrid = Grid.Grid("SPHERICAL_2D")
     PBgrid.initArray('PB', 0, PBmax, dPB)
-    PBgrid.initArray('th', dtheta, np.pi, dtheta)
+    PBgrid.initArray('th', 0, np.pi, dtheta)
 
     PBmagVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: PB, lambda th: 0 * th + 1])
     PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])

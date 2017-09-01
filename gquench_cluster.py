@@ -45,11 +45,11 @@ if __name__ == "__main__":
 
     xgrid = Grid.Grid("SPHERICAL_2D")
     xgrid.initArray('x', xmin, xmax, dx)
-    xgrid.initArray('th', dtheta, np.pi, dtheta)
+    xgrid.initArray('th', 0, np.pi, dtheta)
 
     kgrid = Grid.Grid("SPHERICAL_2D")
     kgrid.initArray('k', dk, kcutoff, dk)
-    kgrid.initArray('th', dtheta, np.pi, dtheta)
+    kgrid.initArray('th', 0, np.pi, dtheta)
 
     # ---- SET GPARAMS ----
 
