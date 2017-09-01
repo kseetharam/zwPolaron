@@ -32,14 +32,14 @@ if __name__ == "__main__":
 
     xmax = 7
     xmin = 0
-    dx = 0.05
+    dx = 0.1
 
     kcutoff = np.pi / dx
     dk = np.pi / xmax
     print('kcutoff: %.2f, dk: %.2f' % (kcutoff, dk))
 
     Ntheta = 50
-    dtheta = np.pi / (Ntheta - 1)
+    dtheta = np.pi / (Ntheta - 0)
 
     NGridPoints = Ntheta * kcutoff / dk
 
