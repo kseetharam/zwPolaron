@@ -32,8 +32,8 @@ class CoherentState:
         # self.PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])
         # self.dV_PB = (2 * np.pi)**3 * self.PBgrid.dV()
 
-        self.FTkernel_kx = FTkernel_func(kgrid, xgrid, True)
-        # self.FTkernel_xPB = FTkernel_func(xgrid, PBgrid, True)
+        # self.FTkernel_kx = FTkernel_func(kgrid, xgrid, True)
+        # # self.FTkernel_xPB = FTkernel_func(xgrid, PBgrid, True)
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6

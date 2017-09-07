@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import quad
 from scipy.special import jv
+from copy import deepcopy
 import Grid
 
 
@@ -40,7 +41,7 @@ def omega0(kgrid, P, aIBi, mI, mB, n0, gBB):
     return kgrid.function_prod(names, functions_omega0)
 
 
-def Wk(kgrid, P, aIBi, mI, mB, n0, gBB):
+def Wk(kgrid, P, mI, mB, n0, gBB):
     #
     names = list(kgrid.arrays.keys())
     functions_Wk = [lambda k: np.sqrt(eB(k, mB) / w(k, gBB, mB, n0)), lambda th: 0 * th + 1]
@@ -68,12 +69,25 @@ def kpow2_func(kgrid):
     return kgrid.function_prod(names, functions_kpow2)
 
 
+def aSi_grid(kgrid, P, mI, mB, n0, gBB):
+    DP = mI * nu(gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
+    names = list(kgrid.arrays.keys())
+    k2 = kpow2_func(kgrid)
+    Wkf = Wk(kgrid, P, mI, mB, n0, gBB)
+    kcos = kcos_func(kgrid)
+    wf = kgrid.function_prod(names, [lambda k: w(k, gBB, mB, n0), lambda th: 0 * th + 1])
+    # calculate aSi
+    integrand = 2 * ur(mI, mB) / k2 - Wkf**2 / (wf + k2 / (2 * mI) - (DP / mI) * kcos)
+    aSi = (2 * np.pi / ur(mI, mB)) * np.dot(integrand, kgrid.dV())
+    return aSi
+
+
 def PCrit_grid(kgrid, P, aIBi, mI, mB, n0, gBB):
     #
     DP = mI * nu(gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
     names = list(kgrid.arrays.keys())
     k2 = kpow2_func(kgrid)
-    Wkf = Wk(kgrid, P, aIBi, mI, mB, n0, gBB)
+    Wkf = Wk(kgrid, P, mI, mB, n0, gBB)
     kcos = kcos_func(kgrid)
     wf = kgrid.function_prod(names, [lambda k: w(k, gBB, mB, n0), lambda th: 0 * th + 1])
     # calculate aSi
@@ -82,7 +96,8 @@ def PCrit_grid(kgrid, P, aIBi, mI, mB, n0, gBB):
     # calculate PB (phonon momentum)
     integrand = kcos * Wkf**2 / (wf + k2 / (2 * mI) - DP / mI * kcos)**2
     PB = 4 * np.pi**2 * n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * np.dot(integrand, kgrid.dV())
-    return DP + PB
+    Pcg = DP + PB
+    return Pcg
 
 
 def FTkernel_func(grid1, grid2, exp_complex_pos=True):
@@ -249,3 +264,57 @@ def quenchDynamics(cParams, gParams, sParams, datapath):
     # generates data file with columns representing P, t, Phase, Phonon Momentum, Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
     # data = np.concatenate((PVec[:, np.newaxis], tGrid[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], MomDisp_Vec[:, np.newaxis], NB_Vec[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/quench_P_%.2f.dat' % P, data)
+
+
+def quenchDynamics_Traj(cParams, gParams, sParams, datapath):
+    #
+    # do not run this inside CoherentState or PolaronHamiltonian
+    import CoherentState
+    import PolaronHamiltonian
+    # takes parameters, performs dynamics, and outputs desired observables
+    [P, aIBi] = cParams
+    [kgrid, xgrid, tGrid] = gParams
+    [mI, mB, n0, gBB, nu, xi, alpha] = sParams
+
+    # Initialization CoherentState
+    cs = CoherentState.CoherentState(kgrid, xgrid)
+    # Initialization PolaronHamiltonian
+    Params = [P, aIBi, mI, mB, n0, gBB]
+    ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
+
+    # Time evolution
+    PB_Vec = np.zeros(tGrid.size, dtype=float)
+    # NB_Vec = np.zeros(tGrid.size, dtype=float)
+    # DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
+    # MomDisp_Vec = np.zeros(tGrid.size, dtype=float)
+    # Phase_Vec = np.zeros(tGrid.size, dtype=float)
+
+    for ind, t in enumerate(tGrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tGrid[ind - 1]
+            cs.evolve(dt, ham)
+        print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
+        PB_Vec[ind] = cs.get_PhononMomentum()
+        # NB_Vec[ind] = cs.get_PhononNumber()
+        # DynOv_Vec[ind] = cs.get_DynOverlap()
+        # MomDisp_Vec[ind] = cs.get_MomentumDispersion()
+        # Phase_Vec[ind] = cs.get_Phase()
+
+    # Save Data
+    # PVec = P * np.ones(tGrid.size)
+    PI_Vec = P - deepcopy(PB_Vec)
+    Traj_Vec = np.zeros(tGrid.size, dtype=float)
+
+    for ind in range(tGrid.size):
+        PI_slice = PI_Vec[0:ind + 1]
+        Traj_Vec[ind] = np.trapz(PI_slice, dx=dt) / mI
+
+    # generates data file with columns representing P, t, Phase, Phonon Momentum, Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
+    tGrid_N = tGrid * nu / xi
+    Traj_Vec_N = Traj_Vec / xi
+    data = np.concatenate((tGrid_N[:, np.newaxis], Traj_Vec_N[:, np.newaxis]), axis=1)
+    np.savetxt(datapath + '/traj_mI_%.2f_alpha_%.2f.dat' % (mI, alpha), data)
+    return tGrid_N, Traj_Vec_N
