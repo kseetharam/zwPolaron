@@ -25,7 +25,7 @@ gBB = (4 * np.pi / mB) * aBB
 nu = pf.nu(gBB * n0 / mB)
 
 mI = 0.5 * mB
-alpha = 6
+alpha = 20
 P = 0.5 * nu * mI
 xi = 1 / (np.sqrt(2 * mB * gBB * n0))
 

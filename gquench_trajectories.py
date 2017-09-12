@@ -17,7 +17,7 @@ if __name__ == "__main__":
     mI = 0.5 * mB
     n0 = 1
     aBB = 0.05
-    alpha = 3
+    alpha = 20
 
     gBB = (4 * np.pi / mB) * aBB
     xi = 1 / (np.sqrt(2 * mB * gBB * n0))
