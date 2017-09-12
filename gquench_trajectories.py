@@ -66,9 +66,10 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE P VALUES) ----
 
     P = 0.5 * nu * mI
-    # aSi = pf.aSi_grid(kgrid, P, mI, mB, n0, gBB)
-    aSi = 0  # for Frohlich model
-    aIBi = -1 * (1 / np.sqrt(alpha)) * ((32 * np.pi**2 * n0) / (mB * gBB))**(1 / 4) + aSi
+    aSi = pf.aSi_grid(kgrid, P, mI, mB, n0, gBB)
+    # aSi = 0  # for Frohlich model
+    # aIBi = -1 * (1 / np.sqrt(alpha)) * ((32 * np.pi**2 * n0) / (mB * gBB))**(1 / 4) + aSi
+    aIBi = 1 * (1 / np.sqrt(alpha)) * ((32 * np.pi**2 * n0) / (mB * gBB))**(1 / 4) + aSi
 
     # g = pf.g(kgrid, 0, aIBi, mI, mB, n0, gBB)
     Pg = pf.PCrit_grid(kgrid, 0, aIBi, mI, mB, n0, gBB)
@@ -82,7 +83,8 @@ if __name__ == "__main__":
     # # ---- COMPUTE DATA ----
 
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    datapath = dirpath + '/trajdata' '/NGridPoints_%.2E' % NGridPoints
+    outerdatapath = dirpath + '/trajdata' '/NGridPoints_%.2E' % NGridPoints
+    datapath = outerdatapath + '/pos' + '/twophonon'
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 

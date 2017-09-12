@@ -61,7 +61,7 @@ figN.savefig(dirpath + '/figures/gquench_PhononNumber_aIBi:%.2f_P:%.2f.pdf' % (a
 # figPB.tight_layout()
 # figPB.savefig(dirpath + '/figures/quench_PolaronMass_aIBi:%.2f_P:%.2f.pdf' % (aIBi, P))
 
-
+plt.subplots_adjust(top=0.85)
 fig, axes = plt.subplots(nrows=1, ncols=2)
 axes[0].plot(tVec, np.abs(DynOv_Vec), color=Color, lw=1, linestyle='-')
 axes[0].set_xlabel('Time, $t$', fontsize=fontsize)
