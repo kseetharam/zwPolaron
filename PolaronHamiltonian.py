@@ -73,16 +73,16 @@ class PolaronHamiltonian:
         betaDiff = amplitude - np.conjugate(amplitude)
         xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dV)
 
-        amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                           amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI) +
-                                           self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-        amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
+        # amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                                    amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI) +
+        #                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         # Frohlich model (without two phonon contribution)
-        # gf = (2 * np.pi / pf.ur(mI, mB)) * (1 / aIBi)
-        # amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
-        #                                    amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI))
+        gf = (2 * np.pi / pf.ur(mI, mB)) * (1 / aIBi)
+        amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
+                                           amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI))
 
-        # amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
+        amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         return amplitude_phase_new
