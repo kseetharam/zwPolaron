@@ -4,7 +4,7 @@ import collections
 
 class Grid:
 
-    COORDINATE_SYSTEMS = ["SPHERICAL_2D", "1D_NoZero", "1D"]
+    COORDINATE_SYSTEMS = ["CARTESIAN_3D", "SPHERICAL_2D", "1D_NoZero", "1D"]
 
     def __init__(self, coordinate_system):
         # Initialization of the Grid using the hash table.
@@ -96,10 +96,13 @@ class Grid:
         if coordinate_system == "SPHERICAL_2D":
             list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
 
-        output = self.function_prod(list_of_unit_vectors, list_of_functions)
+        if coordinate_system == "CARTESIAN_3D":
+            prefac = (2 * np.pi)**(-3)
+        else:
+            prefac = self.function_prod(list_of_unit_vectors, list_of_functions)
 
         # print(len(output))
-        return output * grid_diff.reshape(grid_diff.size)
+        return prefac * grid_diff.reshape(grid_diff.size)
         # use simps method for integration since there is no dk and dth yet
 
     def size(self):
@@ -146,23 +149,19 @@ class Grid:
 
             return np.dot(functionValues_mat, prefactor * grid_diff)
 
-        # def construct_grid(self):
-        #     # construct grid from self.arrays
-        #     # comment: we can use function_prod here with list_of_functions
-        #     # filled with identity functions (need to write such function)
+        # 3D cartesian grid case - ****NOT COMPLETE
 
-        #     list_of_unit_vectors = list(self.arrays.keys())
+        if coordinate_system == "CARTESIAN_3D":
+            kx_array = self.arrays[list_of_unit_vectors[0]]
+            ky_array = self.arrays[list_of_unit_vectors[1]]
+            kz_array = self.arrays[list_of_unit_vectors[2]]
 
-        #     outer_product = self.arrays[list_of_unit_vectors[0]]
+            functionValues_mat = functionValues.reshape((len(kx_array), len(ky_array), len(kz_array)))
+            grid_diff = self.diffArray(list_of_unit_vectors[varInd])
+            if varInd == 0:
+                functionValues_mat = np.transpose(functionValues_mat)  # transpose so we can integrate over 'k'
+                prefactor = (2 * np.pi)**(-2) * k_array**2
+            else:
+                prefactor = np.sin(th_array)
 
-        #     if(len(list_of_unit_vectors) == 1):
-        #         return outer_product
-
-        #     for ind, name in enumerate(list_of_unit_vectors[1:]):
-        #         temp = self.arrays[name]
-        #         outer_product = np.outer(outer_product, temp)
-
-        #     return outer_product.reshape(outer_product.size)
-
-        # def integrate_on_grid(self, array):
-        # takes an array on a grid and integrates it
+            return np.dot(functionValues_mat, prefactor * grid_diff)
