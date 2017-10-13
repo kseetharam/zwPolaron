@@ -226,103 +226,103 @@ z_array = xGrid.getArray('z')
 # # 2D NON-PRODUCT STATE TEST (CIRCLE - BESSEL)
 
 
-# Create grids
-Lx = 10
-dx = 1e-01
-x = np.arange(-Lx, Lx + dx, dx)
+# # Create grids
+# Lx = 10
+# dx = 1e-01
+# x = np.arange(-Lx, Lx + dx, dx)
 
-Ly = 10
-dy = 1e-01
-y = np.arange(-Ly, Ly + dy, dy)
+# Ly = 10
+# dy = 1e-01
+# y = np.arange(-Ly, Ly + dy, dy)
 
-Lkx = np.pi / dx
-dkx = np.pi / Lx
-kx = np.arange(-Lkx, Lkx + dkx, dkx)
+# Lkx = np.pi / dx
+# dkx = np.pi / Lx
+# kx = np.arange(-Lkx, Lkx + dkx, dkx)
 
-Lky = np.pi / dy
-dky = np.pi / Ly
-ky = np.arange(-Lky, Lky + dky, dky)
+# Lky = np.pi / dy
+# dky = np.pi / Ly
+# ky = np.arange(-Lky, Lky + dky, dky)
 
-xv, yv = np.meshgrid(x, y, indexing='ij')
-kxv, kyv = np.meshgrid(kx, ky, indexing='ij')
+# xv, yv = np.meshgrid(x, y, indexing='ij')
+# kxv, kyv = np.meshgrid(kx, ky, indexing='ij')
 
-# FFT prep
-Nx = len(x)
-Ny = len(y)
-Nyx = Nx // 2 + 1
-Nyy = Ny // 2 + 1
+# # FFT prep
+# Nx = len(x)
+# Ny = len(y)
+# Nyx = Nx // 2 + 1
+# Nyy = Ny // 2 + 1
 
-kny_x = (2 * np.pi / dx) / 2
-kxfft = np.linspace(-kny_x, kny_x, Nx)
-kny_y = (2 * np.pi / dy) / 2
-kyfft = np.linspace(-kny_y, kny_y, Ny)
-norm = dx * dy
+# kny_x = (2 * np.pi / dx) / 2
+# kxfft = np.linspace(-kny_x, kny_x, Nx)
+# kny_y = (2 * np.pi / dy) / 2
+# kyfft = np.linspace(-kny_y, kny_y, Ny)
+# norm = dx * dy
 
-# Calculate analytic function and its FT
-a = 5
-mask = np.sqrt(xv**2 + yv**2) < a
-Gxy = np.zeros((len(x), len(y)))
-Gxy[mask] = 1
+# # Calculate analytic function and its FT
+# a = 5
+# mask = np.sqrt(xv**2 + yv**2) < a
+# Gxy = np.zeros((len(x), len(y)))
+# Gxy[mask] = 1
 
-rho = np.sqrt(kxv**2 + kyv**2)
-Gkxky = a * jv(2 * np.pi * a * rho, 1) / rho
+# rho = np.sqrt(kxv**2 + kyv**2)
+# Gkxky = a * jv(2 * np.pi * a * rho, 1) / rho
 
-# Calculate FFT, post-process FFT (switching freqs), and iFFT
-F = np.fft.fftn(Gxy)
-F1 = np.concatenate((F[Nyx:, :], F[0:Nyx, :]), axis=0)
-F2 = np.concatenate((F1[:, Nyy:], F1[:, 0:Nyy]), axis=1)
-Gkxky_fft = norm * F2
-kxv_fft, kyv_fft = np.meshgrid(kxfft, kyfft, indexing='ij')
+# # Calculate FFT, post-process FFT (switching freqs), and iFFT
+# F = np.fft.fftn(Gxy)
+# F1 = np.concatenate((F[Nyx:, :], F[0:Nyx, :]), axis=0)
+# F2 = np.concatenate((F1[:, Nyy:], F1[:, 0:Nyy]), axis=1)
+# Gkxky_fft = norm * F2
+# kxv_fft, kyv_fft = np.meshgrid(kxfft, kyfft, indexing='ij')
 
-Gxy_ifft = (1 / norm) * np.fft.ifftn(Gkxky_fft)
+# Gxy_ifft = (1 / norm) * np.fft.ifftn(Gkxky_fft)
 
-# plotting
-fig = plt.figure()
-
-ax = fig.add_subplot(2, 2, 1, projection='3d')
-ax.plot_surface(xv, yv, np.abs(Gxy), rstride=4, cstride=4, linewidth=0)
-ax.set_title('Original Function (Real Space)')
-
-ax = fig.add_subplot(2, 2, 2, projection='3d')
-ax.plot_surface(xv, yv, np.abs(Gxy_ifft), rstride=4, cstride=4, linewidth=0)
-ax.set_title('Inverse FFT (Real Space)')
-
-ax = fig.add_subplot(2, 2, 3, projection='3d')
-ax.plot_surface(kxv, kyv, np.abs(Gkxky), rstride=2, cstride=2, linewidth=0)
-ax.set_title('Analytical FT (Momentum Space)')
-ax.set_xlim([-3, 3])
-ax.set_ylim([-3, 3])
-
-ax = fig.add_subplot(2, 2, 4, projection='3d')
-ax.plot_surface(kxv_fft, kyv_fft, np.abs(Gkxky_fft), rstride=2, cstride=2, linewidth=0)
-ax.set_title('FFT (Momentum Space)')
-ax.set_xlim([-3, 3])
-ax.set_ylim([-3, 3])
-
-fig.tight_layout()
-plt.show()
-
-# # contour plotting
+# # plotting
 # fig = plt.figure()
 
-# plt.subplot(2, 2, 1)
-# plt.contourf(xv, yv, np.abs(Gxy))
-# plt.title('Original Function (Real Space)')
+# ax = fig.add_subplot(2, 2, 1, projection='3d')
+# ax.plot_surface(xv, yv, np.abs(Gxy), rstride=4, cstride=4, linewidth=0)
+# ax.set_title('Original Function (Real Space)')
 
-# plt.subplot(2, 2, 2)
-# plt.contourf(xv, yv, np.abs(Gxy_ifft))
-# plt.title('Inverse FFT (Real Space)')
+# ax = fig.add_subplot(2, 2, 2, projection='3d')
+# ax.plot_surface(xv, yv, np.abs(Gxy_ifft), rstride=4, cstride=4, linewidth=0)
+# ax.set_title('Inverse FFT (Real Space)')
 
-# plt.subplot(2, 2, 3)
-# plt.contourf(kxv, kyv, np.abs(Gkxky))
-# plt.title('Analytical FT (Momentum Space)')
+# ax = fig.add_subplot(2, 2, 3, projection='3d')
+# ax.plot_surface(kxv, kyv, np.abs(Gkxky), rstride=2, cstride=2, linewidth=0)
+# ax.set_title('Analytical FT (Momentum Space)')
+# ax.set_xlim([-3, 3])
+# ax.set_ylim([-3, 3])
 
-# plt.subplot(2, 2, 4)
-# plt.contourf(kxv_fft, kyv_fft, np.abs(Gkxky_fft))
-# plt.title('FFT (Momentum Space)')
+# ax = fig.add_subplot(2, 2, 4, projection='3d')
+# ax.plot_surface(kxv_fft, kyv_fft, np.abs(Gkxky_fft), rstride=2, cstride=2, linewidth=0)
+# ax.set_title('FFT (Momentum Space)')
+# ax.set_xlim([-3, 3])
+# ax.set_ylim([-3, 3])
 
 # fig.tight_layout()
 # plt.show()
+
+# # # contour plotting
+# # fig = plt.figure()
+
+# # plt.subplot(2, 2, 1)
+# # plt.contourf(xv, yv, np.abs(Gxy))
+# # plt.title('Original Function (Real Space)')
+
+# # plt.subplot(2, 2, 2)
+# # plt.contourf(xv, yv, np.abs(Gxy_ifft))
+# # plt.title('Inverse FFT (Real Space)')
+
+# # plt.subplot(2, 2, 3)
+# # plt.contourf(kxv, kyv, np.abs(Gkxky))
+# # plt.title('Analytical FT (Momentum Space)')
+
+# # plt.subplot(2, 2, 4)
+# # plt.contourf(kxv_fft, kyv_fft, np.abs(Gkxky_fft))
+# # plt.title('FFT (Momentum Space)')
+
+# # fig.tight_layout()
+# # plt.show()
 
 
 # # 3D TEST
@@ -359,13 +359,26 @@ Gy = 1 / np.sqrt(2 * np.pi * vary**2) * np.exp(-(y - my)**2 / (2 * vary**2))
 mz = 0; varz = 1
 Gz = 1 / np.sqrt(2 * np.pi * varz**2) * np.exp(-(z - mz)**2 / (2 * varz**2))
 
-Gxyz = np.outer(Gx, Gy, Gz)
+# Gxyz = np.outer(Gx, Gy, Gz)
 
 Gkx = np.exp(-1j * mx * kx) * np.exp(-(kx**2 * varx**2) / 2)
 Gky = np.exp(-1j * my * ky) * np.exp(-(ky**2 * vary**2) / 2)
 Gkz = np.exp(-1j * mx * kz) * np.exp(-(kz**2 * varz**2) / 2)
 
-Gkxkykz = np.outer(Gkx, Gky, Gkz)
+# Gkxkykz = np.outer(Gkx, Gky, Gkz)
+
+
+# generation
+
+Gxyz = np.zeros((Nx, Ny, Nz)).astype('complex')
+Gkxkykz = np.zeros((Nx, Ny, Nz)).astype('complex')
+for indx in np.arange(Nx):
+    for indy in np.arange(Ny):
+        for indz in np.arange(Nz):
+            Gxyz[indx, indy, indz] = Gx[indx] * Gy[indy] * Gz[indz]
+            Gkxkykz[indx, indy, indz] = Gkx[indx] * Gky[indy] * Gkz[indz]
+
+#
 
 # Calculate FFT, post-process FFT (switching freqs), and iFFT
 F = np.fft.fftn(Gxyz)
@@ -374,6 +387,31 @@ F2 = np.concatenate((F1[:, Nyy:, :], F1[:, 0:Nyy, :]), axis=1)
 F3 = np.concatenate((F2[:, :, Nzz:], F2[:, :, 0:Nzz]), axis=2)
 Gkxkykz_fft = norm * F3
 kxv_fft, kyv_fft, kzv_fft = np.meshgrid(kxfft, kyfft, kzfft, indexing='ij')
+
 Gxyz_ifft = (1 / norm) * np.fft.ifftn(Gkxkykz_fft)
 
 # plotting
+Gx = np.zeros(Nx).astype('complex')
+Gkx = np.zeros(Nx).astype('complex')
+Gkx_fft = np.zeros(Nx).astype('complex')
+Gx_ifft = np.zeros(Nx).astype('complex')
+for indx in np.arange(Nx):
+    for indy in np.arange(Ny):
+        for indz in np.arange(Nz):
+            Gx[indx] = Gx[indx] + Gxyz[indx, indy, indz] * dy * dz
+            Gkx[indx] = Gkx[indx] + np.abs(Gkxkykz[indx, indy, indz]) * dky * dkz
+            Gkx_fft[indx] = Gkx_fft[indx] + np.abs(Gkxkykz_fft[indx, indy, indz]) * dky * dkz
+            Gx_ifft[indx] = Gx_ifft[indx] + np.abs(Gxyz_ifft[indx, indy, indz]) * dy * dz
+
+# for indx in np.arange(len(kxfft)):
+#     GA = Gkxkykz_fft[indx, :, :]
+#     dkyVec = dky * np.ones(len(kyfft))
+#     dkzVec = dkz * np.ones(len(kzfft))
+#     dA = np.outer(dkyVec, dkzVec)
+#     Gkx[indx] = np.sum(GA * dA)
+
+# plt.plot(x, np.abs(Gx))
+# plt.plot(kx, np.abs(Gkx))
+# plt.plot(kxfft, np.abs(Gkx_fft))
+plt.plot(x, np.abs(Gx_ifft))
+plt.show()
