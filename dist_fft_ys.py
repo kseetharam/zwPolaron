@@ -28,7 +28,9 @@ def Omega(kx, ky, kz):
 def Bk(kx, ky, kz):
     aIBi = -5
     aSi = 0
-    return np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (Omega(kx, ky, kz) * (aIBi - aSi))
+    mI = 1; mB = 1
+    ur = mI * mB / (mI + mB)
+    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
 
 
 # Create grids
