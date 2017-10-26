@@ -29,8 +29,7 @@ def Bk(kx, ky, kz):
     aIBi = -5
     aSi = 0
     mI = 1; mB = 1
-    ur = mI * mB / (mI + mB)
-    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
+    return np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (Omega(kx, ky, kz) * (aIBi - aSi))
 
 
 # Create grids
@@ -87,6 +86,9 @@ dVk = np.ones((Nx, Ny, Nz)).astype('complex')
 Nph = np.real(np.sum(beta_kxkykz * dVk) * dkx * dky * dkz)
 print("Nph = \sum b^2 = %f" % (Nph))
 
+Nph = np.real(np.sum(beta_kxkykz * dVk) * dkx * dky * dkz)
+print("Nph = \sum b^2 = %f" % (Nph))
+
 # Slice x,y=0,z=0
 beta_kx = np.zeros(Nx).astype('complex')
 
@@ -114,6 +116,13 @@ dxVec = dx * np.ones(Nx)
 dkxVec = dkx * np.ones(Nx)
 
 print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec)))
+
+kxVec = np.fft.fftshift(kxfft)
+np_M1_kx = np.dot(np.abs(kxVec * Gexp_kx), dkxVec)
+beta2_M1_kx = np.dot(np.abs(kxVec * beta_kx), dkxVec)
+
+print("1st Moment (nPB, Beta^2) = (%f,%f)" % (np_M1_kx, beta2_M1_kx))
+
 
 fig, ax = plt.subplots(nrows=1, ncols=4)
 
