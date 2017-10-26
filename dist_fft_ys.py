@@ -26,16 +26,16 @@ def Omega(kx, ky, kz):
 
 
 def Bk(kx, ky, kz):
-    aIBi = -100
+    aIBi = -5
     aSi = 0
     mI = 1
     mB = 1
     ur = mI * mB / (mI + mB)
-    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
+    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi)) * (2 * np.pi)**(- 3 / 2)
 
 
 # Create grids
-(Lx, Ly, Lz) = (5, 5, 5)
+(Lx, Ly, Lz) = (10, 10, 10)
 (dx, dy, dz) = (2e-01, 2e-01, 2e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
@@ -130,9 +130,20 @@ print("Exp[-Nph] = %f" % (np.exp(-Nph)))
 
 fig, ax = plt.subplots(nrows=1, ncols=4)
 
+ax[0].set_title(r'$|\beta_{\vec{k}}|^2$')
+ax[0].set_xlabel(r'$k_{x}$')
 ax[0].plot(kx, np.abs(beta_kx))
+
+ax[1].set_title(r'$\beta_{x,y=0,z=0}$')
+ax[1].set_xlabel(r'$x$')
 ax[1].plot(x, np.real(beta_x))
+
+ax[1].set_title(r'$\exp(\beta_{x,y=0,z=0} - Nph) - \exp(-Nph)$')
+ax[1].set_xlabel(r'$x$')
 ax[2].plot(x, np.abs(fexp_x))
+
+ax[3].set_title(r'$n_{\vec{P_B}}$')
+ax[3].set_xlabel(r'$P_{B,x}$')
 ax[3].plot(kx, np.real(Gexp_kx))
 
 
