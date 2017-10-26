@@ -25,18 +25,20 @@ def Omega(kx, ky, kz):
     return omegak(kx, ky, kz) + epsilon(kx, ky, kz) / mI - kx * DP / mI
 
 
-def Bk(kx, ky, kz):
-    aIBi = -100
+def Bkt(kx, ky, kz):
+    aIBi = -5
     aSi = 0
     mI = 1
     mB = 1
     ur = mI * mB / (mI + mB)
-    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
+    Bk = 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
+    prefactor = (2 * np.pi)**(-3 / 2)
+    return prefactor * Bk
 
 
 # Create grids
-(Lx, Ly, Lz) = (5, 5, 5)
-(dx, dy, dz) = (2e-01, 2e-01, 2e-01)
+(Lx, Ly, Lz) = (10, 10, 10)
+(dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
 z = np.arange(- Lz, Lz + dz, dz)
@@ -79,7 +81,7 @@ for indx in np.arange(Nx):
             else:
                 decay_momentum = 100
                 decay = np.exp(-1 * epsilon(kxF, kyF, kzF) / (decay_momentum**2))
-                beta_kxkykz[indx, indy, indz] = np.abs(Bk(kxF, kyF, kzF))**2 * decay
+                beta_kxkykz[indx, indy, indz] = np.abs(Bkt(kxF, kyF, kzF))**2 * decay
                 decay_length = 10
                 decay_xyz[indx, indy, indz] = np.exp(-1 * (x_**2 + y_**2 + z_**2) / (2 * decay_length**2))
 
