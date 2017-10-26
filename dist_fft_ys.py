@@ -21,12 +21,12 @@ def omegak(kx, ky, kz):
 
 def Omega(kx, ky, kz):
     mI = 1
-    DP = 0.
+    DP = 0.2
     return omegak(kx, ky, kz) + epsilon(kx, ky, kz) / mI - kx * DP / mI
 
 
 def Bk(kx, ky, kz):
-    aIBi = -5
+    aIBi = -100
     aSi = 0
     mI = 1
     mB = 1
@@ -35,8 +35,8 @@ def Bk(kx, ky, kz):
 
 
 # Create grids
-(Lx, Ly, Lz) = (1, 1, 1)
-(dx, dy, dz) = (1e-01, 1e-01, 1e-01)
+(Lx, Ly, Lz) = (5, 5, 5)
+(dx, dy, dz) = (2e-01, 2e-01, 2e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
 z = np.arange(- Lz, Lz + dz, dz)
@@ -59,7 +59,7 @@ kzfft = np.fft.fftfreq(Nx) * 2 * np.pi * Nz / Lz / 2
 
 # generation
 
-#beta_xyz = np.zeros((Nx, Ny, Nz)).astype('complex')
+# beta_xyz = np.zeros((Nx, Ny, Nz)).astype('complex')
 beta_kxkykz = np.zeros((Nx, Ny, Nz)).astype('complex')
 decay_xyz = np.zeros((Nx, Ny, Nz)).astype('complex')
 
@@ -77,7 +77,7 @@ for indx in np.arange(Nx):
             if(kxF == 0 and kyF == 0 and kzF == 0):
                 beta_kxkykz[indx, indy, indz] = 0
             else:
-                decay_momentum = 10
+                decay_momentum = 100
                 decay = np.exp(-1 * epsilon(kxF, kyF, kzF) / (decay_momentum**2))
                 beta_kxkykz[indx, indy, indz] = np.abs(Bk(kxF, kyF, kzF))**2 * decay
                 decay_length = 10
@@ -91,10 +91,11 @@ print("Nph = \sum b^2 = %f" % (Nph))
 # Slice x,y=0,z=0
 beta_kx = np.zeros(Nx).astype('complex')
 
-# # Fourier transform and slice
-# amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta_kxkykz))
-# amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
-# print(sum(np.abs(amp_beta_xyz)**2) * dx * dy * dz)
+# Fourier transform and slice
+amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta_kxkykz))
+amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
+nx_x = np.zeros(Nx).astype('complex')
+
 
 # Fourier transform and slice
 beta_xyz_0 = np.fft.fftn(beta_kxkykz)
@@ -102,7 +103,7 @@ beta_xyz = np.fft.fftshift(beta_xyz_0) * dkx * dky * dkz
 beta_x = beta_xyz[:, Ny // 2 + 1, Nz // 2 + 1]
 
 # Exponenciate, slice
-fexp = np.exp(beta_xyz - Nph) * decay_xyz
+fexp = (np.exp(beta_xyz - Nph) - np.exp(-Nph)) * decay_xyz
 fexp_x = fexp[:, Ny // 2 + 1, Nz // 2 + 1]
 
 # Inverse Fourier transform
@@ -115,15 +116,17 @@ for indx in np.arange(Nx):
         for indz in np.arange(Nz):
             beta_kx[indx] = beta_kx[indx] + np.abs(beta_kxkykz[indx, indy, indz]) * dky * dkz
             Gexp_kx[indx] = Gexp_kx[indx] + np.abs(Gexp[indx, indy, indz]) * dky * dkz
+            nx_x[indx] = nx_x[indx] + np.abs(amp_beta_xyz[indx, indy, indz])**2 * dy * dz
 
-dxVec = dx * np.ones(Nx)
+
+dxVec = dx * np.ones(Nx) * (2 * np.pi)**(-3)
 dkxVec = dkx * np.ones(Nx)
 
-
-
-print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec)))
+print("(\int beta_x dx)^2 = %f " % (np.dot(np.abs(nx_x), dxVec)))
+print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec) + np.exp(-Nph)))
 print("\int p np dp = %f" % (np.dot(np.abs(Gexp_kx), kx * dkxVec)))
-print("\int k beta^2 dk = %f" % (sum(beta_kx * kxfft) * dkx))
+print("\int k beta^2 dk = %f" % (np.dot(np.abs(beta_kx), kxfft * dkxVec)))
+print("Exp[-Nph] = %f" % (np.exp(-Nph)))
 
 fig, ax = plt.subplots(nrows=1, ncols=4)
 
