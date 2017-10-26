@@ -28,13 +28,15 @@ def Omega(kx, ky, kz):
 def Bk(kx, ky, kz):
     aIBi = -5
     aSi = 0
-    mI = 1; mB = 1
-    return np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (Omega(kx, ky, kz) * (aIBi - aSi))
+    mI = 1
+    mB = 1
+    ur = mI * mB / (mI + mB)
+    return 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
 
 
 # Create grids
-(Lx, Ly, Lz) = (10, 10, 10)
-(dx, dy, dz) = (5e-01, 5e-01, 5e-01)
+(Lx, Ly, Lz) = (1, 1, 1)
+(dx, dy, dz) = (1e-01, 1e-01, 1e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
 z = np.arange(- Lz, Lz + dz, dz)
@@ -75,10 +77,10 @@ for indx in np.arange(Nx):
             if(kxF == 0 and kyF == 0 and kzF == 0):
                 beta_kxkykz[indx, indy, indz] = 0
             else:
-                decay_momentum = 5
+                decay_momentum = 10
                 decay = np.exp(-1 * epsilon(kxF, kyF, kzF) / (decay_momentum**2))
                 beta_kxkykz[indx, indy, indz] = np.abs(Bk(kxF, kyF, kzF))**2 * decay
-                decay_length = 5
+                decay_length = 10
                 decay_xyz[indx, indy, indz] = np.exp(-1 * (x_**2 + y_**2 + z_**2) / (2 * decay_length**2))
 
 
@@ -86,11 +88,13 @@ dVk = np.ones((Nx, Ny, Nz)).astype('complex')
 Nph = np.real(np.sum(beta_kxkykz * dVk) * dkx * dky * dkz)
 print("Nph = \sum b^2 = %f" % (Nph))
 
-Nph = np.real(np.sum(beta_kxkykz * dVk) * dkx * dky * dkz)
-print("Nph = \sum b^2 = %f" % (Nph))
-
 # Slice x,y=0,z=0
 beta_kx = np.zeros(Nx).astype('complex')
+
+# # Fourier transform and slice
+# amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta_kxkykz))
+# amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
+# print(sum(np.abs(amp_beta_xyz)**2) * dx * dy * dz)
 
 # Fourier transform and slice
 beta_xyz_0 = np.fft.fftn(beta_kxkykz)
@@ -115,14 +119,11 @@ for indx in np.arange(Nx):
 dxVec = dx * np.ones(Nx)
 dkxVec = dkx * np.ones(Nx)
 
+
+
 print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec)))
-
-kxVec = np.fft.fftshift(kxfft)
-np_M1_kx = np.dot(np.abs(kxVec * Gexp_kx), dkxVec)
-beta2_M1_kx = np.dot(np.abs(kxVec * beta_kx), dkxVec)
-
-print("1st Moment (nPB, Beta^2) = (%f,%f)" % (np_M1_kx, beta2_M1_kx))
-
+print("\int p np dp = %f" % (np.dot(np.abs(Gexp_kx), kx * dkxVec)))
+print("\int k beta^2 dk = %f" % (sum(beta_kx * kxfft) * dkx))
 
 fig, ax = plt.subplots(nrows=1, ncols=4)
 
