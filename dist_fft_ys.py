@@ -77,10 +77,10 @@ for indx in np.arange(Nx):
             if(kxF == 0 and kyF == 0 and kzF == 0):
                 beta_kxkykz[indx, indy, indz] = 0
             else:
-                decay_momentum = 10
+                decay_momentum = 5
                 decay = np.exp(-1 * epsilon(kxF, kyF, kzF) / (decay_momentum**2))
                 beta_kxkykz[indx, indy, indz] = np.abs(Bk(kxF, kyF, kzF))**2 * decay
-                decay_length = 10
+                decay_length = 5
                 decay_xyz[indx, indy, indz] = np.exp(-1 * (x_**2 + y_**2 + z_**2) / (2 * decay_length**2))
 
 
@@ -118,7 +118,6 @@ for indx in np.arange(Nx):
 
 dxVec = dx * np.ones(Nx)
 dkxVec = dkx * np.ones(Nx)
-
 
 
 print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec)))

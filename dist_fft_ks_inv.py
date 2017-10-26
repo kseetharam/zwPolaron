@@ -39,8 +39,8 @@ mI = 1
 mB = 1
 
 # Create grids
-(Lx, Ly, Lz) = (10, 10, 10)
-(dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+(Lx, Ly, Lz) = (5, 5, 5)
+(dx, dy, dz) = (2e-01, 2e-01, 2e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
 z = np.arange(- Lz, Lz + dz, dz)
@@ -63,9 +63,9 @@ kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
 # print(kxfft)
 
 # window
-hann_x = hanning(Nx)
-hann_y = hanning(Ny)
-hann_z = hanning(Nz)
+# hann_x = hanning(Nx)
+# hann_y = hanning(Ny)
+# hann_z = hanning(Nz)
 
 
 # generation
@@ -94,30 +94,28 @@ for indx in np.arange(Nx):
                 decay_momentum = 100
                 decay_kxkykz[indx, indy, indz] = np.exp(-1 * epsilon(kxF, kyF, kzF, mB) / (2 * decay_momentum**2))
                 beta_kxkykz[indx, indy, indz] = Bk(kxF, kyF, kzF, aIBi, aSi, DP, mI, mB)
-                decay_length = 100
+                decay_length = 10
                 decay_xyz[indx, indy, indz] = np.exp(-1 * (x_**2 + y_**2 + z_**2) / (2 * decay_length**2))
-                hann_3D[indx, indy, indz] = hann_x[indx] * hann_y[indy] * hann_z[indz]
+                # hann_3D[indx, indy, indz] = hann_x[indx] * hann_y[indy] * hann_z[indz]
 
 
 # Slice x,y=0,z=0
 dVk = (dkx * dky * dkz) * (2 * np.pi)**(-3)
 dVx = dx * dy * dz
 
-# beta2_kxkykz = np.abs(beta_kxkykz * decay_kxkykz)**2
-beta2_kxkykz = np.abs(beta_kxkykz)**2
+beta2_kxkykz = np.abs(beta_kxkykz * decay_kxkykz)**2
+# beta2_kxkykz = np.abs(beta_kxkykz)**2
 
 # Fourier transform and slice
 
-# beta_xyz_preshift = np.fft.ifftn(beta_kxkykz * decay_kxkykz)
-beta_xyz_preshift = np.fft.ifftn(beta_kxkykz * hann_3D)
+beta_xyz_preshift = np.fft.ifftn(beta_kxkykz * decay_kxkykz)
 beta_xyz = np.fft.ifftshift(beta_xyz_preshift) * 1 / dVx
 
 nX = np.abs(beta_xyz)**2
 
 
 # Fourier transform and slice
-# beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) * 1 / dVx
-beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz * hann_3D) * 1 / dVx
+beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) * 1 / dVx
 beta2_xyz = np.fft.ifftshift(beta2_xyz_preshift)
 beta2_x = beta2_xyz[:, Ny // 2 + 1, Nz // 2 + 1]
 
@@ -130,22 +128,22 @@ print("Nph_x = \sum n(x) = %f" % (Nph_x))
 
 # Exponenciate, slice
 # fexp = np.exp(beta2_xyz - Nph) * decay_xyz
-fexp = (np.exp(beta_xyz - Nph) - np.exp(-1 * Nph))
+fexp = (np.exp(beta_xyz - Nph) - np.exp(-1 * Nph)) * decay_xyz
+# fexp = np.exp(beta_xyz - Nph) - np.exp(-1 * Nph)
+
 
 fexp_x = fexp[:, Ny // 2 + 1, Nz // 2 + 1]
 
 # Inverse Fourier transform
-# nPB_preshift = np.fft.fftn(fexp * decay_xyz) * dVx
-nPB_preshift = np.fft.fftn(fexp * hann_3D) * dVx
+nPB_preshift = np.fft.fftn(fexp) * dVx
 
 nPB = np.fft.fftshift(nPB_preshift)
 
 # nPB_k0_decay = np.fft.fftn(decay_xyz) * dVx
-nPB_k0_decay = np.fft.fftn(hann_3D) * dVx
-
 nPB_k0 = np.exp(-1 * Nph)
-nPB_k0_tot = np.sum(nPB_k0 * np.abs(nPB_k0_decay) * dVk)
-print(np.sum(np.abs(nPB_k0_decay) * dVk))
+# nPB_k0_tot = np.sum(nPB_k0 * np.abs(nPB_k0_decay) * dVk)
+# print(np.sum(np.abs(nPB_k0_decay) * dVk))
+print('e^(-Nph) = %f' % (nPB_k0))
 
 # Integration
 
@@ -165,22 +163,22 @@ dkxVec = np.ones(Nx) * dkx * (2 * np.pi)**(-1)
 
 
 # int_np = np.dot(np.abs(nPB_kx), dkxVec)
-int_np = np.dot(np.abs(nPB_kx), dkxVec) + nPB_k0_tot
+int_np = np.dot(np.abs(nPB_kx), dkxVec) + nPB_k0
+# int_np = np.dot(np.abs(nPB_kx), dkxVec) + nPB_k0_tot
 print("\int np dp = %f" % (int_np))
 
 
 # moment test
 kxVec = np.fft.fftshift(kxfft)
-np_M1_kx = np.dot(np.abs(kxVec * nPB_kx), dkxVec)
-beta2_M1_kx = np.dot(np.abs(kxVec * beta2_kx), dkxVec)
+print("\int p np dp = %f" % (np.dot(np.abs(nPB_kx), kxVec * dkxVec)))
+print("\int k beta^2 dk = %f" % (sum(beta2_kx * kxfft) * dkx))
 
-print("1st Moment (nPB, Beta^2) = (%f,%f)" % (np_M1_kx, beta2_M1_kx))
 
 # plotting
 
 fig, ax = plt.subplots(nrows=1, ncols=5)
 
-ax[0].plot(kxVec, np.abs(beta2_kx))
+ax[0].plot(kxfft, np.abs(beta2_kx))
 ax[0].set_title(r'$|\beta_{\vec{k}}|^2$')
 ax[0].set_xlabel(r'$k_{x}$')
 
