@@ -1,44 +1,47 @@
 import numpy as np
-import Grid
 import matplotlib.pyplot as plt
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-import polaron_functions_cart as pfc
+import matplotlib
 
 
-def epsilon(kx, ky, kz):
-    mB = 1
+def epsilon(kx, ky, kz, mB):
     return (kx**2 + ky**2 + kz**2) / (2 * mB)
 
 
-def omegak(kx, ky, kz):
-    ep = epsilon(kx, ky, kz)
-    mB = 1
+def omegak(kx, ky, kz, mB):
+    ep = epsilon(kx, ky, kz, mB)
     gBB = (4 * np.pi / mB) * 0.05
     n = 1
     return np.sqrt(ep * (ep + 2 * gBB * n))
 
 
-def Omega(kx, ky, kz):
-    mI = 1
-    DP = 0.2
-    return omegak(kx, ky, kz) + epsilon(kx, ky, kz) / mI - kx * DP / mI
+def Omega(kx, ky, kz, DP, mI, mB):
+    return omegak(kx, ky, kz, mB) + epsilon(kx, ky, kz, mB) / mI - kx * DP / mI
 
 
-def Bkt(kx, ky, kz):
-    aIBi = -5
-    aSi = 0
-    mI = 1
-    mB = 1
+def Wk(kx, ky, kz, mB):
+    return np.sqrt(epsilon(kx, ky, kz, mB) / omegak(kx, ky, kz, mB))
+
+
+def Bkt(kx, ky, kz, aIBi, aSi, DP, mI, mB):
     ur = mI * mB / (mI + mB)
-    Bk = 2 * np.pi * np.sqrt(epsilon(kx, ky, kz) / omegak(kx, ky, kz)) / (ur * Omega(kx, ky, kz) * (aIBi - aSi))
+    n = 1
+    Bk = -2 * np.pi * np.sqrt(n) * Wk(kx, ky, kz, mB) / (ur * Omega(kx, ky, kz, DP, mI, mB) * (aIBi - aSi))
     prefactor = (2 * np.pi)**(-3 / 2)
     return prefactor * Bk
 
 
+# set parameters
+matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
+
+aIBi = 1
+aSi = 0
+DP = 0.8
+mI = 1
+mB = 1
+
 # Create grids
-(Lx, Ly, Lz) = (10, 10, 10)
-(dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+(Lx, Ly, Lz) = (15, 15, 15)
+(dx, dy, dz) = (1e-01, 1e-01, 1e-01)
 x = np.arange(- Lx, Lx + dx, dx)
 y = np.arange(- Ly, Ly + dy, dy)
 z = np.arange(- Lz, Lz + dz, dz)
@@ -79,16 +82,16 @@ for indx in np.arange(Nx):
             if(kxF == 0 and kyF == 0 and kzF == 0):
                 beta_kxkykz[indx, indy, indz] = 0
             else:
-                decay_momentum = 100
-                decay = np.exp(-1 * epsilon(kxF, kyF, kzF) / (decay_momentum**2))
-                beta_kxkykz[indx, indy, indz] = np.abs(Bkt(kxF, kyF, kzF))**2 * decay
+                # decay_momentum = 100
+                # decay = np.exp(-1 * epsilon(kxF, kyF, kzF, mB) / (decay_momentum**2))
+                # beta_kxkykz[indx, indy, indz] = np.abs(Bkt(kxF, kyF, kzF, aIBi, aSi, DP, mI, mB))**2 * decay
+                beta_kxkykz[indx, indy, indz] = np.abs(Bkt(kxF, kyF, kzF, aIBi, aSi, DP, mI, mB))**2
                 decay_length = 10
                 decay_xyz[indx, indy, indz] = np.exp(-1 * (x_**2 + y_**2 + z_**2) / (2 * decay_length**2))
 
 
 dVk = np.ones((Nx, Ny, Nz)).astype('complex')
 Nph = np.real(np.sum(beta_kxkykz * dVk) * dkx * dky * dkz)
-print("Nph = \sum b^2 = %f" % (Nph))
 
 # Slice x,y=0,z=0
 beta_kx = np.zeros(Nx).astype('complex')
@@ -124,7 +127,8 @@ for indx in np.arange(Nx):
 dxVec = dx * np.ones(Nx) * (2 * np.pi)**(-3)
 dkxVec = dkx * np.ones(Nx)
 
-print("(\int beta_x dx)^2 = %f " % (np.dot(np.abs(nx_x), dxVec)))
+print("Nph = \sum b^2 = %f" % (Nph))
+print("Nph_x = %f " % (np.dot(np.abs(nx_x), dxVec)))
 print("\int np dp = %f" % (np.dot(np.abs(Gexp_kx), dkxVec) + np.exp(-Nph)))
 print("\int p np dp = %f" % (np.dot(np.abs(Gexp_kx), kx * dkxVec)))
 print("\int k beta^2 dk = %f" % (np.dot(np.abs(beta_kx), kxfft * dkxVec)))
@@ -132,7 +136,7 @@ print("Exp[-Nph] = %f" % (np.exp(-Nph)))
 
 fig, ax = plt.subplots(nrows=1, ncols=4)
 
-ax[0].plot(kx, np.abs(beta_kx))
+ax[0].plot(kxfft, np.abs(beta_kx))
 ax[1].plot(x, np.real(beta_x))
 ax[2].plot(x, np.abs(fexp_x))
 ax[3].plot(kx, np.real(Gexp_kx))
