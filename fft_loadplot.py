@@ -56,21 +56,27 @@ axA[2, 1].plot(np.array(aIBi_Vals), nPBM1_Vec_aIBi, label=r'$n_{\vec{P_B}}$', co
 
 axA[0, 0].set_title('Total Phonon Momentum Distribution (x)'); axA[0, 0].legend()
 axA[0, 0].set_ylabel(r'$n_{\vec{P_{B,x}}}$'); axA[0, 0].set_xlabel(r'$P_{B,x}$')
+axA[0, 0].set_xlim([-10, 10])
 
 axA[0, 1].set_title('Total Phonon Momentum Distribution (y)'); axA[0, 1].legend()
 axA[0, 1].set_ylabel(r'$n_{\vec{P_{B,y}}}$'); axA[0, 1].set_xlabel(r'$P_{B,y}$')
+axA[0, 1].set_xlim([-10, 10])
 
 axA[0, 2].set_title('Total Phonon Momentum Distribution (z)'); axA[0, 2].legend()
 axA[0, 2].set_ylabel(r'$n_{\vec{P_{B,z}}}$'); axA[0, 2].set_xlabel(r'$P_{B,z}$')
+axA[0, 2].set_xlim([-10, 10])
 
 axA[1, 0].set_title('Phonon Normalized Density Distribution (x)'); axA[1, 0].legend()
 axA[1, 0].set_ylabel(r'$\frac{n(\vec{x})_{x}}{N_{ph}}$'); axA[1, 0].set_xlabel(r'$x$')
+axA[1, 0].set_xlim([-0.5, 0.5])
 
 axA[1, 1].set_title('Phonon Normalized Density Distribution (y)'); axA[1, 1].legend()
 axA[1, 1].set_ylabel(r'$\frac{n(\vec{x})_{y}}{N_{ph}}$'); axA[1, 1].set_xlabel(r'$y$')
+axA[1, 1].set_xlim([-0.5, 0.5])
 
 axA[1, 2].set_title('Phonon Normalized Density Distribution (z)'); axA[1, 2].legend()
 axA[1, 2].set_ylabel(r'$\frac{n(\vec{x})_{z}}{N_{ph}}$'); axA[1, 2].set_xlabel(r'$z$')
+axA[1, 2].set_xlim([-0.5, 0.5])
 
 axA[2, 0].set_title('Phonon Number'); axA[2, 0].legend()
 axA[2, 0].set_ylabel(r'$N_{B}$'); axA[2, 0].set_xlabel(r'$a_{IB}^{-1}$')
@@ -119,21 +125,27 @@ axD[2, 1].plot(np.array(DP_Vals), nPBM1_Vec_DP, label=r'$n_{\vec{P_B}}$', color=
 
 axD[0, 0].set_title('Total Phonon Momentum Distribution (x)'); axD[0, 0].legend()
 axD[0, 0].set_ylabel(r'$n_{\vec{P_{B,x}}}$'); axD[0, 0].set_xlabel(r'$P_{B,x}$')
+axD[0, 0].set_xlim([-5, 5])
 
 axD[0, 1].set_title('Total Phonon Momentum Distribution (y)'); axD[0, 1].legend()
 axD[0, 1].set_ylabel(r'$n_{\vec{P_{B,y}}}$'); axD[0, 1].set_xlabel(r'$P_{B,y}$')
+axD[0, 1].set_xlim([-5, 5])
 
 axD[0, 2].set_title('Total Phonon Momentum Distribution (z)'); axD[0, 2].legend()
 axD[0, 2].set_ylabel(r'$n_{\vec{P_{B,z}}}$'); axD[0, 2].set_xlabel(r'$P_{B,z}$')
+axD[0, 2].set_xlim([-5, 5])
 
 axD[1, 0].set_title('Phonon Normalized Density Distribution (x)'); axD[1, 0].legend()
 axD[1, 0].set_ylabel(r'$\frac{n(\vec{x})_{x}}{N_{ph}}$'); axD[1, 0].set_xlabel(r'$x$')
+axD[1, 0].set_xlim([-0.5, 0.5])
 
 axD[1, 1].set_title('Phonon Normalized Density Distribution (y)'); axD[1, 1].legend()
 axD[1, 1].set_ylabel(r'$\frac{n(\vec{x})_{y}}{N_{ph}}$'); axD[1, 1].set_xlabel(r'$y$')
+axD[1, 1].set_xlim([-0.5, 0.5])
 
 axD[1, 2].set_title('Phonon Normalized Density Distribution (z)'); axD[1, 2].legend()
 axD[1, 2].set_ylabel(r'$\frac{n(\vec{x})_{z}}{N_{ph}}$'); axD[1, 2].set_xlabel(r'$z$')
+axD[1, 2].set_xlim([-0.5, 0.5])
 
 axD[2, 0].set_title('Phonon Number'); axD[2, 0].legend()
 axD[2, 0].set_ylabel(r'$N_{B}$'); axD[2, 0].set_xlabel(r'$a_{IB}^{-1}$')
