@@ -78,8 +78,8 @@ def staticDistCalc(gridargs, params, datapath):
     beta2_x = beta2_xyz[:, Ny // 2 + 1, Nz // 2 + 1]
 
     # Exponentiate, slice
-    fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
-    # fexp = (np.exp(beta_xyz - Nph) - np.exp(-Nph))
+    # fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
     fexp_x = fexp[:, Ny // 2 + 1, Nz // 2 + 1]
 
     # Inverse Fourier transform
@@ -132,31 +132,31 @@ def staticDistCalc(gridargs, params, datapath):
     np.savetxt(datapath + '/3Ddist_aIBi_%.2f_DP_%.2f.dat' % (aIBi, DP), Dist_data)
 
     # Plot
-    # fig, ax = plt.subplots(nrows=1, ncols=5)
+    fig, ax = plt.subplots(nrows=1, ncols=5)
 
-    # ax[0].plot(kxfft, np.abs(beta2_kx))
-    # ax[0].set_title(r'$|\beta_{\vec{k}}|^2$')
-    # ax[0].set_xlabel(r'$k_{x}$')
+    ax[0].plot(kxfft, np.abs(beta2_kx))
+    ax[0].set_title(r'$|\beta_{\vec{k}}|^2$')
+    ax[0].set_xlabel(r'$k_{x}$')
 
-    # ax[3].plot(kx, np.real(nPB_kx))
-    # ax[3].plot(np.zeros(Nx), np.linspace(0, nPB_deltaK0, Nx))
-    # ax[3].set_title(r'$n_{\vec{P_B}}$')
-    # ax[3].set_xlabel(r'$P_{B,x}$')
+    ax[3].plot(kx, np.real(nPB_kx))
+    ax[3].plot(np.zeros(Nx), np.linspace(0, nPB_deltaK0, Nx))
+    ax[3].set_title(r'$n_{\vec{P_B}}$')
+    ax[3].set_xlabel(r'$P_{B,x}$')
 
-    # ax[4].plot(x, np.real(nx_x_norm))
-    # ax[4].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
-    # ax[4].set_xlabel(r'$x$')
+    ax[4].plot(x, np.real(nx_x_norm))
+    ax[4].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
+    ax[4].set_xlabel(r'$x$')
 
-    # ax[1].plot(x, np.real(beta2_x))
-    # ax[2].plot(x, np.abs(fexp_x))
+    ax[1].plot(x, np.real(beta2_x))
+    ax[2].plot(x, np.abs(fexp_x))
 
-    # # ax[1].plot(ky, np.real(nPB_ky))
-    # # ax[1].plot(np.zeros(Ny), np.linspace(0, nPB_deltaK0, Ny))
-    # # ax[2].plot(kz, np.real(nPB_kz))
-    # # ax[2].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
+    # ax[1].plot(ky, np.real(nPB_ky))
+    # ax[1].plot(np.zeros(Ny), np.linspace(0, nPB_deltaK0, Ny))
+    # ax[2].plot(kz, np.real(nPB_kz))
+    # ax[2].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
 
-    # fig.tight_layout()
-    # plt.show()
+    fig.tight_layout()
+    plt.show()
 
 
 # Create grids
@@ -183,20 +183,22 @@ kz = np.fft.fftshift(kzfft)
 gridargs = [Nx, Ny, Nz, x, y, z, dx, dy, dz, kx, ky, kz, dkx, dky, dkz, kxfft, kyfft, kzfft]
 
 # Set parameters
-aIBi = 2
+aIBi = 1
 aSi = 0
 DP = 0.75
 mI = 1
 mB = 1
 params = [aIBi, aSi, DP, mI, mB]
 
-aIBi_Vals = [-10, -5, -2, 2, 5, 10]
+aIBi_Vals = [-10, -5, -2, -1, 1, 2, 5, 10]
 DP_Vals = [0.0, 0.25, 0.5, 0.75]
 paramsList_aIBi = [[aIBi, aSi, 0.5, mI, mB] for aIBi in aIBi_Vals]
 paramsList_DP = [[-2, aSi, DP, mI, mB] for DP in DP_Vals]
 paramsList = paramsList_aIBi + paramsList_DP
 
 # Call function
-datapath = os.path.dirname(os.path.realpath(__file__)) + '/fftdata'
-for p in paramsList:
-    staticDistCalc(gridargs, p, datapath)
+datapath = os.path.dirname(os.path.realpath(__file__)) + '/fftdata/other'
+# for p in paramsList:
+#     staticDistCalc(gridargs, p, datapath)
+
+staticDistCalc(gridargs, params, datapath)
