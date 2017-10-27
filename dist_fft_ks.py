@@ -78,8 +78,8 @@ def staticDistCalc(gridargs, params, datapath):
     beta2_x = beta2_xyz[:, Ny // 2 + 1, Nz // 2 + 1]
 
     # Exponentiate, slice
-    # fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
-    fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
+    fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    # fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
     fexp_x = fexp[:, Ny // 2 + 1, Nz // 2 + 1]
 
     # Inverse Fourier transform
