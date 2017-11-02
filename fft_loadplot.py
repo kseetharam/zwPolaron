@@ -31,8 +31,8 @@ nPBM1_Vec_aIBi = np.zeros(len(aIBi_Vals))
 b2M1_Vec_aIBi = np.zeros(len(aIBi_Vals))
 for ind, aIBi in enumerate(aIBi_Vals):
     DP = 0.5
-    Nph, Nph_x, nPB_Tot, nPB_Mom1, beta2_kx_Mom1, x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz = np.loadtxt(datapath + '/3Ddist_aIBi_%.2f_DP_%.2f.dat' % (aIBi, DP), unpack=True)
-    Nph_Vec_aIBi[ind] = Nph[0]; NphX_Vec_aIBi[ind] = Nph_x[0]; nPBM1_Vec_aIBi[ind] = nPB_Mom1[0]; b2M1_Vec_aIBi[ind] = beta2_kx_Mom1[0]
+    Nph, Nph_x, nPB_Tot, nPB_Mom1, beta2_kz_Mom1, x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz = np.loadtxt(datapath + '/3Ddist_aIBi_%.2f_DP_%.2f.dat' % (aIBi, DP), unpack=True)
+    Nph_Vec_aIBi[ind] = Nph[0]; NphX_Vec_aIBi[ind] = Nph_x[0]; nPBM1_Vec_aIBi[ind] = nPB_Mom1[0]; b2M1_Vec_aIBi[ind] = beta2_kz_Mom1[0]
 
     axA[0, 0].plot(kx, nPB_kx, label=r'$a_{IB}^{-1}=$%.2f' % (aIBi), color=colorList[ind], linestyle='-')
     axA[0, 0].plot(np.zeros(len(kx)), np.linspace(0, np.exp(-1 * Nph[0]), len(kx)), color=colorList[ind], linestyle=':')
@@ -87,8 +87,8 @@ axA[1, 2].set_xscale('log'); axA[1, 2].set_yscale('log')
 axA[2, 0].set_title('Phonon Number'); axA[2, 0].legend()
 axA[2, 0].set_ylabel(r'$N_{B}$'); axA[2, 0].set_xlabel(r'$a_{IB}^{-1}$')
 
-axA[2, 1].set_title('Average Total Phonon Momentum (x)'); axA[2, 1].legend()
-axA[2, 1].set_ylabel(r'$<P_{B,x}>$'); axA[2, 1].set_xlabel(r'$a_{IB}^{-1}$')
+axA[2, 1].set_title('Average Total Phonon Momentum (z)'); axA[2, 1].legend()
+axA[2, 1].set_ylabel(r'$<P_{B,z}>$'); axA[2, 1].set_xlabel(r'$a_{IB}^{-1}$')
 
 figA.delaxes(axA[2, 2])
 # figA.tight_layout(pad=0.9, w_pad=0.9, h_pad=0.9)
@@ -106,8 +106,8 @@ nPBM1_Vec_DP = np.zeros(len(DP_Vals))
 b2M1_Vec_DP = np.zeros(len(DP_Vals))
 for ind, DP in enumerate(DP_Vals):
     aIBi = -2
-    Nph, Nph_x, nPB_Tot, nPB_Mom1, beta2_kx_Mom1, x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz = np.loadtxt(datapath + '/3Ddist_aIBi_%.2f_DP_%.2f.dat' % (aIBi, DP), unpack=True)
-    Nph_Vec_DP[ind] = Nph[0]; NphX_Vec_DP[ind] = Nph_x[0]; nPBM1_Vec_DP[ind] = nPB_Mom1[0]; b2M1_Vec_DP[ind] = beta2_kx_Mom1[0]
+    Nph, Nph_x, nPB_Tot, nPB_Mom1, beta2_kz_Mom1, x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz = np.loadtxt(datapath + '/3Ddist_aIBi_%.2f_DP_%.2f.dat' % (aIBi, DP), unpack=True)
+    Nph_Vec_DP[ind] = Nph[0]; NphX_Vec_DP[ind] = Nph_x[0]; nPBM1_Vec_DP[ind] = nPB_Mom1[0]; b2M1_Vec_DP[ind] = beta2_kz_Mom1[0]
 
     axD[0, 0].plot(kx, nPB_kx, label=r'$\Delta P=$%.2f' % (DP), color=colorList[ind], linestyle='-')
     axD[0, 0].plot(np.zeros(len(kx)), np.linspace(0, np.exp(-1 * Nph[0]), len(kx)), color=colorList[ind], linestyle=':')
@@ -162,8 +162,8 @@ axD[1, 2].set_xscale('log'); axD[1, 2].set_yscale('log')
 axD[2, 0].set_title('Phonon Number'); axD[2, 0].legend()
 axD[2, 0].set_ylabel(r'$N_{B}$'); axD[2, 0].set_xlabel(r'$a_{IB}^{-1}$')
 
-axD[2, 1].set_title('Average Total Phonon Momentum (x)'); axD[2, 1].legend()
-axD[2, 1].set_ylabel(r'$<P_{B,x}>$'); axD[2, 1].set_xlabel(r'$a_{IB}^{-1}$')
+axD[2, 1].set_title('Average Total Phonon Momentum (z)'); axD[2, 1].legend()
+axD[2, 1].set_ylabel(r'$<P_{B,z}>$'); axD[2, 1].set_xlabel(r'$a_{IB}^{-1}$')
 
 figD.delaxes(axD[2, 2])
 # figD.tight_layout(pad=0.9, w_pad=0.9, h_pad=0.9)

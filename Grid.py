@@ -30,6 +30,10 @@ class Grid:
         self.arrays_diff[name] = grid_step
         self.arrays[name] = array
 
+    def initArray_premade(self, name, array):
+        self.arrays_diff[name] = array[1] - array[0]
+        self.arrays[name] = array
+
     def getArray(self, name):
         # with a given key returns a corrsponding 1 dimentional array
         return self.arrays[name]
@@ -149,7 +153,7 @@ class Grid:
 
             return np.dot(functionValues_mat, prefactor * grid_diff)
 
-        # 3D cartesian grid case - ****NOT COMPLETE
+        # 3D cartesian grid case - ****NOT COMPLETE -- this is stupid, can just do np.sum() over different axes
 
         if coordinate_system == "CARTESIAN_3D":
             kx_array = self.arrays[list_of_unit_vectors[0]]
