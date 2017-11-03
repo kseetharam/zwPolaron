@@ -158,37 +158,37 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-# P = 0.9 * nuV
-# aIBi = -2
+P = 0.9 * nuV
+aIBi = -1
 
-# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
-# DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-# aSi = aSi_interp(DP, aSi_tck)
+Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
+DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+aSi = aSi_interp(DP, aSi_tck)
 
-# params = [P, aIBi, aSi, DP, mI, mB, n0, gBB]
-# print('DP: {0}'.format(DP))
-# print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
-# print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
+params = [P, aIBi, aSi, DP, mI, mB, n0, gBB]
+print('DP: {0}'.format(DP))
+print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
+print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
 
 # staticDistCalc(gridargs, params, datapath)
 
 # Multiple function run
 
-paramsList = []
-aIBi_Vals = [-5, -2, -1, 1, 2, 5]
-Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB)
-print('PCrit: {0}'.format(Pc))
-PVals = np.linspace(0, 0.95 * Pc, 6)
-for aIBi in aIBi_Vals:
-    for P in PVals:
-        DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = aSi_interp(DP, aSi_tck)
-        paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB])
+# paramsList = []
+# aIBi_Vals = [-5, -2, -1, 1, 2, 5]
+# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB)
+# print('PCrit: {0}'.format(Pc))
+# PVals = np.linspace(0, 0.95 * Pc, 6)
+# for aIBi in aIBi_Vals:
+#     for P in PVals:
+#         DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+#         aSi = aSi_interp(DP, aSi_tck)
+#         paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB])
 
 
-for p in paramsList:
-    staticDistCalc(gridargs, p, datapath)
+# for p in paramsList:
+#     staticDistCalc(gridargs, p, datapath)
 
 
-end = timer()
-print(end - start)
+# end = timer()
+# print(end - start)

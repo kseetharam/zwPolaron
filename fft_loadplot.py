@@ -59,18 +59,18 @@ axA[2, 1].plot(np.array(aIBi_Vals), nPBM1_Vec_aIBi, label=r'$n_{\vec{P_B}}$', co
 
 axA[0, 0].set_title('Total Phonon Momentum Distribution (x)'); axA[0, 0].legend()
 axA[0, 0].set_ylabel(r'$n_{\vec{P_{B,x}}}$'); axA[0, 0].set_xlabel(r'$P_{B,x}$')
-# axA[0, 0].set_xlim([-10, 10])
-axA[0, 0].set_xscale('log'); axA[0, 0].set_yscale('log')
+axA[0, 0].set_xlim([-10, 10])
+# axA[0, 0].set_xscale('log'); axA[0, 0].set_yscale('log')
 
 axA[0, 1].set_title('Total Phonon Momentum Distribution (y)'); axA[0, 1].legend()
 axA[0, 1].set_ylabel(r'$n_{\vec{P_{B,y}}}$'); axA[0, 1].set_xlabel(r'$P_{B,y}$')
-# axA[0, 1].set_xlim([-10, 10])
-axA[0, 1].set_xscale('log'); axA[0, 1].set_yscale('log')
+axA[0, 1].set_xlim([-10, 10])
+# axA[0, 1].set_xscale('log'); axA[0, 1].set_yscale('log')
 
 axA[0, 2].set_title('Total Phonon Momentum Distribution (z)'); axA[0, 2].legend()
 axA[0, 2].set_ylabel(r'$n_{\vec{P_{B,z}}}$'); axA[0, 2].set_xlabel(r'$P_{B,z}$')
-# axA[0, 2].set_xlim([-10, 10])
-axA[0, 2].set_xscale('log'); axA[0, 2].set_yscale('log')
+axA[0, 2].set_xlim([-10, 10])
+# axA[0, 2].set_xscale('log'); axA[0, 2].set_yscale('log')
 
 axA[1, 0].set_title('Phonon Normalized Density Distribution (x)'); axA[1, 0].legend()
 axA[1, 0].set_ylabel(r'$\frac{n(\vec{x})_{x}}{N_{ph}}$'); axA[1, 0].set_xlabel(r'$x$')
@@ -134,18 +134,18 @@ axD[2, 1].plot(np.array(PVals), nPBM1_Vec_P, label=r'$n_{\vec{P_B}}$', color=col
 
 axD[0, 0].set_title('Total Phonon Momentum Distribution (x)'); axD[0, 0].legend()
 axD[0, 0].set_ylabel(r'$n_{\vec{P_{B,x}}}$'); axD[0, 0].set_xlabel(r'$P_{B,x}$')
-# axD[0, 0].set_xlim([-5, 5])
-axD[0, 0].set_xscale('log'); axD[0, 0].set_yscale('log')
+axD[0, 0].set_xlim([-5, 5])
+# axD[0, 0].set_xscale('log'); axD[0, 0].set_yscale('log')
 
 axD[0, 1].set_title('Total Phonon Momentum Distribution (y)'); axD[0, 1].legend()
 axD[0, 1].set_ylabel(r'$n_{\vec{P_{B,y}}}$'); axD[0, 1].set_xlabel(r'$P_{B,y}$')
-# axD[0, 1].set_xlim([-5, 5])
-axD[0, 1].set_xscale('log'); axD[0, 1].set_yscale('log')
+axD[0, 1].set_xlim([-5, 5])
+# axD[0, 1].set_xscale('log'); axD[0, 1].set_yscale('log')
 
 axD[0, 2].set_title('Total Phonon Momentum Distribution (z)'); axD[0, 2].legend()
 axD[0, 2].set_ylabel(r'$n_{\vec{P_{B,z}}}$'); axD[0, 2].set_xlabel(r'$P_{B,z}$')
-# axD[0, 2].set_xlim([-5, 5])
-axD[0, 2].set_xscale('log'); axD[0, 2].set_yscale('log')
+axD[0, 2].set_xlim([-5, 5])
+# axD[0, 2].set_xscale('log'); axD[0, 2].set_yscale('log')
 
 axD[1, 0].set_title('Phonon Normalized Density Distribution (x)'); axD[1, 0].legend()
 axD[1, 0].set_ylabel(r'$\frac{n(\vec{x})_{x}}{N_{ph}}$'); axD[1, 0].set_xlabel(r'$x$')
@@ -163,10 +163,10 @@ axD[1, 2].set_ylabel(r'$\frac{n(\vec{x})_{z}}{N_{ph}}$'); axD[1, 2].set_xlabel(r
 axD[1, 2].set_xscale('log'); axD[1, 2].set_yscale('log')
 
 axD[2, 0].set_title('Phonon Number'); axD[2, 0].legend()
-axD[2, 0].set_ylabel(r'$N_{B}$'); axD[2, 0].set_xlabel(r'$a_{IB}^{-1}$')
+axD[2, 0].set_ylabel(r'$N_{B}$'); axD[2, 0].set_xlabel(r'$P$')
 
 axD[2, 1].set_title('Average Total Phonon Momentum (z)'); axD[2, 1].legend()
-axD[2, 1].set_ylabel(r'$<P_{B,z}>$'); axD[2, 1].set_xlabel(r'$a_{IB}^{-1}$')
+axD[2, 1].set_ylabel(r'$<P_{B,z}>$'); axD[2, 1].set_xlabel(r'$P$')
 
 figD.delaxes(axD[2, 2])
 # figD.tight_layout(pad=0.9, w_pad=0.9, h_pad=0.9)
