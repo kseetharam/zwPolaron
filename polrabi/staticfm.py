@@ -6,7 +6,8 @@ from scipy import interpolate
 err = 1e-5
 limit = 1e3
 alpha = 0.005
-upcutoff = 1e3
+# upcutoff = 1e3
+upcutoff = 725.6
 
 
 def PCrit(aIBi, gBB, mI, mB, n0):
@@ -38,7 +39,7 @@ def rMass(P, PB, mI):
 
 
 def num_phonons(aIBi, aSi, gBB, mI, mB, n0):
-    integrand = lambda k: (np.abs(Bk(k, aIBi, aSi, gBB, mI, mB, n0))**2) * (k**2)
+    def integrand(k): return (np.abs(Bk(k, aIBi, aSi, gBB, mI, mB, n0))**2) * (k**2)
     val, abserr = quad(integrand, 0, upcutoff)
     return (4 * np.pi / (2 * np.pi)**3) * val
 
@@ -54,7 +55,7 @@ def Bk(k, aIBi, aSi, gBB, mI, mB, n0):
 
 
 def aSi0(gBB, mI, mB, n0):
-    integrand = lambda k: (2 * ur(mI, mB) / k**2 - (Wk(k, gBB, mB, n0)**2) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI))) * (k**2)
+    def integrand(k): return (2 * ur(mI, mB) / k**2 - (Wk(k, gBB, mB, n0)**2) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI))) * (k**2)
     val, abserr = quad(integrand, 0, upcutoff, epsabs=0, epsrel=1.49e-12)
     return (1 / (np.pi * ur(mI, mB))) * val
 
@@ -72,13 +73,13 @@ def aSi0(gBB, mI, mB, n0):
 
 
 def aSi(DP, gBB, mI, mB, n0):
-    integrand = lambda k: (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
+    def integrand(k): return (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
     val, abserr = quad(integrand, 0, upcutoff, epsabs=0, epsrel=1.49e-12)
     return (1 / (2 * np.pi * ur(mI, mB))) * val
 
 
 def PB(DP, aIBi, gBB, mI, mB, n0):
-    integrand = lambda k: ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
+    def integrand(k): return ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
     val, abserr = quad(integrand, 0, upcutoff, epsabs=0, epsrel=1.49e-12)
     return n0 / (ur(mI, mB)**2 * (aIBi - aSi(DP, gBB, mI, mB, n0))**2) * val
 
@@ -111,7 +112,7 @@ def DP(DPi, P, aIBi, gBB, mI, mB, n0):
 # interpolation method functions
 
 def PB_integral(DP, gBB, mI, mB, n0):
-    integrand = lambda k: ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
+    def integrand(k): return ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
     val, abserr = quad(integrand, 0, upcutoff, epsabs=0, epsrel=1.49e-12)
     return val
 

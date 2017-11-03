@@ -2,7 +2,7 @@ import numpy as np
 from scipy import interpolate
 
 err = 1e-5
-limit = 1e3
+limit = 1e5
 alpha = 0.005
 
 # ---- BASIC FUNCTIONS ----
@@ -42,14 +42,12 @@ def BetaK(kx, ky, kz, aIBi, aSi, DP, mI, mB, n0, gBB):
 
 
 def aSi_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB):
-    # kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
     integrand = 2 * ur(mI, mB) / (kxFg**2 + kyFg**2 + kzFg**2) - (Wk(kxFg, kyFg, kzFg, mB, n0, gBB)**2) / Omega(kxFg, kyFg, kzFg, DP, mI, mB, n0, gBB)
     mask = np.isnan(integrand); integrand[mask] = 0
-    return (2 * np.pi / ur(mI, mB)) * np.sum(integrand) * dVk
+    return (2 * np.pi / ur(mI, mB)) * np.sum(integrand) * dVk * (2 * np.pi)**(-3)
 
 
 def PB_integral_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB):
-    # kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
     Bk_without_aSi = BetaK(kxFg, kyFg, kzFg, 1, 0, DP, mI, mB, n0, gBB)
     integrand = kzFg * np.abs(Bk_without_aSi)**2
     mask = np.isnan(integrand); integrand[mask] = 0
@@ -106,3 +104,10 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
         lim = lim - 1
 
     return DP_new
+
+
+def PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB):
+    DPc = mI * nu(gBB)
+    aSi = aSi_grid(kxFg, kyFg, kzFg, dVk, DPc, mI, mB, n0, gBB)
+    PB = (aIBi - aSi)**(-2) * PB_integral_grid(kxFg, kyFg, kzFg, dVk, DPc, mI, mB, n0, gBB)
+    return DPc + PB
