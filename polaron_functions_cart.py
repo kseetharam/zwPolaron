@@ -34,16 +34,20 @@ def Wk(kx, ky, kz, mB, n0, gBB):
 
 
 def BetaK(kx, ky, kz, aIBi, aSi, DP, mI, mB, n0, gBB):
+    old_settings = np.seterr(); np.seterr(all='ignore')
     Bk = -2 * np.pi * np.sqrt(n0) * Wk(kx, ky, kz, mB, n0, gBB) / (ur(mI, mB) * Omega(kx, ky, kz, DP, mI, mB, n0, gBB) * (aIBi - aSi))
     prefactor = (2 * np.pi)**(-3 / 2)
+    np.seterr(**old_settings)
     return prefactor * Bk
 
 # ---- INTERPOLATION FUNCTIONS ----
 
 
 def aSi_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB):
+    old_settings = np.seterr(); np.seterr(all='ignore')
     integrand = 2 * ur(mI, mB) / (kxFg**2 + kyFg**2 + kzFg**2) - (Wk(kxFg, kyFg, kzFg, mB, n0, gBB)**2) / Omega(kxFg, kyFg, kzFg, DP, mI, mB, n0, gBB)
     mask = np.isnan(integrand); integrand[mask] = 0
+    np.seterr(**old_settings)
     return (2 * np.pi / ur(mI, mB)) * np.sum(integrand) * dVk * (2 * np.pi)**(-3)
 
 
