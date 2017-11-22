@@ -109,15 +109,15 @@ def staticDistCalc(gridargs, params, datapath):
 
         # FWTM
 
-        # D = nPI_z - np.max(nPI_z) / 10
-        # indicesT = np.where(D > 0)[0]
-        # FWTM = PI_z_ord[indicesT[-1]] - PI_z_ord[indicesT[0]]
-        # tail_dom_T = PI_z_ord[indicesT[-1] + 1:]
-        # tail_ran_T = nPI_z[indicesT[-1] + 1:]
+        D = nPI_z - np.max(nPI_z) / 10
+        indicesT = np.where(D > 0)[0]
+        FWTM = PI_z_ord[indicesT[-1]] - PI_z_ord[indicesT[0]]
+        tail_dom_T = PI_z_ord[indicesT[-1] + 1:]
+        tail_ran_T = nPI_z[indicesT[-1] + 1:]
 
-        # popt_T, pcov_T = curve_fit(Tanfunc, tail_dom_T, tail_ran_T)
-        # C_T = popt_T[0]
-        # print(C_T, np.sqrt(np.diag(pcov_T))[0])
+        popt_T, pcov_T = curve_fit(Tanfunc, tail_dom_T, tail_ran_T)
+        C_T = popt_T[0]
+        print(C_T, np.sqrt(np.diag(pcov_T))[0])
 
     # Consistency checks
 
@@ -129,39 +129,39 @@ def staticDistCalc(gridargs, params, datapath):
     print("Exp[-Nph] = %f" % (nPB_deltaK0))
 
     # Save data
-    Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], C_Tan * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
+    # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], C_Tan * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
 
     # Plot
-    # fig, ax = plt.subplots(nrows=2, ncols=3)
+    fig, ax = plt.subplots(nrows=2, ncols=3)
 
-    # ax[0, 0].plot(kzF, np.abs(beta2_kz))
-    # ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
-    # ax[0, 0].set_xlabel(r'$k_{z}$')
+    ax[0, 0].plot(kzF, np.abs(beta2_kz))
+    ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
+    ax[0, 0].set_xlabel(r'$k_{z}$')
 
-    # ax[0, 1].plot(x, np.real(beta2_z))
-    # ax[0, 2].plot(x, np.abs(fexp_z))
+    ax[0, 1].plot(x, np.real(beta2_z))
+    ax[0, 2].plot(x, np.abs(fexp_z))
 
-    # ax[1, 0].plot(kz, np.real(nPB_kz))
-    # ax[1, 0].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
-    # ax[1, 0].set_title(r'$n_{\vec{P_B}}$')
-    # ax[1, 0].set_xlabel(r'$P_{B,z}$')
-    # # ax[1,0].set_xlim([-10, 10])
+    ax[1, 0].plot(kz, np.real(nPB_kz))
+    ax[1, 0].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
+    ax[1, 0].set_title(r'$n_{\vec{P_B}}$')
+    ax[1, 0].set_xlabel(r'$P_{B,z}$')
+    # ax[1,0].set_xlim([-10, 10])
 
-    # ax[1, 1].plot(x, np.real(nx_z_norm))
-    # ax[1, 1].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
-    # ax[1, 1].set_xlabel(r'$z$')
+    ax[1, 1].plot(x, np.real(nx_z_norm))
+    ax[1, 1].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
+    ax[1, 1].set_xlabel(r'$z$')
 
-    # ax[1, 2].plot(PI_z_ord, np.real(nPI_z))
-    # ax[1, 2].plot(P * np.ones(Nz), np.linspace(0, nPB_deltaK0, Nz))
-    # ax[1, 2].set_title(r'$n_{\vec{P_I}}$')
-    # ax[1, 2].set_xlabel(r'$P_{I,z}$')
-    # # ax[1,2].set_xlim([-10, 10])
-    # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
-    # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
+    ax[1, 2].plot(PI_z_ord, np.real(nPI_z))
+    ax[1, 2].plot(P * np.ones(Nz), np.linspace(0, nPB_deltaK0, Nz))
+    ax[1, 2].set_title(r'$n_{\vec{P_I}}$')
+    ax[1, 2].set_xlabel(r'$P_{I,z}$')
+    # ax[1,2].set_xlim([-10, 10])
+    ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
+    ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
 
-    # fig.tight_layout()
-    # plt.show()
+    fig.tight_layout()
+    plt.show()
 
 
 # Create grids
@@ -210,38 +210,38 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-# P = 0.9 * nuV
-# aIBi = -3
+P = 0.9 * nuV
+aIBi = -3
 
-# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
-# DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-# aSi = aSi_interp(DP, aSi_tck)
+Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
+DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+aSi = aSi_interp(DP, aSi_tck)
 
-# params = [P, aIBi, aSi, DP, mI, mB, n0, gBB]
-# print('DP: {0}'.format(DP))
-# print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
-# # print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
-# print('Pc: {0}'.format(Pc))
+params = [P, aIBi, aSi, DP, mI, mB, n0, gBB]
+print('DP: {0}'.format(DP))
+print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
+# print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
+print('Pc: {0}'.format(Pc))
 
-# staticDistCalc(gridargs, params, datapath)
+staticDistCalc(gridargs, params, datapath)
 
 # Multiple function run
 
-paramsList = []
-aIBi_Vals = [-5, -2, -1, 1, 2, 5]
-Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB)
-print('PCrit: {0}'.format(Pc))
-PVals = np.linspace(0, 0.95 * Pc, 6)
-for aIBi in aIBi_Vals:
-    for P in PVals:
-        DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = aSi_interp(DP, aSi_tck)
-        paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB])
+# paramsList = []
+# aIBi_Vals = [-5, -2, -1, 1, 2, 5]
+# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB)
+# print('PCrit: {0}'.format(Pc))
+# PVals = np.linspace(0, 0.95 * Pc, 6)
+# for aIBi in aIBi_Vals:
+#     for P in PVals:
+#         DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+#         aSi = aSi_interp(DP, aSi_tck)
+#         paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB])
 
 
-for p in paramsList:
-    staticDistCalc(gridargs, p, datapath)
+# for p in paramsList:
+#     staticDistCalc(gridargs, p, datapath)
 
 
-end = timer()
-print(end - start)
+# end = timer()
+# print(end - start)
