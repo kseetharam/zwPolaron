@@ -29,6 +29,7 @@ def staticDistCalc(gridargs, params, datapath):
 
     # generation
     xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
+    kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
     kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
 
     beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
@@ -89,38 +90,37 @@ def staticDistCalc(gridargs, params, datapath):
     PI_z_ord = np.flip(PI_z, 0)
     nPI_z = np.flip(np.real(nPB_kz), 0)
 
-    if np.abs(np.max(nPI_z) - np.min(nPI_z)) < 1e-3:
+    if np.abs(np.max(nPI_z) - np.min(nPI_z)) < 1e-2:
         FWHM = 0
-        C_Tan = 0
+        # C_Tan = 0
 
     else:
         D = nPI_z - np.max(nPI_z) / 2
         indices = np.where(D > 0)[0]
         FWHM = PI_z_ord[indices[-1]] - PI_z_ord[indices[0]]
-        tail_dom = PI_z_ord[indices[-1] + 1:]
-        tail_ran = nPI_z[indices[-1] + 1:]
+    #     tail_dom = PI_z_ord[indices[-1] + 1:]
+    #     tail_ran = nPI_z[indices[-1] + 1:]
 
-        def Tanfunc(p, C): return C * (p**-4)
+    #     def Tanfunc(p, C): return C * (p**-4)
 
-        popt, pcov = curve_fit(Tanfunc, tail_dom, tail_ran)
-        C_Tan = popt[0]
-        print(C_Tan, np.sqrt(np.diag(pcov))[0])
-        print(FWHM, (FWHM / 2.355)**2)
+    #     def logTanfunc(p, LC): return LC - 4 * np.log(p)
 
-        # FWTM
+    #     popt, pcov = curve_fit(Tanfunc, tail_dom, tail_ran)
+    #     Lpopt, Lpcov = curve_fit(logTanfunc, tail_dom, tail_ran)
+    #     C_Tan = popt[0]
+    #     LC_Tan = Lpopt[0]
+    #     print(C_Tan, np.sqrt(np.diag(pcov))[0])
 
-        D = nPI_z - np.max(nPI_z) / 10
-        indicesT = np.where(D > 0)[0]
-        FWTM = PI_z_ord[indicesT[-1]] - PI_z_ord[indicesT[0]]
-        tail_dom_T = PI_z_ord[indicesT[-1] + 1:]
-        tail_ran_T = nPI_z[indicesT[-1] + 1:]
+    # Histogram of nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2)
+    PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
+    PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
+    PB_flat = PB.reshape(PB.size)
+    PI_flat = PI.reshape(PI.size)
+    nPB_flat = nPB.reshape(nPB.size)
 
-        popt_T, pcov_T = curve_fit(Tanfunc, tail_dom_T, tail_ran_T)
-        C_T = popt_T[0]
-        print(C_T, np.sqrt(np.diag(pcov_T))[0])
+    # Metrics/consistency checks
 
-    # Consistency checks
-
+    print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
     print("Nph = \sum b^2 = %f" % (Nph))
     print("Nph_x = %f " % (Nph_x))
     print("\int np dp = %f" % (nPB_Tot))
@@ -129,24 +129,27 @@ def staticDistCalc(gridargs, params, datapath):
     print("Exp[-Nph] = %f" % (nPB_deltaK0))
 
     # Save data
-    # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], C_Tan * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
+    # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
 
     # Plot
-    fig, ax = plt.subplots(nrows=2, ncols=3)
+    fig, ax = plt.subplots(nrows=3, ncols=3)
 
     ax[0, 0].plot(kzF, np.abs(beta2_kz))
     ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
     ax[0, 0].set_xlabel(r'$k_{z}$')
 
-    ax[0, 1].plot(x, np.real(beta2_z))
-    ax[0, 2].plot(x, np.abs(fexp_z))
+    ax[0, 1].plot(z, np.real(beta2_z))
+    ax[0, 1].set_title(r'Slice $|\beta_{\vec{k}}|^2$')
+
+    ax[0, 2].plot(z, np.abs(fexp_z))
+    ax[0, 2].set_title(r'Slice $f(x)$')
 
     ax[1, 0].plot(kz, np.real(nPB_kz))
     ax[1, 0].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
     ax[1, 0].set_title(r'$n_{\vec{P_B}}$')
     ax[1, 0].set_xlabel(r'$P_{B,z}$')
-    # ax[1,0].set_xlim([-10, 10])
+    ax[1, 0].set_xlim([-10, 10])
 
     ax[1, 1].plot(x, np.real(nx_z_norm))
     ax[1, 1].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
@@ -156,9 +159,22 @@ def staticDistCalc(gridargs, params, datapath):
     ax[1, 2].plot(P * np.ones(Nz), np.linspace(0, nPB_deltaK0, Nz))
     ax[1, 2].set_title(r'$n_{\vec{P_I}}$')
     ax[1, 2].set_xlabel(r'$P_{I,z}$')
-    # ax[1,2].set_xlim([-10, 10])
-    ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
-    ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
+    ax[1, 2].set_xlim([-10, 10])
+    # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
+    # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
+
+    ax[2, 0].plot(PB_flat, np.real(nPB_flat), 'k*')
+    ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
+    ax[2, 0].set_xlabel(r'$|P_{B}|$')
+
+    ax[2, 1].plot(PI_flat, np.real(nPB_flat), 'k*')
+    ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
+    ax[2, 1].set_xlabel(r'$|P_{I}|$')
+
+    # fig.delaxes(ax[2, 2])
+    ax[2, 2].hist(np.real(nPB_flat), bins=20)
+    ax[2, 2].set_title('Count')
+    ax[2, 2].set_xlabel(r'$n_{\vec{P_B}}$')
 
     fig.tight_layout()
     plt.show()
