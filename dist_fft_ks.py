@@ -118,6 +118,20 @@ def staticDistCalc(gridargs, params, datapath):
     PI_flat = PI.reshape(PI.size)
     nPB_flat = nPB.reshape(nPB.size)
 
+    #
+    # nPB_integrand = np.real(nPB * (PB / kzg) * dkx * dky)
+    PB_unique, u_indices, u_counts = np.unique(PB_flat,return_inverse=True, return_counts = True)
+    nPB_unique = np.zeros(PB_unique.size)
+    print(PB_unique)
+
+    for ind, val in enumerate(np.abs(nPB_flat)*dkx*dky*dkz):
+        orig_index = u_indices[ind] 
+        # nPB_unique[orig_index] += val/u_counts[orig_index]
+        nPB_unique[orig_index] = nPB_unique[orig_index]+val/u_counts[orig_index]
+        # print(val)
+
+
+
     # Metrics/consistency checks
 
     print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
@@ -163,18 +177,22 @@ def staticDistCalc(gridargs, params, datapath):
     # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
     # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
 
-    ax[2, 0].plot(PB_flat, np.real(nPB_flat), 'k*')
+    ax[2, 0].plot(PB_unique, nPB_unique, 'k*')
     ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
     ax[2, 0].set_xlabel(r'$|P_{B}|$')
 
-    ax[2, 1].plot(PI_flat, np.real(nPB_flat), 'k*')
-    ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
-    ax[2, 1].set_xlabel(r'$|P_{I}|$')
+    # ax[2, 0].plot(PB_flat, np.real(nPB_flat), 'k*')
+    # ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
+    # ax[2, 0].set_xlabel(r'$|P_{B}|$')
 
-    # fig.delaxes(ax[2, 2])
-    ax[2, 2].hist(np.real(nPB_flat), bins=20)
-    ax[2, 2].set_title('Count')
-    ax[2, 2].set_xlabel(r'$n_{\vec{P_B}}$')
+    # ax[2, 1].plot(PI_flat, np.real(nPB_flat), 'k*')
+    # ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
+    # ax[2, 1].set_xlabel(r'$|P_{I}|$')
+
+    # # fig.delaxes(ax[2, 2])
+    # ax[2, 2].hist(np.real(nPB_flat), bins=20)
+    # ax[2, 2].set_title('Count')
+    # ax[2, 2].set_xlabel(r'$n_{\vec{P_B}}$')
 
     fig.tight_layout()
     plt.show()
