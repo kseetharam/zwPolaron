@@ -111,26 +111,27 @@ def staticDistCalc(gridargs, params, datapath):
     #     LC_Tan = Lpopt[0]
     #     print(C_Tan, np.sqrt(np.diag(pcov))[0])
 
-    # Histogram of nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2)
+    # Calculate magnitude distribution nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2)
+
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
     PI_flat = PI.reshape(PI.size)
     nPB_flat = nPB.reshape(nPB.size)
 
-    #
-    # nPB_integrand = np.real(nPB * (PB / kzg) * dkx * dky)
-    PB_unique, u_indices, u_counts = np.unique(PB_flat,return_inverse=True, return_counts = True)
-    nPB_unique = np.zeros(PB_unique.size)
-    print(PB_unique)
+    PB_unique, PB_uind, PB_ucounts = np.unique(PB_flat, return_inverse=True, return_counts=True)
+    PI_unique, PI_uind, PI_ucounts = np.unique(PI_flat, return_inverse=True, return_counts=True)
+    nPBm_unique = np.zeros(PB_unique.size)
+    nPIm_unique = np.zeros(PI_unique.size)
 
-    for ind, val in enumerate(np.abs(nPB_flat)*dkx*dky*dkz):
-        orig_index = u_indices[ind] 
-        # nPB_unique[orig_index] += val/u_counts[orig_index]
-        nPB_unique[orig_index] = nPB_unique[orig_index]+val/u_counts[orig_index]
-        # print(val)
+    for ind, val in enumerate(np.abs(nPB_flat) * dkx * dky * dkz):
+        PB_index = PB_uind[ind]
+        PI_index = PI_uind[ind]
+        nPBm_unique[PB_index] += val / PB_ucounts[PB_index]
+        nPIm_unique[PI_index] += val / PI_ucounts[PI_index]
 
-
+    nPBm_Tot = np.dot(nPBm_unique, np.ediff1d(nPBm_unique, to_end=1))
+    nPIm_Tot = np.dot(nPIm_unique, np.ediff1d(nPIm_unique, to_end=1))
 
     # Metrics/consistency checks
 
@@ -141,6 +142,8 @@ def staticDistCalc(gridargs, params, datapath):
     print("\int p np dp = %f" % (nPB_Mom1))
     print("\int k beta^2 dk = %f" % (beta2_kz_Mom1))
     print("Exp[-Nph] = %f" % (nPB_deltaK0))
+    print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
+    print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
 
     # Save data
     # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
@@ -177,22 +180,17 @@ def staticDistCalc(gridargs, params, datapath):
     # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
     # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
 
-    ax[2, 0].plot(PB_unique, nPB_unique, 'k*')
+    ax[2, 0].plot(PB_unique, nPBm_unique, 'k*')
+    # ax[2, 0].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
     ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
     ax[2, 0].set_xlabel(r'$|P_{B}|$')
 
-    # ax[2, 0].plot(PB_flat, np.real(nPB_flat), 'k*')
-    # ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
-    # ax[2, 0].set_xlabel(r'$|P_{B}|$')
+    ax[2, 1].plot(PI_unique, nPIm_unique, 'k*')
+    # ax[2, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
+    ax[2, 1].set_xlabel(r'$|P_{I}|$')
 
-    # ax[2, 1].plot(PI_flat, np.real(nPB_flat), 'k*')
-    # ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
-    # ax[2, 1].set_xlabel(r'$|P_{I}|$')
-
-    # # fig.delaxes(ax[2, 2])
-    # ax[2, 2].hist(np.real(nPB_flat), bins=20)
-    # ax[2, 2].set_title('Count')
-    # ax[2, 2].set_xlabel(r'$n_{\vec{P_B}}$')
+    fig.delaxes(ax[2, 2])
 
     fig.tight_layout()
     plt.show()
@@ -202,8 +200,8 @@ def staticDistCalc(gridargs, params, datapath):
 
 start = timer()
 
-(Lx, Ly, Lz) = (15, 15, 15)
-(dx, dy, dz) = (1e-01, 1e-01, 1e-01)
+(Lx, Ly, Lz) = (10, 10, 10)
+(dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
 xgrid = Grid.Grid('CARTESIAN_3D')
 xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
