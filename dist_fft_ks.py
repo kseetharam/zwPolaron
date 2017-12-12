@@ -145,25 +145,33 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
-    PBm_diff = np.ediff1d(PB_unique, to_end=1)
-    PIm_diff = np.ediff1d(PI_unique, to_end=1)
-    nPBm_norm = nPBm_unique / PBm_diff
-    nPIm_norm = nPIm_unique / PIm_diff
-    nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
-    nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
+    # PBm_diff = np.ediff1d(PB_unique, to_end=1)
+    # PIm_diff = np.ediff1d(PI_unique, to_end=1)
+    # nPBm_norm = nPBm_unique / PBm_diff
+    # nPIm_norm = nPIm_unique / PIm_diff
+    # nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
+    # nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
 
-    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum)
-    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum)
+    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=5, s=3)
+    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=5, s=3)
 
     PBm_Vec = np.linspace(0, np.max(PB_unique))
     PIm_Vec = np.linspace(0, np.max(PI_unique))
     nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
     nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
 
-    PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
+    nPBm_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=1)
+    nPIm_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=1)
+
+    dPBm = PBm_Vec[1] - PBm_Vec[0]
+    dPIm = PIm_Vec[1] - PIm_Vec[0]
+    nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
+    nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
+
+    # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
+    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
+    # np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -222,14 +230,16 @@ def staticDistCalc(gridargs, params, datapath):
     ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
     ax[2, 1].set_xlabel(r'$|P_{I}|$')
 
-    # fig.delaxes(ax[2, 2])
-    ax[2, 2].plot(PB_unique, PB_ucounts, 'k*')
-    ax[2, 2].set_title('PB Counts')
+    ax[2, 2].plot(PBm_Vec, nPBm_Vec)
+    ax[2, 2].set_title(r'$n_{\vec{P_B}}$')
     ax[2, 2].set_xlabel(r'$|P_{B}|$')
+    # ax[2, 2].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+    ax[2, 2].plot(PIm_Vec, nPIm_Vec)
 
-    ax[3, 2].plot(PI_unique, PI_ucounts, 'k*')
-    ax[3, 2].set_title('PI Counts')
+    ax[3, 2].plot(PIm_Vec, nPIm_Vec)
+    ax[3, 2].set_title(r'$n_{\vec{P_I}}$')
     ax[3, 2].set_xlabel(r'$|P_{I}|$')
+    ax[3, 2].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
 
     ax[3, 0].plot(PB_unique, nPBm_cum, 'k*')
     ax[3, 0].set_title('Cumulative Distribution Function')
@@ -292,7 +302,7 @@ PBint_tck = np.load('PBint_spline.npy')
 # Single function run
 
 P = 0.9 * nuV
-aIBi = -3
+aIBi = -1
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
 DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
