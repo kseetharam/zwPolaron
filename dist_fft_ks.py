@@ -7,6 +7,7 @@ from polaron_functions_cart import *
 import Grid
 import polrabi.staticfm as fm
 from scipy.optimize import curve_fit
+from scipy import interpolate
 
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
@@ -127,11 +128,41 @@ def staticDistCalc(gridargs, params, datapath):
     for ind, val in enumerate(np.abs(nPB_flat) * dkx * dky * dkz):
         PB_index = PB_uind[ind]
         PI_index = PI_uind[ind]
-        nPBm_unique[PB_index] += val / PB_ucounts[PB_index]
-        nPIm_unique[PI_index] += val / PI_ucounts[PI_index]
+        # nPBm_unique[PB_index] += val / PB_ucounts[PB_index]
+        # nPIm_unique[PI_index] += val / PI_ucounts[PI_index]
+        nPBm_unique[PB_index] += val
+        nPIm_unique[PI_index] += val
 
-    nPBm_Tot = np.dot(nPBm_unique, np.ediff1d(nPBm_unique, to_end=1))
-    nPIm_Tot = np.dot(nPIm_unique, np.ediff1d(nPIm_unique, to_end=1))
+    nPBm_cum = np.zeros(PB_unique.size)
+    nPIm_cum = np.zeros(PI_unique.size)
+    for ind in range(PB_unique.size):
+        if ind == 0:
+            continue
+        nPBm_cum[ind] = nPBm_cum[ind - 1] + nPBm_unique[ind]
+
+    for ind in range(PI_unique.size):
+        if ind == 0:
+            continue
+        nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
+
+    PBm_diff = np.ediff1d(PB_unique, to_end=1)
+    PIm_diff = np.ediff1d(PI_unique, to_end=1)
+    nPBm_norm = nPBm_unique / PBm_diff
+    nPIm_norm = nPIm_unique / PIm_diff
+    nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
+    nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
+
+    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, s=0)
+    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, s=0)
+
+    PBm_Vec = np.linspace(0, np.max(PB_unique))
+    PIm_Vec = np.linspace(0, np.max(PI_unique))
+    nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
+    nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
+
+    # nPBm_Tot = np.dot(nPBm_unique, PBm_diff + nPB_deltaK0)
+    # nPBm_Tot = np.sum(nPBm_unique) + nPB_deltaK0
+    # nPIm_Tot = np.dot(nPIm_unique, PIm_diff) + nPB_deltaK0
 
     # Metrics/consistency checks
 
@@ -150,7 +181,7 @@ def staticDistCalc(gridargs, params, datapath):
     # np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
 
     # Plot
-    fig, ax = plt.subplots(nrows=3, ncols=3)
+    fig, ax = plt.subplots(nrows=4, ncols=3)
 
     ax[0, 0].plot(kzF, np.abs(beta2_kz))
     ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
@@ -190,7 +221,24 @@ def staticDistCalc(gridargs, params, datapath):
     ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
     ax[2, 1].set_xlabel(r'$|P_{I}|$')
 
-    fig.delaxes(ax[2, 2])
+    # fig.delaxes(ax[2, 2])
+    ax[2, 2].plot(PB_unique, PB_ucounts, 'k*')
+    ax[2, 2].set_title('PB Counts')
+    ax[2, 2].set_xlabel(r'$|P_{B}|$')
+
+    ax[3, 2].plot(PI_unique, PI_ucounts, 'k*')
+    ax[3, 2].set_title('PI Counts')
+    ax[3, 2].set_xlabel(r'$|P_{I}|$')
+
+    ax[3, 0].plot(PB_unique, nPBm_cum, 'k*')
+    ax[3, 0].set_title('Cumulative Distribution Function')
+    ax[3, 0].set_xlabel(r'$|P_{B}|$')
+    ax[3, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
+
+    ax[3, 1].plot(PI_unique, nPIm_cum, 'k*')
+    ax[3, 1].set_title('Cumulative Distribution Function')
+    ax[3, 1].set_xlabel(r'$|P_{I}|$')
+    ax[3, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
 
     fig.tight_layout()
     plt.show()
