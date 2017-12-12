@@ -152,17 +152,18 @@ def staticDistCalc(gridargs, params, datapath):
     nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
     nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
 
-    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, s=0)
-    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, s=0)
+    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum)
+    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum)
 
     PBm_Vec = np.linspace(0, np.max(PB_unique))
     PIm_Vec = np.linspace(0, np.max(PI_unique))
     nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
     nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
 
-    # nPBm_Tot = np.dot(nPBm_unique, PBm_diff + nPB_deltaK0)
-    # nPBm_Tot = np.sum(nPBm_unique) + nPB_deltaK0
-    # nPIm_Tot = np.dot(nPIm_unique, PIm_diff) + nPB_deltaK0
+    PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
+    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
+    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
