@@ -385,7 +385,7 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-P = 1.75 * nuV
+P = 1.4 * nuV
 aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
