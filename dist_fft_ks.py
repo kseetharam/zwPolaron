@@ -15,7 +15,7 @@ matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
 def staticDistCalc(gridargs, params, datapath):
     [xgrid, kgrid, kFgrid] = gridargs
-    [P, aIBi, aSi, DP, mI, mB, n0, gBB] = params
+    [P, aIBi, aSi, DP, mI, mB, n0, gBB, Pc] = params
     bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
 
     # unpack grid args
@@ -128,8 +128,6 @@ def staticDistCalc(gridargs, params, datapath):
     for ind, val in enumerate(np.abs(nPB_flat) * dkx * dky * dkz):
         PB_index = PB_uind[ind]
         PI_index = PI_uind[ind]
-        # nPBm_unique[PB_index] += val / PB_ucounts[PB_index]
-        # nPIm_unique[PI_index] += val / PI_ucounts[PI_index]
         nPBm_unique[PB_index] += val
         nPIm_unique[PI_index] += val
 
@@ -145,33 +143,77 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
-    # PBm_diff = np.ediff1d(PB_unique, to_end=1)
-    # PIm_diff = np.ediff1d(PI_unique, to_end=1)
-    # nPBm_norm = nPBm_unique / PBm_diff
-    # nPIm_norm = nPIm_unique / PIm_diff
-    # nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
-    # nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
+    # nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=3, s=1)
+    # nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=3, s=1)
 
-    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=3, s=1)
-    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=3, s=1)
+    # PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
+    # PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
+    # nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
+    # nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
 
-    PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
-    PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
-    nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
-    nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
+    # nPBm_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=1)
+    # nPIm_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=1)
 
-    nPBm_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=1)
-    nPIm_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=1)
+    # dPBm = PBm_Vec[1] - PBm_Vec[0]
+    # dPIm = PIm_Vec[1] - PIm_Vec[0]
+    # nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
+    # nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
-    dPBm = PBm_Vec[1] - PBm_Vec[0]
-    dPIm = PIm_Vec[1] - PIm_Vec[0]
-    nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
-    nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
+    # split interpolation
 
-    PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
+    PB_mask = PB_unique < Pc
+    PI_mask = PI_unique < Pc
+
+    PB_unique_S = PB_unique[PB_mask]
+    PB_unique_L = PB_unique[np.logical_not(PB_mask)]
+    nPBm_cum_S = nPBm_cum[PB_mask]
+    nPBm_cum_L = nPBm_cum[np.logical_not(PB_mask)]
+
+    PI_unique_S = PI_unique[PI_mask]
+    PI_unique_L = PI_unique[np.logical_not(PI_mask)]
+    nPIm_cum_S = nPIm_cum[PI_mask]
+    nPIm_cum_L = nPIm_cum[np.logical_not(PI_mask)]
+
+    nPBm_tck_S = interpolate.splrep(PB_unique_S, nPBm_cum_S, k=3, s=1)
+    nPBm_tck_L = interpolate.splrep(PB_unique_L, nPBm_cum_L, k=3, s=1)
+
+    nPIm_tck_S = interpolate.splrep(PI_unique_S, nPIm_cum_S, k=3, s=1)
+    nPIm_tck_L = interpolate.splrep(PI_unique_L, nPIm_cum_L, k=3, s=1)
+
+    PBm_Vec_S = np.linspace(0, Pc, 50, endpoint=False)
+    PBm_Vec_L = np.linspace(Pc, np.max(PB_unique), 50)
+    PIm_Vec_S = np.linspace(0, Pc, 50, endpoint=False)
+    PIm_Vec_L = np.linspace(Pc, np.max(PI_unique), 50)
+
+    nPBm_cum_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=0)
+    nPBm_cum_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=0)
+    nPIm_cum_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=0)
+    nPIm_cum_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=0)
+
+    nPBm_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=1)
+    nPBm_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=1)
+    nPIm_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=1)
+    nPIm_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=1)
+
+    PBm_Vec = np.concatenate((PBm_Vec_S, PBm_Vec_L))
+    PIm_Vec = np.concatenate((PIm_Vec_S, PIm_Vec_L))
+    nPBm_cum_Vec = np.concatenate((nPBm_cum_Vec_S, nPBm_cum_Vec_L))
+    nPIm_cum_Vec = np.concatenate((nPIm_cum_Vec_S, nPIm_cum_Vec_L))
+    nPBm_Vec = np.concatenate((nPBm_Vec_S, nPBm_Vec_L))
+    nPIm_Vec = np.concatenate((nPIm_Vec_S, nPIm_Vec_L))
+
+    dPBm_L = PBm_Vec[-2] - PBm_Vec[-1]
+    dPIm_L = PIm_Vec[-2] - PIm_Vec[-1]
+    nPBm_Tot = np.dot(nPBm_Vec, np.ediff1d(nPBm_Vec, to_end=dPBm_L)) + nPB_deltaK0
+    nPIm_Tot = np.dot(nPIm_Vec, np.ediff1d(nPIm_Vec, to_end=dPIm_L)) + nPB_deltaK0
+
+    PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
+    PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
+
+    # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
+    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
+    # np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -184,6 +226,8 @@ def staticDistCalc(gridargs, params, datapath):
     print("Exp[-Nph] = %f" % (nPB_deltaK0))
     print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
     print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
+    print('PB_mag Max = %f' % (PBm_max))
+    print('PI_mag Max = %f' % (PIm_max))
 
     # Save data
     # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
@@ -261,14 +305,14 @@ def staticDistCalc(gridargs, params, datapath):
     ax[0, 0].set_title('CDF PB')
     ax[0, 0].set_xlabel(r'$|P_{B}|$')
     ax[0, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
-    ax[0, 0].plot((P / 0.9) * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
+    ax[0, 0].plot(Pc * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
     # ax[0, 0].plot(PI_unique, nPIm_cum, 'r*')
 
     ax[0, 1].plot(PI_unique, nPIm_cum, 'k*')
     ax[0, 1].set_title('CDF PI')
     ax[0, 1].set_xlabel(r'$|P_{I}|$')
     ax[0, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
-    ax[0, 1].plot((P / 0.9) * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
+    ax[0, 1].plot(Pc * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
 
     ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-')
     ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
@@ -340,11 +384,13 @@ Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
 DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
 aSi = aSi_interp(DP, aSi_tck)
 
-params = [P, aIBi, aSi, DP, mI, mB, n0, gBB]
+params = [P, aIBi, aSi, DP, mI, mB, n0, gBB, Pc]
 print('DP: {0}'.format(DP))
 print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
 # print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
 print('Pc: {0}'.format(Pc))
+print('P: {0}'.format(P))
+print('Nu: {0}'.format(nuV))
 
 staticDistCalc(gridargs, params, datapath)
 
