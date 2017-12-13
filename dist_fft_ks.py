@@ -8,6 +8,7 @@ import Grid
 import polrabi.staticfm as fm
 from scipy.optimize import curve_fit
 from scipy import interpolate
+from scipy.special import expit
 
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
@@ -15,7 +16,7 @@ matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
 def staticDistCalc(gridargs, params, datapath):
     [xgrid, kgrid, kFgrid] = gridargs
-    [P, aIBi, aSi, DP, mI, mB, n0, gBB, Pc] = params
+    [P, aIBi, aSi, DP, mI, mB, n0, gBB, nuV] = params
     bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
 
     # unpack grid args
@@ -161,8 +162,8 @@ def staticDistCalc(gridargs, params, datapath):
 
     # split interpolation
 
-    PB_mask = PB_unique < Pc
-    PI_mask = PI_unique < Pc
+    PB_mask = PB_unique < nuV
+    PI_mask = PI_unique < nuV
 
     PB_unique_S = PB_unique[PB_mask]
     PB_unique_L = PB_unique[np.logical_not(PB_mask)]
@@ -180,10 +181,10 @@ def staticDistCalc(gridargs, params, datapath):
     nPIm_tck_S = interpolate.splrep(PI_unique_S, nPIm_cum_S, k=3, s=1)
     nPIm_tck_L = interpolate.splrep(PI_unique_L, nPIm_cum_L, k=3, s=1)
 
-    PBm_Vec_S = np.linspace(0, Pc, 50, endpoint=False)
-    PBm_Vec_L = np.linspace(Pc, np.max(PB_unique), 50)
-    PIm_Vec_S = np.linspace(0, Pc, 50, endpoint=False)
-    PIm_Vec_L = np.linspace(Pc, np.max(PI_unique), 50)
+    PBm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
+    PBm_Vec_L = np.linspace(nuV, np.max(PB_unique), 50)
+    PIm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
+    PIm_Vec_L = np.linspace(nuV, np.max(PI_unique), 50)
 
     nPBm_cum_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=0)
     nPBm_cum_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=0)
@@ -210,10 +211,17 @@ def staticDistCalc(gridargs, params, datapath):
     PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
     PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
 
+    # logistic sigmoid curve fit
+
+    def CDF_fit(Pm,d,b,c):
+        return 1/(1/(d*Pm**2) + 1/(b*expit(c*Pm)))
+
+    # P_mag data save
+
     # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
     PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
+    np.savetxt(datapath + '/PIm_Data_s.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -305,14 +313,14 @@ def staticDistCalc(gridargs, params, datapath):
     ax[0, 0].set_title('CDF PB')
     ax[0, 0].set_xlabel(r'$|P_{B}|$')
     ax[0, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
-    ax[0, 0].plot(Pc * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
+    ax[0, 0].plot(nuV * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
     # ax[0, 0].plot(PI_unique, nPIm_cum, 'r*')
 
     ax[0, 1].plot(PI_unique, nPIm_cum, 'k*')
     ax[0, 1].set_title('CDF PI')
     ax[0, 1].set_xlabel(r'$|P_{I}|$')
     ax[0, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
-    ax[0, 1].plot(Pc * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
+    ax[0, 1].plot(nuV * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
 
     ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-')
     ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
@@ -377,14 +385,14 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-P = 0.9 * nuV
+P = 0.2 * nuV
 aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
 DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
 aSi = aSi_interp(DP, aSi_tck)
 
-params = [P, aIBi, aSi, DP, mI, mB, n0, gBB, Pc]
+params = [P, aIBi, aSi, DP, mI, mB, n0, gBB, nuV]
 print('DP: {0}'.format(DP))
 print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
 # print('Pc: {0}, Pc_fm: {1}'.format(Pc, fm.PCrit(aIBi, gBB, mI, mB, n0)))
