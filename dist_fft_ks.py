@@ -152,11 +152,11 @@ def staticDistCalc(gridargs, params, datapath):
     # nPBm_Tot = np.dot(nPBm_norm, PBm_diff) + nPB_deltaK0
     # nPIm_Tot = np.dot(nPIm_norm, PIm_diff) + nPB_deltaK0
 
-    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=5, s=3)
-    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=5, s=3)
+    nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=3, s=1)
+    nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=3, s=1)
 
-    PBm_Vec = np.linspace(0, np.max(PB_unique))
-    PIm_Vec = np.linspace(0, np.max(PI_unique))
+    PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
+    PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
     nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
     nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
 
@@ -190,72 +190,102 @@ def staticDistCalc(gridargs, params, datapath):
     # np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
 
     # Plot
-    fig, ax = plt.subplots(nrows=4, ncols=3)
+    # fig, ax = plt.subplots(nrows=4, ncols=3)
 
-    ax[0, 0].plot(kzF, np.abs(beta2_kz))
-    ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
-    ax[0, 0].set_xlabel(r'$k_{z}$')
+    # ax[0, 0].plot(kzF, np.abs(beta2_kz))
+    # ax[0, 0].set_title(r'$|\beta_{\vec{k}}|^2$')
+    # ax[0, 0].set_xlabel(r'$k_{z}$')
 
-    ax[0, 1].plot(z, np.real(beta2_z))
-    ax[0, 1].set_title(r'Slice $|\beta_{\vec{k}}|^2$')
+    # ax[0, 1].plot(z, np.real(beta2_z))
+    # ax[0, 1].set_title(r'Slice $|\beta_{\vec{k}}|^2$')
 
-    ax[0, 2].plot(z, np.abs(fexp_z))
-    ax[0, 2].set_title(r'Slice $f(x)$')
+    # ax[0, 2].plot(z, np.abs(fexp_z))
+    # ax[0, 2].set_title(r'Slice $f(x)$')
 
-    ax[1, 0].plot(kz, np.real(nPB_kz))
-    ax[1, 0].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
-    ax[1, 0].set_title(r'$n_{\vec{P_B}}$')
-    ax[1, 0].set_xlabel(r'$P_{B,z}$')
-    ax[1, 0].set_xlim([-10, 10])
+    # ax[1, 0].plot(kz, np.real(nPB_kz))
+    # ax[1, 0].plot(np.zeros(Nz), np.linspace(0, nPB_deltaK0, Nz))
+    # ax[1, 0].set_title(r'$n_{\vec{P_B}}$')
+    # ax[1, 0].set_xlabel(r'$P_{B,z}$')
+    # ax[1, 0].set_xlim([-10, 10])
 
-    ax[1, 1].plot(x, np.real(nx_z_norm))
-    ax[1, 1].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
-    ax[1, 1].set_xlabel(r'$z$')
+    # ax[1, 1].plot(x, np.real(nx_z_norm))
+    # ax[1, 1].set_title(r'$\frac{n(\vec{x})}{N_{ph}}$')
+    # ax[1, 1].set_xlabel(r'$z$')
 
-    ax[1, 2].plot(PI_z_ord, np.real(nPI_z))
-    ax[1, 2].plot(P * np.ones(Nz), np.linspace(0, nPB_deltaK0, Nz))
-    ax[1, 2].set_title(r'$n_{\vec{P_I}}$')
-    ax[1, 2].set_xlabel(r'$P_{I,z}$')
-    ax[1, 2].set_xlim([-10, 10])
-    # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
-    # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
+    # ax[1, 2].plot(PI_z_ord, np.real(nPI_z))
+    # ax[1, 2].plot(P * np.ones(Nz), np.linspace(0, nPB_deltaK0, Nz))
+    # ax[1, 2].set_title(r'$n_{\vec{P_I}}$')
+    # ax[1, 2].set_xlabel(r'$P_{I,z}$')
+    # ax[1, 2].set_xlim([-10, 10])
+    # # ax[1, 2].plot(tail_dom, Tanfunc(tail_dom, C_Tan))
+    # # ax[1, 2].plot(tail_dom_T, Tanfunc(tail_dom_T, C_T))
 
-    ax[2, 0].plot(PB_unique, nPBm_unique, 'k*')
-    # ax[2, 0].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
-    ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
-    ax[2, 0].set_xlabel(r'$|P_{B}|$')
+    # ax[2, 0].plot(PB_unique, nPBm_unique, 'k*')
+    # # ax[2, 0].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+    # ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
+    # ax[2, 0].set_xlabel(r'$|P_{B}|$')
 
-    ax[2, 1].plot(PI_unique, nPIm_unique, 'k*')
-    # ax[2, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
-    ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
-    ax[2, 1].set_xlabel(r'$|P_{I}|$')
+    # ax[2, 1].plot(PI_unique, nPIm_unique, 'k*')
+    # # ax[2, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    # ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
+    # ax[2, 1].set_xlabel(r'$|P_{I}|$')
 
-    ax[2, 2].plot(PBm_Vec, nPBm_Vec)
-    ax[2, 2].set_title(r'$n_{\vec{P_B}}$')
-    ax[2, 2].set_xlabel(r'$|P_{B}|$')
+    # ax[2, 2].plot(PBm_Vec, nPBm_Vec)
+    # ax[2, 2].set_title(r'$n_{\vec{P_B}}$')
+    # ax[2, 2].set_xlabel(r'$|P_{B}|$')
     # ax[2, 2].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
-    ax[2, 2].plot(PIm_Vec, nPIm_Vec)
 
-    ax[3, 2].plot(PIm_Vec, nPIm_Vec)
-    ax[3, 2].set_title(r'$n_{\vec{P_I}}$')
-    ax[3, 2].set_xlabel(r'$|P_{I}|$')
-    ax[3, 2].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    # ax[3, 2].plot(PIm_Vec, nPIm_Vec)
+    # ax[3, 2].set_title(r'$n_{\vec{P_I}}$')
+    # ax[3, 2].set_xlabel(r'$|P_{I}|$')
+    # ax[3, 2].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
 
-    ax[3, 0].plot(PB_unique, nPBm_cum, 'k*')
-    ax[3, 0].set_title('Cumulative Distribution Function')
-    ax[3, 0].set_xlabel(r'$|P_{B}|$')
-    ax[3, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
+    # ax[3, 0].plot(PB_unique, nPBm_cum, 'k*')
+    # ax[3, 0].set_title('Cumulative Distribution Function')
+    # ax[3, 0].set_xlabel(r'$|P_{B}|$')
+    # ax[3, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
 
-    ax[3, 1].plot(PI_unique, nPIm_cum, 'k*')
-    ax[3, 1].set_title('Cumulative Distribution Function')
-    ax[3, 1].set_xlabel(r'$|P_{I}|$')
-    ax[3, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
+    # ax[3, 1].plot(PI_unique, nPIm_cum, 'k*')
+    # ax[3, 1].set_title('Cumulative Distribution Function')
+    # ax[3, 1].set_xlabel(r'$|P_{I}|$')
+    # ax[3, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
 
+    # fig.tight_layout()
+    # plt.show()
+
+    # alt plot
+
+    fig, ax = plt.subplots(nrows=2, ncols=2)
+
+    ax[0, 0].plot(PB_unique, nPBm_cum, 'k*')
+    ax[0, 0].set_title('CDF PB')
+    ax[0, 0].set_xlabel(r'$|P_{B}|$')
+    ax[0, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
+    # ax[0, 0].plot(PI_unique, nPIm_cum, 'r*')
+
+    ax[0, 1].plot(PI_unique, nPIm_cum, 'k*')
+    ax[0, 1].set_title('CDF PI')
+    ax[0, 1].set_xlabel(r'$|P_{I}|$')
+    ax[0, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
+
+    ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-')
+    ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
+    ax[1, 0].set_title('CDF')
+    ax[1, 0].set_xlabel(r'$|P|$')
+
+    ax[1, 1].plot(PBm_Vec, nPBm_Vec, 'b-')
+    ax[1, 1].plot(PIm_Vec, nPIm_Vec, 'r-')
+    ax[1, 1].set_title('PDF')
+    ax[1, 1].set_xlabel(r'$|P|$')
+    # ax[1, 1].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+    # ax[1, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+
+    # fig.delaxes(ax[1, 1])
     fig.tight_layout()
     plt.show()
 
-
 # Create grids
+
 
 start = timer()
 
@@ -302,7 +332,7 @@ PBint_tck = np.load('PBint_spline.npy')
 # Single function run
 
 P = 0.9 * nuV
-aIBi = -1
+aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
 DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
