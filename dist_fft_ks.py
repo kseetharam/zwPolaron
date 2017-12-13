@@ -211,9 +211,9 @@ def staticDistCalc(gridargs, params, datapath):
     PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
 
     # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    # np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
+    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -335,7 +335,7 @@ def staticDistCalc(gridargs, params, datapath):
 
 start = timer()
 
-(Lx, Ly, Lz) = (20, 20, 20)
+(Lx, Ly, Lz) = (15, 15, 15)
 (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
 xgrid = Grid.Grid('CARTESIAN_3D')
