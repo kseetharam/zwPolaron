@@ -144,84 +144,87 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
-    # nPBm_tck = interpolate.splrep(PB_unique, nPBm_cum, k=3, s=1)
-    # nPIm_tck = interpolate.splrep(PI_unique, nPIm_cum, k=3, s=1)
+    # SPLIT SPLINE INTERPOLATION
 
-    # PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
-    # PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
-    # nPBm_cum_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=0)
-    # nPIm_cum_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=0)
+    # PB_mask = PB_unique < nuV
+    # PI_mask = PI_unique < nuV
 
-    # nPBm_Vec = interpolate.splev(PBm_Vec, nPBm_tck, der=1)
-    # nPIm_Vec = interpolate.splev(PIm_Vec, nPIm_tck, der=1)
+    # PB_unique_S = PB_unique[PB_mask]
+    # PB_unique_L = PB_unique[np.logical_not(PB_mask)]
+    # nPBm_cum_S = nPBm_cum[PB_mask]
+    # nPBm_cum_L = nPBm_cum[np.logical_not(PB_mask)]
 
-    # dPBm = PBm_Vec[1] - PBm_Vec[0]
-    # dPIm = PIm_Vec[1] - PIm_Vec[0]
-    # nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
-    # nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
+    # PI_unique_S = PI_unique[PI_mask]
+    # PI_unique_L = PI_unique[np.logical_not(PI_mask)]
+    # nPIm_cum_S = nPIm_cum[PI_mask]
+    # nPIm_cum_L = nPIm_cum[np.logical_not(PI_mask)]
 
-    # split interpolation
+    # nPBm_tck_S = interpolate.splrep(PB_unique_S, nPBm_cum_S, k=3, s=1)
+    # nPBm_tck_L = interpolate.splrep(PB_unique_L, nPBm_cum_L, k=3, s=1)
 
-    PB_mask = PB_unique < nuV
-    PI_mask = PI_unique < nuV
+    # nPIm_tck_S = interpolate.splrep(PI_unique_S, nPIm_cum_S, k=3, s=1)
+    # nPIm_tck_L = interpolate.splrep(PI_unique_L, nPIm_cum_L, k=3, s=1)
 
-    PB_unique_S = PB_unique[PB_mask]
-    PB_unique_L = PB_unique[np.logical_not(PB_mask)]
-    nPBm_cum_S = nPBm_cum[PB_mask]
-    nPBm_cum_L = nPBm_cum[np.logical_not(PB_mask)]
+    # PBm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
+    # PBm_Vec_L = np.linspace(nuV, np.max(PB_unique), 50)
+    # PIm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
+    # PIm_Vec_L = np.linspace(nuV, np.max(PI_unique), 50)
 
-    PI_unique_S = PI_unique[PI_mask]
-    PI_unique_L = PI_unique[np.logical_not(PI_mask)]
-    nPIm_cum_S = nPIm_cum[PI_mask]
-    nPIm_cum_L = nPIm_cum[np.logical_not(PI_mask)]
+    # nPBm_cum_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=0)
+    # nPBm_cum_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=0)
+    # nPIm_cum_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=0)
+    # nPIm_cum_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=0)
 
-    nPBm_tck_S = interpolate.splrep(PB_unique_S, nPBm_cum_S, k=3, s=1)
-    nPBm_tck_L = interpolate.splrep(PB_unique_L, nPBm_cum_L, k=3, s=1)
+    # nPBm_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=1)
+    # nPBm_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=1)
+    # nPIm_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=1)
+    # nPIm_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=1)
 
-    nPIm_tck_S = interpolate.splrep(PI_unique_S, nPIm_cum_S, k=3, s=1)
-    nPIm_tck_L = interpolate.splrep(PI_unique_L, nPIm_cum_L, k=3, s=1)
+    # PBm_Vec = np.concatenate((PBm_Vec_S, PBm_Vec_L))
+    # PIm_Vec = np.concatenate((PIm_Vec_S, PIm_Vec_L))
+    # nPBm_cum_Vec = np.concatenate((nPBm_cum_Vec_S, nPBm_cum_Vec_L))
+    # nPIm_cum_Vec = np.concatenate((nPIm_cum_Vec_S, nPIm_cum_Vec_L))
+    # nPBm_Vec = np.concatenate((nPBm_Vec_S, nPBm_Vec_L))
+    # nPIm_Vec = np.concatenate((nPIm_Vec_S, nPIm_Vec_L))
 
-    PBm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
-    PBm_Vec_L = np.linspace(nuV, np.max(PB_unique), 50)
-    PIm_Vec_S = np.linspace(0, nuV, 50, endpoint=False)
-    PIm_Vec_L = np.linspace(nuV, np.max(PI_unique), 50)
+    # dPBm_L = PBm_Vec[-1] - PBm_Vec[-2]
+    # dPIm_L = PIm_Vec[-1] - PIm_Vec[-2]
+    # nPBm_Tot = np.dot(nPBm_Vec, np.ediff1d(nPBm_Vec, to_end=dPBm_L)) + nPB_deltaK0
+    # nPIm_Tot = np.dot(nPIm_Vec, np.ediff1d(nPIm_Vec, to_end=dPIm_L)) + nPB_deltaK0
 
-    nPBm_cum_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=0)
-    nPBm_cum_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=0)
-    nPIm_cum_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=0)
-    nPIm_cum_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=0)
+    # PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
+    # PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
 
-    nPBm_Vec_S = interpolate.splev(PBm_Vec_S, nPBm_tck_S, der=1)
-    nPBm_Vec_L = interpolate.splev(PBm_Vec_L, nPBm_tck_L, der=1)
-    nPIm_Vec_S = interpolate.splev(PIm_Vec_S, nPIm_tck_S, der=1)
-    nPIm_Vec_L = interpolate.splev(PIm_Vec_L, nPIm_tck_L, der=1)
+    # MODIFIED SIGMOID CURVE FIT
 
-    PBm_Vec = np.concatenate((PBm_Vec_S, PBm_Vec_L))
-    PIm_Vec = np.concatenate((PIm_Vec_S, PIm_Vec_L))
-    nPBm_cum_Vec = np.concatenate((nPBm_cum_Vec_S, nPBm_cum_Vec_L))
-    nPIm_cum_Vec = np.concatenate((nPIm_cum_Vec_S, nPIm_cum_Vec_L))
-    nPBm_Vec = np.concatenate((nPBm_Vec_S, nPBm_Vec_L))
-    nPIm_Vec = np.concatenate((nPIm_Vec_S, nPIm_Vec_L))
+    def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
 
-    dPBm_L = PBm_Vec[-2] - PBm_Vec[-1]
-    dPIm_L = PIm_Vec[-2] - PIm_Vec[-1]
-    nPBm_Tot = np.dot(nPBm_Vec, np.ediff1d(nPBm_Vec, to_end=dPBm_L)) + nPB_deltaK0
-    nPIm_Tot = np.dot(nPIm_Vec, np.ediff1d(nPIm_Vec, to_end=dPIm_L)) + nPB_deltaK0
+    PBopt, PBcov = curve_fit(CDF_tfunc, PB_unique, nPBm_cum)
+    PIopt, PIcov = curve_fit(CDF_tfunc, PI_unique, nPIm_cum)
+
+    PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
+    PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
+
+    nPBm_cum_Vec = CDF_tfunc(PBm_Vec, *PBopt)
+    nPIm_cum_Vec = CDF_tfunc(PIm_Vec, *PIopt)
+
+    dPBm = PBm_Vec[1] - PBm_Vec[0]
+    dPIm = PIm_Vec[1] - PIm_Vec[0]
+    nPBm_Vec = np.gradient(nPBm_cum_Vec, dPBm)
+    nPIm_Vec = np.gradient(nPIm_cum_Vec, dPIm)
+
+    nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
+    nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
     PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
     PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
 
-    # logistic sigmoid curve fit
-
-    # def CDF_fit(Pm,d,b,c):
-    #     return 1/(1/(d*Pm**2) + 1/(b*expit(c*Pm)))
-
     # P_mag data save
 
     # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
-    # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    np.savetxt(datapath + '/PIm_Data_P_{:.3f}.dat'.format(P), PIm_DistData)
+    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/PBm_Data_P_{:.3f}.dat'.format(P), PBm_DistData)
+    # np.savetxt(datapath + '/PIm_Data_P_{:.3f}.dat'.format(P), PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -313,26 +316,25 @@ def staticDistCalc(gridargs, params, datapath):
     ax[0, 0].set_title('CDF PB')
     ax[0, 0].set_xlabel(r'$|P_{B}|$')
     ax[0, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
-    ax[0, 0].plot(nuV * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
-    # ax[0, 0].plot(PI_unique, nPIm_cum, 'r*')
 
     ax[0, 1].plot(PI_unique, nPIm_cum, 'k*')
     ax[0, 1].set_title('CDF PI')
     ax[0, 1].set_xlabel(r'$|P_{I}|$')
     ax[0, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
-    ax[0, 1].plot(nuV * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
 
-    ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-')
-    ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
+    ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-', label=r'$|P_{B}|$')
+    ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-', label=r'$|P_{I}|$')
     ax[1, 0].set_title('CDF')
     ax[1, 0].set_xlabel(r'$|P|$')
+    ax[1, 0].legend()
 
-    ax[1, 1].plot(PBm_Vec, nPBm_Vec, 'b-')
-    ax[1, 1].plot(PIm_Vec, nPIm_Vec, 'r-')
+    ax[1, 1].plot(PBm_Vec, nPBm_Vec, 'b-', label=r'$|P_{B}|$')
+    ax[1, 1].plot(PIm_Vec, nPIm_Vec, 'r-', label=r'$|P_{I}|$')
     ax[1, 1].set_title('PDF')
     ax[1, 1].set_xlabel(r'$|P|$')
-    # ax[1, 1].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
-    # ax[1, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    ax[1, 1].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+    ax[1, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    ax[1, 1].legend()
 
     # fig.delaxes(ax[1, 1])
     fig.tight_layout()
@@ -406,14 +408,14 @@ staticDistCalc(gridargs, params, datapath)
 
 # paramsList = []
 # aIBi_Vals = [-5, -2, -1, 1, 2, 5]
-# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB)
+# Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, np.amin(aIBi_Vals), mI, mB, n0, gBB,nuV)
 # print('PCrit: {0}'.format(Pc))
 # PVals = np.linspace(0, 0.95 * Pc, 6)
 # for aIBi in aIBi_Vals:
 #     for P in PVals:
 #         DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
 #         aSi = aSi_interp(DP, aSi_tck)
-#         paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB])
+#         paramsList.append([P, aIBi, aSi, DP, mI, mB, n0, gBB,nuV])
 
 
 # for p in paramsList:
