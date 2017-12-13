@@ -168,10 +168,10 @@ def staticDistCalc(gridargs, params, datapath):
     nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
     nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
-    # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
-    # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    # np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
+    PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
+    PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
+    np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
+    np.savetxt(datapath + '/PIm_Data.dat', PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -261,12 +261,14 @@ def staticDistCalc(gridargs, params, datapath):
     ax[0, 0].set_title('CDF PB')
     ax[0, 0].set_xlabel(r'$|P_{B}|$')
     ax[0, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
+    ax[0, 0].plot((P / 0.3) * np.ones(PBm_Vec.size), np.linspace(0, np.max(nPBm_cum_Vec), PBm_Vec.size))
     # ax[0, 0].plot(PI_unique, nPIm_cum, 'r*')
 
     ax[0, 1].plot(PI_unique, nPIm_cum, 'k*')
     ax[0, 1].set_title('CDF PI')
     ax[0, 1].set_xlabel(r'$|P_{I}|$')
     ax[0, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
+    ax[0, 1].plot((P / 0.3) * np.ones(PIm_Vec.size), np.linspace(0, np.max(nPIm_cum_Vec), PIm_Vec.size))
 
     ax[1, 0].plot(PBm_Vec, nPBm_cum_Vec, 'b-')
     ax[1, 0].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
@@ -289,7 +291,7 @@ def staticDistCalc(gridargs, params, datapath):
 
 start = timer()
 
-(Lx, Ly, Lz) = (10, 10, 10)
+(Lx, Ly, Lz) = (20, 20, 20)
 (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
 xgrid = Grid.Grid('CARTESIAN_3D')
@@ -331,7 +333,7 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-P = 0.9 * nuV
+P = 0.3 * nuV
 aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
