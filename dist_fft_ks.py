@@ -213,15 +213,15 @@ def staticDistCalc(gridargs, params, datapath):
 
     # logistic sigmoid curve fit
 
-    def CDF_fit(Pm,d,b,c):
-        return 1/(1/(d*Pm**2) + 1/(b*expit(c*Pm)))
+    # def CDF_fit(Pm,d,b,c):
+    #     return 1/(1/(d*Pm**2) + 1/(b*expit(c*Pm)))
 
     # P_mag data save
 
     # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
     PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
     # np.savetxt(datapath + '/PBm_Data.dat', PBm_DistData)
-    np.savetxt(datapath + '/PIm_Data_s.dat', PIm_DistData)
+    np.savetxt(datapath + '/PIm_Data_P_{:.3f}.dat'.format(P), PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -385,7 +385,7 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-P = 0.2 * nuV
+P = 1.75 * nuV
 aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
