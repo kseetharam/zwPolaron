@@ -6,8 +6,8 @@ from scipy import interpolate
 err = 1e-5
 limit = 1e3
 alpha = 0.005
-# upcutoff = 1e3
-upcutoff = 725.6
+upcutoff = 1e3
+# upcutoff = 725.6
 
 
 def PCrit(aIBi, gBB, mI, mB, n0):
