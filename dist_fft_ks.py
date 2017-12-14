@@ -192,6 +192,10 @@ def staticDistCalc(gridargs, params, datapath):
     nPBm_d = np.gradient(nPBm_cum_smooth, dPBm)
     nPIm_d = np.gradient(nPIm_cum_smooth, dPIm)
 
+    nPBm_d[np.isnan(nPBm_d)] = 0
+    nPIm_d[np.isnan(nPIm_d)] = 0
+    print(nPBm_d)
+
     nPBm_Tot = np.sum(nPBm_d * dPBm) + nPB_deltaK0
     nPIm_Tot = np.sum(nPIm_d * dPIm) + nPB_deltaK0
 
@@ -241,10 +245,10 @@ def staticDistCalc(gridargs, params, datapath):
     # np.savetxt(datapath + '/PBm_Data_P_{:.3f}.dat'.format(P), PBm_DistData)
     # np.savetxt(datapath + '/PIm_Data_P_{:.3f}.dat'.format(P), PIm_DistData)
 
-    # PBm_DistData = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_d[:, np.newaxis]), axis=1)
-    # PIm_DistData = np.concatenate((PIm_Vec[:, np.newaxis], nPIm_d[:, np.newaxis]), axis=1)
-    # np.savetxt(datapath + '/mag/PBm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PBm_DistData)
-    # np.savetxt(datapath + '/mag/PIm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PIm_DistData)
+    PBm_DistData = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_d[:, np.newaxis]), axis=1)
+    PIm_DistData = np.concatenate((PIm_Vec[:, np.newaxis], nPIm_d[:, np.newaxis]), axis=1)
+    np.savetxt(datapath + '/mag/PBm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PBm_DistData)
+    np.savetxt(datapath + '/mag/PIm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -382,7 +386,7 @@ def staticDistCalc(gridargs, params, datapath):
 start = timer()
 
 (Lx, Ly, Lz) = (20, 20, 20)
-(dx, dy, dz) = (5e-01, 5e-01, 5e-01)
+(dx, dy, dz) = (8e-01, 8e-01, 8e-01)
 
 xgrid = Grid.Grid('CARTESIAN_3D')
 xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -423,16 +427,16 @@ PBint_tck = np.load('PBint_spline.npy')
 
 # Single function run
 
-P = 0.9 * nuV
-aIBi = -10
+P = 1.4 * nuV
+aIBi = -2
 
 Pc = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
 DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
 aSi = aSi_interp(DP, aSi_tck)
 
 PB = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-Energy = fm.Eup(P, PB, aIBi, aSi, mI, mB, n0)
-Z = fm.qp_residue(aIBi, aSi, gBB, mI, mB, n0)
+# Energy = fm.Eup(P, PB, aIBi, aSi, mI, mB, n0)
+# Z = fm.qp_residue(aIBi, aSi, gBB, mI, mB, n0)
 
 params = [P, aIBi, aSi, DP, mI, mB, n0, gBB, nuV]
 print('DP: {0}'.format(DP))
@@ -441,10 +445,10 @@ print('aSi: {0}, aSi_fm: {1}'.format(aSi, fm.aSi(DP, gBB, mI, mB, n0)))
 print('Pc: {0}'.format(Pc))
 print('P: {0}'.format(P))
 print('Nu: {0}'.format(nuV))
-print('E: {0}'.format(Energy))
-print('Z: {0}'.format(Z))
+# print('E: {0}'.format(Energy))
+# print('Z: {0}'.format(Z))
 
-# staticDistCalc(gridargs, params, datapath)
+staticDistCalc(gridargs, params, datapath)
 
 # Multiple function run
 
@@ -468,31 +472,31 @@ print('Z: {0}'.format(Z))
 # print(end - start)f
 
 
-# Other stuff
+# Z Calculation
 
-datapath_Z = os.path.dirname(os.path.realpath(__file__)) + '/data/qpresidue'
-dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
-PVals = np.linspace(0, Pc, 100)
-ZVals = np.zeros(PVals.size)
+# datapath_Z = os.path.dirname(os.path.realpath(__file__)) + '/data/qpresidue'
+# dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
+# PVals = np.linspace(0, Pc, 100)
+# ZVals = np.zeros(PVals.size)
 
-for ind, P in enumerate(PVals):
-    DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-    aSi = aSi_interp(DP, aSi_tck)
-    bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
-    beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
-    mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
-    Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
-    ZVals[ind] = np.exp(-0.5 * Nph)
+# for ind, P in enumerate(PVals):
+#     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+#     aSi = aSi_interp(DP, aSi_tck)
+#     bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
+#     beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
+#     mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
+#     Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
+#     ZVals[ind] = np.exp(-0.5 * Nph)
 
-# fig, ax = plt.subplots()
+# # fig, ax = plt.subplots()
 
-# ax.plot(PVals, ZVals, 'b-')
-# ax.set_title('Quasiparticle Residue')
-# ax.set_ylabel(r'$Z$')
-# ax.set_xlabel(r'$P$')
+# # ax.plot(PVals, ZVals, 'b-')
+# # ax.set_title('Quasiparticle Residue')
+# # ax.set_ylabel(r'$Z$')
+# # ax.set_xlabel(r'$P$')
 
-# fig.tight_layout()
-# plt.show()
+# # fig.tight_layout()
+# # plt.show()
 
-ZData = np.concatenate((PVals[:, np.newaxis], ZVals[:, np.newaxis]), axis=1)
-np.savetxt(datapath_Z + '/Z_aIBi_{0}.dat'.format(aIBi), ZData)
+# ZData = np.concatenate((PVals[:, np.newaxis], ZVals[:, np.newaxis]), axis=1)
+# np.savetxt(datapath_Z + '/Z_aIBi_{0}.dat'.format(aIBi), ZData)
