@@ -9,6 +9,8 @@ import polrabi.staticfm as fm
 from scipy.optimize import curve_fit
 from scipy import interpolate
 from scipy.special import expit, hyp2f1
+from scipy.signal import savgol_filter
+from TVRegDiff import TVRegDiff
 
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
@@ -115,7 +117,7 @@ def staticDistCalc(gridargs, params, datapath):
     #     LC_Tan = Lpopt[0]
     #     print(C_Tan, np.sqrt(np.diag(pcov))[0])
 
-    # Calculate magnitude distribution nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2)
+    # Calculate magnitude distribution nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2) - calculate CDF from this
 
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
@@ -146,10 +148,89 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
+    # CDF manipulation
+
+    # nPBm_d = savgol_filter(nPBm_cum, window_length=101, polyorder=3, deriv=1)
+    # nPIm_d = savgol_filter(nPIm_cum, window_length=101, polyorder=3, deriv=1)
+    # nPBm_d = np.gradient(nPBm_cum)
+    # nPIm_d = np.gradient(nPIm_cum)
+
+    PBm_Vec = np.linspace(0, np.max(PB_unique), 100, endpoint=False)
+    PIm_Vec = np.linspace(0, np.max(PI_unique), 100, endpoint=False)
+    dPBm = PBm_Vec[1] - PBm_Vec[0]
+    dPIm = PIm_Vec[1] - PIm_Vec[0]
+
+    runsum = 0.0; npoints = 0; counter = 0
+    nPBm_cum_smooth = np.zeros(PBm_Vec.size)
+    for ind, PBval in enumerate(PB_unique):
+        # print(PBval)
+        if PBval < (counter + 1) * dPBm:
+            # print(PBval, (counter + 1) * dPBm)
+            runsum += nPBm_cum[ind]
+            npoints += 1
+            # print(runsum, npoints)
+        else:
+            # print(counter, runsum, npoints)
+            nPBm_cum_smooth[counter] = runsum / npoints
+            counter += 1
+            runsum = nPBm_cum[ind]; npoints = 1
+
+    runsum = 0; npoints = 0; counter = 0
+    nPIm_cum_smooth = np.zeros(PIm_Vec.size)
+    for ind, PIval in enumerate(PI_unique):
+        if PIval < (counter + 1) * dPIm:
+            runsum += nPIm_cum[ind]
+            npoints += 1
+        else:
+            nPIm_cum_smooth[counter] = runsum / npoints
+            counter += 1
+            runsum = nPIm_cum[ind]; npoints = 1
+
+    nPBm_d = np.gradient(nPBm_cum_smooth)
+    nPIm_d = np.gradient(nPIm_cum_smooth)
+
+    # nPBm_d = TVRegDiff(nPBm_cum, 100, 5e-2, dx=dPBm, alph=1e2, ep=1e-2, scale='large', plotflag=0)
+    # nPIm_d = TVRegDiff(nPIm_cum, 100, 5e-2, dx=dPIm, alph=1e2, ep=1e-2, scale='large', plotflag=0)
+
+    # # CURVE FIT
+
+    # # def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
+    # def CDF_tfunc(p, A, B, C, D, E): return E * (C / (A + 1)) * p**(A + 1) * hyp2f1(1, (A + 1) / (A + B), 1 + (A + 1) / (A + B), -(C / D) * p**(A + B))
+
+    # PBopt, PBcov = curve_fit(CDF_tfunc, PB_unique, nPBm_cum)
+    # PIopt, PIcov = curve_fit(CDF_tfunc, PI_unique, nPIm_cum)
+
+    # PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
+    # PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
+
+    # nPBm_cum_Vec = CDF_tfunc(PBm_Vec, *PBopt)
+    # nPIm_cum_Vec = CDF_tfunc(PIm_Vec, *PIopt)
+
+    # dPBm = PBm_Vec[1] - PBm_Vec[0]
+    # dPIm = PIm_Vec[1] - PIm_Vec[0]
+    # nPBm_Vec = np.gradient(nPBm_cum_Vec, dPBm)
+    # nPIm_Vec = np.gradient(nPIm_cum_Vec, dPIm)
+
+    # nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
+    # nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
+
+    # PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
+    # PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
+
+    # # PBm_smallPower = PBopt[3] - 1
+    # # PIm_smallPower = PIopt[3] - 1
+
+    # PBm_initPower = PBopt[1]
+    # PBm_decayPower = PBopt[2]
+    # PIm_initPower = PIopt[1]
+    # PIm_decayPower = PIopt[2]
+
+    # nPBm_mean = np.dot(nPBm_Vec * dPBm, PBm_Vec) + 0 * nPB_deltaK0
+    # nPIm_mean = np.dot(nPIm_Vec * dPIm, PIm_Vec) + 0 * nPB_deltaK0
+
     # CURVE FIT
 
-    # def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
-    def CDF_tfunc(p, A, B, C, D, E): return E * (C / (A + 1)) * p**(A + 1) * hyp2f1(1, (A + 1) / (A + B), 1 + (A + 1) / (A + B), -(C / D) * p**(A + B))
+    def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
 
     PBopt, PBcov = curve_fit(CDF_tfunc, PB_unique, nPBm_cum)
     PIopt, PIcov = curve_fit(CDF_tfunc, PI_unique, nPIm_cum)
@@ -257,7 +338,7 @@ def staticDistCalc(gridargs, params, datapath):
 
     # alt plot
 
-    fig, ax = plt.subplots(nrows=2, ncols=2)
+    fig, ax = plt.subplots(nrows=3, ncols=2)
 
     ax[0, 0].plot(PB_unique, nPBm_cum, 'k*')
     ax[0, 0].set_title('CDF PB')
@@ -282,6 +363,18 @@ def staticDistCalc(gridargs, params, datapath):
     # ax[1, 1].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
     # ax[1, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
     ax[1, 1].legend()
+
+    ax[2, 0].plot(PBm_Vec, nPBm_d, 'b*')
+    ax[2, 0].set_title('PDF PB')
+    ax[2, 0].set_xlabel(r'$|P_{B}|$')
+    # ax[2, 0].set_xscale('log')
+    ax[2, 0].set_yscale('log')
+
+    ax[2, 1].plot(PIm_Vec, nPIm_d, 'r*')
+    ax[2, 1].set_title('PDF PI')
+    ax[2, 1].set_xlabel(r'$|P_{I}|$')
+    # ax[2, 1].set_xscale('log')
+    ax[2, 1].set_yscale('log')
 
     # fig.delaxes(ax[1, 1])
     fig.tight_layout()
