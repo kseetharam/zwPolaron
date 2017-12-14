@@ -8,7 +8,7 @@ import Grid
 import polrabi.staticfm as fm
 from scipy.optimize import curve_fit
 from scipy import interpolate
-from scipy.special import expit
+from scipy.special import expit, hyp2f1
 
 
 matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
@@ -146,9 +146,10 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
-    # MODIFIED SIGMOID CURVE FIT
+    # CURVE FIT
 
-    def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
+    # def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
+    def CDF_tfunc(p, A, B, C, D): return (C / (A + 1)) * p**(A + 1) * hyp2f1(1, (A + 1) / (A + B), 1 + (A + 1) / (A + B), -(C / D) * p**(A + B))
 
     PBopt, PBcov = curve_fit(CDF_tfunc, PB_unique, nPBm_cum)
     PIopt, PIcov = curve_fit(CDF_tfunc, PI_unique, nPIm_cum)
@@ -170,8 +171,13 @@ def staticDistCalc(gridargs, params, datapath):
     PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
     PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
 
-    PBm_smallPower = PBopt[3] - 1
-    PIm_smallPower = PIopt[3] - 1
+    # PBm_smallPower = PBopt[3] - 1
+    # PIm_smallPower = PIopt[3] - 1
+
+    PBm_initPower = PBopt[1]
+    PBm_decayPower = PBopt[2]
+    PIm_initPower = PIopt[1]
+    PIm_decayPower = PIopt[2]
 
     nPBm_mean = np.dot(nPBm_Vec * dPBm, PBm_Vec) + 0 * nPB_deltaK0
     nPIm_mean = np.dot(nPIm_Vec * dPIm, PIm_Vec) + 0 * nPB_deltaK0
@@ -196,10 +202,14 @@ def staticDistCalc(gridargs, params, datapath):
     print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
     print('PB_mag Max = %f' % (PBm_max))
     print('PI_mag Max = %f' % (PIm_max))
-    print('PB_mag Poly = %f' % (PBm_smallPower))
-    print('PI_mag Poly = %f' % (PIm_smallPower))
+    # print('PB_mag Poly = %f' % (PBm_smallPower))
+    # print('PI_mag Poly = %f' % (PIm_smallPower))
     print('PB_mag Mean = %f' % (nPBm_mean))
     print('PI_mag Mean = %f' % (nPIm_mean))
+    print('PB_mag init = %f' % (PBm_initPower))
+    print('PI_mag init = %f' % (PIm_initPower))
+    print('PB_mag decay = %f' % (PBm_decayPower))
+    print('PI_mag decay = %f' % (PIm_decayPower))
 
     # Save data
     # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
