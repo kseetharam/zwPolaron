@@ -48,3 +48,35 @@
 
     # PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
     # PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
+
+    ####
+
+    # ax[2, 0].plot(PB_unique, nPBm_unique, 'k*')
+    # # ax[2, 0].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+    # ax[2, 0].set_title(r'$n_{\vec{P_B}}$')
+    # ax[2, 0].set_xlabel(r'$|P_{B}|$')
+
+    # ax[2, 1].plot(PI_unique, nPIm_unique, 'k*')
+    # # ax[2, 1].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+    # ax[2, 1].set_title(r'$n_{\vec{P_I}}$')
+    # ax[2, 1].set_xlabel(r'$|P_{I}|$')
+
+    # ax[2, 2].plot(PBm_Vec, nPBm_Vec)
+    # ax[2, 2].set_title(r'$n_{\vec{P_B}}$')
+    # ax[2, 2].set_xlabel(r'$|P_{B}|$')
+    # ax[2, 2].plot(np.zeros(PB_unique.size), np.linspace(0, nPB_deltaK0, PB_unique.size))
+
+    # ax[3, 2].plot(PIm_Vec, nPIm_Vec)
+    # ax[3, 2].set_title(r'$n_{\vec{P_I}}$')
+    # ax[3, 2].set_xlabel(r'$|P_{I}|$')
+    # ax[3, 2].plot(P * np.ones(PI_unique.size), np.linspace(0, nPB_deltaK0, PI_unique.size))
+
+    # ax[3, 0].plot(PB_unique, nPBm_cum, 'k*')
+    # ax[3, 0].set_title('Cumulative Distribution Function')
+    # ax[3, 0].set_xlabel(r'$|P_{B}|$')
+    # ax[3, 0].plot(PBm_Vec, nPBm_cum_Vec, 'r-')
+
+    # ax[3, 1].plot(PI_unique, nPIm_cum, 'k*')
+    # ax[3, 1].set_title('Cumulative Distribution Function')
+    # ax[3, 1].set_xlabel(r'$|P_{I}|$')
+    # ax[3, 1].plot(PIm_Vec, nPIm_cum_Vec, 'r-')
