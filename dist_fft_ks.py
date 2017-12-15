@@ -152,103 +152,61 @@ def staticDistCalc(gridargs, params, datapath):
             continue
         nPIm_cum[ind] = nPIm_cum[ind - 1] + nPIm_unique[ind]
 
-    # CDF manipulation
+    # CDF and PDF pre-processing
 
-    PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
-    PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
+    PBm_Vec = np.linspace(0, np.max(PB_unique), 200)
+    PIm_Vec = np.linspace(0, np.max(PI_unique), 200)
     dPBm = PBm_Vec[1] - PBm_Vec[0]
     dPIm = PIm_Vec[1] - PIm_Vec[0]
-
-    # nPBm_cum_smooth = np.zeros(PBm_Vec.size)
-    # nPIm_cum_smooth = np.zeros(PIm_Vec.size)
-
-    # runsum = 0.0; npoints = 0; counter = 0
-    # for ind, PBval in enumerate(PB_unique):
-    #     # print(PBval)
-    #     if PBval < (counter + 1) * dPBm:
-    #         # print(PBval, (counter + 1) * dPBm)
-    #         runsum += nPBm_cum[ind]
-    #         npoints += 1
-    #         # print(runsum, npoints)
-    #     else:
-    #         # print(counter, runsum, npoints)
-    #         nPBm_cum_smooth[counter] = runsum / npoints
-    #         counter += 1
-    #         runsum = nPBm_cum[ind]; npoints = 1
-
-    # runsum = 0; npoints = 0; counter = 0
-    # for ind, PIval in enumerate(PI_unique):
-    #     if PIval < (counter + 1) * dPIm:
-    #         runsum += nPIm_cum[ind]
-    #         npoints += 1
-    #     else:
-    #         nPIm_cum_smooth[counter] = runsum / npoints
-    #         counter += 1
-    #         runsum = nPIm_cum[ind]; npoints = 1
 
     nPBm_cum_smooth, bin_edgesB, binnumberB = binned_statistic(x=PB_unique, values=nPBm_cum, bins=PBm_Vec, statistic='mean')
     nPIm_cum_smooth, bin_edgesI, binnumberI = binned_statistic(x=PI_unique, values=nPIm_cum, bins=PIm_Vec, statistic='mean')
 
-    nPBm_d = np.gradient(nPBm_cum_smooth, dPBm)
-    nPIm_d = np.gradient(nPIm_cum_smooth, dPIm)
+    nPBm_dat = np.gradient(nPBm_cum_smooth, dPBm)
+    nPIm_dat = np.gradient(nPIm_cum_smooth, dPIm)
 
-    nPBm_d[np.isnan(nPBm_d)] = 0
-    nPIm_d[np.isnan(nPIm_d)] = 0
-    print(nPBm_d)
+    PB_mask = np.isnan(nPBm_dat)
+    PI_mask = np.isnan(nPIm_dat)
 
-    nPBm_Tot = np.sum(nPBm_d * dPBm) + nPB_deltaK0
-    nPIm_Tot = np.sum(nPIm_d * dPIm) + nPB_deltaK0
+    if(any(PB_mask) or any(PI_mask)):
+        print('Zeros in nP*m_dat')
+    nPBm_dat[PB_mask] = 0
+    nPIm_dat[PI_mask] = 0
+
+    nPBm_Tot = np.sum(nPBm_dat * dPBm) + nPB_deltaK0
+    nPIm_Tot = np.sum(nPIm_dat * dPIm) + nPB_deltaK0
 
     PBm_Vec = PBm_Vec[0:-1]
     PIm_Vec = PIm_Vec[0:-1]
 
     # # CURVE FIT
 
-    # # def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
-    # def CDF_tfunc(p, A, B, C, D, E): return E * (C / (A + 1)) * p**(A + 1) * hyp2f1(1, (A + 1) / (A + B), 1 + (A + 1) / (A + B), -(C / D) * p**(A + B))
+    # def CDF_tfunc(p, A, B, C, D, E): return 1 / (E + 1 / (A * p**D) + 1 / (B * expit(C * p)))
+    def PDF_tfunc(p, A, B, C, D, E): return 1 / (1 / (C * p**A) + 1 / (D * p**(-B)))
 
-    # PBopt, PBcov = curve_fit(CDF_tfunc, PB_unique, nPBm_cum)
-    # PIopt, PIcov = curve_fit(CDF_tfunc, PI_unique, nPIm_cum)
+    mask = PBm_Vec < 6
+    PBopt, PBcov = curve_fit(PDF_tfunc, PBm_Vec[mask], nPBm_dat[mask])
+    PIopt, PIcov = curve_fit(PDF_tfunc, PIm_Vec[mask], nPIm_dat[mask])
 
-    # PBm_Vec = np.linspace(0, np.max(PB_unique), 100)
-    # PIm_Vec = np.linspace(0, np.max(PI_unique), 100)
+    nPBm_Vec = PDF_tfunc(PBm_Vec, *PBopt)
+    nPIm_Vec = PDF_tfunc(PIm_Vec, *PIopt)
 
-    # nPBm_cum_Vec = CDF_tfunc(PBm_Vec, *PBopt)
-    # nPIm_cum_Vec = CDF_tfunc(PIm_Vec, *PIopt)
-
-    # dPBm = PBm_Vec[1] - PBm_Vec[0]
-    # dPIm = PIm_Vec[1] - PIm_Vec[0]
-    # nPBm_Vec = np.gradient(nPBm_cum_Vec, dPBm)
-    # nPIm_Vec = np.gradient(nPIm_cum_Vec, dPIm)
-
-    # nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
-    # nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
+    PBm_initPower = PBopt[0]
+    PBm_decayPower = PBopt[1]
+    PIm_initPower = PIopt[0]
+    PIm_decayPower = PIopt[1]
 
     # PBm_max = PBm_Vec[np.argmax(nPBm_Vec)]
     # PIm_max = PIm_Vec[np.argmax(nPIm_Vec)]
-
-    # # PBm_smallPower = PBopt[3] - 1
-    # # PIm_smallPower = PIopt[3] - 1
-
-    # PBm_initPower = PBopt[1]
-    # PBm_decayPower = PBopt[2]
-    # PIm_initPower = PIopt[1]
-    # PIm_decayPower = PIopt[2]
-
-    # nPBm_mean = np.dot(nPBm_Vec * dPBm, PBm_Vec) + 0 * nPB_deltaK0
-    # nPIm_mean = np.dot(nPIm_Vec * dPIm, PIm_Vec) + 0 * nPB_deltaK0
+    # nPBm_mean = np.dot(nPBm_Vec * dPBm, PBm_Vec)
+    # nPIm_mean = np.dot(nPIm_Vec * dPIm, PIm_Vec)
 
     # P_mag data save
 
-    # PBm_DistData = np.concatenate((PB_unique[:, np.newaxis], nPBm_cum[:, np.newaxis]), axis=1)
-    # PIm_DistData = np.concatenate((PI_unique[:, np.newaxis], nPIm_cum[:, np.newaxis]), axis=1)
-    # np.savetxt(datapath + '/PBm_Data_P_{:.3f}.dat'.format(P), PBm_DistData)
-    # np.savetxt(datapath + '/PIm_Data_P_{:.3f}.dat'.format(P), PIm_DistData)
-
-    PBm_DistData = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_d[:, np.newaxis]), axis=1)
-    PIm_DistData = np.concatenate((PIm_Vec[:, np.newaxis], nPIm_d[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/mag/PBm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PBm_DistData)
-    np.savetxt(datapath + '/mag/PIm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PIm_DistData)
+    # PBm_DistData = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis]), axis=1)
+    # PIm_DistData = np.concatenate((PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
+    # np.savetxt(datapath + '/mag/PBm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PBm_DistData)
+    # np.savetxt(datapath + '/mag/PIm_Data_P_{:.3f}_kzm_{:.3f}.dat'.format(P, kz_max), PIm_DistData)
 
     # Metrics/consistency checks
 
@@ -261,16 +219,10 @@ def staticDistCalc(gridargs, params, datapath):
     print("Exp[-Nph] = %f" % (nPB_deltaK0))
     print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
     print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
-    # print('PB_mag Max = %f' % (PBm_max))
-    # print('PI_mag Max = %f' % (PIm_max))
-    # print('PB_mag Poly = %f' % (PBm_smallPower))
-    # # print('PI_mag Poly = %f' % (PIm_smallPower))
-    # print('PB_mag Mean = %f' % (nPBm_mean))
-    # print('PI_mag Mean = %f' % (nPIm_mean))
-    # print('PB_mag init = %f' % (PBm_initPower))
-    # print('PI_mag init = %f' % (PIm_initPower))
-    # print('PB_mag decay = %f' % (PBm_decayPower))
-    # print('PI_mag decay = %f' % (PIm_decayPower))
+    print('PB_mag init = %f' % (PBm_initPower))
+    print('PB_mag decay = %f' % (PBm_decayPower))
+    print('PI_mag init = %f' % (PIm_initPower))
+    print('PI_mag decay = %f' % (PIm_decayPower))
 
     # Save data
     # Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
@@ -362,31 +314,33 @@ def staticDistCalc(gridargs, params, datapath):
 
     # alt plot 2
 
-# Create grids
-
     fig, ax = plt.subplots(nrows=1, ncols=2)
 
-    ax[0].plot(PBm_Vec, nPBm_d, 'b*')
+    ax[0].plot(PBm_Vec, nPBm_dat, 'b*')
+    ax[0].plot(PBm_Vec, nPBm_Vec, 'r-')
     ax[0].set_title('PDF PB')
     ax[0].set_xlabel(r'$|P_{B}|$')
-    # ax[0].set_xscale('log')
-    # ax[0].set_yscale('log')
+    ax[0].set_xscale('log')
+    ax[0].set_yscale('log')
 
-    ax[1].plot(PIm_Vec, nPIm_d, 'r*')
+    ax[1].plot(PIm_Vec, nPIm_dat, 'b*')
+    ax[1].plot(PIm_Vec, nPIm_Vec, 'r-')
     ax[1].set_title('PDF PI')
     ax[1].set_xlabel(r'$|P_{I}|$')
-    # ax[1].set_xscale('log')
-    # ax[1].set_yscale('log')
+    ax[1].set_xscale('log')
+    ax[1].set_yscale('log')
 
     # fig.delaxes(ax[1, 1])
     fig.tight_layout()
     plt.show()
 
 
+# Create grids
+
 start = timer()
 
 (Lx, Ly, Lz) = (20, 20, 20)
-(dx, dy, dz) = (8e-01, 8e-01, 8e-01)
+(dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
 xgrid = Grid.Grid('CARTESIAN_3D')
 xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -476,7 +430,7 @@ staticDistCalc(gridargs, params, datapath)
 
 # datapath_Z = os.path.dirname(os.path.realpath(__file__)) + '/data/qpresidue'
 # dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
-# PVals = np.linspace(0, Pc, 100)
+# PVals = np.linspace(0, Pc, 10)
 # ZVals = np.zeros(PVals.size)
 
 # for ind, P in enumerate(PVals):
@@ -488,15 +442,15 @@ staticDistCalc(gridargs, params, datapath)
 #     Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
 #     ZVals[ind] = np.exp(-0.5 * Nph)
 
-# # fig, ax = plt.subplots()
+# fig, ax = plt.subplots()
 
-# # ax.plot(PVals, ZVals, 'b-')
-# # ax.set_title('Quasiparticle Residue')
+# ax.plot(PVals, ZVals, 'b-')
+# ax.set_title('Quasiparticle Residue')
 # # ax.set_ylabel(r'$Z$')
 # # ax.set_xlabel(r'$P$')
 
 # # fig.tight_layout()
-# # plt.show()
+# plt.show()
 
-# ZData = np.concatenate((PVals[:, np.newaxis], ZVals[:, np.newaxis]), axis=1)
-# np.savetxt(datapath_Z + '/Z_aIBi_{0}.dat'.format(aIBi), ZData)
+# # ZData = np.concatenate((PVals[:, np.newaxis], ZVals[:, np.newaxis]), axis=1)
+# # np.savetxt(datapath_Z + '/Z_aIBi_{0}.dat'.format(aIBi), ZData)
