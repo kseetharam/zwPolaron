@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy import interpolate
 from scipy.stats import binned_statistic
 
@@ -200,53 +201,46 @@ def staticDistCalc(gridargs, params, datapath):
         indices = np.where(D > 0)[0]
         FWHM = PI_z_ord[indices[-1]] - PI_z_ord[indices[0]]
 
-    # Calculate magnitude distribution nPB(p) and nPI(p) where p_IorB = sqrt(px^2 + py^2 + pz^2)
+    # Calculate magnitude distribution nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2) - calculate CDF from this
 
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
     PI_flat = PI.reshape(PI.size)
-    nPB_flat = nPB.reshape(nPB.size)
+    nPB_flat = np.abs(nPB.reshape(nPB.size))
 
-    PB_unique, PB_uind, PB_ucounts = np.unique(PB_flat, return_inverse=True, return_counts=True)
-    PI_unique, PI_uind, PI_ucounts = np.unique(PI_flat, return_inverse=True, return_counts=True)
-    nPBm_unique = np.zeros(PB_unique.size)
-    nPIm_unique = np.zeros(PI_unique.size)
+    PB_series = pd.Series(nPB_flat, index=PB_flat)
+    PI_series = pd.Series(nPB_flat, index=PI_flat)
 
-    for ind, val in enumerate(np.abs(nPB_flat) * dkx * dky * dkz):
-        PB_index = PB_uind[ind]
-        PI_index = PI_uind[ind]
-        nPBm_unique[PB_index] += val
-        nPIm_unique[PI_index] += val
+    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dkx * dky * dkz
+    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dkx * dky * dkz
 
-    # Calculate CDF
+    PB_unique = nPBm_unique.keys().values
+    PI_unique = nPIm_unique.keys().values
 
-    nPBm_cum = np.cumsum(nPBm_unique)
-    nPIm_cum = np.cumsum(nPIm_unique)
+    nPBm_cum = nPBm_unique.cumsum()
+    nPIm_cum = nPIm_unique.cumsum()
 
-    # CDF and PDF smoothing/averaging
+    # CDF and PDF pre-processing
 
-    PBm_Vec = np.linspace(0, np.max(PB_unique), 200)
-    PIm_Vec = np.linspace(0, np.max(PI_unique), 200)
-    dPBm = PBm_Vec[1] - PBm_Vec[0]
-    dPIm = PIm_Vec[1] - PIm_Vec[0]
+    PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
+    PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
 
-    nPBm_cum_smooth, bin_edgesB, binnumberB = binned_statistic(x=PB_unique, values=nPBm_cum, bins=PBm_Vec, statistic='mean')
-    nPIm_cum_smooth, bin_edgesI, binnumberI = binned_statistic(x=PI_unique, values=nPIm_cum, bins=PIm_Vec, statistic='mean')
+    nPBm_cum_smooth = nPBm_cum.groupby(pd.cut(x=nPBm_cum.index, bins=PBm_Vec, right=True, include_lowest=True)).mean()
+    nPIm_cum_smooth = nPIm_cum.groupby(pd.cut(x=nPIm_cum.index, bins=PIm_Vec, right=True, include_lowest=True)).mean()
+
+    # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
+    PBm_Vec = PBm_Vec[0:-1]
+    PIm_Vec = PIm_Vec[0:-1]
+
+    # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
+    PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
+    PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+    nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
+    nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
 
     nPBm_dat = np.gradient(nPBm_cum_smooth, dPBm)
     nPIm_dat = np.gradient(nPIm_cum_smooth, dPIm)
-
-    PB_mask = np.isnan(nPBm_dat)
-    PI_mask = np.isnan(nPIm_dat)
-
-    if(any(PB_mask) or any(PI_mask)):
-        print('Zeros in nP*m_dat')
-    nPBm_dat[PB_mask] = 0
-    nPIm_dat[PI_mask] = 0
-
-    PBm_Vec = PBm_Vec[0:-1]
-    PIm_Vec = PIm_Vec[0:-1]
 
     nPBm_Tot = np.sum(nPBm_dat * dPBm) + nPB_deltaK0
     nPIm_Tot = np.sum(nPIm_dat * dPIm) + nPB_deltaK0
