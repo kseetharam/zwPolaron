@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import os
 from timeit import default_timer as timer
-from pf_steadystate_cart import *
+from pf_static_cart import *
 import Grid
 import polrabi.staticfm as fm
 from scipy.optimize import curve_fit
