@@ -239,11 +239,11 @@ def staticDistCalc(gridargs, params, datapath):
     nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
     nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
 
-    nPBm_dat = np.gradient(nPBm_cum_smooth, dPBm)
-    nPIm_dat = np.gradient(nPIm_cum_smooth, dPIm)
+    nPBm_Vec = np.gradient(nPBm_cum_smooth, dPBm)
+    nPIm_Vec = np.gradient(nPIm_cum_smooth, dPIm)
 
-    nPBm_Tot = np.sum(nPBm_dat * dPBm) + nPB_deltaK0
-    nPIm_Tot = np.sum(nPIm_dat * dPIm) + nPB_deltaK0
+    nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
+    nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
     # Metrics/consistency checks
 
@@ -259,5 +259,7 @@ def staticDistCalc(gridargs, params, datapath):
 
     # Save data
 
-    Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
-    np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
+    metrics_data = np.concatenate((DP, Nph, Nph_x, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM), axis=1)
+    xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
+    mag_data = np.concatenate((PBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
+    return metrics_data, xyz_data, mag_data
