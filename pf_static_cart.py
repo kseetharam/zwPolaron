@@ -42,6 +42,24 @@ def BetaK(kx, ky, kz, aIBi, aSi, DP, mI, mB, n0, gBB):
     np.seterr(**old_settings)
     return prefactor * Bk
 
+
+def Energy(P, PB, aIBi, aSi, mI, mB, n0):
+    return ((P**2 - PB**2) / (2 * mI)) + 2 * np.pi * n0 / (ur(mI, mB) * (aIBi - aSi))
+
+
+def effMass(P, PB, mI):
+    m = mI * P / (P - PB)
+
+    if np.isscalar(P):
+        if P == 0:
+            return 1
+        else:
+            return m
+    else:
+        mask = (P == 0)
+        m[mask] = 1
+        return m
+
 # ---- INTERPOLATION FUNCTIONS ----
 
 
@@ -79,7 +97,7 @@ def createSpline_grid(Nsteps, kxFg, kyFg, kzFg, dVk, mI, mB, n0, gBB):
 
 
 def aSi_interp(DP, aSi_tck):
-    return interpolate.splev(DP, aSi_tck, der=0)
+    return 1 * interpolate.splev(DP, aSi_tck, der=0)
 
 
 def PB_interp(DP, aIBi, aSi_tck, PBint_tck):
@@ -122,12 +140,13 @@ def PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB):
 # ---- DATA GENERATION ----
 
 
-def staticDistCalc(gridargs, params, datapath):
-    [xgrid, kgrid, kFgrid] = gridargs
-    [P, aIBi, aSi, DP, mI, mB, n0, gBB] = params
-    bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
+def staticDataGeneration(cParams, gParams, sParams):
+    [P, aIBi] = cParams
+    [xgrid, kgrid, kFgrid] = gParams
+    [mI, mB, n0, gBB, aSi_tck, PBint_tck] = sParams
 
     # unpack grid args
+
     x = xgrid.getArray('x'); y = xgrid.getArray('y'); z = xgrid.getArray('z')
     (Nx, Ny, Nz) = (len(x), len(y), len(z))
     dx = xgrid.arrays_diff['x']; dy = xgrid.arrays_diff['y']; dz = xgrid.arrays_diff['z']
@@ -136,11 +155,25 @@ def staticDistCalc(gridargs, params, datapath):
 
     kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
     dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
+    dVk = dkx * dky * dkz
 
-    # generation
     xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
     kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
     kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
+
+    # calculate relevant parameters
+
+    DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    aSi = aSi_interp(DP, aSi_tck)
+    PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    Pcrit = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
+    En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+    nuV = nu(gBB)
+    eMass = effMass(P, PB_Val, mI)
+
+    bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
+
+    # generation
 
     beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
     mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
@@ -152,9 +185,10 @@ def staticDistCalc(gridargs, params, datapath):
     amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
     amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
 
-    # Calculate Nph
+    # Calculate Nph and Z-factor
     Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
     Nph_x = np.real(np.sum(np.abs(amp_beta_xyz)**2) * dx * dy * dz * (2 * np.pi)**(-3))
+    Z_factor = np.exp(-(1 / 2) * Nph)
 
     # Fourier transform
     beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
@@ -245,21 +279,23 @@ def staticDistCalc(gridargs, params, datapath):
     nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
     nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
-    # Metrics/consistency checks
+    # Consistency checks
 
-    print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
-    print("Nph = \sum b^2 = %f" % (Nph))
-    print("Nph_x = %f " % (Nph_x))
-    print("\int np dp = %f" % (nPB_Tot))
-    print("\int p np dp = %f" % (nPB_Mom1))
-    print("\int k beta^2 dk = %f" % (beta2_kz_Mom1))
-    print("Exp[-Nph] = %f" % (nPB_deltaK0))
-    print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
-    print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
+    # print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
+    # print("Nph = \sum b^2 = %f" % (Nph))
+    # print("Nph_x = %f " % (Nph_x))
+    # print("\int np dp = %f" % (nPB_Tot))
+    # print("\int p np dp = %f" % (nPB_Mom1))
+    # print("\int k beta^2 dk = %f" % (beta2_kz_Mom1))
+    # print("Exp[-Nph] = %f" % (nPB_deltaK0))
+    # print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
+    # print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
 
-    # Save data
+    # Collate data
 
-    metrics_data = np.concatenate((DP, Nph, Nph_x, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM), axis=1)
+    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, Pcrit, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
+    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nuV, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM])
+    # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
     xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
-    mag_data = np.concatenate((PBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
-    return metrics_data, xyz_data, mag_data
+    mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
+    return metrics_string, metrics_data, xyz_data, mag_data
