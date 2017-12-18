@@ -68,9 +68,13 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # metrics_string, metrics_data, xyz_data, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
+    # metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
     # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #     f.write(metrics_string)
+    # with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+    #     f.write(xyz_string)
+    # with open(innerdatapath + '/mag_string.txt', 'w') as f:
+    #     f.write(mag_string)
     # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
     # np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
     # np.savetxt(innerdatapath + '/mag.dat', mag_data)
@@ -99,9 +103,13 @@ if __name__ == "__main__":
         innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
         if os.path.isdir(innerdatapath) is False:
             os.mkdir(innerdatapath)
-        metrics_string, metrics_data, xyz_data, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
+        metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
         with open(innerdatapath + '/metrics_string.txt', 'w') as f:
             f.write(metrics_string)
+        with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+            f.write(xyz_string)
+        with open(innerdatapath + '/mag_string.txt', 'w') as f:
+            f.write(mag_string)
         np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
         np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
         np.savetxt(innerdatapath + '/mag.dat', mag_data)
@@ -129,9 +137,13 @@ if __name__ == "__main__":
     #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
-    #     metrics_string, metrics_data, xyz_data, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
+    #     metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.staticDataGeneration(cParams, gParams, sParams)
     #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #         f.write(metrics_string)
+    #     with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+    #         f.write(xyz_string)
+    #     with open(innerdatapath + '/mag_string.txt', 'w') as f:
+    #         f.write(mag_string)
     #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
     #     np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
     #     np.savetxt(innerdatapath + '/mag.dat', mag_data)

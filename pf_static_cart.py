@@ -304,6 +304,8 @@ def staticDataGeneration(cParams, gParams, sParams):
     metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
     metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM])
     # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
+    xyz_string = 'x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz, PI_z, nPI_z'
     xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
+    mag_string = 'PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec'
     mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
-    return metrics_string, metrics_data, xyz_data, mag_data
+    return metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data
