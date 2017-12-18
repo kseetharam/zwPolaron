@@ -25,6 +25,7 @@ class CoherentState:
             self.kcos = kcos_func(kgrid)
             self.ksin = ksin_func(kgrid)
             self.kpow2 = kpow2_func(kgrid)
+        if(self.)
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
@@ -144,58 +145,10 @@ class CoherentState:
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 
-        # Flipping domain for P_I instead of P_B so now nPB(PI) -> nPI
-
-        PI_x = -1 * kx
-        PI_y = -1 * ky
-        PI_z = P - kz
-
-        # Calculate magnitude distribution nPB(P) and nPI(P) where P_IorB = sqrt(Px^2 + Py^2 + Pz^2) - calculate CDF from this
-
-        PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
-        PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
-        PB_flat = PB.reshape(PB.size)
-        PI_flat = PI.reshape(PI.size)
-        nPB_flat = np.abs(nPB.reshape(nPB.size))
-
-        PB_series = pd.Series(nPB_flat, index=PB_flat)
-        PI_series = pd.Series(nPB_flat, index=PI_flat)
-
-        nPBm_unique = PB_series.groupby(PB_series.index).sum() * dkx * dky * dkz
-        nPIm_unique = PI_series.groupby(PI_series.index).sum() * dkx * dky * dkz
-
-        PB_unique = nPBm_unique.keys().values
-        PI_unique = nPIm_unique.keys().values
-
-        nPBm_cum = nPBm_unique.cumsum()
-        nPIm_cum = nPIm_unique.cumsum()
-
-        # CDF and PDF pre-processing
-
-        PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
-        PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
-
-        nPBm_cum_smooth = nPBm_cum.groupby(pd.cut(x=nPBm_cum.index, bins=PBm_Vec, right=True, include_lowest=True)).mean()
-        nPIm_cum_smooth = nPIm_cum.groupby(pd.cut(x=nPIm_cum.index, bins=PIm_Vec, right=True, include_lowest=True)).mean()
-
-        # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
-        PBm_Vec = PBm_Vec[0:-1]
-        PIm_Vec = PIm_Vec[0:-1]
-
-        # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
-        PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
-        PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
-        nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
-        nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
-
-        nPBm_Vec = np.gradient(nPBm_cum_smooth, dPBm)
-        nPIm_Vec = np.gradient(nPIm_cum_smooth, dPIm)
-
         pos_dist = amp_beta_xyz
         mom_dist = nPB
-        mag_dist_List = [PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec]
 
-        return pos_dist, mom_dist, mag_dist_List
+        return pos_dist, mom_dist
 
 
 #  # THIS WAS FOR DISTRIBUTION FUNCTION ATTEMPT IN SPHERICAL COORDINATES -- DEPRACATED
