@@ -60,6 +60,13 @@ def effMass(P, PB, mI):
         m[mask] = 1
         return m
 
+
+def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
+    # gives bare interaction strength constant
+    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+    mR = ur(mI, mB)
+    return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
+
 # ---- INTERPOLATION FUNCTIONS ----
 
 
@@ -168,8 +175,9 @@ def staticDataGeneration(cParams, gParams, sParams):
     PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
     Pcrit = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
     En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-    nuV = nu(gBB)
+    nu_const = nu(gBB)
     eMass = effMass(P, PB_Val, mI)
+    gIB = g(kx, ky, kz, aIBi, mI, mB, n0, gBB)
 
     bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
 
@@ -293,8 +301,8 @@ def staticDataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, Pcrit, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
-    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nuV, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM])
+    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
+    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM])
     # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
     xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
     mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
