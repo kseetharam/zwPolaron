@@ -83,6 +83,14 @@ class Grid:
         list_of_unit_vectors = list(self.arrays.keys())
         coordinate_system = self.coordinate_system
 
+        if coordinate_system == "CARTESIAN_3D":
+            dV = 1
+            numelements = 1
+            for unit in list_of_unit_vectors:
+                numelements = numelements * self.arrays[unit].size
+                dV = dV * self.arrays_diff[unit]
+            return dV * np.ones(numelements)
+
         # create dk, dtheta and modify it
         grid_diff = self.diffArray(list_of_unit_vectors[0])
 
@@ -100,10 +108,7 @@ class Grid:
         if coordinate_system == "SPHERICAL_2D":
             list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
 
-        if coordinate_system == "CARTESIAN_3D":
-            prefac = (2 * np.pi)**(-3)
-        else:
-            prefac = self.function_prod(list_of_unit_vectors, list_of_functions)
+        prefac = self.function_prod(list_of_unit_vectors, list_of_functions)
 
         # print(len(output))
         return prefac * grid_diff.reshape(grid_diff.size)

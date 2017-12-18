@@ -1,5 +1,5 @@
 import numpy as np
-import polaron_functions as pf
+import pf_spherical as pfs
 
 
 class PolaronHamiltonian:
@@ -13,12 +13,12 @@ class PolaronHamiltonian:
 
         self.grid = coherent_state.kgrid
 
-        self.gnum = pf.g(self.grid, *Params)
-        self.Omega0_grid = pf.omega0(self.grid, *Params)
+        self.gnum = pfs.g(self.grid, *Params)
+        self.Omega0_grid = pfs.omega0(self.grid, *Params)
         # self.Wk_grid = pf.Wk(self.grid, *Params)
-        self.Wk_grid = pf.Wk(self.grid, Params[0], Params[2], Params[3], Params[4], Params[5])
+        self.Wk_grid = pfs.Wk(self.grid, Params[0], Params[2], Params[3], Params[4], Params[5])
         self.Wki_grid = 1 / self.Wk_grid
-        self.kcos = pf.kcos_func(self.grid)
+        self.kcos = pfs.kcos_func(self.grid)
 
         # print(self.Omega0_grid.shape)
 
@@ -79,7 +79,7 @@ class PolaronHamiltonian:
         amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         # Frohlich model (without two phonon contribution)
-        # gf = (2 * np.pi / pf.ur(mI, mB)) * (1 / aIBi)
+        # gf = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
         # amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
         #                                    amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI))
 
