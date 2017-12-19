@@ -1,4 +1,5 @@
 import numpy as np
+import Grid
 from pf_spherical import kcos_func, ksin_func, kpow2_func
 from scipy.integrate import ode
 from copy import copy
@@ -15,6 +16,9 @@ class CoherentState:
 
         self.kgrid = kgrid
         self.xgrid = xgrid
+        self.kFgrid = Grid.Grid('CARTESIAN_3D')  # useful for Fourier transforms when calculating distribution functions
+        self.kFgrid.initArray_premade('kx', np.fft.ifftshift(kgrid.getArray('kx'))); self.kFgrid.initArray_premade('ky', np.fft.ifftshift(kgrid.getArray('ky'))); self.kFgrid.initArray_premade('kz', np.fft.ifftshift(kgrid.getArray('kz')))
+
         self.coordinate_system = kgrid.coordinate_system
         if(kgrid.coordinate_system != xgrid.coordinate_system):
             print('ERROR: GRID COORDINATE SYSTEM MISTMATCH')
@@ -25,7 +29,12 @@ class CoherentState:
             self.kcos = kcos_func(kgrid)
             self.ksin = ksin_func(kgrid)
             self.kpow2 = kpow2_func(kgrid)
-        if(self.)
+        if(self.coordinate_system == "CARTESIAN_3D"):
+            self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij', sparse=True)
+            self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij', sparse=True)
+            self.kxFg, self.kyFg, self.kzFg = np.meshgrid(self.kFgrid.getArray('kx'), self.kFgrid.getArray('ky'), self.kFgrid.getArray('kz'), indexing='ij', sparse=True)
+            self.Nx, self.Ny, self.Nz = len(self.kgrid.getArray('x')), len(self.kgrid.getArray('y')), len(self.kgrid.getArray('z'))
+            self.kzg_r = self.kzg.reshape(self.kzg.size)
 
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
@@ -75,9 +84,7 @@ class CoherentState:
         if self.coordinate_system == "SPHERICAL_2D":
             return np.dot(self.kcos, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)
         elif self.coordinate_system == "CARTESIAN_3D":
-            np.dot(np.abs(beta2_kz), kzF * dkz)
-            return
-            # !!!!!
+            return np.dot(self.kzg_r, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)
         else:
             print('INVALID COORDINATE SYSTEM')
             return
@@ -96,38 +103,22 @@ class CoherentState:
     # POSITION SPACE DEPENDENT OBSERVABLES
 
     def get_Distributions(self):
-        amplitude = self.amplitude_phase[0:-1]
+        amplitude = self.amplitude_phase[0:-1]  # is this stored w.r.t. kgrid of kFgrid?
 
         if self.coordinate_system != "CARTESIAN_3D":
             print('INVALID COORDINATE SYSTEM')
             return -1
 
-        # unpack grid args
-
-        x = self.xgrid.getArray('x'); y = self.xgrid.getArray('y'); z = self.xgrid.getArray('z')
-        (Nx, Ny, Nz) = (len(x), len(y), len(z))
-        dx = self.xgrid.arrays_diff['x']; dy = self.xgrid.arrays_diff['y']; dz = self.xgrid.arrays_diff['z']
-
-        kxF = kFgrid.getArray('kx'); kyF = kFgrid.getArray('ky'); kzF = kFgrid.getArray('kz')
-
-        kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
-        dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
-        dVk = dkx * dky * dkz
-
-        xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
-        kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
-        kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
-
         # generation
 
-        beta_kxkykz = (2 * np.pi)**(-3 / 2) * amplitude.reshape(())
+        beta_kxkykz = (2 * np.pi)**(-3 / 2) * amplitude.reshape((self.Nx, self.Ny, self.Nz))
         beta2_kxkykz = np.abs(beta_kxkykz)**2
         decay_length = 5
-        decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
+        decay_xyz = np.exp(-1 * (self.xg**2 + self.yg**2 + self.zg**2) / (2 * decay_length**2))
 
         # Fourier transform
         amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz  # this is the position distribution
+        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk  # this is the position distribution
 
         # Calculate Nph
         Nph = self.get_PhononNumber()
@@ -135,13 +126,13 @@ class CoherentState:
 
         # Fourier transform
         beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
-        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * dkx * dky * dkz
+        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * self.dVk
 
         # Exponentiate
         fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
 
         # Inverse Fourier transform
-        nPB_preshift = np.fft.ifftn(fexp) * 1 / (dkx * dky * dkz)
+        nPB_preshift = np.fft.ifftn(fexp) * 1 / (self.dVk)
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 

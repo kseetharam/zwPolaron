@@ -263,7 +263,7 @@ def staticDataGeneration(cParams, gParams, sParams):
     nPBm_cum = nPBm_unique.cumsum()
     nPIm_cum = nPIm_unique.cumsum()
 
-    # CDF and PDF pre-processing
+    # CDF pre-processing by averaging distribution over small regions of Delta_P{B or I}
 
     PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
     PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
@@ -276,8 +276,13 @@ def staticDataGeneration(cParams, gParams, sParams):
     PIm_Vec = PIm_Vec[0:-1]
 
     # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
-    PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
-    PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+
+    PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
+    PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
+
+    # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys()) # not sure why using a series as a mapping doesn't work -> it did initially and then broke...
+    # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+
     nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
     nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
 
@@ -301,7 +306,7 @@ def staticDataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
+    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), FWHM'
     metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_x, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, FWHM])
     # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
     xyz_string = 'x, y, z, nx_x_norm, nx_y_norm, nx_z_norm, kx, ky, kz, nPB_kx, nPB_ky, nPB_kz, PI_z, nPI_z'

@@ -41,7 +41,7 @@ def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
 
 
 def xyzDist_To_magDist(coherent_state, P):
-# !!!!
+    # !!!!
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
@@ -73,8 +73,10 @@ def xyzDist_To_magDist(coherent_state, P):
     PIm_Vec = PIm_Vec[0:-1]
 
     # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
-    PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
-    PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+    PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
+    PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
+    # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
+    # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
     nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
     nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
 
