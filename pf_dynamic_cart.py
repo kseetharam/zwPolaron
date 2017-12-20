@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import Grid
 
 err = 1e-5
 limit = 1e5
@@ -40,8 +41,32 @@ def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
 
-def xyzDist_To_magDist(coherent_state, P):
-    # !!!!
+# ---- CALCULATION HELPER FUNCTIONS ----
+
+
+def ImpMomGrid_from_PhononMomGrid(kgrid, P):
+    kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
+    PI_x = -1 * kx; PI_y = -1 * ky; PI_z = P - kz
+    PIgrid = Grid.Grid('CARTESIAN_3D')
+    PIgrid.initArray_premade('kx', PI_x); PIgrid.initArray_premade('ky', PI_y); PIgrid.initArray_premade('kz', PI_z)
+    return PIgrid
+
+
+def FWHM(x, f):
+    # f is function of x -> f(x)
+    if np.abs(np.max(f) - np.min(f)) < 1e-2:
+        return 0
+    else:
+        D = f - np.max(f) / 2
+        indices = np.where(D > 0)[0]
+        return x[indices[-1]] - x[indices[0]]
+
+
+def xyzDist_To_magDist(kgrid, nPB, P):
+    # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
+    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
+    dVk = kgrid.dV()
+
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
@@ -51,8 +76,8 @@ def xyzDist_To_magDist(coherent_state, P):
     PB_series = pd.Series(nPB_flat, index=PB_flat)
     PI_series = pd.Series(nPB_flat, index=PI_flat)
 
-    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dkx * dky * dkz
-    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dkx * dky * dkz
+    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk
+    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk
 
     PB_unique = nPBm_unique.keys().values
     PI_unique = nPIm_unique.keys().values
@@ -89,3 +114,54 @@ def xyzDist_To_magDist(coherent_state, P):
 
 
 # ---- DATA GENERATION ----
+
+
+def quenchDynamics_DataGeneration(cParams, gParams, sParams):
+    #
+    # do not run this inside CoherentState or PolaronHamiltonian
+    import CoherentState
+    import PolaronHamiltonian
+    # takes parameters, performs dynamics, and outputs desired observables
+    [P, aIBi] = cParams
+    [xgrid, kgrid, tgrid] = gParams
+    [mI, mB, n0, gBB] = sParams
+
+    # Initialization CoherentState
+    cs = CoherentState.CoherentState(kgrid, xgrid)
+    # Initialization PolaronHamiltonian
+    Params = [P, aIBi, mI, mB, n0, gBB]
+    ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
+    # Other book-keeping
+    PIgrid = ImpMomGrid_from_PhononMomGrid(kgrid, P)
+
+    # Time evolution
+    PB_Vec = np.zeros(tgrid.size, dtype=float)
+    NB_Vec = np.zeros(tgrid.size, dtype=float)
+    DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+    Phase_Vec = np.zeros(tgrid.size, dtype=float)
+
+    for ind, t in enumerate(tgrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tgrid[ind - 1]
+            cs.evolve(dt, ham)
+        print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
+        PB_Vec[ind] = cs.get_PhononMomentum()
+        NB_Vec[ind] = cs.get_PhononNumber()
+        DynOv_Vec[ind] = cs.get_DynOverlap()
+        Phase_Vec[ind] = cs.get_Phase()
+
+        # save distribution data every 10 time values
+        if t != 0 and ind % int(tgrid.size / 10) == 0:
+
+            phonon_pos_dist, nPB = cs.get_PhononDistributions()
+            [PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec] = xyzDist_To_magDist(cs.kgrid, nPB, P)
+            # ***pick out appropriate slices, etc. that we want to see
+
+    # Save Data
+
+    observables_data = [PB_Vec, NB_Vec, np.real(DynOv_Vec), np.imag(DynOv_Vec), Phase_Vec]
+    distribution_data = 0
+    return observables_data, distribution_data

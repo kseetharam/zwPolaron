@@ -1,5 +1,4 @@
 import numpy as np
-import Grid
 from pf_spherical import kcos_func, ksin_func, kpow2_func
 from scipy.integrate import ode
 from copy import copy
@@ -16,13 +15,14 @@ class CoherentState:
 
         self.kgrid = kgrid
         self.xgrid = xgrid
-        self.kFgrid = Grid.Grid('CARTESIAN_3D')  # useful for Fourier transforms when calculating distribution functions
-        self.kFgrid.initArray_premade('kx', np.fft.ifftshift(kgrid.getArray('kx'))); self.kFgrid.initArray_premade('ky', np.fft.ifftshift(kgrid.getArray('ky'))); self.kFgrid.initArray_premade('kz', np.fft.ifftshift(kgrid.getArray('kz')))
+        # self.kFgrid = Grid.Grid('CARTESIAN_3D')  # useful for Fourier transforms when calculating distribution functions
+        # self.kFgrid.initArray_premade('kx', np.fft.ifftshift(kgrid.getArray('kx'))); self.kFgrid.initArray_premade('ky', np.fft.ifftshift(kgrid.getArray('ky'))); self.kFgrid.initArray_premade('kz', np.fft.ifftshift(kgrid.getArray('kz')))
 
         self.coordinate_system = kgrid.coordinate_system
         if(kgrid.coordinate_system != xgrid.coordinate_system):
             print('ERROR: GRID COORDINATE SYSTEM MISTMATCH')
 
+        # precompute quantities to make observable calculations computationally cheaper
         self.dVk = self.kgrid.dV()
 
         if(self.coordinate_system == "SPHERICAL_2D"):
@@ -32,10 +32,12 @@ class CoherentState:
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij', sparse=True)
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij', sparse=True)
-            self.kxFg, self.kyFg, self.kzFg = np.meshgrid(self.kFgrid.getArray('kx'), self.kFgrid.getArray('ky'), self.kFgrid.getArray('kz'), indexing='ij', sparse=True)
-            self.Nx, self.Ny, self.Nz = len(self.kgrid.getArray('x')), len(self.kgrid.getArray('y')), len(self.kgrid.getArray('z'))
-            self.kzg_r = self.kzg.reshape(self.kzg.size)
+            # self.kxFg, self.kyFg, self.kzFg = np.meshgrid(self.kFgrid.getArray('kx'), self.kFgrid.getArray('ky'), self.kFgrid.getArray('kz'), indexing='ij', sparse=True)
+            self.Nx, self.Ny, self.Nz = len(self.xgrid.getArray('x')), len(self.xgrid.getArray('y')), len(self.xgrid.getArray('z'))
+            self.kzg_flat = self.kzg.reshape(self.kzg.size)
+            print(self.kzg.size)
 
+        # error for ODE solver
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
 
@@ -77,14 +79,14 @@ class CoherentState:
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)  # should this be changed to np.abs() for Cartesian?
+        return np.dot(amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)  # should there be a 2pi type factor for Cartesian? don't think so...
 
     def get_PhononMomentum(self):
         amplitude = self.amplitude_phase[0:-1]
         if self.coordinate_system == "SPHERICAL_2D":
             return np.dot(self.kcos, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)
         elif self.coordinate_system == "CARTESIAN_3D":
-            return np.dot(self.kzg_r, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)
+            return np.dot(self.kzg_flat, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)  # should there be a 2pi type factor for Cartesian? don't think so...
         else:
             print('INVALID COORDINATE SYSTEM')
             return
@@ -102,8 +104,8 @@ class CoherentState:
 
     # POSITION SPACE DEPENDENT OBSERVABLES
 
-    def get_Distributions(self):
-        amplitude = self.amplitude_phase[0:-1]  # is this stored w.r.t. kgrid of kFgrid?
+    def get_PhononDistributions(self):
+        amplitude = self.amplitude_phase[0:-1]  # this is flattened and stored w.r.t. kgrid
 
         if self.coordinate_system != "CARTESIAN_3D":
             print('INVALID COORDINATE SYSTEM')
@@ -111,7 +113,7 @@ class CoherentState:
 
         # generation
 
-        beta_kxkykz = (2 * np.pi)**(-3 / 2) * amplitude.reshape((self.Nx, self.Ny, self.Nz))
+        beta_kxkykz = (2 * np.pi)**(-3 / 2) * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k and reorder w.r.t. kF grid
         beta2_kxkykz = np.abs(beta_kxkykz)**2
         decay_length = 5
         decay_xyz = np.exp(-1 * (self.xg**2 + self.yg**2 + self.zg**2) / (2 * decay_length**2))
@@ -136,10 +138,10 @@ class CoherentState:
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 
-        pos_dist = amp_beta_xyz
-        mom_dist = nPB
+        phonon_pos_dist = amp_beta_xyz  # this is a 3D matrix in terms of x,y,z
+        phonon_mom_dist = nPB  # this is a 3D matrix in terms of kx, ky, kz -> more accurately PB_x, PB_y, PB_z
 
-        return pos_dist, mom_dist
+        return phonon_pos_dist, phonon_mom_dist
 
 
 #  # THIS WAS FOR DISTRIBUTION FUNCTION ATTEMPT IN SPHERICAL COORDINATES -- DEPRACATED
