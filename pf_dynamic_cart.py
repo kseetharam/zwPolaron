@@ -31,7 +31,10 @@ def Omega(kx, ky, kz, DP, mI, mB, n0, gBB):
 
 
 def Wk(kx, ky, kz, mB, n0, gBB):
-    return np.sqrt(epsilon(kx, ky, kz, mB) / omegak(kx, ky, kz, mB, n0, gBB))
+    # old_settings = np.seterr(); np.seterr(all='ignore')
+    output = np.sqrt(epsilon(kx, ky, kz, mB) / omegak(kx, ky, kz, mB, n0, gBB))
+    # np.seterr(**old_settings)
+    return output
 
 
 def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
