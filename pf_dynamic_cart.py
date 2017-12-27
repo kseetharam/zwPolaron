@@ -65,7 +65,7 @@ def FWHM(x, f):
 def xyzDist_To_magDist(kgrid, nPB, P):
     # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
     kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
-    dVk = kgrid.dV()
+    dVk_const = kgrid.dV()[0]
 
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
@@ -76,8 +76,8 @@ def xyzDist_To_magDist(kgrid, nPB, P):
     PB_series = pd.Series(nPB_flat, index=PB_flat)
     PI_series = pd.Series(nPB_flat, index=PI_flat)
 
-    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk
-    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk
+    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk_const
+    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk_const
 
     PB_unique = nPBm_unique.keys().values
     PI_unique = nPIm_unique.keys().values

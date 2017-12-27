@@ -28,7 +28,8 @@ if __name__ == "__main__":
 
     gParams = [xgrid, kgrid, kFgrid]
 
-    NGridPoints = (Lx / dx) * (Ly / dy) * (Lz / dz)
+    # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
+    NGridPoints = xgrid.size()
 
     # Basic parameters
 
@@ -40,7 +41,6 @@ if __name__ == "__main__":
     # Interpolation
 
     kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
-    print(kzFg)
     dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz']
 
     # Nsteps = 1e2
@@ -83,48 +83,48 @@ if __name__ == "__main__":
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
 
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    # cParams_List = []
-    # aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
-    # # aIBi_Vals = np.linspace(-5, 7, 10)
-    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi_Vals, mI, mB, n0, gBB)
-    # Pcrit_max = np.max(Pcrit_Vals)
-    # Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
-    # P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))
+    cParams_List = []
+    aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
+    # aIBi_Vals = np.linspace(-5, 7, 10)
+    Pcrit_Vals = pf_static_cart.PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi_Vals, mI, mB, n0, gBB)
+    Pcrit_max = np.max(Pcrit_Vals)
+    Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
+    P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))
 
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     Pcrit = Pcrit_Vals[ind]
-    #     P_Vals = P_Vals_max[P_Vals_max <= Pcrit]
-    #     for P in P_Vals:
-    #         cParams_List.append([P, aIBi])
+    for ind, aIBi in enumerate(aIBi_Vals):
+        Pcrit = Pcrit_Vals[ind]
+        P_Vals = P_Vals_max[P_Vals_max <= Pcrit]
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [P, aIBi] = cParams
-    #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    #     if os.path.isdir(innerdatapath) is False:
-    #         os.mkdir(innerdatapath)
-    #     metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-    #         f.write(metrics_string)
-    #     with open(innerdatapath + '/xyz_string.txt', 'w') as f:
-    #         f.write(xyz_string)
-    #     with open(innerdatapath + '/mag_string.txt', 'w') as f:
-    #         f.write(mag_string)
-    #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    #     np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
-    #     np.savetxt(innerdatapath + '/mag.dat', mag_data)
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
+        [P, aIBi] = cParams
+        innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+        if os.path.isdir(innerdatapath) is False:
+            os.mkdir(innerdatapath)
+        metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+        with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+            f.write(metrics_string)
+        with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+            f.write(xyz_string)
+        with open(innerdatapath + '/mag_string.txt', 'w') as f:
+            f.write(mag_string)
+        np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+        np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
+        np.savetxt(innerdatapath + '/mag.dat', mag_data)
 
-    #     loopend = timer()
-    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+        loopend = timer()
+        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
-    # end = timer()
-    # print('Total Time: {.2f}'.format(end - runstart))
+    end = timer()
+    print('Total Time: {.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 

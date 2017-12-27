@@ -21,14 +21,14 @@ class PolaronHamiltonian:
             # self.Wk_grid = pf.Wk(self.grid, *Params)
             self.Wk_grid = pfs.Wk(self.grid, Params[0], Params[2], Params[3], Params[4], Params[5])
             self.Wki_grid = 1 / self.Wk_grid
-            self.kcos = pfs.kcos_func(self.grid)
+            self.kz = pfs.kcos_func(self.grid)
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.kxg, self.kyg, self.kzg = coherent_state.kxg, coherent_state.kyg, coherent_state.kzg
             self.gnum = pfc.g(self.kxg, self.kyg, self.kzg, *Params[1:]).flatten()
             self.Omega0_grid = pfc.Omega(self.kxg, self.kyg, self.kzg, 0, *Params[2:]).flatten()
             self.Wk_grid = pfc.Wk(self.kxg, self.kyg, self.kzg, *Params[3:]).flatten()
             self.Wki_grid = 1 / self.Wk_grid
-            self.kzg_flat = coherent_state.kzg_flat
+            self.kz = coherent_state.kzg_flat
 
     def update(self, t, amplitude_phase, coherent_state):
         # here on can write any method induding Runge-Kutta 4
@@ -37,37 +37,32 @@ class PolaronHamiltonian:
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params
 
-        dV = coherent_state.dV
+        dVk = coherent_state.dVk
 
         betaSum = amplitude + np.conjugate(amplitude)
-        xp = 0.5 * np.dot(self.Wk_grid, betaSum * dV)
+        xp = 0.5 * np.dot(self.Wk_grid, betaSum * dVk)
 
         betaDiff = amplitude - np.conjugate(amplitude)
-        xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dV)
+        xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dVk)
 
-        if(self.coordinate_system == "SPHERICAL_2D"):
-            kz_Vec = self.kcos
-        if(self.coordinate_system == "CARTESIAN_3D"):
-            kz_Vec = self.kzg_flat
-
-        PB = np.dot(kz_Vec, amplitude * np.conjugate(amplitude) * dV)
+        PB = np.dot(self.kz, amplitude * np.conjugate(amplitude) * dVk)
 
         amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                           amplitude * (self.Omega0_grid - kz_Vec * (P - PB) / mI) +
+                                           amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                            self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
-        # PB = np.dot(self.kcos, amplitude * np.conjugate(amplitude) * dV)
+        # PB = np.dot(self.kz, amplitude * np.conjugate(amplitude) * dVk)
 
         # amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                                    amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI) +
+        #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
         #                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         # amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         # # Frohlich model (without two phonon contribution)
         # # gf = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
         # # amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
-        # #                                    amplitude * (self.Omega0_grid - self.kcos * (P - PB) / mI))
+        # #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI))
 
         # # amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 

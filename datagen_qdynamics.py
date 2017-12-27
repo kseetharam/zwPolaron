@@ -32,7 +32,8 @@ if __name__ == "__main__":
 
     gParams = [xgrid, kgrid, tgrid]
 
-    NGridPoints = (Lx / dx) * (Ly / dy) * (Lz / dz)
+    # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
+    NGridPoints = xgrid.size()
 
     # Basic parameters
 

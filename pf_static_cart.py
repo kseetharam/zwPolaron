@@ -168,6 +168,10 @@ def static_DataGeneration(cParams, gParams, sParams):
     kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
     kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
 
+    # xg, yg, zg = np.meshgrid(x, y, z, indexing='ij')
+    # kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij')
+    # kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij')
+
     # calculate relevant parameters
 
     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)

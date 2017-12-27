@@ -30,12 +30,12 @@ class CoherentState:
             self.ksin = ksin_func(kgrid)
             self.kpow2 = kpow2_func(kgrid)
         if(self.coordinate_system == "CARTESIAN_3D"):
-            self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij', sparse=True)
-            self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij', sparse=True)
+            self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
+            self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')
             # self.kxFg, self.kyFg, self.kzFg = np.meshgrid(self.kFgrid.getArray('kx'), self.kFgrid.getArray('ky'), self.kFgrid.getArray('kz'), indexing='ij', sparse=True)
             self.Nx, self.Ny, self.Nz = len(self.xgrid.getArray('x')), len(self.xgrid.getArray('y')), len(self.xgrid.getArray('z'))
             self.kzg_flat = self.kzg.reshape(self.kzg.size)
-            print(self.kzg.size)
+            self.dVk_const = self.dVk[0]
 
         # error for ODE solver
         self.abs_error = 1.0e-8
@@ -120,7 +120,7 @@ class CoherentState:
 
         # Fourier transform
         amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk  # this is the position distribution
+        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk_const  # this is the position distribution
 
         # Calculate Nph
         Nph = self.get_PhononNumber()
@@ -128,13 +128,13 @@ class CoherentState:
 
         # Fourier transform
         beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
-        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * self.dVk
+        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * self.dVk_const
 
         # Exponentiate
         fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
 
         # Inverse Fourier transform
-        nPB_preshift = np.fft.ifftn(fexp) * 1 / (self.dVk)
+        nPB_preshift = np.fft.ifftn(fexp) * 1 / (self.dVk_const)
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 
