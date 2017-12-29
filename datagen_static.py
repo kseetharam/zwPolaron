@@ -69,16 +69,19 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    # metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
     # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #     f.write(metrics_string)
-    # with open(innerdatapath + '/xyz_string.txt', 'w') as f:
-    #     f.write(xyz_string)
-    # with open(innerdatapath + '/mag_string.txt', 'w') as f:
-    #     f.write(mag_string)
+    # with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+    #     f.write(pos_xyz_string)
+    # with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+    #     f.write(mom_xyz_string)
+    # with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+    #     f.write(mom_mag_string)
     # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    # np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
-    # np.savetxt(innerdatapath + '/mag.dat', mag_data)
+    # np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    # np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    # np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -109,16 +112,19 @@ if __name__ == "__main__":
         innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
         if os.path.isdir(innerdatapath) is False:
             os.mkdir(innerdatapath)
-        metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+        metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
         with open(innerdatapath + '/metrics_string.txt', 'w') as f:
             f.write(metrics_string)
-        with open(innerdatapath + '/xyz_string.txt', 'w') as f:
-            f.write(xyz_string)
-        with open(innerdatapath + '/mag_string.txt', 'w') as f:
-            f.write(mag_string)
+        with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+            f.write(pos_xyz_string)
+        with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+            f.write(mom_xyz_string)
+        with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+            f.write(mom_mag_string)
         np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-        np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
-        np.savetxt(innerdatapath + '/mag.dat', mag_data)
+        np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+        np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+        np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
         loopend = timer()
         print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -143,16 +149,19 @@ if __name__ == "__main__":
     #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
-    #     metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    #     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
     #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #         f.write(metrics_string)
-    #     with open(innerdatapath + '/xyz_string.txt', 'w') as f:
-    #         f.write(xyz_string)
-    #     with open(innerdatapath + '/mag_string.txt', 'w') as f:
-    #         f.write(mag_string)
+    #     with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+    #         f.write(pos_xyz_string)
+    #     with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+    #         f.write(mom_xyz_string)
+    #     with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+    #         f.write(mom_mag_string)
     #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    #     np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
-    #     np.savetxt(innerdatapath + '/mag.dat', mag_data)
+    #     np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    #     np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    #     np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

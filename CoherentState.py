@@ -122,7 +122,8 @@ class CoherentState:
 
         # Fourier transform
         amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk_const  # this is the position distribution
+        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk_const
+        nxyz = np.abs(amp_beta_xyz)**2  # this is the phonon position distribution
 
         # Calculate Nph
         Nph = self.get_PhononNumber()
@@ -140,10 +141,11 @@ class CoherentState:
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 
-        phonon_pos_dist = amp_beta_xyz  # this is a 3D matrix in terms of x,y,z
+        phonon_pos_dist = nxyz  # this is a 3D matrix in terms of x,y,z
         phonon_mom_dist = nPB  # this is a 3D matrix in terms of kx, ky, kz -> more accurately PB_x, PB_y, PB_z
+        phonon_mom_k0deltapeak = nPB_deltaK0  # this is the weight of the delta peak in nPB at kx=ky=kz=0
 
-        return phonon_pos_dist, phonon_mom_dist
+        return phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak
 
 
 #  # THIS WAS FOR DISTRIBUTION FUNCTION ATTEMPT IN SPHERICAL COORDINATES -- DEPRACATED
