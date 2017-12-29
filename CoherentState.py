@@ -61,7 +61,7 @@ class CoherentState:
     def evolve(self, dt, hamiltonian):
 
         amp_phase0 = copy(self.amplitude_phase)
-        print(np.all(np.isnan(amp_phase0)))
+        print('Beta_k contains NaNs: {0}'.format(np.any(np.isnan(amp_phase0))))
         t0 = copy(self.time)
         amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
         amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self)
@@ -114,7 +114,8 @@ class CoherentState:
 
         # generation
 
-        beta_kxkykz = (2 * np.pi)**(-3 / 2) * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k and reorder w.r.t. kF grid
+        prefactor = (2 * np.pi)**(-3 / 2)
+        beta_kxkykz = prefactor * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k and reorder w.r.t. kF grid
         beta2_kxkykz = np.abs(beta_kxkykz)**2
         decay_length = 5
         decay_xyz = np.exp(-1 * (self.xg**2 + self.yg**2 + self.zg**2) / (2 * decay_length**2))
