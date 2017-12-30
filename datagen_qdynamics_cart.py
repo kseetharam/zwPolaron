@@ -1,6 +1,6 @@
 import numpy as np
 import Grid
-import pf_static_cart
+import pf_dynamic_cart
 import os
 from timeit import default_timer as timer
 
@@ -20,13 +20,15 @@ if __name__ == "__main__":
     (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
 
     kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
-    kFgrid = Grid.Grid('CARTESIAN_3D')
-    kFgrid.initArray_premade('kx', kxfft); kFgrid.initArray_premade('ky', kyfft); kFgrid.initArray_premade('kz', kzfft)
 
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    gParams = [xgrid, kgrid, kFgrid]
+    tMax = 9.9
+    dt = 0.1
+    tgrid = np.arange(0, tMax + dt, dt)
+
+    gParams = [xgrid, kgrid, tgrid]
 
     # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
     NGridPoints = xgrid.size()
@@ -38,53 +40,32 @@ if __name__ == "__main__":
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
 
-    # Interpolation
-
-    kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
-    dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz']
-
-    # Nsteps = 1e2
-    # pf_static_cart.createSpline_grid(Nsteps, kxFg, kyFg, kzFg, dVk, mI, mB, n0, gBB)
-
-    aSi_tck = np.load('aSi_spline.npy')
-    PBint_tck = np.load('PBint_spline.npy')
-
-    sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
+    sParams = [mI, mB, n0, gBB]
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
+    # ---- SINGLE FUNCTION RUN ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # P = 1.4 * pf_static_cart.nu(gBB)
-    # aIBi = -2
-    # cParams = [P, aIBi]
+    P = 1.4 * pf_dynamic_cart.nu(gBB)
+    aIBi = -2
+    cParams = [P, aIBi]
 
-    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
-    # metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-    #     f.write(metrics_string)
-    # with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-    #     f.write(pos_xyz_string)
-    # with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-    #     f.write(mom_xyz_string)
-    # with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-    #     f.write(mom_mag_string)
-    # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    # np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    # np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    # np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
+
+    # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
@@ -112,19 +93,16 @@ if __name__ == "__main__":
     #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
-    #     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    #     metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
     #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #         f.write(metrics_string)
-    #     with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-    #         f.write(pos_xyz_string)
-    #     with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-    #         f.write(mom_xyz_string)
-    #     with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-    #         f.write(mom_mag_string)
+    #     with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+    #         f.write(xyz_string)
+    #     with open(innerdatapath + '/mag_string.txt', 'w') as f:
+    #         f.write(mag_string)
     #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    #     np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    #     np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    #     np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    #     np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
+    #     np.savetxt(innerdatapath + '/mag.dat', mag_data)
 
     #     loopend = timer()
     #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -149,19 +127,16 @@ if __name__ == "__main__":
     #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
-    #     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    #     metrics_string, metrics_data, xyz_string, xyz_data, mag_string, mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
     #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
     #         f.write(metrics_string)
-    #     with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-    #         f.write(pos_xyz_string)
-    #     with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-    #         f.write(mom_xyz_string)
-    #     with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-    #         f.write(mom_mag_string)
+    #     with open(innerdatapath + '/xyz_string.txt', 'w') as f:
+    #         f.write(xyz_string)
+    #     with open(innerdatapath + '/mag_string.txt', 'w') as f:
+    #         f.write(mag_string)
     #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    #     np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    #     np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    #     np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    #     np.savetxt(innerdatapath + '/xyz.dat', xyz_data)
+    #     np.savetxt(innerdatapath + '/mag.dat', mag_data)
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

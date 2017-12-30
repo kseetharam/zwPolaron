@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import Grid
+from timeit import default_timer as timer
 
 err = 1e-5
 limit = 1e5
@@ -225,6 +226,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     PBm = 0
     PIm = 0
 
+    start = timer()
     for ind, t in enumerate(tgrid):
         if ind == 0:
             dt = t
@@ -232,7 +234,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         else:
             dt = t - tgrid[ind - 1]
             cs.evolve(dt, ham)
-        print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
+
         PB_tVec[ind] = cs.get_PhononMomentum()
         NB_tVec[ind] = cs.get_PhononNumber()
         DynOv_tVec[ind] = cs.get_DynOverlap()
@@ -252,6 +254,10 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
             nPB_x_ctVec[cind], nPB_y_ctVec[cind], nPB_z_ctVec[cind], nPI_x_ctVec[cind], nPI_y_ctVec[cind], nPI_z_ctVec[cind] = mom_integration
             tgrid_coarse[cind] = t
             cind += 1
+
+        end = timer()
+        print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, cind: {:d}, runtime: {:.3f}'.format(t, cs.time, dt, cind, end - start))
+        start = timer()
 
     PBm = PBm_Vec
     PIm = PIm_Vec
