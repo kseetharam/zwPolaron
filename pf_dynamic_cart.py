@@ -169,6 +169,9 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
 
+    nu_const = nu(gBB)
+    gIB = g(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
+
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
     # Initialization PolaronHamiltonian
@@ -181,10 +184,32 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     PI_x = PIgrid.getArray('kx'); PI_y = PIgrid.getArray('ky'); PI_z = PIgrid.getArray('kz')
 
     # Time evolution
-    PB_Vec = np.zeros(tgrid.size, dtype=float)
-    NB_Vec = np.zeros(tgrid.size, dtype=float)
-    DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
-    Phase_Vec = np.zeros(tgrid.size, dtype=float)
+
+    # Choose coarsegrain step size
+    maxfac = 1
+    largest_coarsegrain = 10
+    for f in range(1, largest_coarsegrain + 1, 1):
+        if tgrid.size % f == 0:
+            maxfac = f
+    tgrid_coarse = np.zeros(int(tgrid.size / maxfac), dtype=float)
+    cind = 0
+    # Initialize observable data vectors
+    PB_tVec = np.zeros(tgrid.size, dtype=float)
+    NB_tVec = np.zeros(tgrid.size, dtype=float)
+    DynOv_tVec = np.zeros(tgrid.size, dtype=complex)
+    Phase_tVec = np.zeros(tgrid.size, dtype=float)
+    # Initialize distribution data vectors
+    nxyz_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPB_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPI_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nxyz_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPB_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPI_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    phonon_mom_k0deltapeak_ctVec = np.zeros(tgrid_coarse.size, dtype=float)
+    nPBm_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPIm_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    PBm = 0
+    PIm = 0
 
     for ind, t in enumerate(tgrid):
         if ind == 0:
@@ -194,27 +219,35 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
             dt = t - tgrid[ind - 1]
             cs.evolve(dt, ham)
         print('t: {:.2f}, cst: {:.2f}, dt:{:.3f}'.format(t, cs.time, dt))
-        PB_Vec[ind] = cs.get_PhononMomentum()
-        NB_Vec[ind] = cs.get_PhononNumber()
-        DynOv_Vec[ind] = cs.get_DynOverlap()
-        Phase_Vec[ind] = cs.get_Phase()
+        PB_tVec[ind] = cs.get_PhononMomentum()
+        NB_tVec[ind] = cs.get_PhononNumber()
+        DynOv_tVec[ind] = cs.get_DynOverlap()
+        Phase_tVec[ind] = cs.get_Phase()
 
         # save distribution data every 10 time values
-        if t != 0 and ind % int(tgrid.size / 10) == 0:
+        if t != 0 and (ind + 1) % maxfac == 0:
             # calculate distribution information
-            phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak = cs.get_PhononDistributions()
+            phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak_ctVec[cind] = cs.get_PhononDistributions()
             pos_slices, mom_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist)
-            [PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec] = xyzDist_To_magDist(cs.kgrid, phonon_mom_dist, P)
+            [PBm_Vec, nPBm_ctVec[cind], PIm_Vec, nPIm_ctVec[cind]] = xyzDist_To_magDist(cs.kgrid, phonon_mom_dist, P)
 
-            # unpack above calculations
-            nxyz_x_slice, nxyz_y_slice, nxyz_z_slice = pos_slices
-            nPB_x_slice, nPB_y_slice, nPB_z_slice, nPI_x_slice, nPI_y_slice, nPI_z_slice = mom_slices
-            nxyz_x, nxyz_y, nxyz_z = pos_integration
-            nPB_x, nPB_y, nPB_z, nPI_x, nPI_y, nPI_z = mom_integration
-            # !!!! SAVE DIST DATA
+            # unpack above calculations and store data
+            nxyz_x_slice_ctVec[cind], nxyz_y_slice_ctVec[cind], nxyz_z_slice_ctVec[cind] = pos_slices
+            nPB_x_slice_ctVec[cind], nPB_y_slice_ctVec[cind], nPB_z_slice_ctVec[cind], nPI_x_slice_ctVec[cind], nPI_y_slice_ctVec[cind], nPI_z_slice_ctVec[cind] = mom_slices
+            nxyz_x_ctVec[cind], nxyz_y_ctVec[cind], nxyz_z_ctVec[cind] = pos_integration
+            nPB_x_ctVec[cind], nPB_y_ctVec[cind], nPB_z_ctVec[cind], nPI_x_ctVec[cind], nPI_y_ctVec[cind], nPI_z_ctVec[cind] = mom_integration
+            tgrid_coarse[cind] = t
+            cind += 1
 
-    # Save Data
+    PBm = PBm_Vec
+    PIm = PIm_Vec
+    x = xgrid.getArray('x'); y = xgrid.getArray('y'); z = xgrid.getArray('z')
 
-    observables_data = [PB_Vec, NB_Vec, np.real(DynOv_Vec), np.imag(DynOv_Vec), Phase_Vec]
-    distribution_data = 0
-    return observables_data, distribution_data
+    # Save Data - note: _tVec means depends on tgrid, _ctVec means depends on tgrid_coarse, everything else not time-dependent
+
+    time_grids = [tgrid, tgrid_coarse]
+    metrics_data = [P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, np.real(DynOv_tVec), np.imag(DynOv_tVec), Phase_tVec]
+    pos_xyz_data = [x, y, z, nxyz_x_ctVec, nxyz_y_ctVec, nxyz_z_ctVec, nxyz_x_slice_ctVec, nxyz_y_slice_ctVec, nxyz_z_slice_ctVec]
+    mom_xyz_data = [PB_x, PB_y, PB_z, nPB_x_ctVec, nPB_y_ctVec, nPB_z_ctVec, nPB_x_slice_ctVec, nPB_y_slice_ctVec, nPB_z_slice_ctVec, PI_x, PI_y, PI_z, nPI_x_ctVec, nPI_y_ctVec, nPI_z_ctVec, nPI_x_slice_ctVec, nPI_y_slice_ctVec, nPI_z_slice_ctVec, phonon_mom_k0deltapeak_ctVec]
+    mom_mag_data = [PBm, nPBm_ctVec, PIm, nPIm_ctVec]
+    return time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data

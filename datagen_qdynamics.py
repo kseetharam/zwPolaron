@@ -25,10 +25,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
     tMax = 10
-    dt1 = 0.1
-    # dt2 = dt1
-    # tgrid = np.concatenate((np.arange(0, 1 + dt1, dt1), np.arange(1 + dt2, tMax + dt2, dt2)))
-    tgrid = np.arange(0, tMax + dt1, dt1)
+    dt = 0.1
+    tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
 
@@ -62,7 +60,7 @@ if __name__ == "__main__":
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
-    observables_data, distribution_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
