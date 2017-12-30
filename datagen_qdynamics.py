@@ -24,7 +24,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 10
+    tMax = 9.9
     dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 

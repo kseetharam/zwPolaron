@@ -205,6 +205,8 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
             maxfac = f
     tgrid_coarse = np.zeros(int(tgrid.size / maxfac), dtype=float)
     cind = 0
+    print('Time grid size: {0}, Coarse grain step: {1}'.format(tgrid.size, maxfac))
+
     # Initialize observable data vectors
     PB_tVec = np.zeros(tgrid.size, dtype=float)
     NB_tVec = np.zeros(tgrid.size, dtype=float)
