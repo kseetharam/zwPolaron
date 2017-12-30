@@ -86,51 +86,51 @@ if __name__ == "__main__":
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
 
-    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    cParams_List = []
-    aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
-    # aIBi_Vals = np.linspace(-5, 7, 10)
-    Pcrit_Vals = pf_static_cart.PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi_Vals, mI, mB, n0, gBB)
-    Pcrit_max = np.max(Pcrit_Vals)
-    Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
-    P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))
+    # cParams_List = []
+    # aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
+    # # aIBi_Vals = np.linspace(-5, 7, 10)
+    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi_Vals, mI, mB, n0, gBB)
+    # Pcrit_max = np.max(Pcrit_Vals)
+    # Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
+    # P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))
 
-    for ind, aIBi in enumerate(aIBi_Vals):
-        Pcrit = Pcrit_Vals[ind]
-        P_Vals = P_Vals_max[P_Vals_max <= Pcrit]
-        for P in P_Vals:
-            cParams_List.append([P, aIBi])
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     Pcrit = Pcrit_Vals[ind]
+    #     P_Vals = P_Vals_max[P_Vals_max <= Pcrit]
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
 
-    # ---- COMPUTE DATA ON COMPUTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    for ind, cParams in enumerate(cParams_List):
-        loopstart = timer()
-        [P, aIBi] = cParams
-        innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-        if os.path.isdir(innerdatapath) is False:
-            os.mkdir(innerdatapath)
-        metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-        with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-            f.write(metrics_string)
-        with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-            f.write(pos_xyz_string)
-        with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-            f.write(mom_xyz_string)
-        with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-            f.write(mom_mag_string)
-        np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-        np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-        np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-        np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    # for ind, cParams in enumerate(cParams_List):
+    #     loopstart = timer()
+    #     [P, aIBi] = cParams
+    #     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    #     if os.path.isdir(innerdatapath) is False:
+    #         os.mkdir(innerdatapath)
+    #     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    #     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+    #         f.write(metrics_string)
+    #     with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+    #         f.write(pos_xyz_string)
+    #     with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+    #         f.write(mom_xyz_string)
+    #     with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+    #         f.write(mom_mag_string)
+    #     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+    #     np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    #     np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    #     np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
-        loopend = timer()
-        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+    #     loopend = timer()
+    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
-    end = timer()
-    print('Total Time: {.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Total Time: {.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 

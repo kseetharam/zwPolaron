@@ -216,13 +216,13 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPB_deltaK0 = np.exp(-Nph)
 
     # Calculate phonon distribution slices  #!!!! Fix slices
-    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2 + 1, Nz // 2 + 1]))
-    nPB_y_slice = np.real(np.abs(nPB[Nx // 2 + 1, :, Nz // 2 + 1]))
-    nPB_z_slice = np.real(np.abs(nPB[Nx // 2 + 1, Ny // 2 + 1, :]))
+    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2, Nz // 2]))
+    nPB_y_slice = np.real(np.abs(nPB[Nx // 2, :, Nz // 2]))
+    nPB_z_slice = np.real(np.abs(nPB[Nx // 2, Ny // 2, :]))
 
-    nxyz_x_slice = np.real(nxyz[:, Ny // 2 + 1, Nz // 2 + 1])
-    nxyz_y_slice = np.real(nxyz[Nx // 2 + 1, :, Nz // 2 + 1])
-    nxyz_z_slice = np.real(nxyz[Nx // 2 + 1, Ny // 2 + 1, :])
+    nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
+    nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
+    nxyz_z_slice = np.real(nxyz[Nx // 2, Ny // 2, :])
 
     # Integrating out certain directions
     beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky

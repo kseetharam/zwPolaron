@@ -66,18 +66,20 @@ def FWHM(x, f):
         return x[indices[-1]] - x[indices[0]]
 
 
-def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist):
+def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args):
     nxyz = phonon_pos_dist
     nPB = phonon_mom_dist
+    Nx, Ny, Nz = grid_size_args
+    dx, dy, dz, dkx, dky, dkz = grid_diff_args
 
     # slice directions
-    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2 + 1, Nz // 2 + 1]))
-    nPB_y_slice = np.real(np.abs(nPB[Nx // 2 + 1, :, Nz // 2 + 1]))
-    nPB_z_slice = np.real(np.abs(nPB[Nx // 2 + 1, Ny // 2 + 1, :]))
+    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2, Nz // 2]))
+    nPB_y_slice = np.real(np.abs(nPB[Nx // 2, :, Nz // 2]))
+    nPB_z_slice = np.real(np.abs(nPB[Nx // 2, Ny // 2, :]))
 
-    nxyz_x_slice = np.real(nxyz[:, Ny // 2 + 1, Nz // 2 + 1])
-    nxyz_y_slice = np.real(nxyz[Nx // 2 + 1, :, Nz // 2 + 1])
-    nxyz_z_slice = np.real(nxyz[Nx // 2 + 1, Ny // 2 + 1, :])
+    nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
+    nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
+    nxyz_z_slice = np.real(nxyz[Nx // 2, Ny // 2, :])
 
     nPI_x_slice = np.flip(nPB_x_slice, 0)
     nPI_y_slice = np.flip(nPB_y_slice, 0)
@@ -169,8 +171,19 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
 
+    # grid unpacking
+    x = xgrid.getArray('x'); y = xgrid.getArray('y'); z = xgrid.getArray('z')
+    dx = xgrid.arrays_diff['x']; dy = xgrid.arrays_diff['y']; dz = xgrid.arrays_diff['z']
+    Nx, Ny, Nz = len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z'))
+    kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
+    dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
+
+    grid_size_args = Nx, Ny, Nz
+    grid_diff_args = dx, dy, dz, dkx, dky, dkz
+
+    # calculate some parameters
     nu_const = nu(gBB)
-    gIB = g(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
+    gIB = g(kx, ky, kz, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
 
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
@@ -178,9 +191,8 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
     # Other book-keeping
-    PBgrid = kgrid
     PIgrid = ImpMomGrid_from_PhononMomGrid(kgrid, P)
-    PB_x = PBgrid.getArray('kx'); PB_y = PBgrid.getArray('ky'); PB_z = PBgrid.getArray('kz')
+    PB_x = kx; PB_y = ky; PB_z = kz
     PI_x = PIgrid.getArray('kx'); PI_y = PIgrid.getArray('ky'); PI_z = PIgrid.getArray('kz')
 
     # Time evolution
@@ -228,7 +240,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         if t != 0 and (ind + 1) % maxfac == 0:
             # calculate distribution information
             phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak_ctVec[cind] = cs.get_PhononDistributions()
-            pos_slices, mom_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist)
+            pos_slices, mom_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args)
             [PBm_Vec, nPBm_ctVec[cind], PIm_Vec, nPIm_ctVec[cind]] = xyzDist_To_magDist(cs.kgrid, phonon_mom_dist, P)
 
             # unpack above calculations and store data
@@ -241,7 +253,6 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     PBm = PBm_Vec
     PIm = PIm_Vec
-    x = xgrid.getArray('x'); y = xgrid.getArray('y'); z = xgrid.getArray('z')
 
     # Save Data - note: _tVec means depends on tgrid, _ctVec means depends on tgrid_coarse, everything else not time-dependent
 
