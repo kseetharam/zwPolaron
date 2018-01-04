@@ -194,14 +194,16 @@ def static_DataGeneration(cParams, gParams, sParams):
     decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
 
     # Fourier transform
-    amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
-    nxyz = np.abs(amp_beta_xyz)**2  # this is the phonon position distribution in 3D Cartesian coordinates
+    amp_beta_xyz_preshift = np.fft.fftn(np.sqrt(beta2_kxkykz))
+    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift) * dkx * dky * dkz
+    nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2  # this is the unnormalized phonon position distribution in 3D Cartesian coordinates
 
     # Calculate Nph and Z-factor
     Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
-    Nph_xyz = np.real(np.sum(nxyz) * dx * dy * dz * (2 * np.pi)**(-3))
+    Nph_xyz = np.sum(nxyz * dx * dy * dz)
     Z_factor = np.exp(-(1 / 2) * Nph)
+
+    nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution in 3D Cartesian coordinates
 
     # Fourier transform
     beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
@@ -212,7 +214,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Inverse Fourier transform
     nPB_preshift = np.fft.ifftn(fexp) * 1 / (dkx * dky * dkz)
-    nPB = np.fft.fftshift(nPB_preshift)  # this it he phonon momentum distribution in 3D Cartesian coordinates
+    nPB = np.fft.fftshift(nPB_preshift)  # this is the phonon momentum distribution in 3D Cartesian coordinates
     nPB_deltaK0 = np.exp(-Nph)
 
     # Calculate phonon distribution slices  #!!!! Fix slices
@@ -229,11 +231,11 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPB_x = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
     nPB_y = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
     nPB_z = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
-    nxyz_x = np.sum(nxyz, axis=(1, 2)) * dy * dz
-    nxyz_y = np.sum(nxyz, axis=(0, 2)) * dx * dz
-    nxyz_z = np.sum(nxyz, axis=(0, 1)) * dx * dy
-    nxyz_x_norm = np.real(nxyz_x / Nph_xyz); nxyz_y_norm = np.real(nxyz_y / Nph_xyz); nxyz_z_norm = np.real(nxyz_z / Nph_xyz)
+    nxyz_x = np.sum(nxyz_norm, axis=(1, 2)) * dy * dz
+    nxyz_y = np.sum(nxyz_norm, axis=(0, 2)) * dx * dz
+    nxyz_z = np.sum(nxyz_norm, axis=(0, 1)) * dx * dy
 
+    nxyz_Tot = np.sum(nxyz_norm * dx * dy * dz)
     nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
     nPB_Mom1 = np.dot(np.abs(nPB_z), kz * dkz)
     beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz)
@@ -332,8 +334,8 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM'
-    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_xyz, Z_factor, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM])
+    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM'
+    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM])
     # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
 
     # xyz_string = 'x, y, z, nxyz_x_norm, nxyz_y_norm, nxyz_z_norm, kx, ky, kz, nPB_x, nPB_y, nPB_z, PI_z, nPI_z'

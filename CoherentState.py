@@ -26,9 +26,10 @@ class CoherentState:
         self.dVk = self.kgrid.dV()
 
         if(self.coordinate_system == "SPHERICAL_2D"):
-            self.kcos = kcos_func(kgrid)
+            self.kzg_flat = kcos_func(kgrid)
             self.ksin = ksin_func(kgrid)
             self.kpow2 = kpow2_func(kgrid)
+            self.dVk_prefac = 1
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')
@@ -36,6 +37,7 @@ class CoherentState:
             self.Nx, self.Ny, self.Nz = len(self.xgrid.getArray('x')), len(self.xgrid.getArray('y')), len(self.xgrid.getArray('z'))
             self.kzg_flat = self.kzg.reshape(self.kzg.size)
             self.dVk_const = self.dVk[0]
+            self.dVk_prefac = (2 * np.pi)**(-3)
 
         # error for ODE solver
         self.abs_error = 1.0e-8
@@ -80,17 +82,11 @@ class CoherentState:
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)  # should there be a 2pi type factor for Cartesian? don't think so...
+        return np.dot(amplitude * np.conjugate(amplitude), self.dVk_prefac * self.dVk).real.astype(float)
 
     def get_PhononMomentum(self):
         amplitude = self.amplitude_phase[0:-1]
-        if self.coordinate_system == "SPHERICAL_2D":
-            return np.dot(self.kcos, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)
-        elif self.coordinate_system == "CARTESIAN_3D":
-            return np.dot(self.kzg_flat, amplitude * np.conjugate(amplitude) * self.dVk).real.astype(float)  # should there be a 2pi type factor for Cartesian? don't think so...
-        else:
-            print('INVALID COORDINATE SYSTEM')
-            return
+        return np.dot(self.kzg_flat * amplitude * np.conjugate(amplitude), self.dVk_prefac * self.dVk).real.astype(float)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
@@ -115,19 +111,20 @@ class CoherentState:
         # generation
 
         prefactor = (2 * np.pi)**(-3 / 2)
-        beta_kxkykz = prefactor * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k and reorder w.r.t. kF grid
+        beta_kxkykz = prefactor * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k, reorder w.r.t. kF grid, and multiply be prefactor such that Beta_k -> Beta_~_k
         beta2_kxkykz = np.abs(beta_kxkykz)**2
         decay_length = 5
         decay_xyz = np.exp(-1 * (self.xg**2 + self.yg**2 + self.zg**2) / (2 * decay_length**2))
 
-        # Fourier transform
-        amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * self.dVk_const
-        nxyz = np.abs(amp_beta_xyz)**2  # this is the phonon position distribution
-
         # Calculate Nph
         Nph = self.get_PhononNumber()
         # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
+
+        # Fourier transform
+        amp_beta_xyz_preshift = np.fft.fftn(np.sqrt(beta2_kxkykz))
+        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift) * self.dVk_const
+        nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2  # this is the phonon position density distribution -> integrates to Nph
+        nxyz_norm = nxyz / Nph  # this is the phonon position density distribution -> integrates to Nph
 
         # Fourier transform
         beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
@@ -141,7 +138,7 @@ class CoherentState:
         nPB = np.fft.fftshift(nPB_preshift)
         nPB_deltaK0 = np.exp(-Nph)
 
-        phonon_pos_dist = nxyz  # this is a 3D matrix in terms of x,y,z
+        phonon_pos_dist = nxyz_norm  # this is a 3D matrix in terms of x,y,z
         phonon_mom_dist = nPB  # this is a 3D matrix in terms of kx, ky, kz -> more accurately PB_x, PB_y, PB_z
         phonon_mom_k0deltapeak = nPB_deltaK0  # this is the weight of the delta peak in nPB at kx=ky=kz=0
 

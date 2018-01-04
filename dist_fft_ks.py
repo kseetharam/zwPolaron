@@ -46,10 +46,13 @@ def staticDistCalc(gridargs, params, datapath):
     # Fourier transform and slice
     amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
     amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
+    nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2
 
     # Calculate Nph
     Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
-    Nph_x = np.real(np.sum(np.abs(amp_beta_xyz)**2) * dx * dy * dz * (2 * np.pi)**(-3))
+    Nph_x = np.sum(nxyz * dx * dy * dz)
+
+    nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution
 
     # Fourier transform and slice
     beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
@@ -82,6 +85,7 @@ def staticDistCalc(gridargs, params, datapath):
     nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
     nPB_Mom1 = np.dot(np.abs(nPB_kz), kz * dkz)
     beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz)
+    nxyz_Tot = np.sum(nxyz_norm) * dx * dy * dz
 
     # beta2_kz_Mom1_2 = np.sum(np.abs(beta2_kxkykz) * kzFg) * dkx * dky * dkz
     # print(beta2_kz_Mom1_2)
@@ -151,8 +155,10 @@ def staticDistCalc(gridargs, params, datapath):
     PIm_Vec = PIm_Vec[0:-1]
 
     # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
-    PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
-    PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+    PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
+    PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
+    # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
+    # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
     nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
     nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
 
@@ -189,6 +195,7 @@ def staticDistCalc(gridargs, params, datapath):
     print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
     print("Nph = \sum b^2 = %f" % (Nph))
     print("Nph_x = %f " % (Nph_x))
+    print("\int nx dx = %f" % (nxyz_Tot))
     print("\int np dp = %f" % (nPB_Tot))
     print("\int p np dp = %f" % (nPB_Mom1))
     print("\int k beta^2 dk = %f" % (beta2_kz_Mom1))
