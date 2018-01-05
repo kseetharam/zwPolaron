@@ -15,8 +15,6 @@ class CoherentState:
 
         self.kgrid = kgrid
         self.xgrid = xgrid
-        # self.kFgrid = Grid.Grid('CARTESIAN_3D')  # useful for Fourier transforms when calculating distribution functions
-        # self.kFgrid.initArray_premade('kx', np.fft.ifftshift(kgrid.getArray('kx'))); self.kFgrid.initArray_premade('ky', np.fft.ifftshift(kgrid.getArray('ky'))); self.kFgrid.initArray_premade('kz', np.fft.ifftshift(kgrid.getArray('kz')))
 
         self.coordinate_system = kgrid.coordinate_system
         if(kgrid.coordinate_system != xgrid.coordinate_system):
@@ -29,15 +27,12 @@ class CoherentState:
             self.kzg_flat = kcos_func(kgrid)
             self.ksin = ksin_func(kgrid)
             self.kpow2 = kpow2_func(kgrid)
-            self.dVk_prefac = 1
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')
-            # self.kxFg, self.kyFg, self.kzFg = np.meshgrid(self.kFgrid.getArray('kx'), self.kFgrid.getArray('ky'), self.kFgrid.getArray('kz'), indexing='ij', sparse=True)
             self.Nx, self.Ny, self.Nz = len(self.xgrid.getArray('x')), len(self.xgrid.getArray('y')), len(self.xgrid.getArray('z'))
             self.kzg_flat = self.kzg.reshape(self.kzg.size)
-            self.dVk_const = self.dVk[0]
-            self.dVk_prefac = (2 * np.pi)**(-3)
+            self.dVx_const = ((2 * np.pi)**(3)) * self.xgrid.dV()[0]
 
         # error for ODE solver
         self.abs_error = 1.0e-8
@@ -82,11 +77,11 @@ class CoherentState:
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(amplitude * np.conjugate(amplitude), self.dVk_prefac * self.dVk).real.astype(float)
+        return np.dot(amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)
 
     def get_PhononMomentum(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(self.kzg_flat * amplitude * np.conjugate(amplitude), self.dVk_prefac * self.dVk).real.astype(float)
+        return np.dot(self.kzg_flat * amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
@@ -110,9 +105,9 @@ class CoherentState:
 
         # generation
 
-        prefactor = (2 * np.pi)**(-3 / 2)
-        beta_kxkykz = prefactor * np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k, reorder w.r.t. kF grid, and multiply be prefactor such that Beta_k -> Beta_~_k
+        beta_kxkykz = np.fft.ifftshift(amplitude.reshape((self.Nx, self.Ny, self.Nz)))  # unflatten Beta_k, FFT shift it to prepare for Fourier transform
         beta2_kxkykz = np.abs(beta_kxkykz)**2
+
         decay_length = 5
         decay_xyz = np.exp(-1 * (self.xg**2 + self.yg**2 + self.zg**2) / (2 * decay_length**2))
 
@@ -121,21 +116,22 @@ class CoherentState:
         # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
 
         # Fourier transform
-        amp_beta_xyz_preshift = np.fft.fftn(np.sqrt(beta2_kxkykz))
-        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift) * self.dVk_const
-        nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2  # this is the phonon position density distribution -> integrates to Nph
-        nxyz_norm = nxyz / Nph  # this is the phonon position density distribution -> integrates to Nph
+        amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / self.dVx_const
+        amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift)
+        nxyz = np.abs(amp_beta_xyz)**2  # this is the unnormalized phonon position distribution in 3D Cartesian coordinates
+        nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution in 3D Cartesian coordinates
 
         # Fourier transform
-        beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
-        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * self.dVk_const
+        beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) / self.dVx_const
+        beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
 
         # Exponentiate
         fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
 
         # Inverse Fourier transform
-        nPB_preshift = np.fft.ifftn(fexp) * 1 / (self.dVk_const)
-        nPB = np.fft.fftshift(nPB_preshift)
+        nPB_preshift = np.fft.fftn(fexp) * self.dVx_const
+        nPB_complex = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)  # this is the phonon momentum distribution in 3D Cartesian coordinates
+        nPB = np.abs(nPB_complex)
         nPB_deltaK0 = np.exp(-Nph)
 
         phonon_pos_dist = nxyz_norm  # this is a 3D matrix in terms of x,y,z

@@ -28,89 +28,32 @@ def staticDistCalc(gridargs, params, datapath):
     kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
     dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
 
-    #
-
-    kz_max = np.max(kz)
-
     # generation
     xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
     kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
     kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
 
-    # beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
-    # mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
-
-    # decay_length = 5
-    # decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
-
-    # # Fourier transform and slice
-    # amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
-    # amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
-    # nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2
-
-    # # Calculate Nph
-    # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
-    # Nph_x = np.sum(nxyz * dx * dy * dz)
-
-    # nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution
-
-    # # Fourier transform and slice
-    # beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
-    # beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * dkx * dky * dkz
-    # beta2_z = beta2_xyz[Nx // 2 + 1, Ny // 2 + 1, :]
-
-    # # Exponentiate, slice
-    # fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
-    # # fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
-    # fexp_z = fexp[Nx // 2 + 1, Ny // 2 + 1, :]
-
-    # # Inverse Fourier transform
-    # nPB_preshift = np.fft.ifftn(fexp) * 1 / (dkx * dky * dkz)
-    # nPB = np.fft.fftshift(nPB_preshift)
-    # nPB_deltaK0 = np.exp(-Nph)
-
-    # nPB_kz_slice = nPB[Nx // 2 + 1, Ny // 2 + 1, :]
-
-    # # Integrating out y and z
-
-    # beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky
-    # nPB_kx = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
-    # nPB_ky = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
-    # nPB_kz = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
-    # nx_x = np.sum(np.abs(amp_beta_xyz)**2, axis=(1, 2)) * dy * dz
-    # nx_y = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 2)) * dx * dz
-    # nx_z = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 1)) * dx * dy
-    # nx_x_norm = np.real(nx_x / Nph_x); nx_y_norm = np.real(nx_y / Nph_x); nx_z_norm = np.real(nx_z / Nph_x)
-
-    # nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
-    # nPB_Mom1 = np.dot(np.abs(nPB_kz), kz * dkz)
-    # beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz)
-    # nxyz_Tot = np.sum(nxyz_norm) * dx * dy * dz
-
-    # beta2_kz_Mom1_2 = np.sum(np.abs(beta2_kxkykz) * kzFg) * dkx * dky * dkz
-    # print(beta2_kz_Mom1_2)
-
-    # ***\TEST
-
-    beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
-    mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
+    beta_kxkykz_preshift = BetaK(kxg, kyg, kzg, *bparams)
+    beta_kxkykz = np.fft.ifftshift(beta_kxkykz_preshift)
+    mask = np.isnan(beta_kxkykz); beta_kxkykz[mask] = 0
+    beta2_kxkykz = np.abs(beta_kxkykz)**2
 
     decay_length = 5
     decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
 
     # Fourier transform and slice
-    amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz)) * dkx * dky * dkz / ((2 * np.pi)**3)
-    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0)
+    amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / (dx * dy * dz)
+    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift)
     nxyz = np.abs(amp_beta_xyz)**2
 
     # Calculate Nph
-    Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz) / ((2 * np.pi)**3)
+    Nph = np.sum(beta2_kxkykz) * dkx * dky * dkz / ((2 * np.pi)**3)
     Nph_x = np.sum(nxyz * dx * dy * dz)
 
     nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution
 
     # Fourier transform and slice
-    beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz) * dkx * dky * dkz / ((2 * np.pi)**3)
+    beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) / (dx * dy * dz)
     beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
     beta2_z = beta2_xyz[Nx // 2 + 1, Ny // 2 + 1, :]
 
@@ -120,7 +63,7 @@ def staticDistCalc(gridargs, params, datapath):
     fexp_z = fexp[Nx // 2 + 1, Ny // 2 + 1, :]
 
     # Inverse Fourier transform
-    nPB_preshift = np.fft.ifftn(fexp) * ((2 * np.pi)**3) / (dkx * dky * dkz)
+    nPB_preshift = np.fft.fftn(fexp) * (dx * dy * dz)
     nPB = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)
     nPB_deltaK0 = np.exp(-Nph)
 
@@ -128,21 +71,19 @@ def staticDistCalc(gridargs, params, datapath):
 
     # Integrating out y and z
 
-    beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky / ((2 * np.pi)**2)
+    beta2_kz = np.sum(beta2_kxkykz, axis=(0, 1)) * dkx * dky / ((2 * np.pi)**2)
     nPB_kx = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
     nPB_ky = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
     nPB_kz = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
-    nx_x = np.sum(np.abs(amp_beta_xyz)**2, axis=(1, 2)) * dy * dz
-    nx_y = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 2)) * dx * dz
-    nx_z = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 1)) * dx * dy
+    nx_x = np.sum(nxyz, axis=(1, 2)) * dy * dz
+    nx_y = np.sum(nxyz, axis=(0, 2)) * dx * dz
+    nx_z = np.sum(nxyz, axis=(0, 1)) * dx * dy
     nx_x_norm = np.real(nx_x / Nph_x); nx_y_norm = np.real(nx_y / Nph_x); nx_z_norm = np.real(nx_z / Nph_x)
 
-    nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
+    nPB_Tot = np.sum(np.abs(nPB)) * dkx * dky * dkz + nPB_deltaK0
     nPB_Mom1 = np.dot(np.abs(nPB_kz), kz * dkz)
     beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz / (2 * np.pi))
     nxyz_Tot = np.sum(nxyz_norm) * dx * dy * dz
-
-    # ***/TEST
 
     # Flipping domain for P_I instead of P_B so now nPB(PI) -> nPI
 
@@ -358,6 +299,7 @@ gridargs = [xgrid, kgrid, kFgrid]
 
 # precalculate for stuff below
 
+kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
 kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
 dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz']
 

@@ -39,8 +39,6 @@ def BetaK(kx, ky, kz, aIBi, aSi, DP, mI, mB, n0, gBB):
     old_settings = np.seterr(); np.seterr(all='ignore')
     Bk = -2 * np.pi * np.sqrt(n0) * Wk(kx, ky, kz, mB, n0, gBB) / (ur(mI, mB) * Omega(kx, ky, kz, DP, mI, mB, n0, gBB) * (aIBi - aSi))
     np.seterr(**old_settings)
-    # prefactor = (2 * np.pi)**(-3 / 2)
-    # return prefactor * Bk
     return Bk
 
 
@@ -71,22 +69,22 @@ def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
 # ---- INTERPOLATION FUNCTIONS ----
 
 
-def aSi_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB):
+def aSi_grid(kxg, kyg, kzg, dVk, DP, mI, mB, n0, gBB):
     old_settings = np.seterr(); np.seterr(all='ignore')
-    integrand = 2 * ur(mI, mB) / (kxFg**2 + kyFg**2 + kzFg**2) - (Wk(kxFg, kyFg, kzFg, mB, n0, gBB)**2) / Omega(kxFg, kyFg, kzFg, DP, mI, mB, n0, gBB)
+    integrand = 2 * ur(mI, mB) / (kxg**2 + kyg**2 + kzg**2) - (Wk(kxg, kyg, kzg, mB, n0, gBB)**2) / Omega(kxg, kyg, kzg, DP, mI, mB, n0, gBB)
     mask = np.isnan(integrand); integrand[mask] = 0
     np.seterr(**old_settings)
-    return (2 * np.pi / ur(mI, mB)) * np.sum(integrand) * dVk * (2 * np.pi)**(-3)
+    return (2 * np.pi / ur(mI, mB)) * np.sum(integrand) * dVk
 
 
-def PB_integral_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB):
-    Bk_without_aSi = BetaK(kxFg, kyFg, kzFg, 1, 0, DP, mI, mB, n0, gBB)
-    integrand = kzFg * np.abs(Bk_without_aSi)**2
+def PB_integral_grid(kxg, kyg, kzg, dVk, DP, mI, mB, n0, gBB):
+    Bk_without_aSi = BetaK(kxg, kyg, kzg, 1, 0, DP, mI, mB, n0, gBB)
+    integrand = kzg * np.abs(Bk_without_aSi)**2
     mask = np.isnan(integrand); integrand[mask] = 0
     return np.sum(integrand) * dVk
 
 
-def createSpline_grid(Nsteps, kxFg, kyFg, kzFg, dVk, mI, mB, n0, gBB):
+def createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB):
     DP_max = mI * nu(gBB)
     DP_step = DP_max / Nsteps
     DPVals = np.arange(0, DP_max, DP_step)
@@ -94,8 +92,8 @@ def createSpline_grid(Nsteps, kxFg, kyFg, kzFg, dVk, mI, mB, n0, gBB):
     PBintVals = np.zeros(DPVals.size)
 
     for idp, DP in enumerate(DPVals):
-        aSiVals[idp] = aSi_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB)
-        PBintVals[idp] = PB_integral_grid(kxFg, kyFg, kzFg, dVk, DP, mI, mB, n0, gBB)
+        aSiVals[idp] = aSi_grid(kxg, kyg, kzg, dVk, DP, mI, mB, n0, gBB)
+        PBintVals[idp] = PB_integral_grid(kxg, kyg, kzg, dVk, DP, mI, mB, n0, gBB)
 
     aSi_tck = interpolate.splrep(DPVals, aSiVals, s=0)
     PBint_tck = interpolate.splrep(DPVals, PBintVals, s=0)
@@ -138,10 +136,10 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
     return DP_new
 
 
-def PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB):
+def PCrit_grid(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
     DPc = mI * nu(gBB)
-    aSi = aSi_grid(kxFg, kyFg, kzFg, dVk, DPc, mI, mB, n0, gBB)
-    PB = (aIBi - aSi)**(-2) * PB_integral_grid(kxFg, kyFg, kzFg, dVk, DPc, mI, mB, n0, gBB)
+    aSi = aSi_grid(kxg, kyg, kzg, dVk, DPc, mI, mB, n0, gBB)
+    PB = (aIBi - aSi)**(-2) * PB_integral_grid(kxg, kyg, kzg, dVk, DPc, mI, mB, n0, gBB)
     return DPc + PB
 
 
@@ -150,7 +148,8 @@ def PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB):
 
 def static_DataGeneration(cParams, gParams, sParams):
     [P, aIBi] = cParams
-    [xgrid, kgrid, kFgrid] = gParams
+    # [xgrid, kgrid, kFgrid] = gParams
+    [xgrid, kgrid] = gParams
     [mI, mB, n0, gBB, aSi_tck, PBint_tck] = sParams
 
     # unpack grid args
@@ -159,26 +158,22 @@ def static_DataGeneration(cParams, gParams, sParams):
     (Nx, Ny, Nz) = (len(x), len(y), len(z))
     dx = xgrid.arrays_diff['x']; dy = xgrid.arrays_diff['y']; dz = xgrid.arrays_diff['z']
 
-    kxF = kFgrid.getArray('kx'); kyF = kFgrid.getArray('ky'); kzF = kFgrid.getArray('kz')
-
     kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
     dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
     dVk = dkx * dky * dkz
 
     xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
     kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
-    kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij', sparse=True)
 
     # xg, yg, zg = np.meshgrid(x, y, z, indexing='ij')
     # kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij')
-    # kxFg, kyFg, kzFg = np.meshgrid(kxF, kyF, kzF, indexing='ij')
 
     # calculate relevant parameters
 
     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
     aSi = aSi_interp(DP, aSi_tck)
     PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-    Pcrit = PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi, mI, mB, n0, gBB)
+    Pcrit = PCrit_grid(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB)
     En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
     nu_const = nu(gBB)
     eMass = effMass(P, PB_Val, mI)
@@ -188,37 +183,40 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # generation
 
-    beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
-    mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
+    beta_kxkykz_preshift = BetaK(kxg, kyg, kzg, *bparams)
+    beta_kxkykz = np.fft.ifftshift(beta_kxkykz_preshift)
+    mask = np.isnan(beta_kxkykz); beta_kxkykz[mask] = 0
+    beta2_kxkykz = np.abs(beta_kxkykz)**2
 
     decay_length = 5
     decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
 
     # Fourier transform
-    amp_beta_xyz_preshift = np.fft.fftn(np.sqrt(beta2_kxkykz))
-    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift) * dkx * dky * dkz
-    nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2  # this is the unnormalized phonon position distribution in 3D Cartesian coordinates
+    amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / (dx * dy * dz)
+    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift)
+    nxyz = np.abs(amp_beta_xyz)**2  # this is the unnormalized phonon position distribution in 3D Cartesian coordinates
 
     # Calculate Nph and Z-factor
-    Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
+    Nph = np.sum(beta2_kxkykz) * dkx * dky * dkz / ((2 * np.pi)**3)
     Nph_xyz = np.sum(nxyz * dx * dy * dz)
     Z_factor = np.exp(-(1 / 2) * Nph)
 
     nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution in 3D Cartesian coordinates
 
     # Fourier transform
-    beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
-    beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * dkx * dky * dkz
+    beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) / (dx * dy * dz)
+    beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
 
     # Exponentiate
     fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
 
     # Inverse Fourier transform
-    nPB_preshift = np.fft.ifftn(fexp) * 1 / (dkx * dky * dkz)
-    nPB = np.fft.fftshift(nPB_preshift)  # this is the phonon momentum distribution in 3D Cartesian coordinates
+    nPB_preshift = np.fft.fftn(fexp) * (dx * dy * dz)
+    nPB_complex = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)  # this is the phonon momentum distribution in 3D Cartesian coordinates
+    nPB = np.abs(nPB_complex)
     nPB_deltaK0 = np.exp(-Nph)
 
-    # Calculate phonon distribution slices  #!!!! Fix slices
+    # Calculate phonon distribution slices
     nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2, Nz // 2]))
     nPB_y_slice = np.real(np.abs(nPB[Nx // 2, :, Nz // 2]))
     nPB_z_slice = np.real(np.abs(nPB[Nx // 2, Ny // 2, :]))
@@ -228,18 +226,18 @@ def static_DataGeneration(cParams, gParams, sParams):
     nxyz_z_slice = np.real(nxyz[Nx // 2, Ny // 2, :])
 
     # Integrating out certain directions
-    beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky
-    nPB_x = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
-    nPB_y = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
-    nPB_z = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
+    beta2_kz = np.sum(np.fft.fftshift(beta2_kxkykz), axis=(0, 1)) * dkx * dky / ((2 * np.pi)**2)
+    nPB_x = np.sum(nPB, axis=(1, 2)) * dky * dkz
+    nPB_y = np.sum(nPB, axis=(0, 2)) * dkx * dkz
+    nPB_z = np.sum(nPB, axis=(0, 1)) * dkx * dky
     nxyz_x = np.sum(nxyz_norm, axis=(1, 2)) * dy * dz
     nxyz_y = np.sum(nxyz_norm, axis=(0, 2)) * dx * dz
     nxyz_z = np.sum(nxyz_norm, axis=(0, 1)) * dx * dy
 
     nxyz_Tot = np.sum(nxyz_norm * dx * dy * dz)
-    nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
-    nPB_Mom1 = np.dot(np.abs(nPB_z), kz * dkz)
-    beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz)
+    nPB_Tot = np.sum(nPB) * dkx * dky * dkz + nPB_deltaK0
+    nPB_Mom1 = np.dot(nPB_z, kz * dkz)
+    beta2_kz_Mom1 = np.dot(beta2_kz, kz * dkz / (2 * np.pi))
 
     # Flipping domain for P_I instead of P_B so now nPB(PI) -> nPI: Then calculcate nPI quantities
 
@@ -321,11 +319,12 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPBm_Tot = np.sum(nPBm_Vec * dPBm) + nPB_deltaK0
     nPIm_Tot = np.sum(nPIm_Vec * dPIm) + nPB_deltaK0
 
-    # Consistency checks
+    # # Consistency checks
 
     # print("FWHM = {0}, Var = {1}".format(FWHM, (FWHM / 2.355)**2))
     # print("Nph = \sum b^2 = %f" % (Nph))
     # print("Nph_xyz = %f " % (Nph_xyz))
+    # print("\int nx dx = %f" % (nxyz_Tot))
     # print("\int np dp = %f" % (nPB_Tot))
     # print("\int p np dp = %f" % (nPB_Mom1))
     # print("\int k beta^2 dk = %f" % (beta2_kz_Mom1))

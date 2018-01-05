@@ -18,15 +18,13 @@ if __name__ == "__main__":
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
 
     (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
-
     kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
-    kFgrid = Grid.Grid('CARTESIAN_3D')
-    kFgrid.initArray_premade('kx', kxfft); kFgrid.initArray_premade('ky', kyfft); kFgrid.initArray_premade('kz', kzfft)
 
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    gParams = [xgrid, kgrid, kFgrid]
+    # gParams = [xgrid, kgrid, kFgrid]
+    gParams = [xgrid, kgrid]
 
     # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
     NGridPoints = xgrid.size()
@@ -40,11 +38,11 @@ if __name__ == "__main__":
 
     # Interpolation
 
-    kxFg, kyFg, kzFg = np.meshgrid(kFgrid.getArray('kx'), kFgrid.getArray('ky'), kFgrid.getArray('kz'), indexing='ij', sparse=True)
-    dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz']
+    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
+    dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz'] / ((2 * np.pi)**3)
 
-    # Nsteps = 1e2
-    # pf_static_cart.createSpline_grid(Nsteps, kxFg, kyFg, kzFg, dVk, mI, mB, n0, gBB)
+    Nsteps = 1e2
+    pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
 
     aSi_tck = np.load('aSi_spline.npy')
     PBint_tck = np.load('PBint_spline.npy')
@@ -91,7 +89,7 @@ if __name__ == "__main__":
     # cParams_List = []
     # aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
     # # aIBi_Vals = np.linspace(-5, 7, 10)
-    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxFg, kyFg, kzFg, dVk, aIBi_Vals, mI, mB, n0, gBB)
+    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxg, kyg, kzg, dVk, aIBi_Vals, mI, mB, n0, gBB)
     # Pcrit_max = np.max(Pcrit_Vals)
     # Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
     # P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))

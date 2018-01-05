@@ -229,3 +229,112 @@
 
 #     Dist_data = np.concatenate((DP * np.ones(Nz)[:, np.newaxis], Nph * np.ones(Nz)[:, np.newaxis], Nph_x * np.ones(Nz)[:, np.newaxis], nPB_Tot * np.ones(Nz)[:, np.newaxis], nPB_Mom1 * np.ones(Nz)[:, np.newaxis], beta2_kz_Mom1 * np.ones(Nz)[:, np.newaxis], FWHM * np.ones(Nz)[:, np.newaxis], x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nx_x_norm[:, np.newaxis], nx_y_norm[:, np.newaxis], nx_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_kx)[:, np.newaxis], np.real(nPB_ky)[:, np.newaxis], np.real(nPB_kz)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
 #     np.savetxt(datapath + '/3Ddist_aIBi_{:.2f}_P_{:.2f}.dat'.format(aIBi, P), Dist_data)
+
+####
+
+   # beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
+    # mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
+
+    # decay_length = 5
+    # decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
+
+    # # Fourier transform and slice
+    # amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz))
+    # amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0) * dkx * dky * dkz
+    # nxyz = np.abs(amp_beta_xyz * (2 * np.pi)**(-3 / 2))**2
+
+    # # Calculate Nph
+    # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
+    # Nph_x = np.sum(nxyz * dx * dy * dz)
+
+    # nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution
+
+    # # Fourier transform and slice
+    # beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz)
+    # beta2_xyz = np.fft.fftshift(beta2_xyz_preshift) * dkx * dky * dkz
+    # beta2_z = beta2_xyz[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Exponentiate, slice
+    # fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    # # fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
+    # fexp_z = fexp[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Inverse Fourier transform
+    # nPB_preshift = np.fft.ifftn(fexp) * 1 / (dkx * dky * dkz)
+    # nPB = np.fft.fftshift(nPB_preshift)
+    # nPB_deltaK0 = np.exp(-Nph)
+
+    # nPB_kz_slice = nPB[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Integrating out y and z
+
+    # beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky
+    # nPB_kx = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
+    # nPB_ky = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
+    # nPB_kz = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
+    # nx_x = np.sum(np.abs(amp_beta_xyz)**2, axis=(1, 2)) * dy * dz
+    # nx_y = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 2)) * dx * dz
+    # nx_z = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 1)) * dx * dy
+    # nx_x_norm = np.real(nx_x / Nph_x); nx_y_norm = np.real(nx_y / Nph_x); nx_z_norm = np.real(nx_z / Nph_x)
+
+    # nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
+    # nPB_Mom1 = np.dot(np.abs(nPB_kz), kz * dkz)
+    # beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz)
+    # nxyz_Tot = np.sum(nxyz_norm) * dx * dy * dz
+
+    # beta2_kz_Mom1_2 = np.sum(np.abs(beta2_kxkykz) * kzFg) * dkx * dky * dkz
+    # print(beta2_kz_Mom1_2)
+
+    # ***/TEST
+    
+    # beta2_kxkykz = np.abs(BetaK(kxFg, kyFg, kzFg, *bparams))**2
+    # mask = np.isnan(beta2_kxkykz); beta2_kxkykz[mask] = 0
+
+    # decay_length = 5
+    # decay_xyz = np.exp(-1 * (xg**2 + yg**2 + zg**2) / (2 * decay_length**2))
+
+    # # Fourier transform and slice
+    # amp_beta_xyz_0 = np.fft.fftn(np.sqrt(beta2_kxkykz)) * dkx * dky * dkz / ((2 * np.pi)**3)
+    # amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_0)
+    # nxyz = np.abs(amp_beta_xyz)**2
+
+    # # Calculate Nph
+    # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz) / ((2 * np.pi)**3)
+    # Nph_x = np.sum(nxyz * dx * dy * dz)
+
+    # nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution
+
+    # # Fourier transform and slice
+    # beta2_xyz_preshift = np.fft.fftn(beta2_kxkykz) * dkx * dky * dkz / ((2 * np.pi)**3)
+    # beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
+    # beta2_z = beta2_xyz[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Exponentiate, slice
+    # fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    # # fexp = np.exp(beta2_xyz - Nph) - np.exp(-Nph)
+    # fexp_z = fexp[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Inverse Fourier transform
+    # nPB_preshift = np.fft.ifftn(fexp) * ((2 * np.pi)**3) / (dkx * dky * dkz)
+    # nPB = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)
+    # nPB_deltaK0 = np.exp(-Nph)
+
+    # nPB_kz_slice = nPB[Nx // 2 + 1, Ny // 2 + 1, :]
+
+    # # Integrating out y and z
+
+    # beta2_kz = np.sum(np.abs(beta2_kxkykz), axis=(0, 1)) * dkx * dky / ((2 * np.pi)**2)
+    # nPB_kx = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
+    # nPB_ky = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
+    # nPB_kz = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
+    # nx_x = np.sum(np.abs(amp_beta_xyz)**2, axis=(1, 2)) * dy * dz
+    # nx_y = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 2)) * dx * dz
+    # nx_z = np.sum(np.abs(amp_beta_xyz)**2, axis=(0, 1)) * dx * dy
+    # nx_x_norm = np.real(nx_x / Nph_x); nx_y_norm = np.real(nx_y / Nph_x); nx_z_norm = np.real(nx_z / Nph_x)
+
+    # nPB_Tot = np.sum(np.abs(nPB) * dkx * dky * dkz) + nPB_deltaK0
+    # nPB_Mom1 = np.dot(np.abs(nPB_kz), kz * dkz)
+    # beta2_kz_Mom1 = np.dot(np.abs(beta2_kz), kzF * dkz / (2 * np.pi))
+    # nxyz_Tot = np.sum(nxyz_norm) * dx * dy * dz
+
+    # ***\TEST

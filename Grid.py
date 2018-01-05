@@ -78,7 +78,7 @@ class Grid:
 
     def dV(self):
         # create an infinitisimal element of the volume that corresponds to the
-        # given coordinate_system
+        # given coordinate_system, assumes grid is in momentum space -> if in position space, multiply by appropriate factor of 2pi
 
         list_of_unit_vectors = list(self.arrays.keys())
         coordinate_system = self.coordinate_system
@@ -89,7 +89,7 @@ class Grid:
             for unit in list_of_unit_vectors:
                 numelements = numelements * self.arrays[unit].size
                 dV = dV * self.arrays_diff[unit]
-            return dV * np.ones(numelements)
+            return dV * np.ones(numelements) * (2 * np.pi)**(-3)
 
         # create dk, dtheta and modify it
         grid_diff = self.diffArray(list_of_unit_vectors[0])
