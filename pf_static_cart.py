@@ -38,9 +38,10 @@ def Wk(kx, ky, kz, mB, n0, gBB):
 def BetaK(kx, ky, kz, aIBi, aSi, DP, mI, mB, n0, gBB):
     old_settings = np.seterr(); np.seterr(all='ignore')
     Bk = -2 * np.pi * np.sqrt(n0) * Wk(kx, ky, kz, mB, n0, gBB) / (ur(mI, mB) * Omega(kx, ky, kz, DP, mI, mB, n0, gBB) * (aIBi - aSi))
-    prefactor = (2 * np.pi)**(-3 / 2)
     np.seterr(**old_settings)
-    return prefactor * Bk
+    # prefactor = (2 * np.pi)**(-3 / 2)
+    # return prefactor * Bk
+    return Bk
 
 
 def Energy(P, PB, aIBi, aSi, mI, mB, n0):
