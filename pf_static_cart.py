@@ -217,9 +217,9 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPB_deltaK0 = np.exp(-Nph)
 
     # Calculate phonon distribution slices
-    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2, Nz // 2]))
-    nPB_y_slice = np.real(np.abs(nPB[Nx // 2, :, Nz // 2]))
-    nPB_z_slice = np.real(np.abs(nPB[Nx // 2, Ny // 2, :]))
+    nPB_x_slice = np.real(nPB[:, Ny // 2, Nz // 2])
+    nPB_y_slice = np.real(nPB[Nx // 2, :, Nz // 2])
+    nPB_z_slice = np.real(nPB[Nx // 2, Ny // 2, :])
 
     nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
     nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
@@ -276,7 +276,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
     PI_flat = PI.reshape(PI.size)
-    nPB_flat = np.abs(nPB.reshape(nPB.size))
+    nPB_flat = nPB.reshape(nPB.size)
 
     PB_series = pd.Series(nPB_flat, index=PB_flat)
     PI_series = pd.Series(nPB_flat, index=PI_flat)

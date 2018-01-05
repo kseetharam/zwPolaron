@@ -74,9 +74,9 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
     dx, dy, dz, dkx, dky, dkz = grid_diff_args
 
     # slice directions
-    nPB_x_slice = np.real(np.abs(nPB[:, Ny // 2, Nz // 2]))
-    nPB_y_slice = np.real(np.abs(nPB[Nx // 2, :, Nz // 2]))
-    nPB_z_slice = np.real(np.abs(nPB[Nx // 2, Ny // 2, :]))
+    nPB_x_slice = np.real(nPB[:, Ny // 2, Nz // 2])
+    nPB_y_slice = np.real(nPB[Nx // 2, :, Nz // 2])
+    nPB_z_slice = np.real(nPB[Nx // 2, Ny // 2, :])
 
     nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
     nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
@@ -90,9 +90,9 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
     mom_slices = nPB_x_slice, nPB_y_slice, nPB_z_slice, nPI_x_slice, nPI_y_slice, nPI_z_slice
 
     # integrate directions
-    nPB_x = np.sum(np.abs(nPB), axis=(1, 2)) * dky * dkz
-    nPB_y = np.sum(np.abs(nPB), axis=(0, 2)) * dkx * dkz
-    nPB_z = np.sum(np.abs(nPB), axis=(0, 1)) * dkx * dky
+    nPB_x = np.sum(nPB, axis=(1, 2)) * dky * dkz
+    nPB_y = np.sum(nPB, axis=(0, 2)) * dkx * dkz
+    nPB_z = np.sum(nPB, axis=(0, 1)) * dkx * dky
 
     nxyz_x = np.sum(nxyz, axis=(1, 2)) * dy * dz
     nxyz_y = np.sum(nxyz, axis=(0, 2)) * dx * dz
@@ -117,7 +117,7 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
     PB_flat = PB.reshape(PB.size)
     PI_flat = PI.reshape(PI.size)
-    nPB_flat = np.abs(nPB.reshape(nPB.size))
+    nPB_flat = nPB.reshape(nPB.size)
 
     PB_series = pd.Series(nPB_flat, index=PB_flat)
     PI_series = pd.Series(nPB_flat, index=PI_flat)
