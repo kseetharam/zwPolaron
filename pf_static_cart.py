@@ -217,13 +217,19 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPB_deltaK0 = np.exp(-Nph)
 
     # Calculate phonon distribution slices
-    nPB_x_slice = np.real(nPB[:, Ny // 2, Nz // 2])
-    nPB_y_slice = np.real(nPB[Nx // 2, :, Nz // 2])
-    nPB_z_slice = np.real(nPB[Nx // 2, Ny // 2, :])
+    nPB_x_slice = nPB[:, Ny // 2, Nz // 2]
+    nPB_y_slice = nPB[Nx // 2, :, Nz // 2]
+    nPB_z_slice = nPB[Nx // 2, Ny // 2, :]
 
-    nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
-    nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
-    nxyz_z_slice = np.real(nxyz[Nx // 2, Ny // 2, :])
+    nPB_xz_slice = nPB[:, Ny // 2, :]
+    nPB_xy_slice = nPB[:, :, Nz // 2]
+
+    nxyz_x_slice = nxyz[:, Ny // 2, Nz // 2]
+    nxyz_y_slice = nxyz[Nx // 2, :, Nz // 2]
+    nxyz_z_slice = nxyz[Nx // 2, Ny // 2, :]
+
+    nxyz_xz_slice = nxyz[:, Ny // 2, :]
+    nxyz_xy_slice = nxyz[:, :, Nz // 2]
 
     # Integrating out certain directions
     beta2_kz = np.sum(np.fft.fftshift(beta2_kxkykz), axis=(0, 1)) * dkx * dky / ((2 * np.pi)**2)
@@ -260,6 +266,9 @@ def static_DataGeneration(cParams, gParams, sParams):
     nPI_x_slice = np.flip(nPB_x_slice, 0)
     nPI_y_slice = np.flip(nPB_y_slice, 0)
     nPI_z_slice = np.flip(nPB_z_slice, 0)
+
+    nPI_xz_slice = np.flip(np.flip(nPB_xz_slice, 0), 1)
+    nPI_xy_slice = np.flip(np.flip(nPB_xy_slice, 0), 1)
 
     # Calculate FWHM
 
@@ -341,11 +350,14 @@ def static_DataGeneration(cParams, gParams, sParams):
     # xyz_string = 'x, y, z, nxyz_x_norm, nxyz_y_norm, nxyz_z_norm, kx, ky, kz, nPB_x, nPB_y, nPB_z, PI_z, nPI_z'
     # xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nxyz_x_norm[:, np.newaxis], nxyz_y_norm[:, np.newaxis], nxyz_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_x)[:, np.newaxis], np.real(nPB_y)[:, np.newaxis], np.real(nPB_z)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
     pos_xyz_string = 'Phonons: x, y, z, nxyz_x, nxyz_y, nxyz_z, nxyz_x_slice, nxyz_y_slice, nxyz_z_slice'
-    pos_xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nxyz_x[:, np.newaxis], nxyz_y[:, np.newaxis], nxyz_z[:, np.newaxis], np.real(nxyz_x_slice)[:, np.newaxis], np.real(nxyz_y_slice)[:, np.newaxis], np.real(nxyz_z_slice)[:, np.newaxis]), axis=1)
+    pos_xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nxyz_x[:, np.newaxis], nxyz_y[:, np.newaxis], nxyz_z[:, np.newaxis], nxyz_x_slice[:, np.newaxis], nxyz_y_slice[:, np.newaxis], nxyz_z_slice[:, np.newaxis]), axis=1)
 
     mom_xyz_string = 'PB_x, PB_y, PB_z, nPB_x, nPB_y, nPB_z, nPB_x_slice, nPB_y_slice, nPB_z_slice, PI_x, PI_y, PI_z, nPI_x, nPI_y, nPI_z, nPI_x_slice, nPI_y_slice, nPI_z_slice'
-    mom_xyz_data = np.concatenate((PB_x[:, np.newaxis], PB_y[:, np.newaxis], PB_z[:, np.newaxis], np.real(nPB_x)[:, np.newaxis], np.real(nPB_y)[:, np.newaxis], np.real(nPB_z)[:, np.newaxis], np.real(nPB_x_slice)[:, np.newaxis], np.real(nPB_y_slice)[:, np.newaxis], np.real(nPB_z_slice)[:, np.newaxis], PI_x_ord[:, np.newaxis], PI_y_ord[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_x)[:, np.newaxis], np.real(nPI_y)[:, np.newaxis], np.real(nPI_z)[:, np.newaxis], np.real(nPI_x_slice)[:, np.newaxis], np.real(nPI_y_slice)[:, np.newaxis], np.real(nPI_z_slice)[:, np.newaxis]), axis=1)
+    mom_xyz_data = np.concatenate((PB_x[:, np.newaxis], PB_y[:, np.newaxis], PB_z[:, np.newaxis], nPB_x[:, np.newaxis], nPB_y[:, np.newaxis], nPB_z[:, np.newaxis], nPB_x_slice[:, np.newaxis], nPB_y_slice[:, np.newaxis], nPB_z_slice[:, np.newaxis], PI_x_ord[:, np.newaxis], PI_y_ord[:, np.newaxis], PI_z_ord[:, np.newaxis], nPI_x[:, np.newaxis], nPI_y[:, np.newaxis], nPI_z[:, np.newaxis], nPI_x_slice[:, np.newaxis], nPI_y_slice[:, np.newaxis], nPI_z_slice[:, np.newaxis]), axis=1)
+
+    cont_xyz_string = 'nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice'
+    cont_xyz_data = [nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice]
 
     mom_mag_string = 'PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec'
     mom_mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
-    return metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, mom_mag_string, mom_mag_data
+    return metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data

@@ -74,20 +74,30 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
     dx, dy, dz, dkx, dky, dkz = grid_diff_args
 
     # slice directions
-    nPB_x_slice = np.real(nPB[:, Ny // 2, Nz // 2])
-    nPB_y_slice = np.real(nPB[Nx // 2, :, Nz // 2])
-    nPB_z_slice = np.real(nPB[Nx // 2, Ny // 2, :])
+    nPB_x_slice = nPB[:, Ny // 2, Nz // 2]
+    nPB_y_slice = nPB[Nx // 2, :, Nz // 2]
+    nPB_z_slice = nPB[Nx // 2, Ny // 2, :]
 
-    nxyz_x_slice = np.real(nxyz[:, Ny // 2, Nz // 2])
-    nxyz_y_slice = np.real(nxyz[Nx // 2, :, Nz // 2])
-    nxyz_z_slice = np.real(nxyz[Nx // 2, Ny // 2, :])
+    nPB_xz_slice = nPB[:, Ny // 2, :]
+    nPB_xy_slice = nPB[:, :, Nz // 2]
+
+    nxyz_x_slice = nxyz[:, Ny // 2, Nz // 2]
+    nxyz_y_slice = nxyz[Nx // 2, :, Nz // 2]
+    nxyz_z_slice = nxyz[Nx // 2, Ny // 2, :]
+
+    nxyz_xz_slice = nxyz[:, Ny // 2, :]
+    nxyz_xy_slice = nxyz[:, :, Nz // 2]
 
     nPI_x_slice = np.flip(nPB_x_slice, 0)
     nPI_y_slice = np.flip(nPB_y_slice, 0)
     nPI_z_slice = np.flip(nPB_z_slice, 0)
 
+    nPI_xz_slice = np.flip(np.flip(nPB_xz_slice, 0), 1)
+    nPI_xy_slice = np.flip(np.flip(nPB_xy_slice, 0), 1)
+
     pos_slices = nxyz_x_slice, nxyz_y_slice, nxyz_z_slice
     mom_slices = nPB_x_slice, nPB_y_slice, nPB_z_slice, nPI_x_slice, nPI_y_slice, nPI_z_slice
+    cont_slices = nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice
 
     # integrate directions
     nPB_x = np.sum(nPB, axis=(1, 2)) * dky * dkz
@@ -104,7 +114,7 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
 
     pos_integration = nxyz_x, nxyz_y, nxyz_z
     mom_integration = nPB_x, nPB_y, nPB_z, nPI_x, nPI_y, nPI_z
-    return pos_slices, mom_slices, pos_integration, mom_integration  # !!!FIGURE OUT ARGS NEEDED FOR NX,NY,NZ,DX...
+    return pos_slices, mom_slices, cont_slices, pos_integration, mom_integration
 
 
 def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
@@ -217,6 +227,9 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     nxyz_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
     nPB_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
     nPI_x_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_y_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_z_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nxyz_xz_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_xy_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPB_xz_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_xy_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
+    nPI_xz_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_xy_slice_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
     nxyz_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nxyz_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
     nPB_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPB_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
     nPI_x_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_y_ctVec = np.empty(tgrid_coarse.size, dtype=np.object); nPI_z_ctVec = np.empty(tgrid_coarse.size, dtype=np.object)
@@ -244,12 +257,13 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         if t != 0 and (ind + 1) % maxfac == 0:
             # calculate distribution information
             phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak_ctVec[cind] = cs.get_PhononDistributions()
-            pos_slices, mom_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args)
+            pos_slices, mom_slices, cont_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args)
             [PBm_Vec, nPBm_ctVec[cind], PIm_Vec, nPIm_ctVec[cind]] = xyzDist_To_magDist(cs.kgrid, phonon_mom_dist, P)
 
             # unpack above calculations and store data
             nxyz_x_slice_ctVec[cind], nxyz_y_slice_ctVec[cind], nxyz_z_slice_ctVec[cind] = pos_slices
             nPB_x_slice_ctVec[cind], nPB_y_slice_ctVec[cind], nPB_z_slice_ctVec[cind], nPI_x_slice_ctVec[cind], nPI_y_slice_ctVec[cind], nPI_z_slice_ctVec[cind] = mom_slices
+            nxyz_xz_slice_ctVec[cind], nxyz_xy_slice_ctVec[cind], nPB_xz_slice_ctVec[cind], nPB_xy_slice_ctVec[cind], nPI_xz_slice_ctVec[cind], nPI_xy_slice_ctVec[cind] = cont_slices
             nxyz_x_ctVec[cind], nxyz_y_ctVec[cind], nxyz_z_ctVec[cind] = pos_integration
             nPB_x_ctVec[cind], nPB_y_ctVec[cind], nPB_z_ctVec[cind], nPI_x_ctVec[cind], nPI_y_ctVec[cind], nPI_z_ctVec[cind] = mom_integration
             tgrid_coarse[cind] = t
@@ -268,5 +282,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     metrics_data = [P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, np.real(DynOv_tVec), np.imag(DynOv_tVec), Phase_tVec]
     pos_xyz_data = [x, y, z, nxyz_x_ctVec, nxyz_y_ctVec, nxyz_z_ctVec, nxyz_x_slice_ctVec, nxyz_y_slice_ctVec, nxyz_z_slice_ctVec]
     mom_xyz_data = [PB_x, PB_y, PB_z, nPB_x_ctVec, nPB_y_ctVec, nPB_z_ctVec, nPB_x_slice_ctVec, nPB_y_slice_ctVec, nPB_z_slice_ctVec, PI_x, PI_y, PI_z, nPI_x_ctVec, nPI_y_ctVec, nPI_z_ctVec, nPI_x_slice_ctVec, nPI_y_slice_ctVec, nPI_z_slice_ctVec, phonon_mom_k0deltapeak_ctVec]
+    cont_xyz_data = [nxyz_xz_slice_ctVec, nxyz_xy_slice_ctVec, nPB_xz_slice_ctVec, nPB_xy_slice_ctVec, nPI_xz_slice_ctVec, nPI_xy_slice_ctVec]
     mom_mag_data = [PBm, nPBm_ctVec, PIm, nPIm_ctVec]
-    return time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data
+
+    return time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data

@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
-    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
