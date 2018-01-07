@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # gParams = [xgrid, kgrid, kFgrid]
     gParams = [xgrid, kgrid]
 
-    # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
+    # NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints = xgrid.size()
 
     # Basic parameters
@@ -44,8 +44,8 @@ if __name__ == "__main__":
     # Nsteps = 1e2
     # pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
 
-    aSi_tck = np.load('aSi_spline.npy')
-    PBint_tck = np.load('PBint_spline.npy')
+    aSi_tck = np.load('aSi_spline_cart.npy')
+    PBint_tck = np.load('PBint_spline_cart.npy')
 
     sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
 

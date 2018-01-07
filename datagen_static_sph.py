@@ -14,20 +14,23 @@ if __name__ == "__main__":
     (Lx, Ly, Lz) = (25, 25, 25)
     (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
 
-    xgrid = Grid.Grid('CARTESIAN_3D')
-    xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
 
-    (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
-    kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    kgrid = Grid.Grid('CARTESIAN_3D')
-    kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
+    k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    kArray, dk = np.linspace(0, k_max, Nk, retstep=True)
 
-    # gParams = [xgrid, kgrid, kFgrid]
-    gParams = [xgrid, kgrid]
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('th', thetaArray)
+    kgrid.initArray_premade('k', kArray)
 
-    # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
-    NGridPoints = xgrid.size()
+    gParams = [kgrid]
+
+    NGridPoints = kgrid.size()
 
     # Basic parameters
 
@@ -36,53 +39,53 @@ if __name__ == "__main__":
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
 
-    # Interpolation
+    # # Interpolation
 
-    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
-    dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz'] / ((2 * np.pi)**3)
+    # kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
+    # dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz'] / ((2 * np.pi)**3)
 
-    # Nsteps = 1e2
-    # pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
+    # # Nsteps = 1e2
+    # # pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
 
-    aSi_tck = np.load('aSi_spline.npy')
-    PBint_tck = np.load('PBint_spline.npy')
+    # aSi_tck = np.load('aSi_spline.npy')
+    # PBint_tck = np.load('PBint_spline.npy')
 
-    sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
+    # sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
 
-    # ---- SET OUTPUT DATA FOLDER ----
+    # # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/cart' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/sph' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    P = 1.4 * pf_static_cart.nu(gBB)
-    aIBi = -2
-    cParams = [P, aIBi]
+    # P = 1.4 * pf_static_cart.nu(gBB)
+    # aIBi = -2
+    # cParams = [P, aIBi]
 
-    innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
-    metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-        f.write(metrics_string)
-    with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-        f.write(pos_xyz_string)
-    with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-        f.write(mom_xyz_string)
-    with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-        f.write(mom_mag_string)
-    np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    # metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+    #     f.write(metrics_string)
+    # with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+    #     f.write(pos_xyz_string)
+    # with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+    #     f.write(mom_xyz_string)
+    # with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+    #     f.write(mom_mag_string)
+    # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+    # np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    # np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    # np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 

@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 

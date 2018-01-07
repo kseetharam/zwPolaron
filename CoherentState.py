@@ -1,5 +1,5 @@
 import numpy as np
-from pf_spherical import kcos_func, ksin_func, kpow2_func
+from pf_dynamic_sph import kcos_func, ksin_func, kpow2_func
 from scipy.integrate import ode
 from copy import copy
 
@@ -25,8 +25,8 @@ class CoherentState:
 
         if(self.coordinate_system == "SPHERICAL_2D"):
             self.kzg_flat = kcos_func(kgrid)
-            self.ksin = ksin_func(kgrid)
-            self.kpow2 = kpow2_func(kgrid)
+            # self.ksin = ksin_func(kgrid)
+            # self.kpow2 = kpow2_func(kgrid)
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')

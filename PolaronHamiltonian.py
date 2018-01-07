@@ -1,5 +1,5 @@
 import numpy as np
-import pf_spherical as pfs
+import pf_dynamic_sph as pfs
 import pf_dynamic_cart as pfc
 
 

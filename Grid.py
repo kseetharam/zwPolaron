@@ -25,7 +25,10 @@ class Grid:
             posarray = np.arange(grid_step, grid_max + grid_step, grid_step)
             array = np.concatenate((-1 * posarray[::-1], posarray), axis=0)
         else:
-            array = np.arange(grid_min, grid_max + grid_step, grid_step)
+            if(float.is_integer(grid_max - grid_min / grid_step)):
+                array = np.arange(grid_min, grid_max + grid_step, grid_step)
+            else:
+                array = np.arange(grid_min, grid_max, grid_step)
 
         self.arrays_diff[name] = grid_step
         self.arrays[name] = array
