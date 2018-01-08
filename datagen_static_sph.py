@@ -23,7 +23,9 @@ if __name__ == "__main__":
     thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
     k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
-    kArray, dk = np.linspace(0, k_max, Nk, retstep=True)
+    kArray, dk = np.linspace(1e-3, k_max, Nk, retstep=True)
+    if dk < 1e-5:
+        print('k ARRAY GENERATION ERROR')
 
     kgrid = Grid.Grid("SPHERICAL_2D")
     kgrid.initArray_premade('th', thetaArray)
@@ -56,32 +58,32 @@ if __name__ == "__main__":
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
+    # ---- SINGLE FUNCTION RUN ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # P = 1.4 * pf_static_sph.nu(gBB)
-    # aIBi = -2
-    # cParams = [P, aIBi]
+    P = 1.4 * pf_static_sph.nu(gBB)
+    aIBi = -2
+    cParams = [P, aIBi]
 
-    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
-    # metrics_string, metrics_data = pf_static_sph.static_DataGeneration(cParams, gParams, sParams)
-    # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-    #     f.write(metrics_string)
-    # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+    metrics_string, metrics_data = pf_static_sph.static_DataGeneration(cParams, gParams, sParams)
+    with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+        f.write(metrics_string)
+    np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
 
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     # cParams_List = []
     # aIBi_Vals = np.array([-5, -3, -1, 1, 3, 5, 7])
     # # aIBi_Vals = np.linspace(-5, 7, 10)
-    # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+    # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi_Vals, mI, mB, n0, gBB)
     # Pcrit_max = np.max(Pcrit_Vals)
     # Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
     # P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))

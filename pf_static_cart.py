@@ -169,6 +169,9 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # calculate relevant parameters
 
+    NGridPoints = kgrid.size()
+    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+
     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
     aSi = aSi_interp(DP, aSi_tck)
     PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
@@ -342,8 +345,8 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM'
-    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM])
+    metrics_string = 'NGridPoints, |k|_max, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM'
+    metrics_data = np.array([NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM])
     # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
 
     # xyz_string = 'x, y, z, nxyz_x_norm, nxyz_y_norm, nxyz_z_norm, kx, ky, kz, nPB_x, nPB_y, nPB_z, PI_z, nPI_z'

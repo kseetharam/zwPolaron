@@ -80,7 +80,7 @@ def effMass(P, PB, mI):
 
 def g(kgrid, P, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
-    k_max = kgrid.arrays['k'][-1]
+    k_max = kgrid.getArray('k')[-1]
     mR = ur(mI, mB)
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
@@ -178,6 +178,9 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # calculate relevant parameters
 
+    NGridPoints = kgrid.size()
+    k_max = kgrid.getArray('k')[-1]
+
     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
     aSi = aSi_interp(DP, aSi_tck)
     PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
@@ -191,7 +194,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
-    metrics_data = np.array([P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
+    metrics_string = 'NGridPoints, |k|_max, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
+    metrics_data = np.array([NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
 
     return metrics_string, metrics_data
