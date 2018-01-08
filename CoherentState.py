@@ -1,5 +1,5 @@
 import numpy as np
-from pf_dynamic_sph import kcos_func, ksin_func, kpow2_func
+from pf_dynamic_sph import kcos_func
 from scipy.integrate import ode
 from copy import copy
 
@@ -25,8 +25,6 @@ class CoherentState:
 
         if(self.coordinate_system == "SPHERICAL_2D"):
             self.kzg_flat = kcos_func(kgrid)
-            # self.ksin = ksin_func(kgrid)
-            # self.kpow2 = kpow2_func(kgrid)
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')
@@ -37,21 +35,6 @@ class CoherentState:
         # error for ODE solver
         self.abs_error = 1.0e-8
         self.rel_error = 1.0e-6
-
-#  # THIS WAS FOR DISTRIBUTION FUNCTION ATTEMPT IN SPHERICAL COORDINATES -- DEPRACATED
-        # self.th = kgrid.function_prod(list(kgrid.arrays.keys()), [lambda k: 0 * k + 1, lambda th: th])
-        # self.xgrid = xgrid
-        # self.xmagVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: x, lambda th: 0 * th + 1])
-        # self.xthetaVals = xgrid.function_prod(list(xgrid.arrays.keys()), [lambda x: 0 * x + 1, lambda th: th])
-        # self.dV_x = (2 * np.pi)**3 * self.xgrid.dV()
-
-        # self.PBgrid = PBgrid
-        # self.PBmagVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: PB, lambda th: 0 * th + 1])
-        # self.PBthetaVals = PBgrid.function_prod(list(PBgrid.arrays.keys()), [lambda PB: 0 * PB + 1, lambda th: th])
-        # self.dV_PB = (2 * np.pi)**3 * self.PBgrid.dV()
-
-        # self.FTkernel_kx = FTkernel_func(kgrid, xgrid, True)
-        # # self.FTkernel_xPB = FTkernel_func(xgrid, PBgrid, True)
 
     # EVOLUTION
 
@@ -73,7 +56,7 @@ class CoherentState:
     def get_Phase(self):
         return self.amplitude_phase[-1].real.astype(float)
 
-    # PURELY MOMENTUM SPACE DEPENDENT OBSERVABLES
+    # MOMENTUM SPACE DEPENDENT OBSERVABLES
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
@@ -90,11 +73,7 @@ class CoherentState:
         exparg = -1j * phase - (1 / 2) * NB
         return np.exp(exparg)
 
-    # def get_MomentumDispersion(self):
-    #     amplitude = self.amplitude_phase[0:-1]
-    #     return np.dot(self.kpow2 * amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)
-
-    # POSITION SPACE DEPENDENT OBSERVABLES
+    # DISTRIBUTION
 
     def get_PhononDistributions(self):
         amplitude = self.amplitude_phase[0:-1]  # this is flattened and stored w.r.t. kgrid

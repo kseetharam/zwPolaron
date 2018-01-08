@@ -148,7 +148,6 @@ def PCrit_grid(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
 
 def static_DataGeneration(cParams, gParams, sParams):
     [P, aIBi] = cParams
-    # [xgrid, kgrid, kFgrid] = gParams
     [xgrid, kgrid] = gParams
     [mI, mB, n0, gBB, aSi_tck, PBint_tck] = sParams
 
