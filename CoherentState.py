@@ -16,6 +16,8 @@ class CoherentState:
         self.kgrid = kgrid
         self.xgrid = xgrid
 
+        self.k0mask = np.zeros(kgrid.size(), dtype=bool)  # this is where |k| = 0 in the provided kgrid -> never true for Spherical grid
+
         self.coordinate_system = kgrid.coordinate_system
         if(kgrid.coordinate_system != xgrid.coordinate_system):
             print('ERROR: GRID COORDINATE SYSTEM MISTMATCH')
@@ -31,6 +33,7 @@ class CoherentState:
             self.Nx, self.Ny, self.Nz = len(self.xgrid.getArray('x')), len(self.xgrid.getArray('y')), len(self.xgrid.getArray('z'))
             self.kzg_flat = self.kzg.reshape(self.kzg.size)
             self.dVx_const = ((2 * np.pi)**(3)) * self.xgrid.dV()[0]
+            self.k0mask[(self.Nx * self.Ny * self.Nz) // 2] = True  # this is where |k| = sqrt(kx^2 + ky^2 + kz^2) = 0 in the Cartesian grid
 
         # error for ODE solver
         self.abs_error = 1.0e-8
@@ -41,7 +44,7 @@ class CoherentState:
     def evolve(self, dt, hamiltonian):
 
         amp_phase0 = copy(self.amplitude_phase)
-        print('Beta_k contains NaNs: {0}'.format(np.any(np.isnan(amp_phase0))))
+        # print('Beta_k contains NaNs: {0}'.format(np.any(np.isnan(amp_phase0))))
         t0 = copy(self.time)
         amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
         amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self)

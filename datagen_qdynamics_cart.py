@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (25, 25, 25)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -24,14 +24,20 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 9.9
-    dt = 0.1
+    tMax = 99
+    dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
 
     # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
     NGridPoints = xgrid.size()
+
+    kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
+    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+
+    print('Total time steps: {0}'.format(tgrid.size))
+    print('UV cutoff: {0}'.format(k_max))
 
     # Basic parameters
 

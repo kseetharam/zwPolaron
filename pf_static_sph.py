@@ -40,11 +40,14 @@ def epsilon(k, mB):
 
 def omegak(k, mB, n0, gBB):
     ep = epsilon(k, mB)
+    # print(ep == 0, k)
     return np.sqrt(ep * (ep + 2 * gBB * n0))
 
 
 def Omega(kgrid, DP, mI, mB, n0, gBB):
-    names = list(kgrid.arrays.keys())
+    names = list(kgrid.arrays.keys())  # ***need to have arrays added as k, th when kgrid is created
+    if names[0] != 'k':
+        print('CREATED kgrid IN WRONG ORDER')
     functions_omega0 = [lambda k: omegak(k, mB, n0, gBB) + (k**2 / (2 * mI)), lambda th: 0 * th + 1]
     omega0 = kgrid.function_prod(names, functions_omega0)
     return omega0 - kcos_func(kgrid) * DP / mI

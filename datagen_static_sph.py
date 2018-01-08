@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (25, 25, 25)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
@@ -23,13 +23,14 @@ if __name__ == "__main__":
     thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
     k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
-    kArray, dk = np.linspace(1e-3, k_max, Nk, retstep=True)
-    if dk < 1e-5:
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
         print('k ARRAY GENERATION ERROR')
 
     kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('th', thetaArray)
     kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
 
     gParams = [kgrid]
 

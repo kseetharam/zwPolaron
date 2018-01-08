@@ -1,1 +1,0 @@
-P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM
