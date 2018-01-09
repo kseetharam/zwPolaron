@@ -192,6 +192,9 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     grid_size_args = Nx, Ny, Nz
     grid_diff_args = dx, dy, dz, dkx, dky, dkz
 
+    NGridPoints = xgrid.size()
+    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+
     # calculate some parameters
     nu_const = nu(gBB)
     gIB = g(kx, ky, kz, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
@@ -279,7 +282,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     # Save Data - note: _tVec means depends on tgrid, _ctVec means depends on tgrid_coarse, everything else not time-dependent
 
     time_grids = [tgrid, tgrid_coarse]
-    metrics_data = [P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, np.real(DynOv_tVec), np.imag(DynOv_tVec), Phase_tVec]
+    metrics_data = [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, np.real(DynOv_tVec), np.imag(DynOv_tVec), Phase_tVec]
     pos_xyz_data = [x, y, z, nxyz_x_ctVec, nxyz_y_ctVec, nxyz_z_ctVec, nxyz_x_slice_ctVec, nxyz_y_slice_ctVec, nxyz_z_slice_ctVec]
     mom_xyz_data = [PB_x, PB_y, PB_z, nPB_x_ctVec, nPB_y_ctVec, nPB_z_ctVec, nPB_x_slice_ctVec, nPB_y_slice_ctVec, nPB_z_slice_ctVec, PI_x, PI_y, PI_z, nPI_x_ctVec, nPI_y_ctVec, nPI_z_ctVec, nPI_x_slice_ctVec, nPI_y_slice_ctVec, nPI_z_slice_ctVec, phonon_mom_k0deltapeak_ctVec]
     cont_xyz_data = [nxyz_xz_slice_ctVec, nxyz_xy_slice_ctVec, nPB_xz_slice_ctVec, nPB_xy_slice_ctVec, nPI_xz_slice_ctVec, nPI_xy_slice_ctVec]

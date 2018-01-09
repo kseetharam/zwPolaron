@@ -1,6 +1,6 @@
 import numpy as np
 import Grid
-import pf_dynamic_cart
+import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
 
@@ -11,27 +11,39 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (25, 25, 25)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
 
-    (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
 
-    kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    kgrid = Grid.Grid('CARTESIAN_3D')
-    kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
+    k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
+        print('k ARRAY GENERATION ERROR')
+
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
 
     tMax = 9.9
     dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
+    NGridPoints = kgrid.size()
 
-    # NGridPoints = (2 * Lx / dx) * (2 * Ly / dy) * (2 * Lz / dz)
-    NGridPoints = xgrid.size()
+    print('Total time steps: {0}'.format(tgrid.size))
+    print('UV cutoff: {0}'.format(k_max))
 
     # Basic parameters
 
@@ -52,7 +64,7 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 1.4 * pf_dynamic_cart.nu(gBB)
+    P = 1.4 * pf_dynamic_sph.nu(gBB)
     aIBi = -2
     cParams = [P, aIBi]
 
@@ -60,7 +72,7 @@ if __name__ == "__main__":
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
-    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    time_grid, metrics_data = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
