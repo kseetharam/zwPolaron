@@ -4,6 +4,9 @@ import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
 
+import matplotlib
+import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
 
@@ -35,8 +38,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 9.9
-    dt = 0.1
+    tMax = 2
+    dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -76,6 +79,14 @@ if __name__ == "__main__":
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
+
+    # TEMP DATA CHECK
+
+    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, rDynOv_tVec, iDynOv_tVec, Phase_tVec] = metrics_data
+    print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
+    fig, ax = plt.subplots()
+    ax.plot(time_grid, rDynOv_tVec)
+    plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED
 

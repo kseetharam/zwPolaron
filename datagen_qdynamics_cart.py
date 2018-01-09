@@ -5,6 +5,10 @@ import os
 from timeit import default_timer as timer
 
 
+import matplotlib
+import matplotlib.pyplot as plt
+
+
 if __name__ == "__main__":
 
     start = timer()
@@ -24,7 +28,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 99
+    tMax = 2
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -70,6 +74,15 @@ if __name__ == "__main__":
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
+
+    # TEMP DATA CHECK
+
+    [tgrid, tgrid_coarse] = time_grids
+    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, rDynOv_tVec, iDynOv_tVec, Phase_tVec] = metrics_data
+    print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
+    fig, ax = plt.subplots()
+    ax.plot(tgrid, rDynOv_tVec)
+    plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED
 
