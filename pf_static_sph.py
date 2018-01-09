@@ -89,7 +89,7 @@ def g(kgrid, P, aIBi, mI, mB, n0, gBB):
 
 
 def num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
-    integrand = kpow2_func(kgrid) * np.abs(BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB))**2
+    integrand = np.abs(BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB))**2
     return np.dot(integrand, kgrid.dV())
 
 

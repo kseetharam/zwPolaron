@@ -41,8 +41,8 @@ if __name__ == "__main__":
     kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
     dVk = kgrid.arrays_diff['kx'] * kgrid.arrays_diff['ky'] * kgrid.arrays_diff['kz'] / ((2 * np.pi)**3)
 
-    # Nsteps = 1e2
-    # pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
+    Nsteps = 1e2
+    pf_static_cart.createSpline_grid(Nsteps, kxg, kyg, kzg, dVk, mI, mB, n0, gBB)
 
     aSi_tck = np.load('aSi_spline_cart.npy')
     PBint_tck = np.load('PBint_spline_cart.npy')

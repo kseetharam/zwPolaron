@@ -159,7 +159,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
     dkx = kgrid.arrays_diff['kx']; dky = kgrid.arrays_diff['ky']; dkz = kgrid.arrays_diff['kz']
-    dVk = dkx * dky * dkz
+    dVk = dkx * dky * dkz * (2 * np.pi)**(-3)
 
     xg, yg, zg = np.meshgrid(x, y, z, indexing='ij', sparse=True)
     kxg, kyg, kzg = np.meshgrid(kx, ky, kz, indexing='ij', sparse=True)
