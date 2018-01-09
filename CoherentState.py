@@ -63,11 +63,11 @@ class CoherentState:
 
     def get_PhononNumber(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)
+        return np.dot(np.abs(amplitude)**2, self.dVk).real.astype(float)
 
     def get_PhononMomentum(self):
         amplitude = self.amplitude_phase[0:-1]
-        return np.dot(self.kzg_flat * amplitude * np.conjugate(amplitude), self.dVk).real.astype(float)
+        return np.dot(self.kzg_flat * np.abs(amplitude)**2, self.dVk).real.astype(float)
 
     def get_DynOverlap(self):
         # dynamical overlap/Ramsey interferometry signal
@@ -95,7 +95,7 @@ class CoherentState:
 
         # Calculate Nph
         Nph = self.get_PhononNumber()
-        # Nph = np.real(np.sum(beta2_kxkykz) * dkx * dky * dkz)
+        # Nph = np.sum(beta2_kxkykz) * dVk_2
 
         # Fourier transform
         amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / self.dVx_const

@@ -8,7 +8,6 @@ from timeit import default_timer as timer
 import matplotlib
 import matplotlib.pyplot as plt
 
-
 if __name__ == "__main__":
 
     start = timer()
@@ -16,7 +15,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
+    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -28,7 +27,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 2
+    tMax = 99
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -62,7 +61,7 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 1.4 * pf_dynamic_cart.nu(gBB)
+    P = 0.1 * pf_dynamic_cart.nu(gBB)
     aIBi = -2
     cParams = [P, aIBi]
 
@@ -78,10 +77,20 @@ if __name__ == "__main__":
     # TEMP DATA CHECK
 
     [tgrid, tgrid_coarse] = time_grids
-    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, rDynOv_tVec, iDynOv_tVec, Phase_tVec] = metrics_data
+    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
     print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
-    fig, ax = plt.subplots()
-    ax.plot(tgrid, rDynOv_tVec)
+    print(np.abs(DynOv_tVec))
+    print(NB_tVec)
+    print(PB_tVec)
+    print(np.abs(DynOv_tVec)[-1])
+
+    ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
+    np.savetxt(innerdatapath + '/ob.dat', ob_data)
+
+    fig, ax = plt.subplots(nrows=1, ncols=3)
+    ax[0].plot(tgrid, np.real(DynOv_tVec))
+    ax[1].plot(tgrid, np.imag(DynOv_tVec))
+    ax[2].plot(tgrid, np.abs(DynOv_tVec))
     plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED

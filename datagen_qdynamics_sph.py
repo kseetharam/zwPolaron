@@ -38,7 +38,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 2
+    tMax = 99
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 1.4 * pf_dynamic_sph.nu(gBB)
+    P = 0.1 * pf_dynamic_sph.nu(gBB)
     aIBi = -2
     cParams = [P, aIBi]
 
@@ -82,10 +82,21 @@ if __name__ == "__main__":
 
     # TEMP DATA CHECK
 
-    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, rDynOv_tVec, iDynOv_tVec, Phase_tVec] = metrics_data
+    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
     print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
-    fig, ax = plt.subplots()
-    ax.plot(time_grid, rDynOv_tVec)
+    print(np.abs(DynOv_tVec))
+    print(NB_tVec)
+    print(PB_tVec)
+    print(np.abs(DynOv_tVec)[-1])
+    print(Phase_tVec)
+
+    ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
+    np.savetxt(innerdatapath + '/ob.dat', ob_data)
+
+    fig, ax = plt.subplots(nrows=1, ncols=3)
+    ax[0].plot(time_grid, np.real(DynOv_tVec))
+    ax[1].plot(time_grid, np.imag(DynOv_tVec))
+    ax[2].plot(time_grid, np.abs(DynOv_tVec))
     plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED

@@ -148,6 +148,6 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # Save Data
 
-    metrics_data = [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, np.real(DynOv_tVec), np.imag(DynOv_tVec), Phase_tVec]
+    metrics_data = [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec]
 
     return tgrid, metrics_data
