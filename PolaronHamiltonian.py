@@ -17,10 +17,10 @@ class PolaronHamiltonian:
         self.k0mask = coherent_state.k0mask
 
         if(self.coordinate_system == "SPHERICAL_2D"):
-            self.gnum = pfs.g(self.grid, *Params)
-            self.Omega0_grid = pfs.omega0(self.grid, *Params)
+            self.gnum = pfs.g(self.grid, *Params[1:])
+            self.Omega0_grid = pfs.Omega(self.grid, 0, *Params[2:])
             # self.Wk_grid = pf.Wk(self.grid, *Params)
-            self.Wk_grid = pfs.Wk(self.grid, Params[0], Params[2], Params[3], Params[4], Params[5]); self.Wk_grid[self.k0mask] = 1  # k0mask should be all False in the Spherical case so the second line shouldn't do anything
+            self.Wk_grid = pfs.Wk(self.grid, *Params[3:]); self.Wk_grid[self.k0mask] = 1  # k0mask should be all False in the Spherical case so the second line shouldn't do anything
             self.Wki_grid = 1 / self.Wk_grid
             self.kz = pfs.kcos_func(self.grid)
         if(self.coordinate_system == "CARTESIAN_3D"):

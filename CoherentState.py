@@ -20,7 +20,7 @@ class CoherentState:
 
         self.coordinate_system = kgrid.coordinate_system
         if(kgrid.coordinate_system != xgrid.coordinate_system):
-            print('ERROR: GRID COORDINATE SYSTEM MISTMATCH - DISTRIBUTION INFO UNAVAILABLE')
+            print('GRID COORDINATE SYSTEM MISTMATCH - DISTRIBUTION INFO UNAVAILABLE')
 
         # precompute quantities to make observable calculations computationally cheaper
         self.dVk = self.kgrid.dV()

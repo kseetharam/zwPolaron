@@ -40,7 +40,6 @@ def epsilon(k, mB):
 
 def omegak(k, mB, n0, gBB):
     ep = epsilon(k, mB)
-    # print(ep == 0, k)
     return np.sqrt(ep * (ep + 2 * gBB * n0))
 
 
@@ -53,14 +52,14 @@ def Omega(kgrid, DP, mI, mB, n0, gBB):
     return omega0 - kcos_func(kgrid) * DP / mI
 
 
-def Wk(kgrid, mI, mB, n0, gBB):
+def Wk(kgrid, mB, n0, gBB):
     names = list(kgrid.arrays.keys())
     functions_Wk = [lambda k: np.sqrt(epsilon(k, mB) / omegak(k, mB, n0, gBB)), lambda th: 0 * th + 1]
     return kgrid.function_prod(names, functions_Wk)
 
 
 def BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
-    return -2 * np.pi * np.sqrt(n0) * Wk(kgrid, mI, mB, n0, gBB) / (ur(mI, mB) * Omega(kgrid, DP, mI, mB, n0, gBB) * (aIBi - aSi))
+    return -2 * np.pi * np.sqrt(n0) * Wk(kgrid, mB, n0, gBB) / (ur(mI, mB) * Omega(kgrid, DP, mI, mB, n0, gBB) * (aIBi - aSi))
 
 
 def Energy(P, PB, aIBi, aSi, mI, mB, n0):
@@ -81,7 +80,7 @@ def effMass(P, PB, mI):
         return m
 
 
-def g(kgrid, P, aIBi, mI, mB, n0, gBB):
+def g(kgrid, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
     k_max = kgrid.getArray('k')[-1]
     mR = ur(mI, mB)
@@ -102,7 +101,7 @@ def qp_residue(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
 
 
 def aSi_grid(kgrid, DP, mI, mB, n0, gBB):
-    integrand = 2 * ur(mI, mB) / kpow2_func(kgrid) - Wk(kgrid, mI, mB, n0, gBB)**2 / Omega(kgrid, DP, mI, mB, n0, gBB)
+    integrand = 2 * ur(mI, mB) / kpow2_func(kgrid) - Wk(kgrid, mB, n0, gBB)**2 / Omega(kgrid, DP, mI, mB, n0, gBB)
     return (2 * np.pi / ur(mI, mB)) * np.dot(integrand, kgrid.dV())
 
 
@@ -191,7 +190,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
     nu_const = nu(gBB)
     eMass = effMass(P, PB_Val, mI)
-    gIB = g(kgrid, P, aIBi, mI, mB, n0, gBB)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
     Z_factor = qp_residue(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
 

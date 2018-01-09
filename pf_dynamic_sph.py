@@ -36,7 +36,6 @@ def epsilon(k, mB):
 
 def omegak(k, mB, n0, gBB):
     ep = epsilon(k, mB)
-    # print(ep == 0, k)
     return np.sqrt(ep * (ep + 2 * gBB * n0))
 
 
@@ -49,13 +48,13 @@ def Omega(kgrid, DP, mI, mB, n0, gBB):
     return omega0 - kcos_func(kgrid) * DP / mI
 
 
-def Wk(kgrid, mI, mB, n0, gBB):
+def Wk(kgrid, mB, n0, gBB):
     names = list(kgrid.arrays.keys())
     functions_Wk = [lambda k: np.sqrt(epsilon(k, mB) / omegak(k, mB, n0, gBB)), lambda th: 0 * th + 1]
     return kgrid.function_prod(names, functions_Wk)
 
 
-def g(kgrid, P, aIBi, mI, mB, n0, gBB):
+def g(kgrid, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
     k_max = kgrid.getArray('k')[-1]
     mR = ur(mI, mB)
@@ -113,7 +112,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # calculate some parameters
     nu_const = nu(gBB)
-    gIB = g(kgrid, P, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
 
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
