@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -27,8 +27,8 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 99
-    dt = 1
+    tMax = .1
+    dt = .1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
     print('Total time steps: {0}'.format(tgrid.size))
     print('UV cutoff: {0}'.format(k_max))
+    print('NGridPoints: {0}'.format(NGridPoints))
 
     # Basic parameters
 
@@ -84,14 +85,14 @@ if __name__ == "__main__":
     print(PB_tVec)
     print(np.abs(DynOv_tVec)[-1])
 
-    ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
-    np.savetxt(innerdatapath + '/ob.dat', ob_data)
+    # ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
+    # np.savetxt(innerdatapath + '/ob.dat', ob_data)
 
-    fig, ax = plt.subplots(nrows=1, ncols=3)
-    ax[0].plot(tgrid, np.real(DynOv_tVec))
-    ax[1].plot(tgrid, np.imag(DynOv_tVec))
-    ax[2].plot(tgrid, np.abs(DynOv_tVec))
-    plt.show()
+    # fig, ax = plt.subplots(nrows=1, ncols=3)
+    # ax[0].plot(tgrid, np.real(DynOv_tVec))
+    # ax[1].plot(tgrid, np.imag(DynOv_tVec))
+    # ax[2].plot(tgrid, np.abs(DynOv_tVec))
+    # plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED
 

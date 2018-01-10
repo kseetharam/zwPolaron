@@ -70,7 +70,7 @@ class CoherentState:
         return np.dot(self.kzg_flat * np.abs(amplitude)**2, self.dVk).real.astype(float)
 
     def get_DynOverlap(self):
-        # dynamical overlap/Ramsey interferometry signal
+        # dynamical overlap/Ramsey interferometry signal -> S(t) = <psi_0|psi(t)>
         NB = self.get_PhononNumber()
         phase = self.amplitude_phase[-1]
         exparg = -1j * phase - (1 / 2) * NB

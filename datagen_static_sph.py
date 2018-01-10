@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (Lx, Ly, Lz) = (300, 300, 300)
+    (dx, dy, dz) = (5, 5, 5)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
@@ -79,6 +79,9 @@ if __name__ == "__main__":
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
+
+    print(metrics_data[-1])
+    print(2 * metrics_data[-2])
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 

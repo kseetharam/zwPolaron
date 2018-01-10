@@ -92,8 +92,9 @@ def num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
     return np.dot(integrand, kgrid.dV())
 
 
-def qp_residue(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
-    exparg = -1 * (1 / 2) * num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+def z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
+    # qp reside -> Z = |<psi_0|psi_pol>|^2
+    exparg = -1 * num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
     return np.exp(exparg)
 
 
@@ -192,7 +193,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     eMass = effMass(P, PB_Val, mI)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-    Z_factor = qp_residue(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+    Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
 
     # Collate data
 

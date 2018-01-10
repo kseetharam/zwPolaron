@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (2.5e-01, 2.5e-01, 2.5e-01)
+    (dx, dy, dz) = (5e-1, 5e-1, 5e-1)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -28,6 +28,12 @@ if __name__ == "__main__":
 
     # NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints = xgrid.size()
+
+    kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
+    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+
+    print('UV cutoff: {0}'.format(k_max))
+    print('NGridPoints: {0}'.format(NGridPoints))
 
     # Basic parameters
 
@@ -83,6 +89,8 @@ if __name__ == "__main__":
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
+
+    print(metrics_data[18])
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
