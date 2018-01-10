@@ -14,8 +14,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (300, 300, 300)
-    (dx, dy, dz) = (5, 5, 5)
+    (Lx, Ly, Lz) = (100, 100, 100)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -97,8 +97,8 @@ if __name__ == "__main__":
     staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/sph/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
     NGridPoints_s, k_max_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Z_factor_s = np.loadtxt(staticdatapath, unpack=True)
 
-    print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s)))
-    print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s)))
+    print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
+    print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
 
     fig, ax = plt.subplots(nrows=1, ncols=2)
 

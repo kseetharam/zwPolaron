@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (300, 300, 300)
-    (dx, dy, dz) = (5, 5, 5)
+    (Lx, Ly, Lz) = (100, 100, 100)
+    (dx, dy, dz) = (5e-01, 5e-01, 5e-01)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
