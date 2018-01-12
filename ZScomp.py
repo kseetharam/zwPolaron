@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # gParams
     dx = 20e-01
-    Lx_List = [10, 50, 100, 200, 300]
+    Lx_List = [50, 100, 200, 300]
     NG_Vec = np.zeros(len(Lx_List))
     for ind, Lx in enumerate(Lx_List):
         NGridPoints_desired = (1 + 2 * Lx / dx)**2
@@ -57,10 +57,10 @@ if __name__ == "__main__":
         tgrid, S_tVec, Nph_tVec, PB_tVec, Phase_tVec = np.loadtxt(qd_datapath, unpack=True)
         S_List.append(S_tVec)
         Nph_qd_List.append(Nph_tVec)
-        S_tail_Vec[ind] = np.average(S_tVec[-10:])
-        Nph_qd_tail_Vec[ind] = np.average(Nph_tVec[-10:])
-        # S_tail_Vec[ind] = S_tVec[-1]
-        # Nph_qd_tail_Vec[ind] = Nph_tVec[-1]
+        # S_tail_Vec[ind] = np.average(S_tVec[-10:])
+        # Nph_qd_tail_Vec[ind] = np.average(Nph_tVec[-10:])
+        S_tail_Vec[ind] = S_tVec[-1]
+        Nph_qd_tail_Vec[ind] = Nph_tVec[-1]
 
     # max time variation
 
@@ -82,17 +82,21 @@ if __name__ == "__main__":
 
     fig1, ax1 = plt.subplots(nrows=1, ncols=2)
 
-    ax1[0].plot(1 / NG_Vec, Nph_qd_tail_Vec, label='d')
-    ax1[0].plot(1 / NG_Vec, 2 * Nph_s_Vec, label='s')
-    ax1[0].set_title('Nph Tail Average')
+    ax1[0].plot(1 / NG_Vec, Nph_qd_tail_Vec, label=r'$N_{ph}(t=t_{max})$')
+    ax1[0].plot(1 / NG_Vec, 2 * Nph_s_Vec, label=r'$2*N_{ph,static}$')
+    ax1[0].set_ylim([0.98 * 2 * Nph_s_Vec[-1], 1.18 * 2 * Nph_s_Vec[-1]])
+    # ax1[0].set_title('Nph Tail Average')
+    ax1[0].set_title('Phonon Number vs. Grid Resolution')
     ax1[0].set_xlabel(r'$\frac{1}{NG}$')
     ax1[0].legend()
     ax1[0].set_xscale('log')
     # ax1[0].set_yscale('log')
 
-    ax1[1].plot(1 / NG_Vec, S_tail_Vec, label='d')
-    ax1[1].plot(1 / NG_Vec, Z_Vec, label='s')
-    ax1[1].set_title('S(t) Tail Average')
+    ax1[1].plot(1 / NG_Vec, S_tail_Vec, label=r'$S(t=t_{max})$')
+    ax1[1].plot(1 / NG_Vec, Z_Vec, label='Z-factor')
+    ax1[1].set_ylim([0.83 * Z_Vec[-1], 1.03 * Z_Vec[-1]])
+    # ax1[1].set_title('S(t) Tail Average')
+    ax1[1].set_title('Dynamical Overlap vs. Grid Resolution')
     ax1[1].set_xlabel(r'$\frac{1}{NG}$')
     ax1[1].legend()
     ax1[1].set_xscale('log')
@@ -100,17 +104,19 @@ if __name__ == "__main__":
 
     fig2, ax2 = plt.subplots(nrows=1, ncols=2)
 
-    ax2[0].plot(1 / tmax_Vec, Nph_qd_inf_Vec, label='d')
-    ax2[0].plot(1 / tmax_Vec, 2 * Nph_s * np.ones(len(tmax_Vec)), label='s')
-    ax2[0].set_title(r'$N_{ph}(\infty)$')
+    ax2[0].plot(1 / tmax_Vec, Nph_qd_inf_Vec, label=r'$N_{ph}(t=t_{max})$')
+    ax2[0].plot(1 / tmax_Vec, 2 * Nph_s * np.ones(len(tmax_Vec)), label=r'$2*N_{ph,static}$')
+    ax2[0].set_ylim([0.98 * 2 * Nph_s, 1.18 * 2 * Nph_s])
+    ax2[0].set_title('Phonon Number vs. End Time')
     ax2[0].set_xlabel(r'$\frac{1}{t_{max}}$')
     ax2[0].legend()
     ax2[0].set_xscale('log')
     # ax2[0].set_yscale('log')
 
-    ax2[1].plot(1 / tmax_Vec, S_inf_Vec, label='d')
-    ax2[1].plot(1 / tmax_Vec, Z * np.ones(len(tmax_Vec)), label='s')
-    ax2[1].set_title(r'$S(\infty)$')
+    ax2[1].plot(1 / tmax_Vec, S_inf_Vec, label=r'$S(t=t_{max})$')
+    ax2[1].plot(1 / tmax_Vec, Z * np.ones(len(tmax_Vec)), label='Z-factor')
+    ax2[1].set_ylim([0.83 * Z, 1.03 * Z])
+    ax2[1].set_title('Dynamical Overlap vs. End Time')
     ax2[1].set_xlabel(r'$\frac{1}{t_{max}}$')
     ax2[1].legend()
     ax2[1].set_xscale('log')
@@ -132,10 +138,10 @@ if __name__ == "__main__":
         tgrid, S_tVec, Nph_tVec, PB_tVec, Phase_tVec = np.loadtxt(qd_datapath, unpack=True)
         iS_List.append(S_tVec)
         iNph_qd_List.append(Nph_tVec)
-        iS_tail_Vec[ind] = np.average(S_tVec[-10:])
-        iNph_qd_tail_Vec[ind] = np.average(Nph_tVec[-10:])
-        # S_tail_Vec[ind] = S_tVec[-1]
-        # Nph_qd_tail_Vec[ind] = Nph_tVec[-1]
+        # iS_tail_Vec[ind] = np.average(S_tVec[-10:])
+        # iNph_qd_tail_Vec[ind] = np.average(Nph_tVec[-10:])
+        iS_tail_Vec[ind] = S_tVec[-1]
+        iNph_qd_tail_Vec[ind] = Nph_tVec[-1]
 
     # max time variation
 
@@ -157,17 +163,21 @@ if __name__ == "__main__":
 
     fig3, ax3 = plt.subplots(nrows=1, ncols=2)
 
-    ax3[0].plot(1 / NG_Vec, iNph_qd_tail_Vec, label='d')
-    ax3[0].plot(1 / NG_Vec, iNph_s_Vec, label='s')
-    ax3[0].set_title('Nph Tail Average')
+    ax3[0].plot(1 / NG_Vec, iNph_qd_tail_Vec, label=r'$N_{ph}(t=t_{max})$')
+    ax3[0].plot(1 / NG_Vec, iNph_s_Vec, label=r'$N_{ph,static}$')
+    ax3[0].set_ylim([0.83 * iNph_s_Vec[-1], 1.03 * iNph_s_Vec[-1]])
+    # ax3[0].set_title('Nph Tail Average')
+    ax3[0].set_title('Phonon Number vs. Grid Resolution')
     ax3[0].set_xlabel(r'$\frac{1}{NG}$')
     ax3[0].legend()
     ax3[0].set_xscale('log')
     # ax3[0].set_yscale('log')
 
-    ax3[1].plot(1 / NG_Vec, iS_tail_Vec**2, label='d')
-    ax3[1].plot(1 / NG_Vec, iZ_Vec, label='s')
-    ax3[1].set_title('S(t) Tail Average')
+    ax3[1].plot(1 / NG_Vec, iS_tail_Vec**2, label=r'$|S(t=t_{max})|^{2}$')
+    ax3[1].plot(1 / NG_Vec, iZ_Vec, label='Z-factor')
+    ax3[1].set_ylim([0.98 * iZ_Vec[-1], 1.18 * iZ_Vec[-1]])
+    # ax3[1].set_title('S(t) Tail Average')
+    ax3[1].set_title('Dynamical Overlap vs. Grid Resolution')
     ax3[1].set_xlabel(r'$\frac{1}{NG}$')
     ax3[1].legend()
     ax3[1].set_xscale('log')
@@ -175,17 +185,19 @@ if __name__ == "__main__":
 
     fig4, ax4 = plt.subplots(nrows=1, ncols=2)
 
-    ax4[0].plot(1 / tmax_Vec, iNph_qd_inf_Vec, label='d')
-    ax4[0].plot(1 / tmax_Vec, iNph_s * np.ones(len(tmax_Vec)), label='s')
-    ax4[0].set_title(r'$N_{ph}(\infty)$')
+    ax4[0].plot(1 / tmax_Vec, iNph_qd_inf_Vec, label=r'$N_{ph}(t=t_{max})$')
+    ax4[0].plot(1 / tmax_Vec, iNph_s * np.ones(len(tmax_Vec)), label=r'$N_{ph,static}$')
+    ax4[0].set_ylim([0.83 * iNph_s, 1.03 * iNph_s])
+    ax4[0].set_title('Phonon Number vs. End Time')
     ax4[0].set_xlabel(r'$\frac{1}{t_{max}}$')
     ax4[0].legend()
     ax4[0].set_xscale('log')
     # ax4[0].set_yscale('log')
 
-    ax4[1].plot(1 / tmax_Vec, iS_inf_Vec**2, label='d')
-    ax4[1].plot(1 / tmax_Vec, iZ * np.ones(len(tmax_Vec)), label='s')
-    ax4[1].set_title(r'$S(\infty)$')
+    ax4[1].plot(1 / tmax_Vec, iS_inf_Vec**2, label=r'$|S(t=t_{max})|^{2}$')
+    ax4[1].plot(1 / tmax_Vec, iZ * np.ones(len(tmax_Vec)), label='Z-factor')
+    ax4[1].set_ylim([0.98 * iZ, 1.18 * iZ])
+    ax4[1].set_title('Dynamical Overlap vs. End Time')
     ax4[1].set_xlabel(r'$\frac{1}{t_{max}}$')
     ax4[1].legend()
     ax4[1].set_xscale('log')
