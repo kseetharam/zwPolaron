@@ -60,10 +60,16 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 
@@ -89,11 +95,6 @@ if __name__ == "__main__":
 
     [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
     print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
-    # print(np.abs(DynOv_tVec))
-    # print(PB_tVec)
-    # print(np.abs(DynOv_tVec)[-1])
-    # print(NB_tVec[-1])
-    # print(Phase_tVec)
 
     ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
     np.savetxt(innerdatapath + '/ob.dat', ob_data)
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
     # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
 
-    print('|S(t)|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]))))
+    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
     print('N(t): {0}'.format(NB_tVec[-1]))
 
     # fig, ax = plt.subplots(nrows=1, ncols=2)
