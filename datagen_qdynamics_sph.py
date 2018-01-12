@@ -54,8 +54,7 @@ if __name__ == "__main__":
     mI = 1
     mB = 1
     n0 = 1
-    # gBB = (4 * np.pi / mB) * 0.05
-    gBB = (4 * np.pi / mB) * 0.001
+    gBB = (4 * np.pi / mB) * 0.05
 
     sParams = [mI, mB, n0, gBB]
 
@@ -106,11 +105,11 @@ if __name__ == "__main__":
     # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
     # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
 
-    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
-    print('N(t): {0}'.format(NB_tVec[-1]))
+    # print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
+    # print('N(t): {0}'.format(NB_tVec[-1]))
 
-    # print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
-    # print('N(t): {0}'.format(2 * NB_tVec[-1]))
+    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
+    print('N(t): {0}'.format(2 * NB_tVec[-1]))
 
     # fig, ax = plt.subplots(nrows=1, ncols=2)
 
