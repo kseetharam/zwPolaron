@@ -17,6 +17,8 @@ class PolaronHamiltonian:
         self.kz = coherent_state.kzg_flat
         self.k0mask = coherent_state.k0mask
 
+        self.k2 = coherent_state.k2_flat
+
         if(self.coordinate_system == "SPHERICAL_2D"):
             self.gnum = pfs.g(self.grid, *Params[1:])
             self.Omega0_grid = pfs.Omega(self.grid, 0, *Params[2:])
@@ -53,23 +55,23 @@ class PolaronHamiltonian:
         betaSum = amplitude + np.conjugate(amplitude)
         xp = 0.5 * np.dot(self.Wk_grid, betaSum * dVk)
 
-        # betaDiff = amplitude - np.conjugate(amplitude)
-        # xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dVk)
+        betaDiff = amplitude - np.conjugate(amplitude)
+        xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dVk)
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
         # print(xp, xm, PB)
 
         # xp = 0
-        xm = 0
+        # xm = 0
 
-        # amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                             amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                             self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
-        amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                   amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-                                   self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                            amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+        #                            self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
         amplitude_phase_new[0:-1] = amplitude_new_temp
@@ -90,3 +92,22 @@ class PolaronHamiltonian:
         # # amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         return amplitude_phase_new
+
+    def update_jac(self, t, amplitude_phase, coherent_state):
+        amplitude = amplitude_phase[0:-1]
+        amplitude[self.k0mask] = 0  # set Beta_k = 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
+        amplitude_phase_deriv = np.zeros(amplitude_phase.size, dtype=complex)
+
+        [P, aIBi, mI, mB, n0, gBB] = self.Params
+
+        dVk = coherent_state.dVk
+
+        PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
+
+        amplitude_deriv_temp = -1j * (-self.k2 * amplitude / mI - self.kz * (P - PB) / mI + 0.5 * self.gnum * (self.Wk_grid**2 + self.Wki_grid**2))
+        amplitude_deriv_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
+
+        amplitude_phase_deriv[0:-1] = amplitude_deriv_temp
+        amplitude_phase_deriv[-1] = 0.5 * self.gnum * np.sqrt(n0) * self.Wk_grid - np.dot(PB * dVk, self.kz * np.conjugate(amplitude)) / mI
+
+        return amplitude_phase_deriv

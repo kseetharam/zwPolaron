@@ -1,5 +1,5 @@
 import numpy as np
-from pf_dynamic_sph import kcos_func
+from pf_dynamic_sph import kcos_func, kpow2_func
 from scipy.integrate import ode
 from copy import copy
 
@@ -27,6 +27,7 @@ class CoherentState:
 
         if(self.coordinate_system == "SPHERICAL_2D"):
             self.kzg_flat = kcos_func(kgrid)
+            self.k2_flat = kpow2_func(kgrid)
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.xg, self.yg, self.zg = np.meshgrid(self.xgrid.getArray('x'), self.xgrid.getArray('y'), self.xgrid.getArray('z'), indexing='ij')
             self.kxg, self.kyg, self.kzg = np.meshgrid(self.kgrid.getArray('kx'), self.kgrid.getArray('ky'), self.kgrid.getArray('kz'), indexing='ij')
@@ -34,6 +35,9 @@ class CoherentState:
             self.kzg_flat = self.kzg.reshape(self.kzg.size)
             self.dVx_const = ((2 * np.pi)**(3)) * self.xgrid.dV()[0]
             self.k0mask[(self.Nx * self.Ny * self.Nz) // 2] = True  # this is where |k| = sqrt(kx^2 + ky^2 + kz^2) = 0 in the Cartesian grid
+
+            self.k2 = self.kxg**2 + self.ky**2 + self.kzg**2
+            self.k2_flat = self.k2.reshape(self.k2.size)
 
         # error for ODE solver
         self.abs_error = 1.0e-8
@@ -46,8 +50,13 @@ class CoherentState:
         amp_phase0 = copy(self.amplitude_phase)
         # print('Beta_k contains NaNs: {0}'.format(np.any(np.isnan(amp_phase0))))
         t0 = copy(self.time)
-        amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
-        amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self)
+
+        # amp_solver = ode(hamiltonian.update).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
+        # amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self)
+
+        amp_solver = ode(hamiltonian.update, hamiltonian.update_jac).set_integrator('zvode', method='bdf', atol=self.abs_error, rtol=self.rel_error, nsteps=100000)
+        amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self).set_jac_params(self)
+
         self.amplitude_phase = amp_solver.integrate(amp_solver.t + dt)
         self.time = self.time + dt
 
