@@ -41,6 +41,9 @@ class PolaronHamiltonian:
             # dV = coherent_state.dVk; dV[self.k0mask] = 0
             # print(np.pi * np.dot(np.abs(self.Wk_grid), dV))
             # print(np.pi * np.dot(np.abs(self.Omega0_grid), dV))
+        self.Wkkp_grid = np.outer(self.Wk_grid, self.Wk_grid)
+        self.Wkikpi_grid = np.outer(self.Wki_grid, self.Wki_grid)
+        self.k0mask_mat = np.outer(self.k0mask, self.k0mask)
 
     def update(self, t, amplitude_phase, coherent_state):
         # here on can write any method induding Runge-Kutta 4
@@ -96,7 +99,7 @@ class PolaronHamiltonian:
     def update_jac(self, t, amplitude_phase, coherent_state):
         amplitude = amplitude_phase[0:-1]
         amplitude[self.k0mask] = 0  # set Beta_k = 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
-        amplitude_phase_deriv = np.zeros(amplitude_phase.size, dtype=complex)
+        amplitude_phase_jac = np.zeros((amplitude_phase.size, amplitude_phase.size), dtype=complex)
 
         [P, aIBi, mI, mB, n0, gBB] = self.Params
 
@@ -104,10 +107,10 @@ class PolaronHamiltonian:
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
-        amplitude_deriv_temp = -1j * (-self.k2 * amplitude / mI - self.kz * (P - PB) / mI + 0.5 * self.gnum * (self.Wk_grid**2 + self.Wki_grid**2))
-        amplitude_deriv_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
+        amplitude_jac_temp = -1j * (self.k2 * amplitude / mI - self.kz * (P - PB) / mI + 0.5 * self.gnum * (self.Wkkp_grid + self.Wkikpi_grid))
+        amplitude_jac_temp[self.k0mask_mat] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
 
-        amplitude_phase_deriv[0:-1] = amplitude_deriv_temp
-        amplitude_phase_deriv[-1] = 0.5 * self.gnum * np.sqrt(n0) * self.Wk_grid - np.dot(PB * dVk, self.kz * np.conjugate(amplitude)) / mI
+        amplitude_phase_jac[0:-1, 0:-1] = amplitude_jac_temp
+        amplitude_phase_jac[-1, 0:-1] = 0.5 * self.gnum * np.sqrt(n0) * self.Wk_grid - np.dot(PB * dVk, self.kz * np.conjugate(amplitude)) / mI
 
         return amplitude_phase_deriv
