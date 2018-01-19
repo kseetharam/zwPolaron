@@ -14,7 +14,7 @@ if __name__ == "__main__":
     # (Lx, Ly, Lz) = (200, 200, 200)
     # (dx, dy, dz) = (20e-01, 20e-01, 20e-01)
 
-    (Lx, Ly, Lz) = (50, 50, 50)
+    (Lx, Ly, Lz) = (75, 75, 75)
     (dx, dy, dz) = (5, 5, 5)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
@@ -39,6 +39,7 @@ if __name__ == "__main__":
     gParams = [kgrid]
 
     NGridPoints = kgrid.size()
+    print(NGridPoints)
 
     # Basic parameters
 
@@ -83,8 +84,8 @@ if __name__ == "__main__":
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
 
-    print(metrics_data[-1])
-    print(2 * metrics_data[-2])
+    print('Z-factor: {0}'.format(metrics_data[-1]))
+    print('2*Nph: {0}'.format(2 * metrics_data[-2]))
     print(1 / (dk * pf_static_sph.nu(gBB)))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----

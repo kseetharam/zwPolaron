@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (5e-1, 5e-1, 5e-1)
+    (Lx, Ly, Lz) = (75, 75, 75)
+    (dx, dy, dz) = (5, 5, 5)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -90,7 +90,8 @@ if __name__ == "__main__":
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
 
-    print(metrics_data[18])
+    print('Z-factor: {0}'.format(metrics_data[18]))
+    print('2*Nph: {0}'.format(2 * metrics_data[16]))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 

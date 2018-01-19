@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (50, 50, 50)
+    (Lx, Ly, Lz) = (75, 75, 75)
     (dx, dy, dz) = (5, 5, 5)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -60,9 +60,9 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
 
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
 
     ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
-    # np.savetxt(innerdatapath + '/ob.dat', ob_data)
+    np.savetxt(innerdatapath + '/ob.dat', ob_data)
 
     staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/sph/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
     NGridPoints_s, k_max_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Z_factor_s = np.loadtxt(staticdatapath, unpack=True)
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     # print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
     # print('N(t): {0}'.format(NB_tVec[-1]))
 
-    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
-    print('N(t): {0}'.format(2 * NB_tVec[-1]))
+    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
+    print('N(t): {0}'.format(NB_tVec[-1]))
 
     fig, ax = plt.subplots(nrows=1, ncols=2)
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     # ax[1].set_xscale('log')
     # ax[1].set_yscale('log')
 
-    plt.show()
+    # plt.show()
 
     # !!!! HAVE TO EDIT THE MULTIPLE FUNCTION RUN SCRIPTS BELOW ONCE SINGLE FUNCTION RUN IS FINALIZED
 

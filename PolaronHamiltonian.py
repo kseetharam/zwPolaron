@@ -68,13 +68,13 @@ class PolaronHamiltonian:
         # xp = 0
         # xm = 0
 
-        amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                             amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+        #                             self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
-        # amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                            amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                            self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                   amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                   self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
         amplitude_phase_new[0:-1] = amplitude_new_temp

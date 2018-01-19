@@ -201,7 +201,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     # Calculate Nph and Z-factor
     Nph = np.sum(beta2_kxkykz) * dkx * dky * dkz / ((2 * np.pi)**3)
     Nph_xyz = np.sum(nxyz * dx * dy * dz)
-    Z_factor = np.exp(-(1 / 2) * Nph)
+    Z_factor = np.exp(-1 * Nph)
 
     nxyz_norm = nxyz / Nph  # this is the normalized phonon position distribution in 3D Cartesian coordinates
 
