@@ -98,6 +98,15 @@ def z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
     return np.exp(exparg)
 
 
+def test_grid(kgrid, mB, n0, gBB):
+    names = list(kgrid.arrays.keys())
+    functions_ep = [lambda k: epsilon(k, mB), lambda th: 0 * th + 1]
+    ep = kgrid.function_prod(names, functions_ep)
+    epint = np.dot(ep, kgrid.dV())
+    Wkint = np.dot(Wk(kgrid, mB, n0, gBB), kgrid.dV())
+    print('\int ep: {0}'.format(epint))
+    print('\int Wk: {0}'.format(Wkint))
+
 # ---- INTERPOLATION FUNCTIONS ----
 
 
@@ -199,5 +208,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     metrics_string = 'NGridPoints, |k|_max, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
     metrics_data = np.array([NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
+
+    # test_grid(kgrid, mB, n0, gBB)
 
     return metrics_string, metrics_data

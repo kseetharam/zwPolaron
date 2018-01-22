@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (75, 75, 75)
+    (Lx, Ly, Lz) = (80, 80, 80)
     (dx, dy, dz) = (5, 5, 5)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -34,6 +34,8 @@ if __name__ == "__main__":
 
     print('UV cutoff: {0}'.format(k_max))
     print('NGridPoints: {0}'.format(NGridPoints))
+
+    print('Perfect \int ep: {0}'.format(4 * np.max(kx)**5 / (2 * np.pi)**3))
 
     # Basic parameters
 
@@ -92,6 +94,10 @@ if __name__ == "__main__":
 
     print('Z-factor: {0}'.format(metrics_data[18]))
     print('2*Nph: {0}'.format(2 * metrics_data[16]))
+
+    # print('Energy: {0}'.format(metrics_data[14]))
+    # print('PB: {0}'.format(metrics_data[13]))
+    # print('aSi: {0}'.format(metrics_data[11]))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 

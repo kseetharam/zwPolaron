@@ -66,6 +66,19 @@ def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
     mR = ur(mI, mB)
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
+
+def test_grid(kgrid, mB, n0, gBB):
+    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)
+    ep = epsilon(kxg, kyg, kzg, mB).flatten()
+    epint = np.dot(ep, kgrid.dV())
+    Wkf = Wk(kxg, kyg, kzg, mB, n0, gBB).flatten()
+    mask = np.isnan(Wkf); Wkf[mask] = 0
+    Wkint = np.dot(Wkf, kgrid.dV())
+
+    print('\int ep: {0}'.format(epint))
+    print('\int Wk: {0}'.format(Wkint))
+
+
 # ---- INTERPOLATION FUNCTIONS ----
 
 
@@ -362,4 +375,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     mom_mag_string = 'PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec'
     mom_mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
+
+    # test_grid(kgrid, mB, n0, gBB)
+
     return metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data

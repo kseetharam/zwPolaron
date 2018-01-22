@@ -11,10 +11,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (200, 200, 200)
-    # (dx, dy, dz) = (20e-01, 20e-01, 20e-01)
-
-    (Lx, Ly, Lz) = (75, 75, 75)
+    (Lx, Ly, Lz) = (80, 80, 80)
     (dx, dy, dz) = (5, 5, 5)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
@@ -25,10 +22,11 @@ if __name__ == "__main__":
     theta_max = np.pi
     thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+
     k_min = 1e-5
     kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    print(k_max, dk)
     if dk < k_min:
         print('k ARRAY GENERATION ERROR')
 
@@ -39,7 +37,12 @@ if __name__ == "__main__":
     gParams = [kgrid]
 
     NGridPoints = kgrid.size()
-    print(NGridPoints)
+
+    print('dk: {0}'.format(dk))
+    print('UV cutoff: {0}'.format(k_max))
+    print('NGridPoints: {0}'.format(NGridPoints))
+
+    print('Perfect \int ep: {0}'.format(k_max**5 / (5 * (2 * np.pi)**2)))
 
     # Basic parameters
 
@@ -86,7 +89,11 @@ if __name__ == "__main__":
 
     print('Z-factor: {0}'.format(metrics_data[-1]))
     print('2*Nph: {0}'.format(2 * metrics_data[-2]))
-    print(1 / (dk * pf_static_sph.nu(gBB)))
+
+    # print(1 / (dk * pf_static_sph.nu(gBB)))
+    # print('Energy: {0}'.format(metrics_data[-4]))
+    # print('PB: {0}'.format(metrics_data[-5]))
+    # print('aSi: {0}'.format(metrics_data[-7]))
 
     # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 

@@ -41,9 +41,10 @@ class PolaronHamiltonian:
             # dV = coherent_state.dVk; dV[self.k0mask] = 0
             # print(np.pi * np.dot(np.abs(self.Wk_grid), dV))
             # print(np.pi * np.dot(np.abs(self.Omega0_grid), dV))
-        self.Wkkp_grid = np.outer(self.Wk_grid, self.Wk_grid)
-        self.Wkikpi_grid = np.outer(self.Wki_grid, self.Wki_grid)
-        self.k0mask_mat = np.outer(self.k0mask, self.k0mask)
+
+        # self.Wkkp_grid = np.outer(self.Wk_grid, self.Wk_grid)
+        # self.Wkikpi_grid = np.outer(self.Wki_grid, self.Wki_grid)
+        # self.k0mask_mat = np.outer(self.k0mask, self.k0mask)
 
     def update(self, t, amplitude_phase, coherent_state):
         # here on can write any method induding Runge-Kutta 4
@@ -65,34 +66,26 @@ class PolaronHamiltonian:
 
         # print(xp, xm, PB)
 
+        # FOR FROLICH:
+
         # xp = 0
         # xm = 0
 
-        # amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                             amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                             self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # FOR REAL TIME DYNAMICS:
 
-        amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                   amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-                                   self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+
+        # FOR IMAGINARY TIME DYNAMICS
+
+        # amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                            amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+        #                            self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
         amplitude_phase_new[0:-1] = amplitude_new_temp
         amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
-
-        # PB = np.dot(self.kz, amplitude * np.conjugate(amplitude) * dVk)
-
-        # amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-        # amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
-
-        # # Frohlich model (without two phonon contribution)
-        # # gf = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
-        # # amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
-        # #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI))
-
-        # # amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
 
         return amplitude_phase_new
 
@@ -107,10 +100,31 @@ class PolaronHamiltonian:
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
-        amplitude_jac_temp = -1j * (self.k2 * amplitude / mI - self.kz * (P - PB) / mI + 0.5 * self.gnum * (self.Wkkp_grid + self.Wkikpi_grid))
+        kz_ampcon = self.kz * np.conjugate(amplitude)
+        kz_ampcon_mat = np.outer(kz_ampcon, kz_ampcon)
+        Omega_mat = np.outer((self.Omega0_grid - self.kz * (P - PB) / mI), np.ones(self.kz.size))
+
+        amplitude_jac_temp = -1j * (kz_ampcon_mat / mI + Omega_mat + 0.5 * self.gnum * (self.Wkkp_grid + self.Wkikpi_grid))
         amplitude_jac_temp[self.k0mask_mat] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
 
         amplitude_phase_jac[0:-1, 0:-1] = amplitude_jac_temp
-        amplitude_phase_jac[-1, 0:-1] = 0.5 * self.gnum * np.sqrt(n0) * self.Wk_grid - np.dot(PB * dVk, self.kz * np.conjugate(amplitude)) / mI
+        amplitude_phase_jac[-1, 0:-1] = 0.5 * self.gnum * np.sqrt(n0) * self.Wk_grid - PB * kz_ampcon / mI
 
-        return amplitude_phase_deriv
+        return amplitude_phase_jac
+
+
+# old code from 'update' function:
+
+        # PB = np.dot(self.kz, amplitude * np.conjugate(amplitude) * dVk)
+
+        # amplitude_phase_new[0:-1] = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+        #                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # amplitude_phase_new[-1] = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
+
+        # # Frohlich model (without two phonon contribution)
+        # # gf = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
+        # # amplitude_phase_new[0:-1] = -1j * (gf * np.sqrt(n0) * self.Wk_grid +
+        # #                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI))
+
+        # # amplitude_phase_new[-1] = gf * n0 + gf * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
