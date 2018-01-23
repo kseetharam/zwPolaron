@@ -76,18 +76,18 @@ if __name__ == "__main__":
         os.mkdir(innerdatapath)
 
     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-        f.write(metrics_string)
-    with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-        f.write(pos_xyz_string)
-    with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-        f.write(mom_xyz_string)
-    with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-        f.write(mom_mag_string)
-    np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+    #     f.write(metrics_string)
+    # with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+    #     f.write(pos_xyz_string)
+    # with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+    #     f.write(mom_xyz_string)
+    # with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+    #     f.write(mom_mag_string)
+    # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+    # np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    # np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    # np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
