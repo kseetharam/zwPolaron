@@ -40,7 +40,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 10000
+    tMax = 99
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
