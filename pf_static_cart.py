@@ -60,11 +60,14 @@ def effMass(P, PB, mI):
         return m
 
 
-def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
+def g(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
-    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+    old_settings = np.seterr(); np.seterr(all='ignore')
     mR = ur(mI, mB)
-    return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
+    integrand = 2 * mR / (kxg**2 + kyg**2 + kzg**2)
+    mask = np.isinf(integrand); integrand[mask] = 0
+    np.seterr(**old_settings)
+    return 1 / ((mR / (2 * np.pi)) * aIBi - np.sum(integrand) * dVk)
 
 
 def test_grid(kgrid, mB, n0, gBB):
@@ -192,7 +195,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
     nu_const = nu(gBB)
     eMass = effMass(P, PB_Val, mI)
-    gIB = g(kx, ky, kz, aIBi, mI, mB, n0, gBB)
+    gIB = g(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB)
 
     bparams = [aIBi, aSi, DP, mI, mB, n0, gBB]
 

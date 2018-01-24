@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (80, 80, 80)
+    (Lx, Ly, Lz) = (120, 120, 120)
     (dx, dy, dz) = (5, 5, 5)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
@@ -80,9 +80,9 @@ if __name__ == "__main__":
         os.mkdir(innerdatapath)
 
     metrics_string, metrics_data = pf_static_sph.static_DataGeneration(cParams, gParams, sParams)
-    # with open(innerdatapath + '/metrics_string.txt', 'w') as f:
-    #     f.write(metrics_string)
-    # np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
+    with open(innerdatapath + '/metrics_string.txt', 'w') as f:
+        f.write(metrics_string)
+    np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))

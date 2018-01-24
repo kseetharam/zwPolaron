@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import quad
 from timeit import default_timer as timer
+import os
 
 # ---- HELPER FUNCTIONS ----
 
@@ -116,6 +117,12 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
+
+    initpath = os.path.dirname(os.path.realpath(__file__)) + '/initial_amp'
+    # initial_amplitude_phase = np.zeros(kgrid.size() + 1, dtype=complex)
+    initial_amplitude_phase = np.load(initpath + '/imagfixed.npy')
+    cs.amplitude_phase = initial_amplitude_phase
+
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
@@ -141,6 +148,10 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         NB_tVec[ind] = cs.get_PhononNumber()
         DynOv_tVec[ind] = cs.get_DynOverlap()
         Phase_tVec[ind] = cs.get_Phase()
+
+        if ind == 28:
+            print('t: {0}'.format(t))
+            # np.save(initpath + '/imagfixed.npy', cs.amplitude_phase)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))

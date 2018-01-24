@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (80, 80, 80)
+    (Lx, Ly, Lz) = (120, 120, 120)
     (dx, dy, dz) = (5, 5, 5)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 99
+    tMax = 10000
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -107,17 +107,17 @@ if __name__ == "__main__":
     # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
     # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
 
-    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])))
-    print('N(t): {0}'.format(NB_tVec[-1]))
+    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
+    print('N(t): {0}'.format(2 * NB_tVec[-1]))
 
     fig, ax = plt.subplots(nrows=1, ncols=2)
 
-    ax[0].plot(time_grid, np.abs(DynOv_tVec))
+    ax[0].plot(time_grid, np.abs(DynOv_tVec)**2)
     ax[0].plot(time_grid, Z_factor_s * np.ones(len(time_grid)))
     # ax[0].set_xscale('log')
     # ax[0].set_yscale('log')
 
-    ax[1].plot(time_grid, NB_tVec)
+    ax[1].plot(time_grid, 2 * NB_tVec)
     ax[1].plot(time_grid, 2 * Nph_s * np.ones(len(time_grid)))
     # ax[1].set_xscale('log')
     # ax[1].set_yscale('log')

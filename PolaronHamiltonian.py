@@ -33,7 +33,7 @@ class PolaronHamiltonian:
 
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.kxg, self.kyg, self.kzg = coherent_state.kxg, coherent_state.kyg, coherent_state.kzg
-            self.gnum = pfc.g(self.kxg, self.kyg, self.kzg, *Params[1:])
+            self.gnum = pfc.g(self.kxg, self.kyg, self.kzg, coherent_state.dVk[0], *Params[1:])
             self.Omega0_grid = pfc.Omega(self.kxg, self.kyg, self.kzg, 0, *Params[2:]).flatten()
             self.Wk_grid = pfc.Wk(self.kxg, self.kyg, self.kzg, *Params[3:]).flatten(); self.Wk_grid[self.k0mask] = 1  # this is where |k| = 0 -> changing this value to 1 arbitrarily shouldn't affect the actual calculation as we are setting Beta_k = 0 here too
             self.Wki_grid = 1 / self.Wk_grid
@@ -77,7 +77,7 @@ class PolaronHamiltonian:
                                     amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
-        # FOR IMAGINARY TIME DYNAMICS
+        # # FOR IMAGINARY TIME DYNAMICS
 
         # amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
         #                            amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +

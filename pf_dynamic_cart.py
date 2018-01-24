@@ -38,11 +38,14 @@ def Wk(kx, ky, kz, mB, n0, gBB):
     return output
 
 
-def g(kx, ky, kz, aIBi, mI, mB, n0, gBB):
+def g(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
-    k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
+    old_settings = np.seterr(); np.seterr(all='ignore')
     mR = ur(mI, mB)
-    return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
+    integrand = 2 * mR / (kxg**2 + kyg**2 + kzg**2)
+    mask = np.isinf(integrand); integrand[mask] = 0
+    np.seterr(**old_settings)
+    return 1 / ((mR / (2 * np.pi)) * aIBi - np.sum(integrand) * dVk)
 
 
 # ---- CALCULATION HELPER FUNCTIONS ----
@@ -195,15 +198,14 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     NGridPoints = xgrid.size()
     k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
 
-    # calculate some parameters
-    nu_const = nu(gBB)
-    gIB = g(kx, ky, kz, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
-
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
+    # calculate some parameters
+    nu_const = nu(gBB)
+    gIB = g(cs.kxg, cs.kyg, cs.kzg, cs.dVk[0], aIBi, mI, mB, n0, gBB)
     # Other book-keeping
     PIgrid = ImpMomGrid_from_PhononMomGrid(kgrid, P)
     PB_x = kx; PB_y = ky; PB_z = kz
