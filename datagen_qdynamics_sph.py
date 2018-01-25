@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (5, 5, 5)
+    (dx, dy, dz) = (4, 4, 4)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -62,7 +62,9 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
@@ -99,27 +101,31 @@ if __name__ == "__main__":
     print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
 
     ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
-    # np.savetxt(innerdatapath + '/ob.dat', ob_data)
+    np.savetxt(innerdatapath + '/ob.dat', ob_data)
 
-    staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/sph/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
-    NGridPoints_s, k_max_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Z_factor_s = np.loadtxt(staticdatapath, unpack=True)
+    ob_string = 't, |S(t)|, Nph(t), PB(t), Phi(t)'
+    with open(innerdatapath + '/ob_string.txt', 'w') as f:
+        f.write(ob_string)
 
-    # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
-    # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
+    # staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/sph/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
+    # NGridPoints_s, k_max_s, dk_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Z_factor_s = np.loadtxt(staticdatapath, unpack=True)
 
-    print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
-    print('N(t): {0}'.format(2 * NB_tVec[-1]))
+    # # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
+    # # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
 
-    fig, ax = plt.subplots(nrows=1, ncols=2)
+    # print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
+    # print('N(t): {0}'.format(2 * NB_tVec[-1]))
 
-    ax[0].plot(time_grid, np.abs(DynOv_tVec)**2)
-    ax[0].plot(time_grid, Z_factor_s * np.ones(len(time_grid)))
-    # ax[0].set_xscale('log')
-    # ax[0].set_yscale('log')
+    # fig, ax = plt.subplots(nrows=1, ncols=2)
 
-    ax[1].plot(time_grid, 2 * NB_tVec)
-    ax[1].plot(time_grid, 2 * Nph_s * np.ones(len(time_grid)))
-    # ax[1].set_xscale('log')
-    # ax[1].set_yscale('log')
+    # ax[0].plot(time_grid, np.abs(DynOv_tVec)**2)
+    # ax[0].plot(time_grid, Z_factor_s * np.ones(len(time_grid)))
+    # # ax[0].set_xscale('log')
+    # # ax[0].set_yscale('log')
 
-    plt.show()
+    # ax[1].plot(time_grid, 2 * NB_tVec)
+    # ax[1].plot(time_grid, 2 * Nph_s * np.ones(len(time_grid)))
+    # # ax[1].set_xscale('log')
+    # # ax[1].set_yscale('log')
+
+    # plt.show()

@@ -192,6 +192,7 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
+    dk = (kgrid.getArray('k')[1] - kgrid.getArray('k')[0])
 
     DP = DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
     aSi = aSi_interp(DP, aSi_tck)
@@ -206,8 +207,8 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Collate data
 
-    metrics_string = 'NGridPoints, |k|_max, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
-    metrics_data = np.array([NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
+    metrics_string = 'NGridPoints, |k|_max, dk, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
+    metrics_data = np.array([NGridPoints, k_max, dk, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
 
     # test_grid(kgrid, mB, n0, gBB)
 

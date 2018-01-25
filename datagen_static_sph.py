@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (5, 5, 5)
+    (dx, dy, dz) = (4, 4, 4)
 
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
@@ -63,7 +63,9 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/sph' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/sph' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/sph/static' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
 

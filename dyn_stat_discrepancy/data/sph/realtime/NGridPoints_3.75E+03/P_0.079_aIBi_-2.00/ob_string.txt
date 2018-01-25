@@ -1,0 +1,1 @@
+t, |S(t)|, Nph(t), PB(t), Phi(t)

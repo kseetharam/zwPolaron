@@ -118,10 +118,12 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
 
-    initpath = os.path.dirname(os.path.realpath(__file__)) + '/initial_amp'
+    # start the coherent state and a different initial condition
+
+    # initpath = os.path.dirname(os.path.realpath(__file__)) + '/initial_amp'
     # initial_amplitude_phase = np.zeros(kgrid.size() + 1, dtype=complex)
-    initial_amplitude_phase = np.load(initpath + '/imagfixed.npy')
-    cs.amplitude_phase = initial_amplitude_phase
+    # initial_amplitude_phase = np.load(initpath + '/imagfixed.npy')
+    # cs.amplitude_phase = initial_amplitude_phase
 
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
