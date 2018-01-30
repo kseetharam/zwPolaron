@@ -56,6 +56,8 @@ if __name__ == "__main__":
 
     datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
