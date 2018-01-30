@@ -3,6 +3,7 @@ import Grid
 import pf_dynamic_cart
 import os
 from timeit import default_timer as timer
+import pickle
 
 
 import matplotlib
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid('CARTESIAN_3D')
     kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
 
-    tMax = 99
+    tMax = 69
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -54,19 +55,19 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    dirpath = os.path.dirname(os.path.realpath(__file__))
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/cart/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -85,21 +86,34 @@ if __name__ == "__main__":
 
     time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
+    with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
+        pickle.dump(time_grids, f)
+    with open(innerdatapath + '/metrics_data.pickle', 'wb') as f:
+        pickle.dump(metrics_data, f)
+    with open(innerdatapath + '/pos_xyz_data.pickle', 'wb') as f:
+        pickle.dump(pos_xyz_data, f)
+    with open(innerdatapath + '/mom_xyz_data.pickle', 'wb') as f:
+        pickle.dump(mom_xyz_data, f)
+    with open(innerdatapath + '/cont_xyz_data.pickle', 'wb') as f:
+        pickle.dump(cont_xyz_data, f)
+    with open(innerdatapath + '/mom_mag_data.pickle', 'wb') as f:
+        pickle.dump(mom_mag_data, f)
+
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
 
-    # TEMP DATA CHECK
+    # # TEMP DATA CHECK
 
-    [tgrid, tgrid_coarse] = time_grids
-    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
-    print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
+    # [tgrid, tgrid_coarse] = time_grids
+    # [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
+    # print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
 
-    ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
-    np.savetxt(innerdatapath + '/ob.dat', ob_data)
+    # ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
+    # np.savetxt(innerdatapath + '/ob.dat', ob_data)
 
-    ob_string = 't, |S(t)|, Nph(t), PB(t), Phi(t)'
-    with open(innerdatapath + '/ob_string.txt', 'w') as f:
-        f.write(ob_string)
+    # ob_string = 't, |S(t)|, Nph(t), PB(t), Phi(t)'
+    # with open(innerdatapath + '/ob_string.txt', 'w') as f:
+    #     f.write(ob_string)
 
     # staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/cart/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
     # NGridPoints_s, k_max_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Nph_xyz_s, Z_factor_s, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM = np.loadtxt(staticdatapath, unpack=True)

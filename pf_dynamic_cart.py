@@ -215,7 +215,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # Choose coarsegrain step size
     maxfac = 1
-    largest_coarsegrain = 10
+    largest_coarsegrain = 2
     for f in range(1, largest_coarsegrain + 1, 1):
         if tgrid.size % f == 0:
             maxfac = f
@@ -259,7 +259,8 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         Phase_tVec[ind] = cs.get_Phase()
 
         # save distribution data every 10 time values
-        if t != 0 and (ind + 1) % maxfac == 0:
+        # if t != 0 and (ind + 1) % maxfac == 0:
+        if (ind + 1) % maxfac == 0:
             # calculate distribution information
             phonon_pos_dist, phonon_mom_dist, phonon_mom_k0deltapeak_ctVec[cind] = cs.get_PhononDistributions()
             pos_slices, mom_slices, cont_slices, pos_integration, mom_integration = xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args)

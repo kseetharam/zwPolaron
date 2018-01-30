@@ -104,7 +104,7 @@ class CoherentState:
 
         # Calculate Nph
         Nph = self.get_PhononNumber()
-        # Nph = np.sum(beta2_kxkykz) * dVk_2
+        # Nph = np.sum(beta2_kxkykz) * self.dVk[0]
 
         # Fourier transform
         amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / self.dVx_const
