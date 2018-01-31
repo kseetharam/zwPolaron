@@ -3,6 +3,7 @@ import Grid
 import pf_static_cart
 import os
 from timeit import default_timer as timer
+import pickle
 
 
 if __name__ == "__main__":
@@ -59,8 +60,8 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/cart' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/static' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static' + '/cart' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/cart/static' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -80,16 +81,21 @@ if __name__ == "__main__":
     metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
     with open(innerdatapath + '/metrics_string.txt', 'w') as f:
         f.write(metrics_string)
-    # with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
-    #     f.write(pos_xyz_string)
-    # with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
-    #     f.write(mom_xyz_string)
-    # with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
-    #     f.write(mom_mag_string)
+    with open(innerdatapath + '/pos_xyz_string.txt', 'w') as f:
+        f.write(pos_xyz_string)
+    with open(innerdatapath + '/mom_xyz_string.txt', 'w') as f:
+        f.write(mom_xyz_string)
+    with open(innerdatapath + '/cont_xyz_string.txt', 'w') as f:
+        f.write(cont_xyz_string)
+    with open(innerdatapath + '/mom_mag_string.txt', 'w') as f:
+        f.write(mom_mag_string)
+
     np.savetxt(innerdatapath + '/metrics.dat', metrics_data)
-    # np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
-    # np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
-    # np.savetxt(innerdatapath + '/mag.dat', mom_mag_data)
+    np.savetxt(innerdatapath + '/pos_xyz.dat', pos_xyz_data)
+    np.savetxt(innerdatapath + '/mom_xyz.dat', mom_xyz_data)
+    with open(innerdatapath + '/cont_xyz_data.pickle', 'wb') as f:
+        pickle.dump(cont_xyz_data, f)
+    np.savetxt(innerdatapath + '/mom_mag.dat', mom_mag_data)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))

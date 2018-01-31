@@ -124,7 +124,7 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
     nPB = phonon_mom_dist
     # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
     kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
-    dVk_const = kgrid.dV()[0]
+    dVk_const = kgrid.dV()[0] * (2 * np.pi)**(3)
 
     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
