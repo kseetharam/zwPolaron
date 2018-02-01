@@ -72,11 +72,14 @@ if __name__ == "__main__":
         [nxyz_xz_slice_st, nxyz_xy_slice_st, nPB_xz_slice_st, nPB_xy_slice_st, nPI_xz_slice_st, nPI_xy_slice_st] = pickle.load(f)
     PBm_Vec_st, nPBm_Vec_st, PIm_Vec_st, nPIm_Vec_st = np.loadtxt(static_datapath + '/mom_mag.dat', unpack=True)
 
-    # Set animation datapath
+    # Set animation datapath and max end time
 
     animdatapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi) + '/animations'
     if os.path.isdir(animdatapath) is False:
         os.mkdir(animdatapath)
+
+    tmax = 25
+    tmax_ind = (np.abs(tgrid_coarse - tmax)).argmin()
 
     # # MAGNITUDE ANIMATION
 
@@ -85,14 +88,14 @@ if __name__ == "__main__":
     fig1, ax = plt.subplots()
     curve = ax.plot(PIm, nPIm_ctVec[0], color='g', lw=2)[0]
     line = ax.plot(P * np.ones(len(PIm)), np.linspace(0, phonon_mom_k0deltapeak_ctVec[0], len(PIm)), 'go')[0]
-    time_text = ax.text(0.85, 0.9, 't: {0}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
+    time_text = ax.text(0.85, 0.9, 't: {:.1f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
     norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{I}}|}(t) d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
 
     ax.plot(PIm_Vec_st, nPIm_Vec_st, 'b')
     ax.plot(P * np.ones(len(PIm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PIm_Vec_st)), 'b--')
     norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{I}}|,st} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_st), transform=ax.transAxes, color='b')
 
-    ax.set_xlim([0, np.max(PIm)])
+    ax.set_xlim([-0.01, np.max(PIm)])
     ax.set_ylim([0, 1])
     ax.set_title('Impurity Momentum Distribution (Magnitude)')
     ax.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
@@ -102,41 +105,41 @@ if __name__ == "__main__":
         curve.set_ydata(nPIm_ctVec[i])
         line.set_ydata(np.linspace(0, phonon_mom_k0deltapeak_ctVec[i], len(PIm)))
 
-        time_text.set_text('t: {0}'.format(tgrid_coarse[i]))
+        time_text.set_text('t: {:.1f}'.format(tgrid_coarse[i]))
         norm_text.set_text(r'$\int n_{|\vec{P_{I}}|}(t) d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_ctVec[i]))
 
-    anim1 = FuncAnimation(fig1, animate1, interval=700, frames=len(tgrid_coarse) - 30)
+    anim1 = FuncAnimation(fig1, animate1, interval=50, frames=range(tmax_ind + 1))
     # anim1.save(animdatapath + '/nPIm.gif', writer='imagemagick')
 
-    # nPBm
+    # # nPBm
 
-    fig2, ax = plt.subplots()
-    curve = ax.plot(PBm, nPBm_ctVec[0], color='g', lw=2)[0]
-    line = ax.plot(np.zeros(len(PBm)), np.linspace(0, phonon_mom_k0deltapeak_ctVec[0], len(PBm)), 'go')[0]
-    time_text = ax.text(0.85, 0.9, 't: {0}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
-    norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
+    # fig2, ax = plt.subplots()
+    # curve = ax.plot(PBm, nPBm_ctVec[0], color='g', lw=2)[0]
+    # line = ax.plot(np.zeros(len(PBm)), np.linspace(0, phonon_mom_k0deltapeak_ctVec[0], len(PBm)), 'go')[0]
+    # time_text = ax.text(0.85, 0.9, 't: {:.1f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
+    # norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
 
-    ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
-    ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
-    norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
+    # ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
+    # ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
+    # norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
 
-    ax.set_xlim([0, np.max(PBm)])
-    ax.set_ylim([0, 1])
-    ax.set_title('Phonon Momentum Distribution (Magnitude)')
-    ax.set_ylabel(r'$n_{|\vec{P_{B}}|}$')
-    ax.set_xlabel(r'$|\vec{P_{B}}|$')
+    # ax.set_xlim([-0.01, np.max(PBm)])
+    # ax.set_ylim([0, 1])
+    # ax.set_title('Phonon Momentum Distribution (Magnitude)')
+    # ax.set_ylabel(r'$n_{|\vec{P_{B}}|}$')
+    # ax.set_xlabel(r'$|\vec{P_{B}}|$')
 
-    def animate2(i):
-        curve.set_ydata(nPBm_ctVec[i])
-        line.set_ydata(np.linspace(0, phonon_mom_k0deltapeak_ctVec[i], len(PBm)))
+    # def animate2(i):
+    #     curve.set_ydata(nPBm_ctVec[i])
+    #     line.set_ydata(np.linspace(0, phonon_mom_k0deltapeak_ctVec[i], len(PBm)))
 
-        time_text.set_text('t: {0}'.format(tgrid_coarse[i]))
-        norm_text.set_text(r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[i]))
+    #     time_text.set_text('t: {:.1f}'.format(tgrid_coarse[i]))
+    #     norm_text.set_text(r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[i]))
 
-    anim2 = FuncAnimation(fig2, animate2, interval=700, frames=len(tgrid_coarse) - 30)
-    # anim2.save(animdatapath + '/nPBm.gif', writer='imagemagick')
+    # anim2 = FuncAnimation(fig2, animate2, interval=50, frames=range(tmax_ind + 1))
+    # # anim2.save(animdatapath + '/nPBm.gif', writer='imagemagick')
 
-    plt.draw()
+    # plt.draw()
     plt.show()
 
     # # MAGNITUDE 2D DYNAMICAL PLOT
