@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (4, 4, 4)
+    (dx, dy, dz) = (1, 1, 1)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 99
-    dt = 1
+    tMax = 25
+    dt = 0.25
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
