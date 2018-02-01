@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     ax.set_xlim([-0.01, np.max(PIm)])
     ax.set_ylim([0, 1])
-    ax.set_title('Impurity Momentum Distribution (Magnitude)')
+    ax.set_title('Impurity Momentum Magnitude Distribution')
     ax.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     ax.set_xlabel(r'$|\vec{P_{I}}|$')
 
@@ -109,39 +109,67 @@ if __name__ == "__main__":
         norm_text.set_text(r'$\int n_{|\vec{P_{I}}|}(t) d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_ctVec[i]))
 
     anim1 = FuncAnimation(fig1, animate1, interval=50, frames=range(tmax_ind + 1))
-    # anim1.save(animdatapath + '/nPIm.gif', writer='imagemagick')
+    anim1.save(animdatapath + '/nPIm.gif', writer='imagemagick')
 
-    # # nPBm
+    # nPBm
 
-    # fig2, ax = plt.subplots()
-    # curve = ax.plot(PBm, nPBm_ctVec[0], color='g', lw=2)[0]
-    # line = ax.plot(np.zeros(len(PBm)), np.linspace(0, phonon_mom_k0deltapeak_ctVec[0], len(PBm)), 'go')[0]
-    # time_text = ax.text(0.85, 0.9, 't: {:.1f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
-    # norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
+    fig2, ax = plt.subplots()
+    curve = ax.plot(PBm, nPBm_ctVec[0], color='g', lw=2)[0]
+    line = ax.plot(np.zeros(len(PBm)), np.linspace(0, phonon_mom_k0deltapeak_ctVec[0], len(PBm)), 'go')[0]
+    time_text = ax.text(0.85, 0.9, 't: {:.1f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
+    norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
 
-    # ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
-    # ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
-    # norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
+    ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
+    ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
+    norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
 
-    # ax.set_xlim([-0.01, np.max(PBm)])
-    # ax.set_ylim([0, 1])
-    # ax.set_title('Phonon Momentum Distribution (Magnitude)')
-    # ax.set_ylabel(r'$n_{|\vec{P_{B}}|}$')
-    # ax.set_xlabel(r'$|\vec{P_{B}}|$')
+    ax.set_xlim([-0.01, np.max(PBm)])
+    ax.set_ylim([0, 1])
+    ax.set_title('Phonon Momentum Magnitude Distribution')
+    ax.set_ylabel(r'$n_{|\vec{P_{B}}|}$')
+    ax.set_xlabel(r'$|\vec{P_{B}}|$')
 
-    # def animate2(i):
-    #     curve.set_ydata(nPBm_ctVec[i])
-    #     line.set_ydata(np.linspace(0, phonon_mom_k0deltapeak_ctVec[i], len(PBm)))
+    def animate2(i):
+        curve.set_ydata(nPBm_ctVec[i])
+        line.set_ydata(np.linspace(0, phonon_mom_k0deltapeak_ctVec[i], len(PBm)))
 
-    #     time_text.set_text('t: {:.1f}'.format(tgrid_coarse[i]))
-    #     norm_text.set_text(r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[i]))
+        time_text.set_text('t: {:.1f}'.format(tgrid_coarse[i]))
+        norm_text.set_text(r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[i]))
 
-    # anim2 = FuncAnimation(fig2, animate2, interval=50, frames=range(tmax_ind + 1))
-    # # anim2.save(animdatapath + '/nPBm.gif', writer='imagemagick')
+    anim2 = FuncAnimation(fig2, animate2, interval=50, frames=range(tmax_ind + 1))
+    anim2.save(animdatapath + '/nPBm.gif', writer='imagemagick')
 
     # plt.draw()
-    plt.show()
+    # plt.show()
 
     # # MAGNITUDE 2D DYNAMICAL PLOT
+
+    # tgrid_coarse_short = tgrid_coarse[:tmax_ind + 1]
+    # tc_g, PIm_g = np.meshgrid(tgrid_coarse_short, PIm, indexing='ij')
+    # nPIm_g = np.zeros((len(tgrid_coarse_short), len(PIm)))
+    # for ind, nPIm_Vec in enumerate(nPIm_ctVec[:tmax_ind + 1]):
+    #     nPIm_g[ind, :] = nPIm_Vec[:]
+
+    # tc_g, PBm_g = np.meshgrid(tgrid_coarse_short, PBm, indexing='ij')
+    # nPBm_g = np.zeros((len(tgrid_coarse_short), len(PBm)))
+    # for ind, nPBm_Vec in enumerate(nPBm_ctVec[:tmax_ind + 1]):
+    #     nPBm_g[ind, :] = nPBm_Vec[:]
+
+    # fig1, ax1 = plt.subplots()
+    # ax1.pcolormesh(tc_g, PIm_g, nPIm_g)
+    # ax1.set_title('Impurity Momentum Magnitude Distribution ' + r'($n_{|\vec{P_{I}}|}(t)$)')
+    # ax1.set_ylabel(r'$|\vec{P_{I}}|$')
+    # ax1.set_xlabel(r'$t$')
+
+    # fig2, ax2 = plt.subplots()
+    # ax2.pcolormesh(tc_g, PBm_g, nPBm_g)
+    # ax2.set_title('Phonon Momentum Magnitude Distribution ' + r'($n_{|\vec{P_{B}}|}(t)$)')
+    # ax2.set_ylabel(r'$|\vec{P_{B}}|$')
+    # ax2.set_xlabel(r'$t$')
+
+    # fig1.savefig(animdatapath + '/nPIm_2D.pdf')
+    # fig2.savefig(animdatapath + '/nPBm_2D.pdf')
+
+    # plt.show()
 
     # # 2D SLICE ANIMATION
