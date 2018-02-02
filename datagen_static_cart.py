@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (4, 4, 4)
+    (dx, dy, dz) = (2, 2, 2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     print('UV cutoff: {0}'.format(k_max))
     print('NGridPoints: {0}'.format(NGridPoints))
 
-    print('Perfect \int ep: {0}'.format(4 * np.max(kx)**5 / (2 * np.pi)**3))
+    # print('Perfect \int ep: {0}'.format(4 * np.max(kx)**5 / (2 * np.pi)**3))
 
     # Basic parameters
 

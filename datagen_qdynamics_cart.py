@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (1, 1, 1)
+    (dx, dy, dz) = (2, 2, 2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 0.1 * pf_dynamic_cart.nu(gBB)
+    P = 1.2 * pf_dynamic_cart.nu(gBB)
     aIBi = -2
     cParams = [P, aIBi]
 
