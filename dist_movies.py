@@ -15,8 +15,8 @@ if __name__ == "__main__":
     mI = 1
     mB = 1
     n0 = 1
-    # gBB = (4 * np.pi / mB) * 0.05
-    gBB = (4 * np.pi / mB) * 0.05 * 3
+    gBB = (4 * np.pi / mB) * 0.05
+    # gBB = (4 * np.pi / mB) * 0.05 * 3
 
     # cParams
 
