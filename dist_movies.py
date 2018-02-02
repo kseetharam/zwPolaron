@@ -15,10 +15,12 @@ if __name__ == "__main__":
     mI = 1
     mB = 1
     n0 = 1
-    gBB = (4 * np.pi / mB) * 0.05
+    # gBB = (4 * np.pi / mB) * 0.05
+    gBB = (4 * np.pi / mB) * 0.05 * 3
 
     # cParams
 
+    # P = .07926654595212022369
     P = 0.1 * pf_dynamic_cart.nu(gBB)
     aIBi = -2
 
@@ -32,6 +34,7 @@ if __name__ == "__main__":
 
     dirpath = os.path.dirname(os.path.realpath(__file__))
     datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(NGridPoints, P, aIBi)
 
     with open(datapath + '/time_grids.pickle', 'rb') as f:
         time_grids = pickle.load(f)
@@ -61,9 +64,10 @@ if __name__ == "__main__":
         nPBm_Tot_ctVec[ind] = np.sum(nPBm_ctVec[ind] * dPBm) + phonon_mom_k0deltapeak_ctVec[ind]
         nPIm_Tot_ctVec[ind] = np.sum(nPIm_ctVec[ind] * dPIm) + phonon_mom_k0deltapeak_ctVec[ind]
 
-    # Load static data
+    # # Load static data
 
     static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi)
+    # static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(NGridPoints, P, aIBi)
 
     NGridPoints_st, k_max_st, P_st, aIBi_st, mI_st, mB_st, n0_st, gBB_st, nu_stonst_st, gIB_st, Pcrit_st, aSi_st, DP_st, PB_Val_st, En_st, eMass_st, Nph_st, Nph_xyz_st, Z_factor_st, nxyz_Tot_st, nPB_Tot_st, nPBm_Tot_st, nPIm_Tot_st, nPB_Mom1_st, beta2_kz_Mom1_st, nPB_deltaK0_st, FWHM_st = np.loadtxt(static_datapath + '/metrics.dat', unpack=True)
     x_st, y_st, z_st, nxyz_x_st, nxyz_y_st, nxyz_z_st, nxyz_x_slice_st, nxyz_y_slice_st, nxyz_z_slice_st = np.loadtxt(static_datapath + '/pos_xyz.dat', unpack=True)
@@ -75,10 +79,11 @@ if __name__ == "__main__":
     # Set animation datapath and max end time
 
     figdatapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi) + '/figures'
+    # figdatapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi) + '/aBBx3/figures'
     if os.path.isdir(figdatapath) is False:
         os.mkdir(figdatapath)
 
-    tmax = 15
+    tmax = 25
     tmax_ind = (np.abs(tgrid_coarse - tmax)).argmin()
 
     # # MAGNITUDE ANIMATION

@@ -52,6 +52,7 @@ if __name__ == "__main__":
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
+    # gBB = (4 * np.pi / mB) * 0.05 * 3
 
     sParams = [mI, mB, n0, gBB]
 
@@ -78,11 +79,13 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 1.2 * pf_dynamic_cart.nu(gBB)
+    # P = .07926654595212022369
+    P = 0.1 * pf_dynamic_cart.nu(gBB)
     aIBi = -2
     cParams = [P, aIBi]
 
     innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(P, aIBi)
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
