@@ -21,12 +21,12 @@ if __name__ == "__main__":
     # cParams
 
     # P = .07926654595212022369
-    P = 0.1 * pf_dynamic_cart.nu(gBB)
+    P = 1.8 * pf_dynamic_cart.nu(gBB)
     aIBi = -2
 
     # gParams
-    (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (2, 2, 2)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.5, 0.5, 0.5)
 
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
@@ -64,17 +64,17 @@ if __name__ == "__main__":
         nPBm_Tot_ctVec[ind] = np.sum(nPBm_ctVec[ind] * dPBm) + phonon_mom_k0deltapeak_ctVec[ind]
         nPIm_Tot_ctVec[ind] = np.sum(nPIm_ctVec[ind] * dPIm) + phonon_mom_k0deltapeak_ctVec[ind]
 
-    # # Load static data
+    # # # Load static data
 
-    static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi)
-    # static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(NGridPoints, P, aIBi)
+    # static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}'.format(NGridPoints, P, aIBi)
+    # # static_datapath = dirpath + '/data_static' + '/cart' + '/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(NGridPoints, P, aIBi)
 
-    NGridPoints_st, k_max_st, P_st, aIBi_st, mI_st, mB_st, n0_st, gBB_st, nu_stonst_st, gIB_st, Pcrit_st, aSi_st, DP_st, PB_Val_st, En_st, eMass_st, Nph_st, Nph_xyz_st, Z_factor_st, nxyz_Tot_st, nPB_Tot_st, nPBm_Tot_st, nPIm_Tot_st, nPB_Mom1_st, beta2_kz_Mom1_st, nPB_deltaK0_st, FWHM_st = np.loadtxt(static_datapath + '/metrics.dat', unpack=True)
-    x_st, y_st, z_st, nxyz_x_st, nxyz_y_st, nxyz_z_st, nxyz_x_slice_st, nxyz_y_slice_st, nxyz_z_slice_st = np.loadtxt(static_datapath + '/pos_xyz.dat', unpack=True)
-    PB_x_st, PB_y_st, PB_z_st, nPB_x_st, nPB_y_st, nPB_z_st, nPB_x_slice_st, nPB_y_slice_st, nPB_z_slice_st, PI_x_st, PI_y_st, PI_z_st, nPI_x_st, nPI_y_st, nPI_z_st, nPI_x_slice_st, nPI_y_slice_st, nPI_z_slice_st = np.loadtxt(static_datapath + '/mom_xyz.dat', unpack=True)
-    with open(static_datapath + '/cont_xyz_data.pickle', 'rb') as f:
-        [nxyz_xz_slice_st, nxyz_xy_slice_st, nPB_xz_slice_st, nPB_xy_slice_st, nPI_xz_slice_st, nPI_xy_slice_st] = pickle.load(f)
-    PBm_Vec_st, nPBm_Vec_st, PIm_Vec_st, nPIm_Vec_st = np.loadtxt(static_datapath + '/mom_mag.dat', unpack=True)
+    # NGridPoints_st, k_max_st, P_st, aIBi_st, mI_st, mB_st, n0_st, gBB_st, nu_stonst_st, gIB_st, Pcrit_st, aSi_st, DP_st, PB_Val_st, En_st, eMass_st, Nph_st, Nph_xyz_st, Z_factor_st, nxyz_Tot_st, nPB_Tot_st, nPBm_Tot_st, nPIm_Tot_st, nPB_Mom1_st, beta2_kz_Mom1_st, nPB_deltaK0_st, FWHM_st = np.loadtxt(static_datapath + '/metrics.dat', unpack=True)
+    # x_st, y_st, z_st, nxyz_x_st, nxyz_y_st, nxyz_z_st, nxyz_x_slice_st, nxyz_y_slice_st, nxyz_z_slice_st = np.loadtxt(static_datapath + '/pos_xyz.dat', unpack=True)
+    # PB_x_st, PB_y_st, PB_z_st, nPB_x_st, nPB_y_st, nPB_z_st, nPB_x_slice_st, nPB_y_slice_st, nPB_z_slice_st, PI_x_st, PI_y_st, PI_z_st, nPI_x_st, nPI_y_st, nPI_z_st, nPI_x_slice_st, nPI_y_slice_st, nPI_z_slice_st = np.loadtxt(static_datapath + '/mom_xyz.dat', unpack=True)
+    # with open(static_datapath + '/cont_xyz_data.pickle', 'rb') as f:
+    #     [nxyz_xz_slice_st, nxyz_xy_slice_st, nPB_xz_slice_st, nPB_xy_slice_st, nPI_xz_slice_st, nPI_xy_slice_st] = pickle.load(f)
+    # PBm_Vec_st, nPBm_Vec_st, PIm_Vec_st, nPIm_Vec_st = np.loadtxt(static_datapath + '/mom_mag.dat', unpack=True)
 
     # Set animation datapath and max end time
 
@@ -96,9 +96,9 @@ if __name__ == "__main__":
     time_text = ax.text(0.85, 0.9, 't: {:.2f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
     norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{I}}|}(t) d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
 
-    ax.plot(PIm_Vec_st, nPIm_Vec_st, 'b')
-    ax.plot(P * np.ones(len(PIm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PIm_Vec_st)), 'b--')
-    norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{I}}|,st} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_st), transform=ax.transAxes, color='b')
+    # ax.plot(PIm_Vec_st, nPIm_Vec_st, 'b')
+    # ax.plot(P * np.ones(len(PIm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PIm_Vec_st)), 'b--')
+    # norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{I}}|,st} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_st), transform=ax.transAxes, color='b')
 
     ax.set_xlim([-0.01, np.max(PIm)])
     ax.set_ylim([0, 1])
@@ -127,9 +127,9 @@ if __name__ == "__main__":
     time_text = ax.text(0.85, 0.9, 't: {:.2f}'.format(tgrid_coarse[0]), transform=ax.transAxes, color='r')
     norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{B}}|}(t) d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_ctVec[0]), transform=ax.transAxes, color='g')
 
-    ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
-    ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
-    norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
+    # ax.plot(PBm_Vec_st, nPBm_Vec_st, 'b')
+    # ax.plot(np.zeros(len(PBm_Vec_st)), np.linspace(0, nPB_deltaK0_st, len(PBm_Vec_st)), 'b--')
+    # norm_st_text = ax.text(0.02, 0.8, r'$\int n_{|\vec{P_{B}}|,st} d|\vec{P_{B}}| = $' + '{:.3f}'.format(nPBm_Tot_st), transform=ax.transAxes, color='b')
 
     ax.set_xlim([-0.01, np.max(PBm)])
     ax.set_ylim([0, 1])
@@ -315,47 +315,47 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # # 2D SLICE STATIC
+    # # # 2D SLICE STATIC
 
-    PI_x_g, PI_z_g = np.meshgrid(PI_x_st, PI_z_st, indexing='ij')
-    fig1, ax1 = plt.subplots()
-    q1 = ax1.pcolormesh(PI_x_g, PI_z_g, nPI_xz_slice_st)
-    ax1.set_title('Static Impurity Longitudinal Momentum Distribution ' + r'($n_{P_{I,x},P_{I,z},st}$)')
-    ax1.set_ylabel(r'$P_{I,z}$')
-    ax1.set_xlabel(r'$P_{I,x}$')
-    ax1.grid(True, linewidth=0.5)
-    fig1.colorbar(q1, ax=ax1, extend='both')
+    # PI_x_g, PI_z_g = np.meshgrid(PI_x_st, PI_z_st, indexing='ij')
+    # fig1, ax1 = plt.subplots()
+    # q1 = ax1.pcolormesh(PI_x_g, PI_z_g, nPI_xz_slice_st)
+    # ax1.set_title('Static Impurity Longitudinal Momentum Distribution ' + r'($n_{P_{I,x},P_{I,z},st}$)')
+    # ax1.set_ylabel(r'$P_{I,z}$')
+    # ax1.set_xlabel(r'$P_{I,x}$')
+    # ax1.grid(True, linewidth=0.5)
+    # fig1.colorbar(q1, ax=ax1, extend='both')
 
-    PI_x_g, PI_y_g = np.meshgrid(PI_x_st, PI_y_st, indexing='ij')
-    fig2, ax2 = plt.subplots()
-    q2 = ax2.pcolormesh(PI_x_g, PI_y_g, nPI_xy_slice_st)
-    ax2.set_title('Static Impurity Transverse Momentum Distribution ' + r'($n_{P_{I,x},P_{I,y},st}$)')
-    ax2.set_ylabel(r'$P_{I,y}$')
-    ax2.set_xlabel(r'$P_{I,x}$')
-    ax2.grid(True, linewidth=0.5)
-    fig2.colorbar(q2, ax=ax2, extend='both')
+    # PI_x_g, PI_y_g = np.meshgrid(PI_x_st, PI_y_st, indexing='ij')
+    # fig2, ax2 = plt.subplots()
+    # q2 = ax2.pcolormesh(PI_x_g, PI_y_g, nPI_xy_slice_st)
+    # ax2.set_title('Static Impurity Transverse Momentum Distribution ' + r'($n_{P_{I,x},P_{I,y},st}$)')
+    # ax2.set_ylabel(r'$P_{I,y}$')
+    # ax2.set_xlabel(r'$P_{I,x}$')
+    # ax2.grid(True, linewidth=0.5)
+    # fig2.colorbar(q2, ax=ax2, extend='both')
 
-    PB_x_g, PB_z_g = np.meshgrid(PB_x_st, PB_z_st, indexing='ij')
-    fig3, ax3 = plt.subplots()
-    q3 = ax3.pcolormesh(PB_x_g, PB_z_g, nPB_xz_slice_st)
-    ax3.set_title('Static Phonon Longitudinal Momentum Distribution ' + r'($n_{P_{B,x},P_{B,z},st}$)')
-    ax3.set_ylabel(r'$P_{B,z}$')
-    ax3.set_xlabel(r'$P_{B,x}$')
-    ax3.grid(True, linewidth=0.5)
-    fig3.colorbar(q3, ax=ax3, extend='both')
+    # PB_x_g, PB_z_g = np.meshgrid(PB_x_st, PB_z_st, indexing='ij')
+    # fig3, ax3 = plt.subplots()
+    # q3 = ax3.pcolormesh(PB_x_g, PB_z_g, nPB_xz_slice_st)
+    # ax3.set_title('Static Phonon Longitudinal Momentum Distribution ' + r'($n_{P_{B,x},P_{B,z},st}$)')
+    # ax3.set_ylabel(r'$P_{B,z}$')
+    # ax3.set_xlabel(r'$P_{B,x}$')
+    # ax3.grid(True, linewidth=0.5)
+    # fig3.colorbar(q3, ax=ax3, extend='both')
 
-    PB_x_g, PB_y_g = np.meshgrid(PB_x_st, PB_y_st, indexing='ij')
-    fig4, ax4 = plt.subplots()
-    q4 = ax4.pcolormesh(PB_x_g, PB_y_g, nPB_xy_slice_st)
-    ax4.set_title('Static Phonon Transverse Momentum Distribution ' + r'($n_{P_{B,x},P_{B,y},st}$)')
-    ax4.set_ylabel(r'$P_{B,y}$')
-    ax4.set_xlabel(r'$P_{B,x}$')
-    ax4.grid(True, linewidth=0.5)
-    fig4.colorbar(q4, ax=ax4, extend='both')
+    # PB_x_g, PB_y_g = np.meshgrid(PB_x_st, PB_y_st, indexing='ij')
+    # fig4, ax4 = plt.subplots()
+    # q4 = ax4.pcolormesh(PB_x_g, PB_y_g, nPB_xy_slice_st)
+    # ax4.set_title('Static Phonon Transverse Momentum Distribution ' + r'($n_{P_{B,x},P_{B,y},st}$)')
+    # ax4.set_ylabel(r'$P_{B,y}$')
+    # ax4.set_xlabel(r'$P_{B,x}$')
+    # ax4.grid(True, linewidth=0.5)
+    # fig4.colorbar(q4, ax=ax4, extend='both')
 
-    fig1.savefig(figdatapath + '/nPI_xz_st.pdf')
-    fig2.savefig(figdatapath + '/nPI_xy_st.pdf')
-    fig3.savefig(figdatapath + '/nPB_xz_st.pdf')
-    fig4.savefig(figdatapath + '/nPB_xy_st.pdf')
+    # fig1.savefig(figdatapath + '/nPI_xz_st.pdf')
+    # fig2.savefig(figdatapath + '/nPI_xy_st.pdf')
+    # fig3.savefig(figdatapath + '/nPB_xz_st.pdf')
+    # fig4.savefig(figdatapath + '/nPB_xy_st.pdf')
 
-    # plt.show()
+    # # plt.show()
