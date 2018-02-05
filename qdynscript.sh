@@ -4,7 +4,7 @@
 #SBATCH -N 1
 #SBATCH -t 1-00:00
 #SBATCH -p serial_requeue
-#SBATCH --mem=350
+#SBATCH --mem=500
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
