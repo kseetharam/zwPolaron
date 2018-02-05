@@ -8,8 +8,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
-#SBATCH -o data_qdynamics/cart/std/quench_%A_%a
-#SBATCH -e clusterdata/std/quench_%A_%a
+#SBATCH -o /n/regal/demler_lab/kis/genPol_data/std/quench_%A_%a.out
+#SBATCH -e /n/regal/demler_lab/kis/genPol_data/std/quench_%A_%a.err
 
-module load Anaconda3/4.3.0-fasrc01
+module load Anaconda3/5.0.1-fasrc01
 python datagen_qdynamics_cart.py

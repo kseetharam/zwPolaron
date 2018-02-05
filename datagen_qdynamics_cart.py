@@ -5,9 +5,8 @@ import os
 from timeit import default_timer as timer
 import pickle
 
-
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
@@ -30,8 +29,8 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 25
-    dt = 0.25
+    tMax = 1
+    dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -52,60 +51,58 @@ if __name__ == "__main__":
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
-    # gBB = (4 * np.pi / mB) * 0.05 * 3
 
     sParams = [mI, mB, n0, gBB]
 
-    # ---- SET OUTPUT DATA FOLDER ----
+    # # ---- SET OUTPUT DATA FOLDER ----
 
-    dirpath = os.path.dirname(os.path.realpath(__file__))
+    # dirpath = os.path.dirname(os.path.realpath(__file__))
 
-    # datapath = dirpath + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/dyn_stat_discrepancy/data/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
 
-    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # # datapath = dirpath + '/data_qdynamics' + '/cart/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    # P = .07926654595212022369
-    P = 1.8 * pf_dynamic_cart.nu(gBB)
-    aIBi = -2
-    cParams = [P, aIBi]
+    # # P = .07926654595212022369
+    # P = 1.8 * pf_dynamic_cart.nu(gBB)
+    # aIBi = -2
+    # cParams = [P, aIBi]
 
-    innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}/aBBx3'.format(P, aIBi)
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
-    time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
-        pickle.dump(time_grids, f)
-    with open(innerdatapath + '/metrics_data.pickle', 'wb') as f:
-        pickle.dump(metrics_data, f)
-    with open(innerdatapath + '/pos_xyz_data.pickle', 'wb') as f:
-        pickle.dump(pos_xyz_data, f)
-    with open(innerdatapath + '/mom_xyz_data.pickle', 'wb') as f:
-        pickle.dump(mom_xyz_data, f)
-    with open(innerdatapath + '/cont_xyz_data.pickle', 'wb') as f:
-        pickle.dump(cont_xyz_data, f)
-    with open(innerdatapath + '/mom_mag_data.pickle', 'wb') as f:
-        pickle.dump(mom_mag_data, f)
+    # with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
+    #     pickle.dump(time_grids, f)
+    # with open(innerdatapath + '/metrics_data.pickle', 'wb') as f:
+    #     pickle.dump(metrics_data, f)
+    # with open(innerdatapath + '/pos_xyz_data.pickle', 'wb') as f:
+    #     pickle.dump(pos_xyz_data, f)
+    # with open(innerdatapath + '/mom_xyz_data.pickle', 'wb') as f:
+    #     pickle.dump(mom_xyz_data, f)
+    # with open(innerdatapath + '/cont_xyz_data.pickle', 'wb') as f:
+    #     pickle.dump(cont_xyz_data, f)
+    # with open(innerdatapath + '/mom_mag_data.pickle', 'wb') as f:
+    #     pickle.dump(mom_mag_data, f)
 
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
 
     # # TEMP DATA CHECK
 
@@ -142,3 +139,65 @@ if __name__ == "__main__":
     # # ax[1].set_yscale('log')
 
     # plt.show()
+
+# # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+
+    # cParams_List = []
+    # aIBi_Vals = np.array([-5, -2, -0.1])
+    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxg, kyg, kzg, dVk, aIBi_Vals, mI, mB, n0, gBB)
+    # Pcrit_max = np.max(Pcrit_Vals)
+    # Pcrit_submax = np.max(Pcrit_Vals[Pcrit_Vals <= 10])
+    # P_Vals_max = np.concatenate((np.linspace(0.01, Pcrit_submax, 50), np.linspace(Pcrit_submax, .95 * Pcrit_max, 10)))
+
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     Pcrit = Pcrit_Vals[ind]
+    #     P_Vals = P_Vals_max[P_Vals_max <= Pcrit]
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
+
+    cParams_List = []
+    aIBi_Vals = np.array([-5.0, -2.0])
+    P_Vals = np.array([0.1, 1.0])
+    for ind, aIBi in enumerate(aIBi_Vals):
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount != len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+    else:
+        cParams = cParams_List[taskID]
+        [P, aIBi] = cParams
+        innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
+        if os.path.isdir(innerdatapath) is False:
+            os.mkdir(innerdatapath)
+
+        time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+
+        with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
+            pickle.dump(time_grids, f)
+        with open(innerdatapath + '/metrics_data.pickle', 'wb') as f:
+            pickle.dump(metrics_data, f)
+        with open(innerdatapath + '/pos_xyz_data.pickle', 'wb') as f:
+            pickle.dump(pos_xyz_data, f)
+        with open(innerdatapath + '/mom_xyz_data.pickle', 'wb') as f:
+            pickle.dump(mom_xyz_data, f)
+        with open(innerdatapath + '/cont_xyz_data.pickle', 'wb') as f:
+            pickle.dump(cont_xyz_data, f)
+        with open(innerdatapath + '/mom_mag_data.pickle', 'wb') as f:
+            pickle.dump(mom_mag_data, f)
+
+    end = timer()
+    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
