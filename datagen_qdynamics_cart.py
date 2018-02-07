@@ -56,8 +56,8 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     # ---- SET OUTPUT DATA FOLDER ----
-
-    dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
+    dirpath = '/home/kis/repocode/genPolaron'
+    # dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
     datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # dirpath = os.path.dirname(os.path.realpath(__file__))
