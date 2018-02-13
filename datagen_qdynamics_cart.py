@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 3
+    tMax = 99
     dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -60,8 +60,10 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
     # dirpath = '/home/kis/repocode/genPolaron'
-    dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
-    datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
+    # datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+
+    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # dirpath = os.path.dirname(os.path.realpath(__file__))
 
