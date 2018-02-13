@@ -45,6 +45,7 @@ class CoherentState:
 
     # EVOLUTION
 
+    @profile
     def evolve(self, dt, hamiltonian):
 
         amp_phase0 = copy(self.amplitude_phase)

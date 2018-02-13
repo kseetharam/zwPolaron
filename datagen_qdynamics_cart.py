@@ -15,6 +15,9 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+
     (Lx, Ly, Lz) = (20, 20, 20)
     (dx, dy, dz) = (0.5, 0.5, 0.5)
 
@@ -30,8 +33,8 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 1
-    dt = 0.1
+    tMax = 3
+    dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -56,8 +59,8 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     # ---- SET OUTPUT DATA FOLDER ----
-    dirpath = '/home/kis/repocode/genPolaron'
-    # dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
+    # dirpath = '/home/kis/repocode/genPolaron'
+    dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
     datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # dirpath = os.path.dirname(os.path.realpath(__file__))

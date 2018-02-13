@@ -46,6 +46,7 @@ class PolaronHamiltonian:
         # self.Wkikpi_grid = np.outer(self.Wki_grid, self.Wki_grid)
         # self.k0mask_mat = np.outer(self.k0mask, self.k0mask)
 
+    # @profile
     def update(self, t, amplitude_phase, coherent_state):
         # here on can write any method induding Runge-Kutta 4
         amplitude = amplitude_phase[0:-1]
