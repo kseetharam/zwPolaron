@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    @profile
+    # @profile
     def pickleoutput(time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data):
         with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
             pickle.dump(time_grids, f)

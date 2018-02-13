@@ -120,7 +120,7 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
     return pos_slices, mom_slices, cont_slices, pos_integration, mom_integration
 
 
-@profile
+# @profile
 def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
     nPB = phonon_mom_dist
     # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
@@ -174,7 +174,7 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
 
 
 # ---- DATA GENERATION ----
-@profile
+# @profile
 def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
