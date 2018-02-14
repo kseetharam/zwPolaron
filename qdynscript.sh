@@ -2,7 +2,7 @@
 #SBATCH -J quench
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -t 1-00:00
+#SBATCH -t 2-00:00
 #SBATCH -p serial_requeue
 #SBATCH --mem=2000
 #SBATCH --mail-type=ALL
@@ -13,4 +13,4 @@
 
 module load Anaconda3/5.0.1-fasrc01
 source activate anaclone
-python datagen_qdynamics_cart.py
+python xdatagen_qdynamics_cart.py
