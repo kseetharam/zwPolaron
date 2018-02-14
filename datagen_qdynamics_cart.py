@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 99
+    tMax = 10
     dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -60,10 +60,10 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
     # dirpath = '/home/kis/repocode/genPolaron'
-    # dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
-    # datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
+    datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # dirpath = os.path.dirname(os.path.realpath(__file__))
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    # @profile
+    @profile
     def pickleoutput(time_grids, metrics_data, pos_xyz_data, mom_xyz_data, cont_xyz_data, mom_mag_data):
         with open(innerdatapath + '/time_grids.pickle', 'wb') as f:
             pickle.dump(time_grids, f)
