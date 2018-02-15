@@ -12,8 +12,12 @@ if __name__ == "__main__":
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
     # gParams
-    (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (0.5, 0.5, 0.5)
+
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.5, 0.5, 0.5)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
@@ -33,5 +37,5 @@ if __name__ == "__main__":
     S_mag = np.sqrt(ds['Real_DynOv']**2 + ds['Imag_DynOv']**2)
     # S_mag.plot()
     # ds['nPI_mag'].isel(t=-1).plot()
-    ds['nPI_xz_slice'].isel(t=3).plot()
+    ds['nPI_xz_slice'].isel(t=1).plot()
     plt.show()
