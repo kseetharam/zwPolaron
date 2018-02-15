@@ -216,7 +216,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # Choose coarsegrain step size
     maxfac = 1
-    largest_coarsegrain = 2
+    largest_coarsegrain = 1
     for f in range(1, largest_coarsegrain + 1, 1):
         if tgrid.size % f == 0:
             maxfac = f
