@@ -57,11 +57,11 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     # ---- SET OUTPUT DATA FOLDER ----
-    # dirpath = '/home/kis/repocode/genPolaron'
+    dirpath = '/home/kis/repocode/genPolaron'
     # dirpath = '/media/kis/Storage/Dropbox/VariationalResearch/genPolaron'
-    # datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = dirpath + '/mem_test' + '/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # dirpath = os.path.dirname(os.path.realpath(__file__))
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     dyncart_ds = xpf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    # @profile
+    @profile
     def savedat(ds):
         ds.to_netcdf(datapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
