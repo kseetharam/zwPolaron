@@ -33,9 +33,14 @@ if __name__ == "__main__":
 
     ds = ds_list[0]; P = P_list[0]; aIBi = aIBi_list[0]; mI = mI_list[0]
 
-    # ds['NB'].plot()
+    print('P: {0}'.format(P))
+    print('aIBi: {0}'.format(aIBi))
+    print('nu: {0}'.format(ds_list[0].attrs['nu']))
+
     S_mag = np.sqrt(ds['Real_DynOv']**2 + ds['Imag_DynOv']**2)
+
+    # ds['NB'].plot()
     # S_mag.plot()
     # ds['nPI_mag'].isel(t=-1).plot()
-    ds['nPI_xz_slice'].isel(t=0).plot()
+    ds['nPI_xz_slice'].isel(t=-1).plot()
     plt.show()
