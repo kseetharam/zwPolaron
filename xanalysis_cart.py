@@ -37,5 +37,5 @@ if __name__ == "__main__":
     S_mag = np.sqrt(ds['Real_DynOv']**2 + ds['Imag_DynOv']**2)
     # S_mag.plot()
     # ds['nPI_mag'].isel(t=-1).plot()
-    ds['nPI_xz_slice'].isel(t=1).plot()
+    ds['nPI_xz_slice'].isel(t=0).plot()
     plt.show()
