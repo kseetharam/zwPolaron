@@ -1,6 +1,6 @@
 import numpy as np
 import pf_dynamic_sph as pfs
-import xpf_dynamic_cart as pfc
+import pf_dynamic_cart as pfc
 
 
 class PolaronHamiltonian:

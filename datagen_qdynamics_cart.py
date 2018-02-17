@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 99
+    tMax = 0.4
     dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -56,9 +56,9 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     # ---- SET OUTPUT DATA FOLDER ----
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     # runstart = timer()
 
-    # P = 1.8 * pf_dynamic_cart.nu(gBB)
+    # P = 2.67
     # aIBi = -2
     # cParams = [P, aIBi]
 
