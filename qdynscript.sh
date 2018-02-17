@@ -2,9 +2,9 @@
 #SBATCH -J quench
 #SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -t 3-00:00
+#SBATCH -t 2-00:00
 #SBATCH -p shared
-#SBATCH --mem=10000
+#SBATCH --mem=6500
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append

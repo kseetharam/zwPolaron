@@ -19,9 +19,10 @@ if __name__ == "__main__":
     # (Lx, Ly, Lz) = (20, 20, 20)
     # (dx, dy, dz) = (0.5, 0.5, 0.5)
 
-    NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     ds_list = []; P_list = []; aIBi_list = []; mI_list = []
     for ind, filename in enumerate(os.listdir(datapath)):
