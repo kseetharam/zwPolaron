@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 0.4
+    tMax = 99
     dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
