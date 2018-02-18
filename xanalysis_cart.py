@@ -32,7 +32,8 @@ if __name__ == "__main__":
         aIBi_list.append(ds.attrs['aIBi'])
         mI_list.append(ds.attrs['mI'])
 
-    ds = ds_list[0]; P = P_list[0]; aIBi = aIBi_list[0]; mI = mI_list[0]
+    ds_ind = -1
+    ds = ds_list[ds_ind]; P = P_list[ds_ind]; aIBi = aIBi_list[ds_ind]; mI = mI_list[ds_ind]
 
     print('P: {0}'.format(P))
     print('aIBi: {0}'.format(aIBi))
