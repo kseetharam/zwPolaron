@@ -108,8 +108,46 @@ if __name__ == "__main__":
         P_text.set_text('P: {:.2f}'.format(PVec[i]))
 
     anim1 = FuncAnimation(fig1, animate1, interval=1000, frames=PVec.size, blit=False)
-    anim1.save(figdatapath + '/nPI_xz_aIBi_{:.2f}.gif'.format(aIBi), writer='imagemagick')
+    # anim1.save(figdatapath + '/nPI_xz_aIBi_{:.2f}.gif'.format(aIBi), writer='imagemagick')
     # plt.show()
+
+    # # nxyz xz slice
+
+    # aIBi = -2
+    # qds_am2 = qds['nxyz_xz_slice'].sel(aIBi=aIBi, t=99)
+
+    # fig1, ax1 = plt.subplots()
+
+    # PVec = qds_am2.coords['P'].values
+    # vmin = 1
+    # vmax = 0
+    # for ind, Pv in enumerate(PVec):
+    #     vec = qds_am2.sel(P=Pv).values
+    #     if np.min(vec) < vmin:
+    #         vmin = np.min(vec)
+    #     if np.max(vec) > vmax:
+    #         vmax = np.max(vec)
+
+    # quad = qds_am2.isel(P=0)[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+    # P_text = ax1.text(0.85, 0.9, 'P: {:.2f}'.format(PVec[0]), transform=ax1.transAxes, color='r')
+
+    # ax1.set_title('Impurity Longitudinal Position Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f})'.format(aIBi))
+    # ax1.set_ylabel(r'$x$')
+    # ax1.set_xlabel(r'$z$')
+    # # ax1.grid(True, linewidth=0.5)
+    # ax1.set_xlim([-2, 2])
+    # ax1.set_ylim([-2, 2])
+    # fig1.colorbar(quad, ax=ax1, extend='both')
+
+    # def animate1(i):
+    #     qds_am2.isel(P=i)[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+    #     ax1.set_xlim([-2, 2])
+    #     ax1.set_ylim([-2, 2])
+    #     P_text.set_text('P: {:.2f}'.format(PVec[i]))
+
+    # anim1 = FuncAnimation(fig1, animate1, interval=1000, frames=PVec.size, blit=False)
+    # anim1.save(figdatapath + '/nxyz_xz_aIBi_{:.2f}.gif'.format(aIBi), writer='imagemagick')
+    # # plt.show()
 
     # # MISC
 
