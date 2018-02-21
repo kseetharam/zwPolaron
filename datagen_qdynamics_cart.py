@@ -72,7 +72,7 @@ if __name__ == "__main__":
     cParams = [P, aIBi]
 
     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # dyncart_ds.to_netcdf(datapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dyncart_ds.to_netcdf(datapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
