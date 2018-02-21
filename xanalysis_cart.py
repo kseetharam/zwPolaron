@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
     # for ind, filename in enumerate(os.listdir(datapath)):
-    #     if filename == 'quench_Dataset.nc' or filename == 'figures':
+    #     if filename == 'quench_Dataset.nc' or filename == 'figures' or filename == sph:
     #         continue
     #     print(filename)
     #     ds = xr.open_dataset(datapath + '/' + filename)

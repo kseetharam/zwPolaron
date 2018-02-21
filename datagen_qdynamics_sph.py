@@ -4,9 +4,6 @@ import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
 
-import matplotlib
-import matplotlib.pyplot as plt
-
 
 if __name__ == "__main__":
 
@@ -14,13 +11,13 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (120, 120, 120)
-    (dx, dy, dz) = (4, 4, 4)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
 
-    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
     Ntheta = 50
     Nk = np.ceil(NGridPoints_desired / Ntheta)
@@ -40,8 +37,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 99
-    dt = 1
+    tMax = 1
+    dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -62,70 +59,62 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = os.path.dirname(os.path.realpath(__file__)) + '/dyn_stat_discrepancy/data/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    innerdatapath = datapath + '/sph'
 
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/realtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/realtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/imagtime' + '/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = os.path.dirname(os.path.realpath(__file__)) + '/data_qdynamics' + '/sph/frolich/imagtime' + '/time_NGridPoints_{:.2E}'.format(NGridPoints)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
     # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
 
-    P = 0.1 * pf_dynamic_sph.nu(gBB)
+    P = 1.0
     aIBi = -2
     cParams = [P, aIBi]
 
-    innerdatapath = datapath + '/P_{:.3f}_aIBi_{:.2f}'.format(P, aIBi)
-    # innerdatapath = datapath + '/{0}'.format(tMax)
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
-
-    time_grid, metrics_data = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
 
-    # TEMP DATA CHECK
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec] = metrics_data
-    print(k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB)
+    # cParams_List = []
+    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
+    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
 
-    ob_data = np.concatenate((tgrid[:, np.newaxis], np.abs(DynOv_tVec)[:, np.newaxis], NB_tVec[:, np.newaxis], PB_tVec[:, np.newaxis], Phase_tVec[:, np.newaxis]), axis=1)
-    np.savetxt(innerdatapath + '/ob.dat', ob_data)
+    # # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+    # # print(Pcrit_Vals)
 
-    ob_string = 't, |S(t)|, Nph(t), PB(t), Phi(t)'
-    with open(innerdatapath + '/ob_string.txt', 'w') as f:
-        f.write(ob_string)
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    # staticdatapath = os.path.dirname(os.path.realpath(__file__)) + '/data_static/sph/NGridPoints_{:.2E}/P_{:.3f}_aIBi_{:.2f}/metrics.dat'.format(NGridPoints, P, aIBi)
-    # NGridPoints_s, k_max_s, dk_s, P_s, aIBi_s, mI_s, mB_s, n0_s, gBB_s, nu_const_s, gIB_s, Pcrit_s, aSi_s, DP_s, PB_Val_s, En_s, eMass_s, Nph_s, Z_factor_s = np.loadtxt(staticdatapath, unpack=True)
+    # runstart = timer()
 
-    # # print('|S(t) - Z|: {0}'.format(np.abs(np.abs(DynOv_tVec[-1]) - Z_factor_s) / Z_factor_s))
-    # # print('|N(t)-2*Npol|: {0}'.format(np.abs(NB_tVec[-1] - 2 * Nph_s) / (2 * Nph_s)))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # print('|S(t)|: {0}'.format(np.abs(DynOv_tVec[-1])**2))
-    # print('N(t): {0}'.format(2 * NB_tVec[-1]))
+    # if(taskCount != len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
 
-    # fig, ax = plt.subplots(nrows=1, ncols=2)
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # ax[0].plot(time_grid, np.abs(DynOv_tVec)**2)
-    # ax[0].plot(time_grid, Z_factor_s * np.ones(len(time_grid)))
-    # # ax[0].set_xscale('log')
-    # # ax[0].set_yscale('log')
-
-    # ax[1].plot(time_grid, 2 * NB_tVec)
-    # ax[1].plot(time_grid, 2 * Nph_s * np.ones(len(time_grid)))
-    # # ax[1].set_xscale('log')
-    # # ax[1].set_yscale('log')
-
-    # plt.show()
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

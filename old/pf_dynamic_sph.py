@@ -1,6 +1,4 @@
 import numpy as np
-import pandas as pd
-import xarray as xr
 from scipy.integrate import quad
 from timeit import default_timer as timer
 import os
@@ -120,18 +118,24 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
 
+    # start the coherent state and a different initial condition
+
+    # initpath = os.path.dirname(os.path.realpath(__file__)) + '/initial_amp'
+    # initial_amplitude_phase = np.zeros(kgrid.size() + 1, dtype=complex)
+    # initial_amplitude_phase = np.load(initpath + '/imagfixed.npy')
+    # cs.amplitude_phase = initial_amplitude_phase
+
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
     # Time evolution
 
-    # Initialize observable Data Arrays
-    PB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    NB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ReDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ImDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    # Initialize observable data vectors
+    PB_tVec = np.zeros(tgrid.size, dtype=float)
+    NB_tVec = np.zeros(tgrid.size, dtype=float)
+    DynOv_tVec = np.zeros(tgrid.size, dtype=complex)
+    Phase_tVec = np.zeros(tgrid.size, dtype=float)
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -142,23 +146,21 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
             dt = t - tgrid[ind - 1]
             cs.evolve(dt, ham)
 
-        PB_da[ind] = cs.get_PhononMomentum()
-        NB_da[ind] = cs.get_PhononNumber()
-        DynOv = cs.get_DynOverlap()
-        ReDynOv_da[ind] = np.real(DynOv)
-        ImDynOv_da[ind] = np.imag(DynOv)
-        Phase_da[ind] = cs.get_Phase()
+        PB_tVec[ind] = cs.get_PhononMomentum()
+        NB_tVec[ind] = cs.get_PhononNumber()
+        DynOv_tVec[ind] = cs.get_DynOverlap()
+        Phase_tVec[ind] = cs.get_Phase()
+
+        if ind == 28:
+            print('t: {0}'.format(t))
+            # np.save(initpath + '/imagfixed.npy', cs.amplitude_phase)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
         start = timer()
 
-    # Create Data Set
+    # Save Data
 
-    data_dict = {'PB': PB_da, 'NB': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da}
-    coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
+    metrics_data = [NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, PB_tVec, NB_tVec, DynOv_tVec, Phase_tVec]
 
-    dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-
-    return dynsph_ds
+    return tgrid, metrics_data
