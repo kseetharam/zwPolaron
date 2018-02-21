@@ -60,19 +60,24 @@ if __name__ == "__main__":
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
+    innerdatapath = datapath + '/cart'
+
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
+
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
 
     P = 0.1
-    aIBi = -0.1
+    aIBi = -2
     cParams = [P, aIBi]
 
     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    dyncart_ds.to_netcdf(datapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
@@ -108,7 +113,7 @@ if __name__ == "__main__":
     #     [P, aIBi] = cParams
 
     # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # dyncart_ds.to_netcdf(datapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

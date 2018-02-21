@@ -37,7 +37,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1
+    tMax = 99
     dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -63,39 +63,55 @@ if __name__ == "__main__":
     datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
-    innerdatapath = datapath + '/sph'
+    innerdatapath = datapath + '/spherical'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
-    # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
+
+    # runstart = timer()
+
+    # P = 0.1
+    # aIBi = -5
+    # cParams = [P, aIBi]
+
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
+
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+
+    cParams_List = []
+    aIBi_Vals = np.array([-0.5])
+    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
+    P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    for ind, aIBi in enumerate(aIBi_Vals):
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
+
+    # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+    # print(Pcrit_Vals)
+
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
 
-    P = 1.0
-    aIBi = -2
-    cParams = [P, aIBi]
-
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
+        [P, aIBi] = cParams
+        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+        dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        loopend = timer()
+        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
     end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
-
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
-
-    # cParams_List = []
-    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     for P in P_Vals:
-    #         cParams_List.append([P, aIBi])
-
-    # # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-    # # print(Pcrit_Vals)
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
