@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     innerdatapath = datapath + '/spherical'
     figdatapath = datapath + '/figures'
 
@@ -59,6 +59,8 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_sph.nc')
+    qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
     # qds['NB'].isel(t=-1).sel(P=0.1).plot()
-    qds['NB'].sel(P=3).sel(aIBi=-5).plot()
+    # qds['NB'].isel(t=-1).sel(aIBi=-5).plot()
+    qds_St.isel(t=-1).sel(aIBi=-5).plot()
     plt.show()
