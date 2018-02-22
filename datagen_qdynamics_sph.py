@@ -88,9 +88,11 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     cParams_List = []
-    aIBi_Vals = np.array([-0.5])
-    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    # aIBi_Vals = np.array([-1, -0.8])
+    aIBi_Vals = np.array([-5.0, -2.0, -0.5])
+    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    P_Vals = np.linspace(0.1, 3.0, 20)
+
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
             cParams_List.append([P, aIBi])
