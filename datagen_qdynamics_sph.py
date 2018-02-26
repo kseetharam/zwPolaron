@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     innerdatapath = datapath + '/spherical'
@@ -89,7 +89,8 @@ if __name__ == "__main__":
 
     cParams_List = []
     # aIBi_Vals = np.array([-1, -0.8])
-    aIBi_Vals = np.array([-5.0, -2.0, -0.5])
+    # aIBi_Vals = np.array([-5.0, -2.0, -0.5])
+    aIBi_Vals = np.array([-10.0])
     # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
     P_Vals = np.linspace(0.1, 3.0, 20)
 
