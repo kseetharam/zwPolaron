@@ -1,6 +1,4 @@
 import numpy as np
-import pandas as pd
-import xarray as xr
 from scipy import interpolate
 
 err = 1e-5
@@ -207,11 +205,11 @@ def static_DataGeneration(cParams, gParams, sParams):
     Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
     Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
 
-    # Create Data Set
+    # Collate data
 
-    data_dict = {'PB': PB_Val, 'NB': Nph, 'Z_factor': Z_factor, 'DP': DP, 'Energy': En, 'effMass': eMass}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'dk': dk, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Pcrit': Pcrit}
+    metrics_string = 'NGridPoints, |k|_max, dk, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor'
+    metrics_data = np.array([NGridPoints, k_max, dk, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Z_factor])
 
-    stsph_ds = xr.Dataset(data_dict, attrs=attrs_dict)
+    # test_grid(kgrid, mB, n0, gBB)
 
-    return stsph_ds
+    return metrics_string, metrics_data
