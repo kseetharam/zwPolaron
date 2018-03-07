@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    innerdatapath = datapath + '/spherical/steadystate'
+    innerdatapath = datapath + '/steadystate_spherical'
 
     # # # Concatenate Individual Datasets
 

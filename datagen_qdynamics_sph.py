@@ -11,11 +11,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-
     (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
-    innerdatapath = datapath + '/spherical'
+    innerdatapath = datapath + '/spherical_fine'
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -91,10 +91,11 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     cParams_List = []
+    aIBi_Vals = np.array([-5.0, -2.0])
     # aIBi_Vals = np.array([-1, -0.8])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
     # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-    P_Vals = np.linspace(0.1, 5.0, 50)
+    P_Vals = np.linspace(0.1, 5.0, 100)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
