@@ -15,11 +15,11 @@ if __name__ == "__main__":
 
     # gParams
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-
     (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
@@ -56,16 +56,16 @@ if __name__ == "__main__":
     #     aIBi_ds_list.append(ds_temp)
 
     # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
+    # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_sph.nc')
 
     # # Analysis of Total Dataset
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_sph.nc')
-    print(qds.attrs)
+    # print(qds.attrs)
 
-    # qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
+    qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
     # qds['NB'].isel(t=-1).sel(aIBi=-2).plot()
-    # qds['NB'].isel(t=-1).sel(aIBi=-5).plot()
+    qds['NB'].isel(P=40).sel(aIBi=-2).isel(t=np.arange(-300, 0)).plot()
     # qds_St.isel(t=-1).sel(aIBi=-5).plot()
-    # plt.show()
+    plt.show()
