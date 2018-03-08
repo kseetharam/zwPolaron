@@ -64,8 +64,16 @@ if __name__ == "__main__":
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_sph.nc')
     # print(qds.attrs)
 
+    fig, ax = plt.subplots()
     qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
-    # qds['NB'].isel(t=-1).sel(aIBi=-2).plot()
-    qds['NB'].isel(P=40).sel(aIBi=-2).isel(t=np.arange(-300, 0)).plot()
-    # qds_St.isel(t=-1).sel(aIBi=-5).plot()
+    qds_Pimp = qds.coords['P'] - qds['PB']
+
+    # qds['NB'].isel(t=-1).sel(aIBi=-2).plot(ax=ax)
+    # qds['NB'].isel(P=40).sel(aIBi=-2).isel(t=np.arange(-300, 0)).plot(ax=ax)
+    # qds_St.isel(t=-1).sel(aIBi=-5).plot(ax=ax)
+    qds_Pimp.isel(P=45).sel(aIBi=-2).rolling(t=5).mean().isel(t=np.arange(-495, 0)).plot(ax=ax)
+    # qds['PB'].isel(P=5).sel(aIBi=-10).rolling(t=5).mean().isel(t=np.arange(-495, 0)).plot(ax=ax)
+
+    ax.set_xscale('linear'); ax.set_yscale('linear')
+
     plt.show()

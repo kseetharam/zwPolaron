@@ -151,19 +151,19 @@ if __name__ == "__main__":
     # # anim1.save(figdatapath + '/nPI_xz_aIBi_{:.2f}.gif'.format(aIBi), writer='imagemagick')
     # plt.show()
 
-    # nxyz xz slice
+    # # nxyz xz slice
 
-    aIBi = -2
-    qds_am2 = qds['nxyz_xz_slice'].sel(aIBi=aIBi, t=99)
+    # aIBi = -2
+    # qds_am2 = qds['nxyz_xz_slice'].sel(aIBi=aIBi, t=99)
 
-    fig1, ax1 = plt.subplots()
-    # np.log(qds['nxyz_xz_slice']).sel(aIBi=-2, P=3, t=99).plot(ax=ax1, vmin=-10, vmax=0)
-    # ax1.set_xlim([-10, 10])
-    # ax1.set_ylim([-10, 10])
+    # fig1, ax1 = plt.subplots()
+    # # np.log(qds['nxyz_xz_slice']).sel(aIBi=-2, P=3, t=99).plot(ax=ax1, vmin=-10, vmax=0)
+    # # ax1.set_xlim([-10, 10])
+    # # ax1.set_ylim([-10, 10])
 
-    qds['nxyz_x_slice'].sel(aIBi=-5, P=3, t=99).plot()
+    # qds['nxyz_x_slice'].sel(aIBi=-5, P=3, t=99).plot()
 
-    plt.show()
+    # plt.show()
 
     # fig1, ax1 = plt.subplots()
 
@@ -216,3 +216,52 @@ if __name__ == "__main__":
     # ds_tot['nPI_xz_slice'].isel(P=0, t=-1).dropna('PI_z').plot()
     # # ds_tot['nPI_xy_slice'].sel(P=3, t=99).plot()
     # plt.show()
+
+    # # SUBSONIC TO SUPERSONIC
+
+    nu = 0.792665459521
+
+    # # aIBi=-5
+    # fig, axes = plt.subplots(nrows=2, ncols=2)
+    # qds5 = qds.sel(aIBi=-5)
+    # qds5['nPI_mag'].sel(P=0.1, t=99).dropna('PI_mag').plot(ax=axes[0, 0])
+    # qds5['nPI_mag'].sel(P=1, t=99).dropna('PI_mag').plot(ax=axes[0, 1])
+    # qds5['nPI_mag'].sel(P=2, t=99).dropna('PI_mag').plot(ax=axes[1, 0])
+    # qds5['nPI_mag'].sel(P=3, t=99).dropna('PI_mag').plot(ax=axes[1, 1])
+
+    # PIm = qds5.coords['PI_mag'].values
+    # axes[0, 0].plot(0.1 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=0.1, t=99).values, len(PIm)), 'g--')
+    # axes[0, 1].plot(1 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=1, t=99).values, len(PIm)), 'g--')
+    # axes[1, 0].plot(2 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=2, t=99).values, len(PIm)), 'g--')
+    # axes[1, 1].plot(3 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=3, t=99).values, len(PIm)), 'g--')
+
+    # axes[0, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    # axes[0, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    # axes[1, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    # axes[1, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+
+    # axes[0, 0].set_ylim([0, 1]); axes[0, 1].set_ylim([0, 1]); axes[1, 0].set_ylim([0, 1]); axes[1, 1].set_ylim([0, 1])
+    # plt.show()
+
+    # aIBi=-2
+
+    fig, axes = plt.subplots(nrows=2, ncols=2)
+    qds2 = qds.sel(aIBi=-2)
+    qds2['nPI_mag'].sel(P=0.1, t=99).dropna('PI_mag').plot(ax=axes[0, 0])
+    qds2['nPI_mag'].sel(P=1, t=99).dropna('PI_mag').plot(ax=axes[0, 1])
+    qds2['nPI_mag'].sel(P=2, t=99).dropna('PI_mag').plot(ax=axes[1, 0])
+    qds2['nPI_mag'].sel(P=3, t=99).dropna('PI_mag').plot(ax=axes[1, 1])
+
+    PIm = qds2.coords['PI_mag'].values
+    axes[0, 0].plot(0.1 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=0.1, t=99).values, len(PIm)), 'g--')
+    axes[0, 1].plot(1 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=1, t=99).values, len(PIm)), 'g--')
+    axes[1, 0].plot(2 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=2, t=99).values, len(PIm)), 'g--')
+    axes[1, 1].plot(3 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=3, t=99).values, len(PIm)), 'g--')
+
+    axes[0, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    axes[0, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    axes[1, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+    axes[1, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+
+    axes[0, 0].set_ylim([0, 1]); axes[0, 1].set_ylim([0, 1]); axes[1, 0].set_ylim([0, 1]); axes[1, 1].set_ylim([0, 1])
+    plt.show()
