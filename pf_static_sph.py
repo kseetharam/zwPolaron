@@ -209,8 +209,8 @@ def static_DataGeneration(cParams, gParams, sParams):
 
     # Create Data Set
 
-    data_dict = {'PB': PB_Val, 'NB': Nph, 'Z_factor': Z_factor, 'DP': DP, 'Energy': En, 'effMass': eMass}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'dk': dk, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Pcrit': Pcrit}
+    data_dict = {'PB': PB_Val, 'NB': Nph, 'Z_factor': Z_factor, 'DP': DP, 'Energy': En, 'effMass': eMass, 'Pcrit': Pcrit}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'dk': dk, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
 
     stsph_ds = xr.Dataset(data_dict, attrs=attrs_dict)
 
