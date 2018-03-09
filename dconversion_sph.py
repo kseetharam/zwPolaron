@@ -22,8 +22,8 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     aIBi = -2
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/spherical_fine'.format(NGridPoints_cart)
-    outputdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/newdata/NGridPoints_{:.2E}/dynamics_spherical_fine/aIBi_{:.2f}'.format(NGridPoints_cart, aIBi)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/spherical'.format(NGridPoints_cart)
+    outputdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/newdata/NGridPoints_{:.2E}/dynamics_spherical/aIBi_{:.2f}'.format(NGridPoints_cart, aIBi)
 
     # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/spherical'.format(NGridPoints_cart)
     # outputdatapath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/newdata/NGridPoints_{:.2E}/dynamics_spherical/aIBi_{:.2f}'.format(NGridPoints_cart, aIBi)

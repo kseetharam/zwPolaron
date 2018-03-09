@@ -36,12 +36,11 @@ if __name__ == "__main__":
     #     if filename == 'quench_Dataset_cart.nc':
     #         continue
     #     print(filename)
-    #     with xr.open_dataset(innerdatapath + '/' + filename) as dsf:
-    #         ds = dsf.compute()
-    #         ds_list.append(ds)
-    #         P_list.append(ds.attrs['P'])
-    #         aIBi_list.append(ds.attrs['aIBi'])
-    #         mI_list.append(ds.attrs['mI'])
+    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
+    #     ds_list.append(ds)
+    #     P_list.append(ds.attrs['P'])
+    #     aIBi_list.append(ds.attrs['aIBi'])
+    #     mI_list.append(ds.attrs['mI'])
 
     # s = sorted(zip(aIBi_list, P_list, ds_list))
     # g = itertools.groupby(s, key=lambda x: x[0])
@@ -63,7 +62,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
     # qds['nPI_mag'].sel(aIBi=-2, P=3, t=99).dropna('PI_mag').plot()
     # qds['nPI_xz_slice'].sel(aIBi=-2, P=3, t=99).dropna('PI_z').plot()
     # plt.show()
@@ -220,49 +219,38 @@ if __name__ == "__main__":
 
     # # SUBSONIC TO SUPERSONIC
 
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
+
     nu = 0.792665459521
 
-    # # aIBi=-5
-    # fig, axes = plt.subplots(nrows=2, ncols=2)
-    # qds5 = qds.sel(aIBi=-5)
-    # qds5['nPI_mag'].sel(P=0.1, t=99).dropna('PI_mag').plot(ax=axes[0, 0])
-    # qds5['nPI_mag'].sel(P=1, t=99).dropna('PI_mag').plot(ax=axes[0, 1])
-    # qds5['nPI_mag'].sel(P=2, t=99).dropna('PI_mag').plot(ax=axes[1, 0])
-    # qds5['nPI_mag'].sel(P=3, t=99).dropna('PI_mag').plot(ax=axes[1, 1])
+    aIBi = -2
+    fig, axes = plt.subplots(nrows=2, ncols=3)
+    # PList = [0.8, 1.2, 1.5, 1.8, 2.1, 2.4]
+    PList = [0.1, 0.8, 1.2, 1.5, 1.8, 2.4]
+    qdsA = qds.sel(aIBi=aIBi)
+    PIm = qdsA.coords['PI_mag'].values
 
-    # PIm = qds5.coords['PI_mag'].values
-    # axes[0, 0].plot(0.1 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=0.1, t=99).values, len(PIm)), 'g--')
-    # axes[0, 1].plot(1 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=1, t=99).values, len(PIm)), 'g--')
-    # axes[1, 0].plot(2 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=2, t=99).values, len(PIm)), 'g--')
-    # axes[1, 1].plot(3 * np.ones(len(PIm)), np.linspace(0, qds5['mom_deltapeak'].sel(P=3, t=99).values, len(PIm)), 'g--')
+    for ind, P in enumerate(PList):
+        if ind == 0:
+            ax = axes[0, 0]
+        elif ind == 1:
+            ax = axes[0, 1]
+        elif ind == 2:
+            ax = axes[0, 2]
+        elif ind == 3:
+            ax = axes[1, 0]
+        elif ind == 4:
+            ax = axes[1, 1]
+        else:
+            ax = axes[1, 2]
 
-    # axes[0, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    # axes[0, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    # axes[1, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    # axes[1, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
+        qdsA['nPI_mag'].sel(P=P, t=99).dropna('PI_mag').plot(ax=ax, label='')
+        ax.plot(P * np.ones(len(PIm)), np.linspace(0, qdsA['mom_deltapeak'].sel(P=P, t=99).values, len(PIm)), 'g--', label=r'$\delta$-peak')
+        ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+        ax.set_ylim([0, 1])
+        ax.set_title('$P=${:.2f}'.format(P))
+        ax.set_xlabel(r'$|P_{I}|$')
+        ax.set_ylabel(r'$n_{|P_{I}|}$')
+        ax.legend()
 
-    # axes[0, 0].set_ylim([0, 1]); axes[0, 1].set_ylim([0, 1]); axes[1, 0].set_ylim([0, 1]); axes[1, 1].set_ylim([0, 1])
-    # plt.show()
-
-    # aIBi=-2
-
-    fig, axes = plt.subplots(nrows=2, ncols=2)
-    qds2 = qds.sel(aIBi=-2)
-    qds2['nPI_mag'].sel(P=0.1, t=99).dropna('PI_mag').plot(ax=axes[0, 0])
-    qds2['nPI_mag'].sel(P=1, t=99).dropna('PI_mag').plot(ax=axes[0, 1])
-    qds2['nPI_mag'].sel(P=2, t=99).dropna('PI_mag').plot(ax=axes[1, 0])
-    qds2['nPI_mag'].sel(P=3, t=99).dropna('PI_mag').plot(ax=axes[1, 1])
-
-    PIm = qds2.coords['PI_mag'].values
-    axes[0, 0].plot(0.1 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=0.1, t=99).values, len(PIm)), 'g--')
-    axes[0, 1].plot(1 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=1, t=99).values, len(PIm)), 'g--')
-    axes[1, 0].plot(2 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=2, t=99).values, len(PIm)), 'g--')
-    axes[1, 1].plot(3 * np.ones(len(PIm)), np.linspace(0, qds2['mom_deltapeak'].sel(P=3, t=99).values, len(PIm)), 'g--')
-
-    axes[0, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    axes[0, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    axes[1, 0].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-    axes[1, 1].plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:')
-
-    axes[0, 0].set_ylim([0, 1]); axes[0, 1].set_ylim([0, 1]); axes[1, 0].set_ylim([0, 1]); axes[1, 1].set_ylim([0, 1])
     plt.show()
