@@ -65,19 +65,19 @@ if __name__ == "__main__":
     nu = 0.792665459521
 
     P = 0.8
-    aIBi = -2
+    aIBi = -10
     PIm = qds.coords['PI_mag'].values
 
-    # qds['nPI_mag'].sel(P=P, aIBi=aIBi).dropna('PI_mag').plot(ax=axes, label='')
-    # axes.plot(P * np.ones(PIm.size), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=-10).values, PIm.size), 'g--', label=r'$\delta$-peak')
-    # # axes.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+    qds['nPI_mag'].sel(P=P, aIBi=aIBi).dropna('PI_mag').plot(ax=axes, label='')
+    axes.plot(P * np.ones(PIm.size), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=-10).values, PIm.size), 'g--', label=r'$\delta$-peak')
+    axes.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
 
-    # axes.set_ylim([0, 1])
-    # axes.set_title('$P=${:.2f}'.format(P))
-    # axes.set_xlabel(r'$|P_{I}|$')
-    # axes.set_ylabel(r'$n_{|P_{I}|}$')
-    # axes.legend()
-    # plt.show()
+    axes.set_ylim([0, 1])
+    axes.set_title('$P=${:.2f}'.format(P))
+    axes.set_xlabel(r'$|P_{I}|$')
+    axes.set_ylabel(r'$n_{|P_{I}|}$')
+    axes.legend()
+    plt.show()
 
     # qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z')
     # PI_x = qd_slice.coords['PI_x'].values
@@ -94,12 +94,13 @@ if __name__ == "__main__":
     # print(qd_slice.values.shape)
     # # axes.pcolormesh(PI_zg, PI_xg, qd_slice.values)
     # axes.pcolormesh(PI_z_interp, PI_x_interp, slice_interp)
-    qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z').plot(ax=axes)
 
-    axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
-    axes.set_ylabel(r'$P_{I,x}$')
-    axes.set_xlabel(r'$P_{I,z}$')
-    axes.set_xlim([-2, 2])
-    axes.set_ylim([-2, 2])
-    axes.grid(True, linewidth=0.5)
-    plt.show()
+    # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z').plot(ax=axes)
+
+    # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    # axes.set_ylabel(r'$P_{I,x}$')
+    # axes.set_xlabel(r'$P_{I,z}$')
+    # axes.set_xlim([-2, 2])
+    # axes.set_ylim([-2, 2])
+    # axes.grid(True, linewidth=0.5)
+    # plt.show()

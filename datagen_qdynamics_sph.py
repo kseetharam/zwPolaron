@@ -40,8 +40,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 99
-    dt = 0.2
+    tMax = 100000
+    dt = 100
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -66,7 +66,8 @@ if __name__ == "__main__":
     datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
-    innerdatapath = datapath + '/spherical_fine'
+    # innerdatapath = datapath + '/spherical'
+    innerdatapath = datapath + '/imdyn_spherical'
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -91,11 +92,11 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     cParams_List = []
-    aIBi_Vals = np.array([-10.0])
+    aIBi_Vals = np.array([-5.0, -2.0])
     # aIBi_Vals = np.array([-1, -0.8])
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
-    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-    P_Vals = np.linspace(0.1, 5.0, 100)
+    P_Vals = np.array([2.4, 5.0])
+    # P_Vals = np.linspace(0.1, 5.0, 100)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:

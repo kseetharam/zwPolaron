@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 99
-    dt = 0.2
+    tMax = 500
+    dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -60,7 +60,8 @@ if __name__ == "__main__":
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    innerdatapath = datapath + '/cart'
+    # innerdatapath = datapath + '/cart'
+    innerdatapath = datapath + '/imdyn_cart'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -68,55 +69,50 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
-
-    # runstart = timer()
-
-    # P = 0.1
-    # aIBi = -2
-    # cParams = [P, aIBi]
-
-    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
-
-    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
-
-    cParams_List = []
-    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.array([0.8, 1.2, 1.5, 1.8, 2.1, 2.4])
-
-    for ind, aIBi in enumerate(aIBi_Vals):
-        for P in P_Vals:
-            cParams_List.append([P, aIBi])
-
-    # kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij')
-    # dVk = kgrid.dV()[0]
-    # Pcrit_Vals = pf_static_cart.PCrit_grid(kxg, kyg, kzg, dVk, aIBi_Vals, mI, mB, n0, gBB)
-    # print(Pcrit_Vals)
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    if(taskCount != len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
-        [P, aIBi] = cParams
+    P = 2.4
+    aIBi = -5
+    cParams = [P, aIBi]
 
     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
     dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    print('Time: {:.2f}'.format(end - runstart))
+
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+
+    # cParams_List = []
+    # # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
+    # # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    # P_Vals = np.array([0.8, 1.2, 1.8, 2.4, 3.0, 5.0, 10.0])
+
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # if(taskCount != len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
+
+    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

@@ -59,6 +59,7 @@ class CoherentState:
         # amp_solver.set_initial_value(amp_phase0, t0).set_f_params(self).set_jac_params(self)
 
         self.amplitude_phase = amp_solver.integrate(amp_solver.t + dt)
+
         self.time = self.time + dt
 
     # CHARACTERISTICS

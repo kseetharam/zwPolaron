@@ -223,34 +223,60 @@ if __name__ == "__main__":
 
     nu = 0.792665459521
 
-    aIBi = -2
-    fig, axes = plt.subplots(nrows=2, ncols=3)
-    # PList = [0.8, 1.2, 1.5, 1.8, 2.1, 2.4]
-    PList = [0.1, 0.8, 1.2, 1.5, 1.8, 2.4]
-    qdsA = qds.sel(aIBi=aIBi)
-    PIm = qdsA.coords['PI_mag'].values
+    # aIBi = -2
+    # fig, axes = plt.subplots(nrows=2, ncols=3)
+    # # PList = [0.8, 1.2, 1.5, 1.8, 2.1, 2.4]
+    # PList = [0.1, 0.8, 1.2, 1.5, 1.8, 2.4]
+    # qdsA = qds.sel(aIBi=aIBi)
+    # PIm = qdsA.coords['PI_mag'].values
 
-    for ind, P in enumerate(PList):
-        if ind == 0:
-            ax = axes[0, 0]
-        elif ind == 1:
-            ax = axes[0, 1]
-        elif ind == 2:
-            ax = axes[0, 2]
-        elif ind == 3:
-            ax = axes[1, 0]
-        elif ind == 4:
-            ax = axes[1, 1]
-        else:
-            ax = axes[1, 2]
+    # for ind, P in enumerate(PList):
+    #     if ind == 0:
+    #         ax = axes[0, 0]
+    #     elif ind == 1:
+    #         ax = axes[0, 1]
+    #     elif ind == 2:
+    #         ax = axes[0, 2]
+    #     elif ind == 3:
+    #         ax = axes[1, 0]
+    #     elif ind == 4:
+    #         ax = axes[1, 1]
+    #     else:
+    #         ax = axes[1, 2]
 
-        qdsA['nPI_mag'].sel(P=P, t=99).dropna('PI_mag').plot(ax=ax, label='')
-        ax.plot(P * np.ones(len(PIm)), np.linspace(0, qdsA['mom_deltapeak'].sel(P=P, t=99).values, len(PIm)), 'g--', label=r'$\delta$-peak')
-        ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
-        ax.set_ylim([0, 1])
-        ax.set_title('$P=${:.2f}'.format(P))
-        ax.set_xlabel(r'$|P_{I}|$')
-        ax.set_ylabel(r'$n_{|P_{I}|}$')
-        ax.legend()
+    #     qdsA['nPI_mag'].sel(P=P, t=99).dropna('PI_mag').plot(ax=ax, label='')
+    #     ax.plot(P * np.ones(len(PIm)), np.linspace(0, qdsA['mom_deltapeak'].sel(P=P, t=99).values, len(PIm)), 'g--', label=r'$\delta$-peak')
+    #     ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+    #     ax.set_ylim([0, 1])
+    #     ax.set_title('$P=${:.2f}'.format(P))
+    #     ax.set_xlabel(r'$|P_{I}|$')
+    #     ax.set_ylabel(r'$n_{|P_{I}|}$')
+    #     ax.legend()
 
+    # plt.show()
+
+    # P = 0.1
+    # aIBi = -5
+    # fig, axes = plt.subplots()
+    # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PI_z').plot(ax=axes)
+
+    # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    # axes.set_ylabel(r'$P_{I,x}$')
+    # axes.set_xlabel(r'$P_{I,z}$')
+    # axes.set_xlim([-2, 2])
+    # axes.set_ylim([-2, 2])
+    # axes.grid(True, linewidth=0.5)
+    # plt.show()
+
+    P = 0.1
+    aIBi = -5
+    fig, axes = plt.subplots()
+    qds['nPB_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PB_z').plot(ax=axes)
+
+    axes.set_title('Phonon Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    axes.set_ylabel(r'$P_{B,x}$')
+    axes.set_xlabel(r'$P_{B,z}$')
+    axes.set_xlim([-2, 2])
+    axes.set_ylim([-2, 2])
+    axes.grid(True, linewidth=0.5)
     plt.show()
