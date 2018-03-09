@@ -72,47 +72,44 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # ---- SINGLE FUNCTION RUN ----
-
-    runstart = timer()
-
-    P = 0.1
-    aIBi = -10
-    cParams = [P, aIBi]
-
-    stcart_ds = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    stcart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
-
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
-
-    # cParams_List = []
-    # # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    # # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # # P_Vals = np.array([0.8, 1.2, 1.5, 1.8, 2.1, 2.4])
-    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
-
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     for P in P_Vals:
-    #         cParams_List.append([P, aIBi])
-
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
 
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [P, aIBi] = cParams
-    #     stsph_ds = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
-    #     stsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    #     loopend = timer()
-    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+    # P = 0.1
+    # aIBi = -10
+    # cParams = [P, aIBi]
+
+    # stcart_ds = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+    # stcart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    # print('Time: {:.2f}'.format(end - runstart))
+
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+
+    cParams_List = []
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    P_Vals = np.array([0.1, 0.8, 1.0, 1.2, 1.5, 1.8, 2.0, 2.1, 2.4, 3.0])
+
+    for ind, aIBi in enumerate(aIBi_Vals):
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
+
+    # ---- COMPUTE DATA ON COMPUTER ----
+
+    runstart = timer()
+
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
+        [P, aIBi] = cParams
+        stsph_ds = pf_static_cart.static_DataGeneration(cParams, gParams, sParams)
+        stsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        loopend = timer()
+        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
