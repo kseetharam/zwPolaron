@@ -25,38 +25,38 @@ if __name__ == "__main__":
 
     innerdatapath = datapath + '/steadystate_cart'
 
-    # # Concatenate Individual Datasets
+    # # # Concatenate Individual Datasets
 
-    ds_list = []; P_list = []; aIBi_list = []; mI_list = []
-    for ind, filename in enumerate(os.listdir(innerdatapath)):
-        if filename == 'quench_Dataset_cart.nc':
-            continue
-        print(filename)
-        with xr.open_dataset(innerdatapath + '/' + filename) as dsf:
-            ds = dsf.compute()
-            ds_list.append(ds)
-            P_list.append(ds.attrs['P'])
-            aIBi_list.append(ds.attrs['aIBi'])
-            mI_list.append(ds.attrs['mI'])
+    # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename == 'quench_Dataset_cart.nc':
+    #         continue
+    #     print(filename)
+    #     with xr.open_dataset(innerdatapath + '/' + filename) as dsf:
+    #         ds = dsf.compute()
+    #         ds_list.append(ds)
+    #         P_list.append(ds.attrs['P'])
+    #         aIBi_list.append(ds.attrs['aIBi'])
+    #         mI_list.append(ds.attrs['mI'])
 
-    s = sorted(zip(aIBi_list, P_list, ds_list))
-    g = itertools.groupby(s, key=lambda x: x[0])
+    # s = sorted(zip(aIBi_list, P_list, ds_list))
+    # g = itertools.groupby(s, key=lambda x: x[0])
 
-    aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
-    for key, group in g:
-        aIBi_keys.append(key)
-        aIBi_groups.append(list(group))
+    # aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
+    # for key, group in g:
+    #     aIBi_keys.append(key)
+    #     aIBi_groups.append(list(group))
 
-    for ind, group in enumerate(aIBi_groups):
-        aIBi = aIBi_keys[ind]
-        _, P_list_temp, ds_list_temp = zip(*group)
-        ds_temp = xr.concat(ds_list_temp, pd.Index(P_list_temp, name='P'))
-        aIBi_ds_list.append(ds_temp)
+    # for ind, group in enumerate(aIBi_groups):
+    #     aIBi = aIBi_keys[ind]
+    #     _, P_list_temp, ds_list_temp = zip(*group)
+    #     ds_temp = xr.concat(ds_list_temp, pd.Index(P_list_temp, name='P'))
+    #     aIBi_ds_list.append(ds_temp)
 
-    ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB'])
-    ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
+    # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
+    # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB'])
+    # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
     # # # Analysis of Total Dataset
 
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
