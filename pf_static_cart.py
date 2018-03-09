@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy import interpolate
 from scipy.stats import binned_statistic
 
@@ -359,26 +360,35 @@ def static_DataGeneration(cParams, gParams, sParams):
     # print("\int n(PB_mag) dPB_mag = %f" % (nPBm_Tot))
     # print("\int n(PI_mag) dPI_mag = %f" % (nPIm_Tot))
 
-    # Collate data
+    # Initialize distribution Data Arrays
+    PI_x = PI_x_ord; PI_y = PI_y_ord; PI_z = PI_z_ord
+    PBm = PBm_Vec; PIm = PIm_Vec
+    nPBm = nPBm_Vec; nPIm = nPIm_Vec
 
-    metrics_string = 'NGridPoints, |k|_max, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, PB_1stMoment(nPB), PB_1stMoment(Betak^2), nPB(k=0)_DeltaPeak, FWHM'
-    metrics_data = np.array([NGridPoints, k_max, P, aIBi, mI, mB, n0, gBB, nu_const, gIB, Pcrit, aSi, DP, PB_Val, En, eMass, Nph, Nph_xyz, Z_factor, nxyz_Tot, nPB_Tot, nPBm_Tot, nPIm_Tot, nPB_Mom1, beta2_kz_Mom1, nPB_deltaK0, FWHM])
-    # note that nPI_x and nPI_y can be derived just by plotting nPB_x and nPI_y against -kx and -ky instead of kx and ky
+    nxyz_x_slice_da = xr.DataArray(nxyz_x_slice, coords=[x], dims=['x']); nxyz_y_slice_da = xr.DataArray(nxyz_y_slice, coords=[y], dims=['y']); nxyz_z_slice_da = xr.DataArray(nxyz_z_slice, coords=[z], dims=['z'])
+    nxyz_xz_slice_da = xr.DataArray(nxyz_xz_slice, coords=[x, z], dims=['x', 'z']); nxyz_xy_slice_da = xr.DataArray(nxyz_xy_slice, coords=[x, y], dims=['x', 'y'])
+    nxyz_x_da = xr.DataArray(nxyz_x, coords=[x], dims=['x']); nxyz_y_da = xr.DataArray(nxyz_y, coords=[y], dims=['y']); nxyz_z_da = xr.DataArray(nxyz_z, coords=[z], dims=['z'])
 
-    # xyz_string = 'x, y, z, nxyz_x_norm, nxyz_y_norm, nxyz_z_norm, kx, ky, kz, nPB_x, nPB_y, nPB_z, PI_z, nPI_z'
-    # xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nxyz_x_norm[:, np.newaxis], nxyz_y_norm[:, np.newaxis], nxyz_z_norm[:, np.newaxis], kx[:, np.newaxis], ky[:, np.newaxis], kz[:, np.newaxis], np.real(nPB_x)[:, np.newaxis], np.real(nPB_y)[:, np.newaxis], np.real(nPB_z)[:, np.newaxis], PI_z_ord[:, np.newaxis], np.real(nPI_z)[:, np.newaxis]), axis=1)
-    pos_xyz_string = 'Phonons: x, y, z, nxyz_x, nxyz_y, nxyz_z, nxyz_x_slice, nxyz_y_slice, nxyz_z_slice'
-    pos_xyz_data = np.concatenate((x[:, np.newaxis], y[:, np.newaxis], z[:, np.newaxis], nxyz_x[:, np.newaxis], nxyz_y[:, np.newaxis], nxyz_z[:, np.newaxis], nxyz_x_slice[:, np.newaxis], nxyz_y_slice[:, np.newaxis], nxyz_z_slice[:, np.newaxis]), axis=1)
+    nPB_x_slice_da = xr.DataArray(nPB_x_slice, coords=[PB_x], dims=['PB_x']); nPB_y_slice_da = xr.DataArray(nPB_y_slice, coords=[PB_y], dims=['PB_y']); nPB_z_slice_da = xr.DataArray(nPB_z_slice, coords=[PB_z], dims=['PB_z'])
+    nPB_xz_slice_da = xr.DataArray(nPB_xz_slice, coords=[PB_x, PB_z], dims=['PB_x', 'PB_z']); nPB_xy_slice_da = xr.DataArray(nPB_xy_slice, coords=[PB_x, PB_y], dims=['PB_x', 'PB_y'])
+    nPB_x_da = xr.DataArray(nPB_x, coords=[PB_x], dims=['PB_x']); nPB_y_da = xr.DataArray(nPB_y, coords=[PB_y], dims=['PB_y']); nPB_z_da = xr.DataArray(nPB_z, coords=[PB_z], dims=['PB_z'])
 
-    mom_xyz_string = 'PB_x, PB_y, PB_z, nPB_x, nPB_y, nPB_z, nPB_x_slice, nPB_y_slice, nPB_z_slice, PI_x, PI_y, PI_z, nPI_x, nPI_y, nPI_z, nPI_x_slice, nPI_y_slice, nPI_z_slice'
-    mom_xyz_data = np.concatenate((PB_x[:, np.newaxis], PB_y[:, np.newaxis], PB_z[:, np.newaxis], nPB_x[:, np.newaxis], nPB_y[:, np.newaxis], nPB_z[:, np.newaxis], nPB_x_slice[:, np.newaxis], nPB_y_slice[:, np.newaxis], nPB_z_slice[:, np.newaxis], PI_x_ord[:, np.newaxis], PI_y_ord[:, np.newaxis], PI_z_ord[:, np.newaxis], nPI_x[:, np.newaxis], nPI_y[:, np.newaxis], nPI_z[:, np.newaxis], nPI_x_slice[:, np.newaxis], nPI_y_slice[:, np.newaxis], nPI_z_slice[:, np.newaxis]), axis=1)
+    nPI_x_slice_da = xr.DataArray(nPI_x_slice, coords=[PI_x], dims=['PI_x']); nPI_y_slice_da = xr.DataArray(nPI_y_slice, coords=[PI_y], dims=['PI_y']); nPI_z_slice_da = xr.DataArray(nPI_z_slice, coords=[PI_z], dims=['PI_z'])
+    nPI_xz_slice_da = xr.DataArray(nPI_xz_slice, coords=[PI_x, PI_z], dims=['PI_x', 'PI_z']); nPI_xy_slice_da = xr.DataArray(nPI_xy_slice, coords=[PI_x, PI_y], dims=['PI_x', 'PI_y'])
+    nPI_x_da = xr.DataArray(nPI_x, coords=[PI_z], dims=['PI_z']); nPI_y_da = xr.DataArray(nPI_y, coords=[PI_y], dims=['PI_y']); nPI_z_da = xr.DataArray(nPI_z, coords=[PI_z], dims=['PI_z'])
 
-    cont_xyz_string = 'nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice'
-    cont_xyz_data = [nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice]
+    nPBm_da = xr.DataArray(nPBm, coords=[PBm], dims=['PB_mag'])
+    nPIm_da = xr.DataArray(nPIm, coords=[PIm], dims=['PI_mag'])
 
-    mom_mag_string = 'PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec'
-    mom_mag_data = np.concatenate((PBm_Vec[:, np.newaxis], nPBm_Vec[:, np.newaxis], PIm_Vec[:, np.newaxis], nPIm_Vec[:, np.newaxis]), axis=1)
+    # Create Data Set
 
-    # test_grid(kgrid, mB, n0, gBB)
+    data_dict = ({'PB': PB_Val, 'NB': Nph, 'Z_factor': Z_factor, 'mom_deltapeak': nPB_deltaK0, 'aSi': aSi, 'Pcrit': Pcrit, 'DP': DP, 'Energy': En, 'effMass': eMass, 'nxyz_Tot': nxyz_Tot, 'nPB_Tot': nPB_Tot, 'nPBm_Tot': nPBm_Tot, 'nPIm_Tot': nPIm_Tot, 'nPB_Mom1': nPB_Mom1, 'beta2_kz_Mom1': beta2_kz_Mom1,
+                  'nxyz_x_int': nxyz_x_da, 'nxyz_y_int': nxyz_y_da, 'nxyz_z_int': nxyz_z_da, 'nxyz_x_slice': nxyz_x_slice_da, 'nxyz_y_slice': nxyz_y_slice_da, 'nxyz_z_slice': nxyz_z_slice_da, 'nxyz_xz_slice': nxyz_xz_slice_da, 'nxyz_xy_slice': nxyz_xy_slice_da,
+                  'nPB_x_int': nPB_x_da, 'nPB_y_int': nPB_y_da, 'nPB_z_int': nPB_z_da, 'nPB_x_slice': nPB_x_slice_da, 'nPB_y_slice': nPB_y_slice_da, 'nPB_z_slice': nPB_z_slice_da, 'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_mag': nPBm_da,
+                  'nPI_x_int': nPI_x_da, 'nPI_y_int': nPI_y_da, 'nPI_z_int': nPI_z_da, 'nPI_x_slice': nPI_x_slice_da, 'nPI_y_slice': nPI_y_slice_da, 'nPI_z_slice': nPI_z_slice_da, 'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_mag': nPIm_da})
+    coords_dict = {'x': x, 'y': y, 'z': z, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
 
-    return metrics_string, metrics_data, pos_xyz_string, pos_xyz_data, mom_xyz_string, mom_xyz_data, cont_xyz_string, cont_xyz_data, mom_mag_string, mom_mag_data
+    stcart_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+
+    return stcart_ds

@@ -36,11 +36,12 @@ if __name__ == "__main__":
     #     if filename == 'quench_Dataset_cart.nc':
     #         continue
     #     print(filename)
-    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #     ds_list.append(ds)
-    #     P_list.append(ds.attrs['P'])
-    #     aIBi_list.append(ds.attrs['aIBi'])
-    #     mI_list.append(ds.attrs['mI'])
+    #     with xr.open_dataset(innerdatapath + '/' + filename) as dsf:
+    #         ds = dsf.compute()
+    #         ds_list.append(ds)
+    #         P_list.append(ds.attrs['P'])
+    #         aIBi_list.append(ds.attrs['aIBi'])
+    #         mI_list.append(ds.attrs['mI'])
 
     # s = sorted(zip(aIBi_list, P_list, ds_list))
     # g = itertools.groupby(s, key=lambda x: x[0])
