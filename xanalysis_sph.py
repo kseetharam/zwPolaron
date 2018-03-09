@@ -23,8 +23,8 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     innerdatapath = datapath + '/spherical'
     figdatapath = datapath + '/figures'
 
@@ -71,9 +71,9 @@ if __name__ == "__main__":
     # qds['NB'].isel(t=-1).sel(aIBi=-2).plot(ax=ax)
     # qds['NB'].isel(P=40).sel(aIBi=-2).isel(t=np.arange(-300, 0)).plot(ax=ax)
     # qds_St.isel(t=-1).sel(aIBi=-5).plot(ax=ax)
-    qds_Pimp.isel(P=45).sel(aIBi=-2).rolling(t=5).mean().isel(t=np.arange(-495, 0)).plot(ax=ax)
+    qds_Pimp.isel(P=45).sel(aIBi=-10).rolling(t=5).mean().isel(t=np.arange(-495, 0)).plot(ax=ax)
     # qds['PB'].isel(P=5).sel(aIBi=-10).rolling(t=5).mean().isel(t=np.arange(-495, 0)).plot(ax=ax)
 
-    ax.set_xscale('linear'); ax.set_yscale('linear')
+    ax.set_xscale('log'); ax.set_yscale('linear')
 
     plt.show()
