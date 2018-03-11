@@ -60,8 +60,8 @@ if __name__ == "__main__":
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    # innerdatapath = datapath + '/cart'
-    innerdatapath = datapath + '/imdyn_cart'
+    innerdatapath = datapath + '/cart'
+    # innerdatapath = datapath + '/imdyn_cart'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -87,9 +87,9 @@ if __name__ == "__main__":
 
     cParams_List = []
     # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    # P_Vals = np.array([0.1, 1.0, 2.0, 3.0])
+    P_Vals = np.array([5.0, 10.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.array([0.8, 1.2, 1.8, 2.4, 3.0, 5.0, 10.0])
+    # P_Vals = np.array([0.8, 1.2, 1.8, 2.4, 3.0, 5.0, 10.0])
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:

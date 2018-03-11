@@ -23,10 +23,12 @@ if __name__ == "__main__":
 
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
     innerdatapath = datapath + '/cart'
+    # innerdatapath = datapath + '/imdyn_cart'
+
     figdatapath = datapath + '/figures'
 
     # # # Concatenate Individual Datasets
@@ -220,6 +222,7 @@ if __name__ == "__main__":
     # # SUBSONIC TO SUPERSONIC
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
+    qds_im = xr.open_dataset(datapath + '/imdyn_cart' + '/quench_Dataset_cart.nc')
 
     nu = 0.792665459521
 
@@ -255,28 +258,49 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # P = 0.1
+    # P = 2.4
     # aIBi = -5
     # fig, axes = plt.subplots()
-    # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PI_z').plot(ax=axes)
+    # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z').plot(ax=axes)
 
     # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
     # axes.set_ylabel(r'$P_{I,x}$')
     # axes.set_xlabel(r'$P_{I,z}$')
+    # axes.set_xlim([-3, 3])
+    # axes.set_ylim([-3, 3])
+    # axes.grid(True, linewidth=0.5)
+    # plt.show()
+
+    # P = 0.1
+    # aIBi = -5
+    # fig, axes = plt.subplots()
+    # qds['nPB_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PB_z').plot(ax=axes)
+
+    # axes.set_title('Phonon Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    # axes.set_ylabel(r'$P_{B,x}$')
+    # axes.set_xlabel(r'$P_{B,z}$')
     # axes.set_xlim([-2, 2])
     # axes.set_ylim([-2, 2])
     # axes.grid(True, linewidth=0.5)
     # plt.show()
 
-    P = 0.1
     aIBi = -5
-    fig, axes = plt.subplots()
-    qds['nPB_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PB_z').plot(ax=axes)
+    P = 2.4
+    fig, ax = plt.subplots()
+    PIm = qds_im.coords['PI_mag'].values
 
-    axes.set_title('Phonon Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
-    axes.set_ylabel(r'$P_{B,x}$')
-    axes.set_xlabel(r'$P_{B,z}$')
-    axes.set_xlim([-2, 2])
-    axes.set_ylim([-2, 2])
-    axes.grid(True, linewidth=0.5)
+    print(qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values)
+
+    qds_im['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='idyn')
+    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'g--', label=r'$\delta$-peak idyn')
+
+    qds['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='rdyn')
+    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'm--', label=r'$\delta$-peak rdyn')
+
+    ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+    ax.set_ylim([0, 1])
+    ax.set_title('$P=${:.2f}'.format(P))
+    ax.set_xlabel(r'$|P_{I}|$')
+    ax.set_ylabel(r'$n_{|P_{I}|}$')
+    ax.legend()
     plt.show()
