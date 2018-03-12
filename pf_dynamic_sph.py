@@ -132,6 +132,10 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     ReDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     ImDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Amp_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    DeltaAmp_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    # nPBm_da = xr.DataArray(np.full((tgrid.size, PBm.size), np.nan, dtype=float), coords=[tgrid, PBm], dims=['t', 'PB_mag'])
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -148,6 +152,16 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
         ReDynOv_da[ind] = np.real(DynOv)
         ImDynOv_da[ind] = np.imag(DynOv)
         Phase_da[ind] = cs.get_Phase()
+        Amp_da[ind] = cs.get_Amplitude()
+
+        betaSum = Amp_da[ind] + np.conjugate(Amp_da[ind])
+        xp = 0.5 * np.dot(ham.Wk_grid, betaSum * cs.dVk)
+        betaDiff = Amp_da[ind] - np.conjugate(Amp_da[ind])
+        xm = 0.5 * np.dot(ham.Wki_grid, betaDiff * cs.dVk)
+
+        DeltaAmp_da[ind] = -1j * (ham.gnum * np.sqrt(n0) * ham.Wk_grid +
+                                  Amp_da[ind] * (ham.Omega0_grid - ham.kz * (P - PB_da[ind]) / mI) +
+                                  ham.gnum * (ham.Wk_grid * xp + ham.Wki_grid * xm))
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
@@ -155,7 +169,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # Create Data Set
 
-    data_dict = {'PB': PB_da, 'NB': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da}
+    data_dict = {'PB': PB_da, 'NB': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'CSAmp': Amp_da, 'Delta_CSAmp': DeltaAmp_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
 
