@@ -26,6 +26,25 @@ if __name__ == "__main__":
 
     innerdatapath = datapath + '/steadystate_cart'
 
+    def xinterp2D(xdataset, coord1, coord2, mult):
+        # xdataset is the desired xarray dataset with the desired plotting quantity already selected
+        # coord1 and coord2 are the two coordinates making the 2d plot
+        # mul is the multiplicative factor by which you wish to increase the resolution of the grid
+        # e.g. xdataset = qds['nPI_xz_slice'].sel(P=P,aIBi=aIBi).dropna('PI_z'), coord1 = 'PI_x', coord2 = 'PI_z'
+        # returns meshgrid values for C1_interp and C2_interp as well as the function value on this 2D grid -> these are ready to plot
+
+        C1 = xdataset.coords[coord1].values
+        C2 = xdataset.coords[coord2].values
+        C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
+
+        C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+        C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
+        C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
+
+        interp_vals = griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+
+        return interp_vals, C1g_interp, C2g_interp
+
     # # # Concatenate Individual Datasets
 
     # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
@@ -65,42 +84,30 @@ if __name__ == "__main__":
     nu = 0.792665459521
 
     P = 0.8
-    aIBi = -10
+    aIBi = -5
     PIm = qds.coords['PI_mag'].values
 
-    qds['nPI_mag'].sel(P=P, aIBi=aIBi).dropna('PI_mag').plot(ax=axes, label='')
-    axes.plot(P * np.ones(PIm.size), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=-10).values, PIm.size), 'g--', label=r'$\delta$-peak')
-    axes.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+    # qds['nPI_mag'].sel(P=P, aIBi=aIBi).dropna('PI_mag').plot(ax=axes, label='')
+    # axes.plot(P * np.ones(PIm.size), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=-10).values, PIm.size), 'g--', label=r'$\delta$-peak')
+    # axes.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
 
-    axes.set_ylim([0, 1])
-    axes.set_title('$P=${:.2f}'.format(P))
-    axes.set_xlabel(r'$|P_{I}|$')
-    axes.set_ylabel(r'$n_{|P_{I}|}$')
-    axes.legend()
-    plt.show()
+    # axes.set_ylim([0, 1])
+    # axes.set_title('$P=${:.2f}'.format(P))
+    # axes.set_xlabel(r'$|P_{I}|$')
+    # axes.set_ylabel(r'$n_{|P_{I}|}$')
+    # axes.legend()
+    # plt.show()
 
-    # qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z')
-    # PI_x = qd_slice.coords['PI_x'].values
-    # PI_z = qd_slice.coords['PI_z'].values
-    # PI_zg, PI_xg = np.meshgrid(PI_z, PI_x)
-
-    # PI_x_interp = np.linspace(np.min(PI_x), np.max(PI_x), 2 * PI_x.size)
-    # PI_z_interp = np.linspace(np.min(PI_z), np.max(PI_z), 2 * PI_z.size)
-    # PI_zg_interp, PI_xg_interp = np.meshgrid(PI_z_interp, PI_x_interp)
-
-    # slice_interp = griddata((PI_z, PI_x), qd_slice.values, (PI_zg_interp, PI_xg_interp), method='nearest')
-    # print(slice_interp.shape)
-    # print(PI_z_interp.shape, PI_x_interp.shape)
-    # print(qd_slice.values.shape)
-    # # axes.pcolormesh(PI_zg, PI_xg, qd_slice.values)
-    # axes.pcolormesh(PI_z_interp, PI_x_interp, slice_interp)
-
+    qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z')
+    slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_slice, 'PI_x', 'PI_z', 8)
+    axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
+    # axes.pcolormesh(PI_zg, PI_xg, qd_slice.values)
     # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).dropna('PI_z').plot(ax=axes)
 
-    # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
-    # axes.set_ylabel(r'$P_{I,x}$')
-    # axes.set_xlabel(r'$P_{I,z}$')
-    # axes.set_xlim([-2, 2])
-    # axes.set_ylim([-2, 2])
-    # axes.grid(True, linewidth=0.5)
-    # plt.show()
+    axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    axes.set_ylabel(r'$P_{I,x}$')
+    axes.set_xlabel(r'$P_{I,z}$')
+    axes.set_xlim([-2, 2])
+    axes.set_ylim([-2, 2])
+    axes.grid(True, linewidth=0.5)
+    plt.show()

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
 import itertools
+from scipy.interpolate import griddata
 
 if __name__ == "__main__":
 
@@ -23,13 +24,32 @@ if __name__ == "__main__":
 
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    innerdatapath = datapath + '/cart'
+    innerdatapath = datapath + '/redyn_cart'
     # innerdatapath = datapath + '/imdyn_cart'
 
     figdatapath = datapath + '/figures'
+
+    def xinterp2D(xdataset, coord1, coord2, mult):
+        # xdataset is the desired xarray dataset with the desired plotting quantity already selected
+        # coord1 and coord2 are the two coordinates making the 2d plot
+        # mul is the multiplicative factor by which you wish to increase the resolution of the grid
+        # e.g. xdataset = qds['nPI_xz_slice'].sel(P=P,aIBi=aIBi).dropna('PI_z'), coord1 = 'PI_x', coord2 = 'PI_z'
+        # returns meshgrid values for C1_interp and C2_interp as well as the function value on this 2D grid -> these are ready to plot
+
+        C1 = xdataset.coords[coord1].values
+        C2 = xdataset.coords[coord2].values
+        C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
+
+        C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+        C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
+        C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
+
+        interp_vals = griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+
+        return interp_vals, C1g_interp, C2g_interp
 
     # # # Concatenate Individual Datasets
 
@@ -258,44 +278,41 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # P = 2.4
-    # aIBi = -5
+    # P = 5.0
+    # aIBi = -2
     # fig, axes = plt.subplots()
-    # qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z').plot(ax=axes)
+    # qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).sel(t=20).dropna('PI_z')
+    # qd_im_slice = qds_im['nPI_xz_slice'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z')
+
+    # slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_slice, 'PI_x', 'PI_z', 8)
+    # quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
+    # # quad = qd_slice.plot(ax=axes, add_colorbar=False)
+
+    # # slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_im_slice, 'PI_x', 'PI_z', 8)
+    # # quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
+    # # # quad = qd_im_slice.dropna('PI_z').plot(ax=axes, add_colorbar=False)
 
     # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
     # axes.set_ylabel(r'$P_{I,x}$')
     # axes.set_xlabel(r'$P_{I,z}$')
-    # axes.set_xlim([-3, 3])
+    # axes.set_xlim([-2, 6])
     # axes.set_ylim([-3, 3])
     # axes.grid(True, linewidth=0.5)
+    # fig.colorbar(quad, ax=axes, extend='both')
     # plt.show()
 
-    # P = 0.1
-    # aIBi = -5
-    # fig, axes = plt.subplots()
-    # qds['nPB_xz_slice'].sel(P=P, aIBi=aIBi, t=99).dropna('PB_z').plot(ax=axes)
-
-    # axes.set_title('Phonon Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
-    # axes.set_ylabel(r'$P_{B,x}$')
-    # axes.set_xlabel(r'$P_{B,z}$')
-    # axes.set_xlim([-2, 2])
-    # axes.set_ylim([-2, 2])
-    # axes.grid(True, linewidth=0.5)
-    # plt.show()
-
-    aIBi = -5
-    P = 2.4
+    aIBi = -2
+    P = 5.0
     fig, ax = plt.subplots()
     PIm = qds_im.coords['PI_mag'].values
 
-    print(qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values)
+    print(qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=30).values)
 
     qds_im['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='idyn')
     ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'g--', label=r'$\delta$-peak idyn')
 
-    qds['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='rdyn')
-    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'm--', label=r'$\delta$-peak rdyn')
+    qds['nPI_mag'].sel(P=P, aIBi=aIBi).sel(t=30).dropna('PI_mag').plot(ax=ax, label='rdyn')
+    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).sel(t=30).values, len(PIm)), 'm--', label=r'$\delta$-peak rdyn')
 
     ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
     ax.set_ylim([0, 1])

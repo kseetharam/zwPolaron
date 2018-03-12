@@ -42,7 +42,7 @@ class Grid:
         return self.arrays[name]
 
     def function_prod(self, list_of_unit_vectors, list_of_functions):
-        # calculates a function on a grid when function is a product of function
+        # calculates a function on a grid when function is a product of functions
         # acting independently on each coordinate
         # example:  list_of_unit_vectors = [x1, x2]
         # assume that f = f1 (x1) * f2 (x2)

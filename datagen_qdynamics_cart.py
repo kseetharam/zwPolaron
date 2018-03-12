@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    innerdatapath = datapath + '/cart'
+    innerdatapath = datapath + '/redyn_cart'
     # innerdatapath = datapath + '/imdyn_cart'
 
     # if os.path.isdir(datapath) is False:
