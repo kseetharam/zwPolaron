@@ -57,11 +57,11 @@ class PolaronHamiltonian:
 
         dVk = coherent_state.dVk
 
-        betaSum = amplitude + np.conjugate(amplitude)
-        xp = 0.5 * np.dot(self.Wk_grid, betaSum * dVk)
+        # betaSum = amplitude + np.conjugate(amplitude)
+        # xp = 0.5 * np.dot(self.Wk_grid, betaSum * dVk)
 
-        betaDiff = amplitude - np.conjugate(amplitude)
-        xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dVk)
+        # betaDiff = amplitude - np.conjugate(amplitude)
+        # xm = 0.5 * np.dot(self.Wki_grid, betaDiff * dVk)
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
@@ -69,20 +69,20 @@ class PolaronHamiltonian:
 
         # FOR FROLICH:
 
-        # xp = 0
-        # xm = 0
+        xp = 0
+        xm = 0
 
-        # # FOR REAL TIME DYNAMICS:
+        # FOR REAL TIME DYNAMICS:
 
-        # amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                             amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                             self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                    self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
-        # FOR IMAGINARY TIME DYNAMICS
+        # # FOR IMAGINARY TIME DYNAMICS
 
-        amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                   amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-                                   self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        # amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+        #                            amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+        #                            self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
         amplitude_phase_new[0:-1] = amplitude_new_temp

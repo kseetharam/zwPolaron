@@ -111,6 +111,7 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_sph.nc')
+
     qds_Pimp = qds.coords['P'] - qds['Pph']
     aIBi = -5
     P = 2.4
@@ -147,11 +148,19 @@ if __name__ == "__main__":
     # plt.show()
 
     # qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
-    # qds['Nph'].sel(P=P, aIBi=aIBi).plot(ax=ax)
-    # # qds_St.sel(P=P, aIBi=aIBi).plot(ax=ax)
+    # qds.sel(P=P, aIBi=aIBi)['Nph'].plot(ax=ax)
+    # qds_St.sel(P=P, aIBi=aIBi).plot(ax=ax)
     # ax.set_xscale('log'); ax.set_yscale('linear')
-
     # plt.show()
+
+
+    qds = xr.open_dataset(datapath + '/redyn_spherical_frohlich/P_2.400_aIBi_-8.77.nc')
+
+    qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
+    # qds['Nph'].plot(ax=ax)
+    qds_St.plot(ax=ax)
+    ax.set_xscale('log'); ax.set_yscale('log')
+    plt.show()
 
     # # # REAL DYN AND IM DYN CS OVERLAP
 

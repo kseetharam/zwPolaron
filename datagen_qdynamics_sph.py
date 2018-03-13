@@ -3,6 +3,7 @@ import Grid
 import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
+from pf_static_sph import aSi_grid
 
 
 if __name__ == "__main__":
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 
     # tMax = 100000
     # dt = 100
-    tMax = 500
+    tMax = 99
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -70,7 +71,8 @@ if __name__ == "__main__":
 
     # innerdatapath = datapath
     # innerdatapath = datapath + '/redyn_spherical'
-    innerdatapath = datapath + '/imdyn_spherical'
+    # innerdatapath = datapath + '/imdyn_spherical'
+    innerdatapath = datapath + '/redyn_spherical_frohlich'
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -82,8 +84,8 @@ if __name__ == "__main__":
 
     # runstart = timer()
 
-    # P = 0.1
-    # aIBi = -5
+    # P = 2.4
+    # aIBi = -10
     # cParams = [P, aIBi]
 
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
@@ -95,9 +97,12 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     cParams_List = []
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.array([0.4])
-    # P_Vals = np.linspace(0.1, 5.0, 100)
+    aIBi_Vals = np.array([-11.23, -10.0, -6.23, -5.0, -3.23, -2.0])
+    
+    aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals + aSi
+
+    # P_Vals = np.array([0.4])
+    P_Vals = np.linspace(0.1, 5.0, 50)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
