@@ -275,49 +275,100 @@ if __name__ == "__main__":
     #     ax.set_xlabel(r'$|P_{I}|$')
     #     ax.set_ylabel(r'$n_{|P_{I}|}$')
     #     ax.legend()
-
     # plt.show()
 
-    # P = 5.0
-    # aIBi = -2
-    # fig, axes = plt.subplots()
-    # qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).sel(t=20).dropna('PI_z')
-    # qd_im_slice = qds_im['nPI_xz_slice'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z')
-
-    # slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_slice, 'PI_x', 'PI_z', 8)
-    # quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
-    # # quad = qd_slice.plot(ax=axes, add_colorbar=False)
-
-    # # slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_im_slice, 'PI_x', 'PI_z', 8)
-    # # quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
-    # # # quad = qd_im_slice.dropna('PI_z').plot(ax=axes, add_colorbar=False)
-
-    # axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
-    # axes.set_ylabel(r'$P_{I,x}$')
-    # axes.set_xlabel(r'$P_{I,z}$')
-    # axes.set_xlim([-2, 6])
-    # axes.set_ylim([-3, 3])
-    # axes.grid(True, linewidth=0.5)
-    # fig.colorbar(quad, ax=axes, extend='both')
-    # plt.show()
-
+    P = 2.4
     aIBi = -2
-    P = 5.0
-    fig, ax = plt.subplots()
-    PIm = qds_im.coords['PI_mag'].values
+    fig, axes = plt.subplots()
+    qd_slice = qds['nPI_xz_slice'].sel(P=P, aIBi=aIBi).sel(t=20).dropna('PI_z')
+    qd_im_slice = qds_im['nPI_xz_slice'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z')
 
-    print(qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=30).values)
+    slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_slice, 'PI_x', 'PI_z', 8)
+    quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
+    # quad = qd_slice.plot(ax=axes, add_colorbar=False)
 
-    qds_im['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='idyn')
-    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'g--', label=r'$\delta$-peak idyn')
+    # slice_interp, PI_xg_interp, PI_zg_interp = xinterp2D(qd_im_slice, 'PI_x', 'PI_z', 8)
+    # quad = axes.pcolormesh(PI_zg_interp, PI_xg_interp, slice_interp)
+    # # quad = qd_im_slice.dropna('PI_z').plot(ax=axes, add_colorbar=False)
 
-    qds['nPI_mag'].sel(P=P, aIBi=aIBi).sel(t=30).dropna('PI_mag').plot(ax=ax, label='rdyn')
-    ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).sel(t=30).values, len(PIm)), 'm--', label=r'$\delta$-peak rdyn')
-
-    ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
-    ax.set_ylim([0, 1])
-    ax.set_title('$P=${:.2f}'.format(P))
-    ax.set_xlabel(r'$|P_{I}|$')
-    ax.set_ylabel(r'$n_{|P_{I}|}$')
-    ax.legend()
+    axes.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi) + '$P=${:.2f})'.format(P))
+    axes.set_ylabel(r'$P_{I,x}$')
+    axes.set_xlabel(r'$P_{I,z}$')
+    axes.set_xlim([-2, 6])
+    axes.set_ylim([-3, 3])
+    axes.grid(True, linewidth=0.5)
+    fig.colorbar(quad, ax=axes, extend='both')
     plt.show()
+
+    # aIBi = -2
+    # P = 5.0
+    # fig, ax = plt.subplots()
+    # PIm = qds_im.coords['PI_mag'].values
+
+    # print(qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=30).values)
+
+    # qds_im['nPI_mag'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_mag').plot(ax=ax, label='idyn')
+    # ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PIm)), 'g--', label=r'$\delta$-peak idyn')
+
+    # qds['nPI_mag'].sel(P=P, aIBi=aIBi).sel(t=30).dropna('PI_mag').plot(ax=ax, label='rdyn')
+    # ax.plot(P * np.ones(len(PIm)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).sel(t=30).values, len(PIm)), 'm--', label=r'$\delta$-peak rdyn')
+
+    # ax.plot(nu * np.ones(len(PIm)), np.linspace(0, 1, len(PIm)), 'k:', label=r'$m_{I}\nu$')
+    # ax.set_ylim([0, 1])
+    # ax.set_title('$P=${:.2f}'.format(P))
+    # ax.set_xlabel(r'$|P_{I}|$')
+    # ax.set_ylabel(r'$n_{|P_{I}|}$')
+    # ax.legend()
+    # plt.show()
+
+    # aIBi = -5
+    # P = 1.2
+    # fig, ax = plt.subplots()
+    # PI_z = qds_im.coords['PI_z'].values
+
+    # print(qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=30).values)
+
+    # qds_im_slice = qds_im['nPI_z_int'].sel(P=P, aIBi=aIBi).isel(t=-1).dropna('PI_z')
+    # dz = PI_z[1] - PI_z[0]
+    # norm = np.sum(qds_im_slice.values) * dz + qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1)
+    # print(norm)
+
+    # qds_im_slice.plot(ax=ax, label='idyn')
+    # ax.plot(P * np.ones(len(PI_z)), np.linspace(0, qds_im['mom_deltapeak'].sel(P=P, aIBi=aIBi).isel(t=-1).values, len(PI_z)), 'g--', label=r'$\delta$-peak idyn')
+
+    # # qds['nPI_z_int'].sel(P=P, aIBi=aIBi).sel(t=30).dropna('PI_z').plot(ax=ax, label='rdyn')
+    # # ax.plot(P * np.ones(len(PI_z)), np.linspace(0, qds['mom_deltapeak'].sel(P=P, aIBi=aIBi).sel(t=30).values, len(PI_z)), 'm--', label=r'$\delta$-peak rdyn')
+
+    # ax.plot(nu * np.ones(len(PI_z)), np.linspace(0, 1, len(PI_z)), 'k:', label=r'$m_{I}\nu$')
+    # ax.set_ylim([0, 1])
+    # ax.set_title('$P=${:.2f}'.format(P))
+    # ax.set_xlabel(r'$P_{I,z}$')
+    # ax.set_ylabel(r'$n_{P_{I,z}}$')
+    # ax.legend()
+    # plt.show()
+
+    # aIBi = -2
+    # fig, ax = plt.subplots()
+    # qds_Pimp = qds_im.coords['P'] - qds_im['PB']
+    # # ax.plot(qds_Pimp.coords['t'].values, np.abs(qds_im.attrs['mI'] * nu * np.ones(qds_Pimp.coords['t'].values.size)), 'k--', label=r'$P=m_{I}\nu$')
+    # PindList = [2, 3, 4]
+
+    # for Pind in PindList:
+    #     dat = qds_Pimp.isel(P=Pind).sel(aIBi=aIBi).rolling(t=1).mean()
+    #     datm = np.abs(dat - nu)
+    #     datm.plot(ax=ax, label='P={:.2f}'.format(qds_Pimp.coords['P'].values[Pind]))
+
+    # # ax.set_xscale('log'); ax.set_yscale('log')
+    # ax.legend()
+    # ax.set_title('Impurity Momentum at Interaction aIBi={:.2f}'.format(aIBi))
+    # ax.set_ylabel(r'$P_{imp}$')
+    # # ax.set_ylabel(r'$P_{imp}-m_{I}\nu$')
+    # ax.set_xlabel(r'$t$')
+    # plt.show()
+
+    # aIBi = -10
+    # fig, ax = plt.subplots()
+    # qds_St = np.sqrt(qds_im['Real_DynOv']**2 + qds_im['Imag_DynOv']**2)
+    # qds_St.sel(P=0.8, aIBi=aIBi).plot(ax=ax)
+    # # qds_im['NB'].sel(P=0.8, aIBi=aIBi).plot(ax=ax)
+    # plt.show()
