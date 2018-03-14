@@ -30,9 +30,10 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 99
-    dt = 0.2
+    tMax = 200
+    dt = 10
     tgrid = np.arange(0, tMax + dt, dt)
+    print(tgrid)
 
     gParams = [xgrid, kgrid, tgrid]
 
@@ -60,8 +61,9 @@ if __name__ == "__main__":
     # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
     datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    innerdatapath = datapath + '/redyn_cart'
+    # innerdatapath = datapath + '/redyn_cart'
     # innerdatapath = datapath + '/imdyn_cart'
+    innerdatapath = datapath + '/imdyn_cart_long'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -87,9 +89,9 @@ if __name__ == "__main__":
 
     cParams_List = []
     # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    P_Vals = np.array([5.0, 10.0])
+    # P_Vals = np.array([5.0, 10.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # P_Vals = np.array([0.8, 1.2, 1.8, 2.4, 3.0, 5.0, 10.0])
+    P_Vals = np.array([0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:

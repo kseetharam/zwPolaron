@@ -70,9 +70,10 @@ if __name__ == "__main__":
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     # innerdatapath = datapath
-    # innerdatapath = datapath + '/redyn_spherical'
+    innerdatapath = datapath + '/redyn_spherical'
     # innerdatapath = datapath + '/imdyn_spherical'
-    innerdatapath = datapath + '/redyn_spherical_frohlich'
+    # innerdatapath = datapath + '/redyn_spherical_frohlich'
+    # innerdatapath = datapath + '/imdyn_spherical_frohlich'
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -97,9 +98,10 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
     cParams_List = []
-    aIBi_Vals = np.array([-11.23, -10.0, -6.23, -5.0, -3.23, -2.0])
-    
-    aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals + aSi
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+
+    # aIBi_Vals = np.array([-11.23, -10.0, -6.23, -5.0, -3.23, -2.0])
+    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals + aSi
 
     # P_Vals = np.array([0.4])
     P_Vals = np.linspace(0.1, 5.0, 50)
