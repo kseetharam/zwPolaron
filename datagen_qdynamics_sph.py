@@ -72,8 +72,8 @@ if __name__ == "__main__":
     # innerdatapath = datapath
     # innerdatapath = datapath + '/redyn_spherical'
     # innerdatapath = datapath + '/imdyn_spherical'
-    # innerdatapath = datapath + '/redyn_spherical_frohlich'
-    innerdatapath = datapath + '/imdyn_spherical_frohlich'
+    innerdatapath = datapath + '/redyn_spherical_frohlich'
+    # innerdatapath = datapath + '/imdyn_spherical_frohlich'
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
