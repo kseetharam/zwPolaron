@@ -65,11 +65,11 @@ class PolaronHamiltonian:
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
-        # # FOR FROLICH:
+        # FOR FROLICH:
 
-        # self.gnum = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
-        # xp = 0
-        # xm = 0
+        self.gnum = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
+        xp = 0
+        xm = 0
 
         # # FOR REAL TIME DYNAMICS:
 

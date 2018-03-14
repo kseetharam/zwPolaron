@@ -24,8 +24,8 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # innerdatapath = datapath + '/redyn_spherical'
     innerdatapath = datapath + '/imdyn_spherical'
     # innerdatapath = datapath + '/imdyn_spherical_long'
@@ -147,20 +147,19 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$t$')
     # plt.show()
 
-    qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
-    # qds.sel(P=P, aIBi=aIBi)['Nph'].plot(ax=ax)
-    qds_St.sel(P=P, aIBi=aIBi).plot(ax=ax)
-    ax.set_xscale('log'); ax.set_yscale('log')
-    plt.show()
-
-
-    # qds = xr.open_dataset(datapath + '/redyn_spherical_frohlich/P_2.400_aIBi_-8.77.nc')
-
     # qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
-    # # qds['Nph'].plot(ax=ax)
-    # qds_St.plot(ax=ax)
+    # # qds.sel(P=P, aIBi=aIBi)['Nph'].plot(ax=ax)
+    # qds_St.sel(P=P, aIBi=aIBi).plot(ax=ax)
     # ax.set_xscale('log'); ax.set_yscale('log')
     # plt.show()
+
+    qds = xr.open_dataset(datapath + '/imdyn_spherical_frohlich/P_2.400_aIBi_-11.23.nc')
+
+    qds_St = np.sqrt(qds['Real_DynOv']**2 + qds['Imag_DynOv']**2)
+    # qds['Nph'].plot(ax=ax)
+    qds_St.plot(ax=ax)
+    ax.set_xscale('log'); ax.set_yscale('log')
+    plt.show()
 
     # # # REAL DYN AND IM DYN CS OVERLAP
 
