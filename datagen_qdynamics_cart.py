@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    tMax = 200
+    tMax = 1000
     dt = 10
     tgrid = np.arange(0, tMax + dt, dt)
     print(tgrid)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
     # P_Vals = np.array([5.0, 10.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.array([0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
