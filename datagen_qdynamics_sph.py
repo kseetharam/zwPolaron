@@ -70,9 +70,9 @@ if __name__ == "__main__":
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     # innerdatapath = datapath
-    # innerdatapath = datapath + '/redyn_spherical'
+    innerdatapath = datapath + '/redyn_spherical'
     # innerdatapath = datapath + '/imdyn_spherical'
-    innerdatapath = datapath + '/redyn_spherical_frohlich'
+    # innerdatapath = datapath + '/redyn_spherical_frohlich'
     # innerdatapath = datapath + '/imdyn_spherical_frohlich'
 
     if os.path.isdir(datapath) is False:
