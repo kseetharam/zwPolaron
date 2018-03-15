@@ -41,9 +41,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # tMax = 100000
-    # dt = 100
-    tMax = 500
+    tMax = 99
     dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -70,8 +68,8 @@ if __name__ == "__main__":
     # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     # innerdatapath = datapath
-    innerdatapath = datapath + '/redyn_spherical'
-    # innerdatapath = datapath + '/imdyn_spherical'
+    # innerdatapath = datapath + '/redyn_spherical'
+    innerdatapath = datapath + '/imdyn_spherical'
     # innerdatapath = datapath + '/redyn_spherical_frohlich'
     # innerdatapath = datapath + '/imdyn_spherical_frohlich'
 
@@ -104,7 +102,7 @@ if __name__ == "__main__":
     cParams_List = []
 
     aIBi_Vals = np.array([-10.0, -5.0])
-    aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
+    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
     P_Vals = np.linspace(0.1, 5.0, 50)
