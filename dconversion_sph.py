@@ -45,14 +45,11 @@ if __name__ == "__main__":
         P = ds.attrs['P']
         tGrid = ds.coords['t'].values
         PVec = P * np.ones(tGrid.size)
-        Phase_Vec = ds['Phase'].values
-        PB_Vec = ds['PB'].rolling(t=5).mean().values
-        NB_Vec = ds['NB'].values
-        Real_DynOv_Vec = ds['Real_DynOv'].values
-        Imag_DynOv_Vec = ds['Imag_DynOv'].values
+        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+        CSAmp = CSAmp.reshape(CSAmp.size)
 
         # generates data file with columns representing P, t, Phase, Phonon Momentum, !Momentum Dispersion, Phonon Number, Re(Dynamical Overlap), Im(Dynamical Overlap)
-        data = np.concatenate((PVec[:, np.newaxis], tGrid[:, np.newaxis], Phase_Vec[:, np.newaxis], PB_Vec[:, np.newaxis], np.zeros(tGrid.size)[:, np.newaxis], NB_Vec[:, np.newaxis], Real_DynOv_Vec[:, np.newaxis], Imag_DynOv_Vec[:, np.newaxis]), axis=1)
+        data = np.concatenate((aIBiVec[:, np.newaxis], PVec[:, np.newaxis], tGrid[:, np.newaxis], Real_DynOv_Vec[:, np.newaxis], Imag_DynOv_Vec[:, np.newaxis]), axis=1)
         np.savetxt(outputdatapath + '/quench_P_%.2f.dat' % P, data)
 
     # # steady state
