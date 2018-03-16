@@ -54,7 +54,7 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.075
+    aBB = 0.062
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(gBB)
 
@@ -94,7 +94,8 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = (6 * np.pi**2)**(1 / 3) * np.linspace(-4, 4, 5)
+    # aIBi_Vals = (6 * np.pi**2)**(1 / 3) * np.linspace(-4, 4, 5)
+    aIBi_Vals = np.array([-0.32])
 
     P_Vals = np.linspace(0.01, mI * nu, 20)
 
