@@ -60,8 +60,8 @@ if __name__ == "__main__":
     functions_wk = [lambda k: pfs.omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
     wk = kgrid.function_prod(names, functions_wk)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     innerdatapath = datapath + '/imdyn_spherical'
     outputdatapath = datapath + '/mm'
 
@@ -84,8 +84,7 @@ if __name__ == "__main__":
 
         DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
         for tind, t in enumerate(tGrid):
-            amplitude = CSAmp * np.exp(-1j * wk * t)
-            DynOv_Vec[tind] = np.exp(-1j * t * P / (2 * mI)) * np.exp((-1 / 2) * np.dot(np.abs(amplitude)**2, dVk).real.astype(float))
+            DynOv_Vec[tind] = np.exp(-1j * t * P / (2 * mI)) * np.exp(-(1 / 2) * np.dot(np.abs(CSAmp)**2 * (2 - 2 * np.exp(-1j * wk * t)), dVk).real.astype(float))
 
         data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], tGrid[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
         np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
