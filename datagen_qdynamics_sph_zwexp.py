@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # aIBi_Vals = (6 * np.pi**2)**(1 / 3) * np.linspace(-4, 4, 5)
     aIBi_Vals = np.array([-0.32])
 
-    P_Vals = np.linspace(0.01, mI * nu, 20)
+    P_Vals = np.linspace(0.1, mI * nu, 30)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:

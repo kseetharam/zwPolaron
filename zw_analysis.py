@@ -60,31 +60,50 @@ if __name__ == "__main__":
     functions_wk = [lambda k: pfs.omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
     wk = kgrid.function_prod(names, functions_wk)
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     innerdatapath = datapath + '/imdyn_spherical'
     outputdatapath = datapath + '/mm'
 
     # # Individual Datasets
 
-    tGrid = np.linspace(0, 50, 100)
+    tGrid = np.linspace(0, 100, 200)
 
-    for ind, filename in enumerate(os.listdir(innerdatapath)):
-        if filename == 'quench_Dataset_sph.nc':
-            continue
-        ds = xr.open_dataset(innerdatapath + '/' + filename)
-        print(filename)
-        aIBi = ds.attrs['aIBi']
-        P = ds.attrs['P']
-        aIBiVec = aIBi * np.ones(tGrid.size)
-        PVec = P * np.ones(tGrid.size)
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename == 'quench_Dataset_sph.nc':
+    #         continue
+    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
+    #     aIBi = ds.attrs['aIBi']
+    #     P = ds.attrs['P']
 
-        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
-        CSAmp = CSAmp.reshape(CSAmp.size)
+    #     if(P <= 0.1 or aIBi > 7):
+    #         continue
 
-        DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
-        for tind, t in enumerate(tGrid):
-            DynOv_Vec[tind] = np.exp(-1j * t * P / (2 * mI)) * np.exp(-(1 / 2) * np.dot(np.abs(CSAmp)**2 * (2 - 2 * np.exp(-1j * wk * t)), dVk).real.astype(float))
+    #     print(filename)
+    #     aIBiVec = aIBi * np.ones(tGrid.size)
+    #     PVec = P * np.ones(tGrid.size)
 
-        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], tGrid[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
-        np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+    #     CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+    #     CSAmp = CSAmp.reshape(CSAmp.size)
+
+    #     DynOv_Vec = np.zeros(tGrid.size, dtype=complex)
+    #     for tind, t in enumerate(tGrid):
+    #         exparg = -(1 / 2) * np.dot(np.abs(CSAmp)**2 * (2 - 2 * np.exp(-1j * wk * t)), dVk).real.astype(float)
+    #         DynOv_Vec[tind] = np.exp(-1j * t * P / (2 * mI)) * np.exp(exparg)
+
+    #     # fig, ax = plt.subplots()
+    #     # ax.plot(tGrid, np.imag(DynOv_Vec))
+    #     # plt.show()
+
+    #     data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], tGrid[:, np.newaxis], np.real(DynOv_Vec)[:, np.newaxis], np.imag(DynOv_Vec)[:, np.newaxis]), axis=1)
+    #     np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+
+    for ind, filename in enumerate(os.listdir(outputdatapath)):
+        PVec, aIBiVec, tGrid, ReSt, ImSt = np.loadtxt(outputdatapath + '/' + filename, unpack=True)
+        P = PVec[0]; aIBi = aIBiVec[0]
+        if(aIBi == 0):
+            # if(P > 0.1 and aIBi < 7):
+            print(filename, P, aIBi)
+            fig, ax = plt.subplots()
+            ax.plot(tGrid, ImSt)
+            plt.show()
