@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import xarray as xr
 import Grid
 import pf_dynamic_sph
 import os
@@ -38,8 +40,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1000
-    dt = 500
+    # tMax = 1000; dt = 500
+    tMax = 30; dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -60,12 +62,29 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
+    def dirRF(dataset, kgrid):
+        CSAmp = dynsph_ds['Real_CSAmp'] + 1j * dynsph_ds['Imag_CSAmp']
+        dVk = kgrid.dV()
+        tgrid = CSAmp.coords['t'].values
+        CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+        DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+        for tind, t in enumerate(tgrid):
+            CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+            exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 + 2 * CSA0.conjugate() * CSAt, dVk)
+            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
+
+        ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
+        ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
+        dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+        return dirRF_ds
+
     # ---- SET OUTPUT DATA FOLDER ----
 
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     innerdatapath = datapath + '/imdyn_spherical'
+    nonintdatapath = datapath + '/redyn_nonint'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -77,15 +96,15 @@ if __name__ == "__main__":
 
     # runstart = timer()
 
-    # P = 0.5 * mI * nu
-    # aIBi = (6 * np.pi**2)**(1 / 3) * (-4)
+    # P = 0.1
+    # aIBi = -0.32
 
     # cParams = [P, aIBi]
 
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1)
-    # print(CSAmp_ds)
-    # CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    # # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi)) # imag time evolution to get polaron state
+    # dirRF_ds = dirRF(dynsph_ds, kgrid); dirRF_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -103,42 +122,44 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [P, aIBi] = cParams
-    #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    #     # CSAmp_ds = dynsph_ds.drop(['Pph', 'Nph', 'Real_DynOv', 'Imag_DynOv', 'Phase', 'Real_Delta_CSAmp', 'Imag_Delta_CSAmp'])
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1)
-    #     CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    #     loopend = timer()
-    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
-
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    if(taskCount != len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
         [P, aIBi] = cParams
+        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1)
-    CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi)) # imag time evolution to get polaron state
+        dirRF_ds = dirRF(dynsph_ds, kgrid); dirRF_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+
+        loopend = timer()
+        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
     end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # if(taskCount != len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
+
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+
+    # # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi)) # imag time evolution to get polaron state
+    # dirRF_ds = dirRF(dynsph_ds, kgrid); dirRF_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

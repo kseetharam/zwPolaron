@@ -117,7 +117,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
 
     # calculate some parameters
     nu_const = nu(gBB)
-    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)  # ***IS THIS VALID FOR DYNAMICS?
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
 
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
@@ -125,6 +125,14 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
+
+    # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
+
+    ds = xr.open_dataset('/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_8.12E+06/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # ds = xr.open_dataset('/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_8.12E+06/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+    cs.amplitude_phase[0:-1] = CSAmp.reshape(CSAmp.size)  # this is the initial condition for quenching the impurity from the interacting state to the non-interacting state
+    ham.gnum = 0
 
     # Time evolution
 
