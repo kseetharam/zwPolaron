@@ -61,8 +61,8 @@ if __name__ == "__main__":
     functions_wk = [lambda k: pfs.omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
     wk = kgrid.function_prod(names, functions_wk)
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # innerdatapath = datapath + '/imdyn_spherical'
     innerdatapath = datapath + '/redyn_nonint'
     outputdatapath = datapath + '/mm'
@@ -148,5 +148,11 @@ if __name__ == "__main__":
         aIBiVec = aIBi * np.ones(tgrid.size)
         PVec = P * np.ones(tgrid.size)
         EVec = Energy_id * np.ones(tgrid.size)
-        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], ds['Real_DynOv'].values[:, np.newaxis], ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
-        np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+        # data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], ds['Real_DynOv'].values[:, np.newaxis], ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
+        # np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+
+        St = np.exp(1j * Energy_id) * (ds['Real_DynOv'] + 1j * ds['Imag_DynOv'])
+        fig, ax = plt.subplots()
+        ax.plot(tgrid, np.abs(St.values), 'k-')
+
+        plt.show()
