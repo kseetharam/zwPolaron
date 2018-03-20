@@ -6,8 +6,8 @@ import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
 import sys
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 

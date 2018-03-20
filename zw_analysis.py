@@ -67,6 +67,22 @@ if __name__ == "__main__":
     innerdatapath = datapath + '/redyn_nonint'
     outputdatapath = datapath + '/mm'
 
+    def dirRF(dataset, kgrid):
+        CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+        dVk = kgrid.dV()
+        tgrid = CSAmp.coords['t'].values
+        CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+        DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+        for tind, t in enumerate(tgrid):
+            CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+            exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
+            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
+
+        ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
+        ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
+        dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+        return dirRF_ds
+
     # # # Individual Datasets OLD
 
     # tGrid = np.linspace(0, 100, 200)
@@ -126,6 +142,7 @@ if __name__ == "__main__":
         aIBi = ds.attrs['aIBi']
         P = ds.attrs['P']
         tgrid = ds.coords['t'].values
+        dirRF_ds = dirRF(ds, kgrid)
 
         # calculate energy explictly from imdyn polaron state
         gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
@@ -148,11 +165,10 @@ if __name__ == "__main__":
         aIBiVec = aIBi * np.ones(tgrid.size)
         PVec = P * np.ones(tgrid.size)
         EVec = Energy_id * np.ones(tgrid.size)
-        # data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], ds['Real_DynOv'].values[:, np.newaxis], ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
+        # data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], dirRF_ds['Real_DynOv'].values[:, np.newaxis], dirRF_ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
         # np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
 
-        St = np.exp(1j * Energy_id) * (ds['Real_DynOv'] + 1j * ds['Imag_DynOv'])
+        St = np.exp(1j * Energy_id) * (dirRF_ds['Real_DynOv'] + 1j * dirRF_ds['Imag_DynOv'])
         fig, ax = plt.subplots()
         ax.plot(tgrid, np.abs(St.values), 'k-')
-
         plt.show()
