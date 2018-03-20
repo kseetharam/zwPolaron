@@ -8,6 +8,7 @@ import os
 import itertools
 import Grid
 import pf_dynamic_sph as pfs
+import pf_static_sph
 
 if __name__ == "__main__":
 
@@ -60,8 +61,8 @@ if __name__ == "__main__":
     functions_wk = [lambda k: pfs.omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
     wk = kgrid.function_prod(names, functions_wk)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # innerdatapath = datapath + '/imdyn_spherical'
     innerdatapath = datapath + '/redyn_nonint'
     outputdatapath = datapath + '/mm'
@@ -110,6 +111,14 @@ if __name__ == "__main__":
 
     # # Individual Datasets
 
+    Nsteps = 1e2
+    # pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    aSi_tck = np.load('aSi_spline_sph.npy')
+    PBint_tck = np.load('PBint_spline_sph.npy')
+
+    dVk = kgrid.dV()
+    kzg_flat = pfs.kcos_func(kgrid)
+
     for ind, filename in enumerate(os.listdir(innerdatapath)):
         if filename == 'quench_Dataset_sph.nc':
             continue
@@ -117,7 +126,27 @@ if __name__ == "__main__":
         aIBi = ds.attrs['aIBi']
         P = ds.attrs['P']
         tgrid = ds.coords['t'].values
+
+        # calculate energy explictly from imdyn polaron state
+        gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
+        Amp_ds = xr.open_dataset(datapath + '/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        CSAmp = (Amp_ds['Real_CSAmp'] + 1j * Amp_ds['Imag_CSAmp']).values; CSAmp = CSAmp.reshape(CSAmp.size)
+        PB_id = np.dot(kzg_flat * np.abs(CSAmp)**2, dVk).real.astype(float)
+        DP_id = P - PB_id
+        Energy_id = (P**2 - PB_id**2) / (2 * mI) + np.dot(pfs.Omega(kgrid, DP_id, mI, mB, n0, gBB) * np.abs(CSAmp)**2, dVk) + gIB * (np.dot(pfs.Wk(kgrid, mB, n0, gBB) * CSAmp, dVk) + np.sqrt(n0))**2
+        Energy_id = Energy_id.real.astype(float)
+
+        # calculate energy from steady state formula
+        DP = pf_static_sph.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+        PB_Val = pf_static_sph.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        Energy = pf_static_sph.Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+        eMass = pf_static_sph.effMass(P, PB_Val, mI)
+
+        # print(np.abs((Energy_id - Energy) / Energy))
+
         aIBiVec = aIBi * np.ones(tgrid.size)
         PVec = P * np.ones(tgrid.size)
-        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], tgrid[:, np.newaxis], ds['Real_DynOv'].values[:, np.newaxis], ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
+        EVec = Energy_id * np.ones(tgrid.size)
+        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], ds['Real_DynOv'].values[:, np.newaxis], ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
         np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
