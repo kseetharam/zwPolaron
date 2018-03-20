@@ -42,7 +42,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # tMax = 1000; dt = 500
-    tMax = 1; dt = 0.2
+    tMax = 50; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
