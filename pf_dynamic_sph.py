@@ -126,15 +126,15 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     Params = [P, aIBi, mI, mB, n0, gBB]
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
 
-    # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
+    # # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
 
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_8.12E+06'
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_8.12E+06'
-    # datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_8.12E+06'
-    ds = xr.open_dataset(datapath + '/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
-    cs.amplitude_phase[0:-1] = CSAmp.reshape(CSAmp.size)  # this is the initial condition for quenching the impurity from the interacting state to the non-interacting state
-    ham.gnum = 0
+    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_8.12E+06'
+    # # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_8.12E+06'
+    # # datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_8.12E+06'
+    # ds = xr.open_dataset(datapath + '/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+    # cs.amplitude_phase[0:-1] = CSAmp.reshape(CSAmp.size)  # this is the initial condition for quenching the impurity from the interacting state to the non-interacting state
+    # ham.gnum = 0
 
     # Time evolution
 
