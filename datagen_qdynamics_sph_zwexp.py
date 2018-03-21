@@ -105,8 +105,8 @@ if __name__ == "__main__":
 
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    # # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    # # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -133,8 +133,8 @@ if __name__ == "__main__":
     #     [P, aIBi] = cParams
     #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    #     # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    #     # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     #     loopend = timer()
     #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -160,8 +160,8 @@ if __name__ == "__main__":
 
     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
 
-    CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(nonintdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     end = timer()
     print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
