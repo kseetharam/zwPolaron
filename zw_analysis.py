@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-# import matplotlib
-# import matplotlib.pyplot as plt
+import matplotlib
+import matplotlib.pyplot as plt
 import os
 import itertools
 import Grid
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     wk = kgrid.function_prod(names, functions_wk)
 
     # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     # innerdatapath = datapath + '/imdyn_spherical'
     innerdatapath = datapath + '/redyn_nonint'
@@ -87,60 +87,60 @@ if __name__ == "__main__":
         dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
         return dirRF_ds
 
-    # # Individual Datasets
+    # # # Individual Datasets
 
-    Nsteps = 1e2
-    # pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-    aSi_tck = np.load('aSi_spline_sph.npy')
-    PBint_tck = np.load('PBint_spline_sph.npy')
+    # Nsteps = 1e2
+    # # pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # aSi_tck = np.load('aSi_spline_sph.npy')
+    # PBint_tck = np.load('PBint_spline_sph.npy')
 
-    dVk = kgrid.dV()
-    kzg_flat = pfs.kcos_func(kgrid)
+    # dVk = kgrid.dV()
+    # kzg_flat = pfs.kcos_func(kgrid)
 
-    for ind, filename in enumerate(os.listdir(innerdatapath)):
-        if filename == 'quench_Dataset_sph.nc':
-            continue
-        with xr.open_dataset(innerdatapath + '/' + filename) as ds:
-            # ds = xr.open_dataset(innerdatapath + '/' + filename)
-            aIBi = ds.attrs['aIBi']
-            P = ds.attrs['P']
-            tgrid = ds.coords['t'].values
-            dirRF_ds = dirRF(ds, kgrid)
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename == 'quench_Dataset_sph.nc':
+    #         continue
+    #     with xr.open_dataset(innerdatapath + '/' + filename) as ds:
+    #         # ds = xr.open_dataset(innerdatapath + '/' + filename)
+    #         aIBi = ds.attrs['aIBi']
+    #         P = ds.attrs['P']
+    #         tgrid = ds.coords['t'].values
+    #         dirRF_ds = dirRF(ds, kgrid)
 
-        # calculate energy explictly from imdyn polaron state
-        gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
-        Amp_ds = xr.open_dataset(datapath + '/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-        CSAmp = (Amp_ds['Real_CSAmp'] + 1j * Amp_ds['Imag_CSAmp']).values; CSAmp = CSAmp.reshape(CSAmp.size)
-        PB_id = np.dot(kzg_flat * np.abs(CSAmp)**2, dVk).real.astype(float)
-        DP_id = P - PB_id
-        Energy_id = (P**2 - PB_id**2) / (2 * mI) + np.dot(pfs.Omega(kgrid, DP_id, mI, mB, n0, gBB) * np.abs(CSAmp)**2, dVk) + gIB * (np.dot(pfs.Wk(kgrid, mB, n0, gBB) * CSAmp, dVk) + np.sqrt(n0))**2
-        Energy_id = Energy_id.real.astype(float)
+    #     # calculate energy explictly from imdyn polaron state
+    #     gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
+    #     Amp_ds = xr.open_dataset(datapath + '/imdyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #     CSAmp = (Amp_ds['Real_CSAmp'] + 1j * Amp_ds['Imag_CSAmp']).values; CSAmp = CSAmp.reshape(CSAmp.size)
+    #     PB_id = np.dot(kzg_flat * np.abs(CSAmp)**2, dVk).real.astype(float)
+    #     DP_id = P - PB_id
+    #     Energy_id = (P**2 - PB_id**2) / (2 * mI) + np.dot(pfs.Omega(kgrid, DP_id, mI, mB, n0, gBB) * np.abs(CSAmp)**2, dVk) + gIB * (np.dot(pfs.Wk(kgrid, mB, n0, gBB) * CSAmp, dVk) + np.sqrt(n0))**2
+    #     Energy_id = Energy_id.real.astype(float)
 
-        # calculate energy from steady state formula
-        DP = pf_static_sph.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
-        PB_Val = pf_static_sph.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        Energy = pf_static_sph.Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-        eMass = pf_static_sph.effMass(P, PB_Val, mI)
+    #     # calculate energy from steady state formula
+    #     DP = pf_static_sph.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+    #     PB_Val = pf_static_sph.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    #     Energy = pf_static_sph.Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+    #     eMass = pf_static_sph.effMass(P, PB_Val, mI)
 
-        # print(np.abs((Energy_id - Energy) / Energy))
+    #     # print(np.abs((Energy_id - Energy) / Energy))
 
-        aIBiVec = aIBi * np.ones(tgrid.size)
-        PVec = P * np.ones(tgrid.size)
-        EVec = Energy_id * np.ones(tgrid.size)
-        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], dirRF_ds['Real_DynOv'].values[:, np.newaxis], dirRF_ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
-        np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+    #     aIBiVec = aIBi * np.ones(tgrid.size)
+    #     PVec = P * np.ones(tgrid.size)
+    #     EVec = Energy_id * np.ones(tgrid.size)
+    #     data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], dirRF_ds['Real_DynOv'].values[:, np.newaxis], dirRF_ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
+    #     np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
 
-        # St = np.exp(1j * Energy_id) * (dirRF_ds['Real_DynOv'] + 1j * dirRF_ds['Imag_DynOv'])
-        # fig, ax = plt.subplots()
-        # ax.plot(tgrid, np.abs(St.values), 'k-')
-        # plt.show()
+    #     # St = np.exp(1j * Energy_id) * (dirRF_ds['Real_DynOv'] + 1j * dirRF_ds['Imag_DynOv'])
+    #     # fig, ax = plt.subplots()
+    #     # ax.plot(tgrid, np.abs(St.values), 'k-')
+    #     # plt.show()
 
-    # for ind, filename in enumerate(os.listdir(outputdatapath)):
-    #     PVec, aIBiVec, EVec, tGrid, ReSt, ImSt = np.loadtxt(outputdatapath + '/' + filename, unpack=True)
-    #     P = PVec[0]; aIBi = aIBiVec[0]; Energy = EVec[0]
-    #     print(filename, P, aIBi)
-    #     St = np.exp(1j * Energy) * (ReSt + 1j * ImSt)
-    #     fig, ax = plt.subplots()
-    #     ax.plot(tGrid, np.imag(St))
-    #     plt.show()
+    for ind, filename in enumerate(os.listdir(outputdatapath)):
+        PVec, aIBiVec, EVec, tGrid, ReSt, ImSt = np.loadtxt(outputdatapath + '/' + filename, unpack=True)
+        P = PVec[0]; aIBi = aIBiVec[0]; Energy = EVec[0]
+        print(filename, P, aIBi)
+        St = np.exp(1j * Energy) * (ReSt + 1j * ImSt)
+        fig, ax = plt.subplots()
+        ax.plot(tGrid, np.abs(St))
+        plt.show()
