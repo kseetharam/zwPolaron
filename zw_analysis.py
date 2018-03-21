@@ -61,8 +61,8 @@ if __name__ == "__main__":
     functions_wk = [lambda k: pfs.omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
     wk = kgrid.function_prod(names, functions_wk)
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     # innerdatapath = datapath + '/imdyn_spherical'
     innerdatapath = datapath + '/redyn_nonint'
     outputdatapath = datapath + '/mm'
