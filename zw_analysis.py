@@ -69,14 +69,17 @@ if __name__ == "__main__":
 
     def dirRF(dataset, kgrid):
         CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+        Phase = dataset['Phase']
         dVk = kgrid.dV()
         tgrid = CSAmp.coords['t'].values
         CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+        Phase0 = Phase.isel(t=0).values
         DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
         for tind, t in enumerate(tgrid):
             CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+            Phaset = Phase.sel(t=t).values
             exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
-            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
+            DynOv_Vec[tind] = np.exp(-1j * (Phaset - Phase0)) * np.exp((-1 / 2) * exparg)
 
         ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
         ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
