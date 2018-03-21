@@ -138,11 +138,12 @@ if __name__ == "__main__":
     for ind, filename in enumerate(os.listdir(innerdatapath)):
         if filename == 'quench_Dataset_sph.nc':
             continue
-        ds = xr.open_dataset(innerdatapath + '/' + filename)
-        aIBi = ds.attrs['aIBi']
-        P = ds.attrs['P']
-        tgrid = ds.coords['t'].values
-        dirRF_ds = dirRF(ds, kgrid)
+        with xr.open_dataset(innerdatapath + '/' + filename) as ds:
+            # ds = xr.open_dataset(innerdatapath + '/' + filename)
+            aIBi = ds.attrs['aIBi']
+            P = ds.attrs['P']
+            tgrid = ds.coords['t'].values
+            dirRF_ds = dirRF(ds, kgrid)
 
         # calculate energy explictly from imdyn polaron state
         gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
@@ -165,10 +166,10 @@ if __name__ == "__main__":
         aIBiVec = aIBi * np.ones(tgrid.size)
         PVec = P * np.ones(tgrid.size)
         EVec = Energy_id * np.ones(tgrid.size)
-        # data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], dirRF_ds['Real_DynOv'].values[:, np.newaxis], dirRF_ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
-        # np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
+        data = np.concatenate((PVec[:, np.newaxis], aIBiVec[:, np.newaxis], EVec[:, np.newaxis], tgrid[:, np.newaxis], dirRF_ds['Real_DynOv'].values[:, np.newaxis], dirRF_ds['Imag_DynOv'].values[:, np.newaxis]), axis=1)
+        np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
 
-        St = np.exp(1j * Energy_id) * (dirRF_ds['Real_DynOv'] + 1j * dirRF_ds['Imag_DynOv'])
-        fig, ax = plt.subplots()
-        ax.plot(tgrid, np.abs(St.values), 'k-')
-        plt.show()
+        # St = np.exp(1j * Energy_id) * (dirRF_ds['Real_DynOv'] + 1j * dirRF_ds['Imag_DynOv'])
+        # fig, ax = plt.subplots()
+        # ax.plot(tgrid, np.abs(St.values), 'k-')
+        # plt.show()
