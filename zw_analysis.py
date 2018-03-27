@@ -65,7 +65,7 @@ if __name__ == "__main__":
     datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     # innerdatapath = datapath + '/imdyn_spherical'
-    innerdatapath = datapath + '/redyn_nonint'
+    innerdatapath = datapath + '/redyn_spherical_nonint'
     outputdatapath = datapath + '/mm'
 
     def dirRF(dataset, kgrid):
