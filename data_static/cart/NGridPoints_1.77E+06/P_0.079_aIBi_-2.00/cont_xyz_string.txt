@@ -1,1 +1,0 @@
-nxyz_xz_slice, nxyz_xy_slice, nPB_xz_slice, nPB_xy_slice, nPI_xz_slice, nPI_xy_slice
