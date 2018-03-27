@@ -41,8 +41,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1000; dt = 100
-    # tMax = 50; dt = 0.2
+    # tMax = 1000; dt = 100
+    tMax = 50; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -81,8 +81,8 @@ if __name__ == "__main__":
 
         # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
-    # toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    # toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
