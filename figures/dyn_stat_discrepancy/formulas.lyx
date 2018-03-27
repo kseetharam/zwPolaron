@@ -1,0 +1,215 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{braket}
+\usepackage{soul}
+\usepackage{color}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\hat{H} & =\frac{1}{2m_{I}}\left(\hat{\mathbf{P}}-\frac{1}{L^{\frac{d}{2}}}\sum_{\mathbf{k}}\mathbf{k}\cdot b_{\mathbf{k}}^{\dagger}b_{\mathbf{k}}\right)^{2}\\
+ & +\sum_{\mathbf{k}}\omega_{\mathbf{k}}b_{\mathbf{k}}^{\dagger}b_{\mathbf{k}}\\
+ & +g_{\Lambda}n_{0}\\
+ & +\frac{g_{\Lambda}\sqrt{n_{0}}}{L^{\frac{d}{2}}}\sum_{\mathbf{k}\neq0}W_{\mathbf{k}}\left(b_{-\mathbf{k}}^{\dagger}+b_{\mathbf{k}}\right)\\
+ & +\frac{g_{\Lambda}}{L^{\frac{d}{2}}}\sum_{\mathbf{k}\neq0,\mathbf{k}'\neq0}V_{\mathbf{k},\mathbf{k}'}^{\left(1\right)}b_{\mathbf{k}}^{\dagger}b_{\mathbf{k}'}\\
+ & +\frac{1}{2}\frac{g_{\Lambda}}{L^{\frac{d}{2}}}\sum_{\mathbf{k}\neq0,\mathbf{k}'\neq0}V_{\mathbf{k},\mathbf{k}'}^{\left(2\right)}\left(b_{\mathbf{k}}^{\dagger}b_{\mathbf{k}'}^{\dagger}+b_{-\mathbf{k}}b_{-\mathbf{k}'}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ket{\Psi_{coh}\left(t\right)}=e^{-i\phi\left(t\right)}e^{\sum_{k}\beta_{\mathbf{\mathbf{k}}}\left(t\right)b_{k}^{\dagger}-h.c.}\ket{0}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{P}_{B}\left[\beta\right]=\sum_{\mathbf{k}}\mathbf{k}\left|\beta_{\mathbf{k}}\right|^{2}
+\]
+
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+\chi_{\beta}^{+}\equiv\frac{1}{2}\sum_{\mathbf{k}}W_{\mathbf{k}}\left(\beta_{\mathbf{k}}+\beta_{\mathbf{k}}^{*}\right)
+\]
+
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+\chi_{\beta}^{-}\equiv\frac{1}{2}\sum_{\mathbf{k}}W_{\mathbf{k}}^{-1}\left(\beta_{\mathbf{k}}-\beta_{\mathbf{k}}^{*}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{P}_{B}=\sum_{\mathbf{k}}\mathbf{k}\left|\beta_{\mathbf{k}}\right|^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a_{*}^{-1}=\frac{2\pi}{\mu_{red}}\sum_{\mathbf{k}}\left(\frac{2\mu_{red}}{\left|\mathbf{k}\right|^{2}}-\frac{W_{\mathbf{k}}^{2}}{\Omega_{\mathbf{k}}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\beta_{\mathbf{k}}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Z=\left|\braket{\Psi_{0}|\Psi_{coh}}\right|^{2}=e^{-N_{ph}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+N_{ph}=\sum_{\mathbf{k}}\left|\beta_{\mathbf{k}}\right|^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+S\left(t\right)=\braket{\Psi_{0}|\Psi_{coh}\left(t\right)}=e^{-i\phi\left(t\right)-\frac{1}{2}N_{ph}\left(t\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+N_{ph}\left(t\right)=\sum_{\mathbf{k}}\left|\beta_{\mathbf{k}}\left(t\right)\right|^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

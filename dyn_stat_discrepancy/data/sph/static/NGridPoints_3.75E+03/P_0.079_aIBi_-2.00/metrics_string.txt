@@ -1,0 +1,1 @@
+NGridPoints, |k|_max, dk, P, aIBi, mI, mB, n0, gBB, nu, gIB, Pcrit, aSi, DP, PB, Energy, effMass, Nph, Z_factor
