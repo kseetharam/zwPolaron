@@ -55,14 +55,33 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    # ---- SET OUTPUT DATA FOLDER ----
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # Toggle parameters
 
-    # innerdatapath = datapath + '/redyn_cart'
-    # innerdatapath = datapath + '/imdyn_cart'
-    innerdatapath = datapath + '/imdyn_cart_long'
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'frohlich', 'Grid': 'cartesian'}
+
+    # ---- SET OUTPUT DATA FOLDER ----
+
+    if toggleDict['Location'] == 'home':
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'work':
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+
+    if toggleDict['Dynamics'] == 'real':
+        innerdatapath = datapath + '/redyn'
+    elif toggleDict['Dynamics'] == 'imaginary':
+        innerdatapath = datapath + '/imdyn'
+
+    if toggleDict['Grid'] == 'cartesian':
+        innerdatapath = innerdatapath + '_cart'
+    elif toggleDict['Grid'] == 'spherical':
+        innerdatapath = innerdatapath + '_spherical'
+
+    if toggleDict['Coupling'] == 'frohlich':
+        innerdatapath = innerdatapath + '_froh'
+    elif toggleDict['Coupling'] == 'twophonon':
+        innerdatapath = innerdatapath
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)
@@ -78,7 +97,7 @@ if __name__ == "__main__":
     # aIBi = -5
     # cParams = [P, aIBi]
 
-    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
     # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
@@ -112,7 +131,7 @@ if __name__ == "__main__":
         cParams = cParams_List[taskID]
         [P, aIBi] = cParams
 
-    dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
     dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()

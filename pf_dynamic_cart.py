@@ -176,7 +176,7 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
 
 # ---- DATA GENERATION ----
 # @profile
-def quenchDynamics_DataGeneration(cParams, gParams, sParams):
+def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
     import CoherentState
@@ -203,7 +203,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams):
     cs = CoherentState.CoherentState(kgrid, xgrid)
     # Initialization PolaronHamiltonian
     Params = [P, aIBi, mI, mB, n0, gBB]
-    ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params)
+    ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params, toggleDict)
     # calculate some parameters
     nu_const = nu(gBB)
     gIB = g(cs.kxg, cs.kyg, cs.kzg, cs.dVk[0], aIBi, mI, mB, n0, gBB)

@@ -59,12 +59,25 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
 
-    # ---- SET OUTPUT DATA FOLDER ----
-    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    # Toggle parameters
 
-    innerdatapath = datapath + '/steadystate_cart'
+    toggleDict = {'Location': 'work', 'Grid': 'cartesian'}
+
+    # ---- SET OUTPUT DATA FOLDER ----
+
+    if toggleDict['Location'] == 'home':
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'work':
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+
+    innerdatapath = datapath + '/steadystate'
+
+    if toggleDict['Grid'] == 'cartesian':
+        innerdatapath = innerdatapath + '_cart'
+    elif toggleDict['Grid'] == 'spherical':
+        innerdatapath = innerdatapath + '_spherical'
 
     # if os.path.isdir(datapath) is False:
     #     os.mkdir(datapath)

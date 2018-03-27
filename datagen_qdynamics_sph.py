@@ -1,10 +1,13 @@
 import numpy as np
+import pandas as pd
+import xarray as xr
 import Grid
 import pf_dynamic_sph
 import os
 from timeit import default_timer as timer
-from pf_static_sph import aSi_grid
-
+import sys
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
@@ -12,11 +15,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
-
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 99
-    dt = 1
+    # tMax = 1000; dt = 100
+    tMax = 1; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -54,45 +54,91 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 1
+    mI = 1.7
     mB = 1
     n0 = 1
-    gBB = (4 * np.pi / mB) * 0.05
+    aBB = 0.062
+    gBB = (4 * np.pi / mB) * aBB
+    nu = pf_dynamic_sph.nu(gBB)
 
     sParams = [mI, mB, n0, gBB]
 
+    def dirRF(dataset, kgrid):
+        CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+        dVk = kgrid.dV()
+        tgrid = CSAmp.coords['t'].values
+        CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+        DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+        for tind, t in enumerate(tgrid):
+            CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+            exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
+            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
+
+        ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
+        ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
+        dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+        return dirRF_ds
+
+        # Toggle parameters
+
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    # toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+
     # ---- SET OUTPUT DATA FOLDER ----
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    if toggleDict['Location'] == 'home':
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    elif toggleDict['Location'] == 'work':
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
-    # innerdatapath = datapath
-    # innerdatapath = datapath + '/redyn_spherical'
-    innerdatapath = datapath + '/imdyn_spherical'
-    # innerdatapath = datapath + '/redyn_spherical_frohlich'
-    # innerdatapath = datapath + '/imdyn_spherical_frohlich'
+    if toggleDict['Dynamics'] == 'real':
+        innerdatapath = datapath + '/redyn'
+    elif toggleDict['Dynamics'] == 'imaginary':
+        innerdatapath = datapath + '/imdyn'
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    if toggleDict['Grid'] == 'cartesian':
+        innerdatapath = innerdatapath + '_cart'
+    elif toggleDict['Grid'] == 'spherical':
+        innerdatapath = innerdatapath + '_spherical'
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    if toggleDict['Coupling'] == 'frohlich':
+        innerdatapath = innerdatapath + '_froh'
+    elif toggleDict['Coupling'] == 'twophonon':
+        innerdatapath = innerdatapath
+
+    if toggleDict['InitCS'] == 'file':
+        toggleDict['InitCS_datapath'] = datapath + '/imdyn_spherical'
+    elif toggleDict['InitCS'] == 'default':
+        toggleDict['InitCS_datapath'] = 'InitCS ERROR'
+
+    if toggleDict['Interaction'] == 'off':
+        innerdatapath = innerdatapath + '_nonint'
+    elif toggleDict['Interaction'] == 'on':
+        innerdatapath = innerdatapath
+
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
+
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
 
-    # P = 2.4
-    # aIBi = -10
-
-    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
-    # print(aIBi)
+    # P = 0.5829473548404368
+    # aIBi = -1.17
 
     # cParams = [P, aIBi]
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+
+    # if toggleDict['LastTimeStepOnly'] == 'yes':
+    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    # else:
+    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -101,52 +147,58 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-10.0, -5.0])
-    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
+    # aIBi_Vals = (n0*6 * np.pi**2)**(1 / 3) * np.array([-0.3])
+    # aIBi_Vals = np.array([-1.17])
+    aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
 
-    # P_Vals = np.array([0.4])
-    P_Vals = np.linspace(0.1, 5.0, 50)
+    P_Vals = np.linspace(0.1, mI * nu, 30)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    # Pcrit_Vals = pf_static_sph.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-    # print(Pcrit_Vals)
-
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-
-    for ind, cParams in enumerate(cParams_List):
-        loopstart = timer()
-        [P, aIBi] = cParams
-        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-        dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-        loopend = timer()
-        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
-
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # if(taskCount != len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
+    # for ind, cParams in enumerate(cParams_List):
+    #     loopstart = timer()
     #     [P, aIBi] = cParams
+    #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
-    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #     if toggleDict['LastTimeStepOnly'] == 'yes':
+    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    #     else:
+    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+
+    #     loopend = timer()
+    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
     # end = timer()
-    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount != len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [P, aIBi] = cParams
+
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+
+    if toggleDict['LastTimeStepOnly'] == 'yes':
+        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    else:
+        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+
+    end = timer()
+    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
