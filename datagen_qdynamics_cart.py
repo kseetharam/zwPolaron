@@ -33,7 +33,6 @@ if __name__ == "__main__":
     tMax = 1000
     dt = 10
     tgrid = np.arange(0, tMax + dt, dt)
-    print(tgrid)
 
     gParams = [xgrid, kgrid, tgrid]
 
@@ -104,7 +103,7 @@ if __name__ == "__main__":
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount != len(cParams_List)):
+    if(taskCount > len(cParams_List)):
         print('ERROR: TASK COUNT MISMATCH')
         P = float('nan')
         aIBi = float('nan')
