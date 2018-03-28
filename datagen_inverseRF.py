@@ -63,27 +63,9 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    def dirRF(dataset, kgrid):
-        CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
-        dVk = kgrid.dV()
-        tgrid = CSAmp.coords['t'].values
-        CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
-        DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
-        for tind, t in enumerate(tgrid):
-            CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
-            exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
-            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
+    # Toggle parameters
 
-        ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
-        ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
-        dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
-        return dirRF_ds
-
-        # Toggle parameters
-
-    # toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
-    # toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -125,7 +107,7 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # # # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
 
@@ -135,11 +117,7 @@ if __name__ == "__main__":
     # cParams = [P, aIBi]
 
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-
-    # if toggleDict['LastTimeStepOnly'] == 'yes':
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    # else:
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    # DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -166,11 +144,7 @@ if __name__ == "__main__":
     #     loopstart = timer()
     #     [P, aIBi] = cParams
     #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-
-    #     if toggleDict['LastTimeStepOnly'] == 'yes':
-    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    #     else:
-    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #     DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     #     loopend = timer()
     #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -185,7 +159,7 @@ if __name__ == "__main__":
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount != len(cParams_List)):
+    if(taskCount > len(cParams_List)):
         print('ERROR: TASK COUNT MISMATCH')
         P = float('nan')
         aIBi = float('nan')
@@ -195,11 +169,7 @@ if __name__ == "__main__":
         [P, aIBi] = cParams
 
     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-
-    if toggleDict['LastTimeStepOnly'] == 'yes':
-        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    else:
-        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
     print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
