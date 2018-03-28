@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-# import matplotlib
-# import matplotlib.pyplot as plt
+import matplotlib
+import matplotlib.pyplot as plt
 import os
 import itertools
 import Grid
@@ -76,10 +76,10 @@ if __name__ == "__main__":
             np.savetxt(outputdatapath + '/quench_P_{:.3f}_aIBi_{:.2f}.dat'.format(P, aIBi), data)
 
     # for ind, filename in enumerate(os.listdir(outputdatapath)):
-    #     PVec, aIBiVec, EVec, tGrid, ReSt, ImSt = np.loadtxt(outputdatapath + '/' + filename, unpack=True)
-    #     P = PVec[0]; aIBi = aIBiVec[0]; Energy = EVec[0]
+    #     PVec, aIBiVec, P2mVec, tGrid, ReSt, ImSt = np.loadtxt(outputdatapath + '/' + filename, unpack=True)
+    #     P = PVec[0]; aIBi = aIBiVec[0]; P2m = P2mVec[0]
     #     print(filename, P, aIBi)
-    #     St = np.exp(1j * Energy) * (ReSt + 1j * ImSt)
+    #     St = np.exp(1j * P2m) * (ReSt + 1j * ImSt)
     #     fig, ax = plt.subplots()
-    #     ax.plot(tGrid, np.abs(St))
+    #     ax.plot(tGrid, np.imag(St))
     #     plt.show()
