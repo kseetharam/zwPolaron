@@ -117,7 +117,7 @@ if __name__ == "__main__":
     # cParams = [P, aIBi]
 
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     #     loopstart = timer()
     #     [P, aIBi] = cParams
     #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    #     DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #     DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     #     loopend = timer()
     #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         [P, aIBi] = cParams
 
     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
     print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
