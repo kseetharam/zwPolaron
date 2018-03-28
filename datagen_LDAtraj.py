@@ -41,8 +41,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # tMax = 1000; dt = 100
-    tMax = 1; dt = 0.2
+    tMax = 50; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -64,14 +63,15 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    # LDA functions
-
     dP = 0.5 * mI * nu
+    fParams = [dP]
     print('Force Time scale: {0}'.format(dP / (nu / xi**2)))
 
-    def F_ext_func(t, F):
+    # LDA functions
+
+    def F_ext_func(t, F, dP):
         TF = dP / F
-        if t < TF:
+        if t <= TF:
             return F
         else:
             return 0
@@ -122,22 +122,23 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
-    F = 0.1 * nu / (xi**2)
+    F = 0.1 * nu / xi**2
+    print('TF: {0}'.format(dP / F))
     aIBi = -1.17
 
     cParams = [F, aIBi]
 
-    # ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, toggleDict)
-    # ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
@@ -148,7 +149,7 @@ if __name__ == "__main__":
 
     aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
 
-    F_Vals = np.linspace(0.1, 2 * nu / (xi**2), 30)
+    F_Vals = np.linspace(0.1 * (nu / xi**2), 2 * (nu / xi**2), 30)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for F in F_Vals:
@@ -161,7 +162,7 @@ if __name__ == "__main__":
     # for ind, cParams in enumerate(cParams_List):
     #     loopstart = timer()
     #     [aIBi] = cParams
-    #     ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, toggleDict)
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
     #     ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     #     loopend = timer()
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     #     cParams = cParams_List[taskID]
     #     [aIBi] = cParams
 
-    # ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, toggleDict)
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
     # ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     # end = timer()

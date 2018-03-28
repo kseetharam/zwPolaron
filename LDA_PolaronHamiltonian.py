@@ -3,7 +3,7 @@ import pf_dynamic_sph as pfs
 import pf_dynamic_cart as pfc
 
 
-class PolaronHamiltonian:
+class LDA_PolaronHamiltonian:
         # """ This is a class that stores information about the Hamiltonian"""
 
     def __init__(self, coherent_state, Params, LDA_funcs, LDA_Params, toggleDict):
@@ -55,7 +55,7 @@ class PolaronHamiltonian:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         [F_ext_func, F_Vconf_func, F_Vden_func] = self.LDA_funcs
-        [F] = self.LDA_Params
+        [F, dP] = self.LDA_Params
 
         # Calculate updates
 
@@ -83,7 +83,7 @@ class PolaronHamiltonian:
                                         amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                         self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
             phase_new_temp = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
-            P_new_temp = F_ext_func(t, F) + F_Vconf_func(X) + F_Vconf_func(X)
+            P_new_temp = F_ext_func(t, F, dP) + F_Vconf_func(X) + F_Vconf_func(X)
             X_new_temp = (P - PB) / mI
 
         elif self.dynamicsType == 'imaginary':

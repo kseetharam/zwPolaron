@@ -198,7 +198,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     return dynsph_ds
 
 
-def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, toggleDict):
+def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
     import LDA_CoherentState
@@ -207,6 +207,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, togg
     [Fext_mag, aIBi] = cParams
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
+    [dP] = fParams
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
@@ -222,15 +223,15 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, togg
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
-    LDA_Params = [Fext_mag]
+    LDA_Params = [Fext_mag, dP]
     ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, LDA_Params, toggleDict)
 
     # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
     if toggleDict['InitCS'] == 'file':
         ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
-        amplitude = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
-        phase = ds['Phase'].values
-        cs.set_initState(amplitude, phase, P=0, X=0)
+        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+        CSPhase = ds['Phase'].values
+        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0, X=0)
 
     if toggleDict['Interaction'] == 'off':
         ham.gnum = 0
@@ -273,7 +274,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, togg
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Fext_mag': Fext_mag}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Fext_mag': Fext_mag, 'TF': dP / Fext_mag}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
