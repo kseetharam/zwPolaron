@@ -63,23 +63,7 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    def dirRF(dataset, kgrid):
-        CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
-        dVk = kgrid.dV()
-        tgrid = CSAmp.coords['t'].values
-        CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
-        DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
-        for tind, t in enumerate(tgrid):
-            CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
-            exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
-            DynOv_Vec[tind] = np.exp((-1 / 2) * exparg)
-
-        ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
-        ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
-        dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
-        return dirRF_ds
-
-        # Toggle parameters
+    # Toggle parameters
 
     # toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
     toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}

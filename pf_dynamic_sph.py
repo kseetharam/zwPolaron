@@ -196,3 +196,85 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
     return dynsph_ds
+
+
+def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, LDA_funcs, toggleDict):
+    #
+    # do not run this inside CoherentState or PolaronHamiltonian
+    import LDA_CoherentState
+    import LDA_PolaronHamiltonian
+    # takes parameters, performs dynamics, and outputs desired observables
+    [Fext_mag, aIBi] = cParams
+    [xgrid, kgrid, tgrid] = gParams
+    [mI, mB, n0, gBB] = sParams
+
+    NGridPoints = kgrid.size()
+    k_max = kgrid.getArray('k')[-1]
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+
+    # calculate some parameters
+    nu_const = nu(gBB)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+
+    # Initialization CoherentState
+    cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
+
+    # Initialization PolaronHamiltonian
+    Params = [aIBi, mI, mB, n0, gBB]
+    LDA_Params = [Fext_mag]
+    ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, LDA_Params, toggleDict)
+
+    # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
+    if toggleDict['InitCS'] == 'file':
+        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
+        amplitude = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+        phase = ds['Phase'].values
+        cs.set_initState(amplitude, phase, P=0, X=0)
+
+    if toggleDict['Interaction'] == 'off':
+        ham.gnum = 0
+
+    # Time evolution
+
+    # Initialize observable Data Arrays
+    Pph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Nph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+
+    P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    start = timer()
+    for ind, t in enumerate(tgrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tgrid[ind - 1]
+            cs.evolve(dt, ham)
+
+        Pph_da[ind] = cs.get_PhononMomentum()
+        Nph_da[ind] = cs.get_PhononNumber()
+        Phase_da[ind] = cs.get_Phase()
+        Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
+        ReAmp_da[ind] = np.real(Amp)
+        ImAmp_da[ind] = np.imag(Amp)
+        P_da[ind] = cs.get_totMom()
+        X_da[ind] = cs.get_impPos()
+
+        end = timer()
+        print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
+        start = timer()
+
+    # Create Data Set
+
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
+    coords_dict = {'t': tgrid}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Fext_mag': Fext_mag}
+
+    dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+
+    return dynsph_ds
