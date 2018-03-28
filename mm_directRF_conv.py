@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     # innerdatapath = datapath + '/imdyn_spherical'
     innerdatapath = datapath + '/redyn_spherical_nonint'
-    outputdatapath = datapath + '/mm'
+    outputdatapath = datapath + '/mm_dirRF'
 
     def dirRF(dataset, kgrid):
         CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
