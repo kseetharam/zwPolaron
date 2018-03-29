@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     aIBi = -1.17
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
-    dP = attrs['dP']
+    dP = attrs['dP'] - 0.1
     mI = attrs['mI']
     Fscale = attrs['nu'] / attrs['xi']**2
     FVals = qds['F'].values
