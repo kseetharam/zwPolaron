@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     # for ind, cParams in enumerate(cParams_List):
     #     loopstart = timer()
-    #     [aIBi] = cParams
+    #     [F, aIBi] = cParams
     #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
     #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         sys.exit()
     else:
         cParams = cParams_List[taskID]
-        [aIBi] = cParams
+        [F, aIBi] = cParams
 
     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
