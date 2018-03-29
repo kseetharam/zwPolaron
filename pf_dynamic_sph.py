@@ -217,6 +217,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
     # calculate some parameters
     nu_const = nu(gBB)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = np.sqrt(8 * np.pi * n0 * aBB)
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
@@ -274,7 +276,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'Fext_mag': Fext_mag, 'TF': dP / Fext_mag}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': dP / Fext_mag}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
