@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (40, 40, 40)
-    (dx, dy, dz) = (0.1, 0.1, 0.1)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     # (Lx, Ly, Lz) = (21, 21, 21)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
@@ -54,8 +54,8 @@ if __name__ == "__main__":
     n0 = 1
     aBB = 0.062
     gBB = (4 * np.pi / mB) * aBB
+    nu = pfs.nu(gBB)
     xi = np.sqrt(8 * np.pi * n0 * aBB)
-    print(xi)
 
     # Interpolation
 
@@ -72,19 +72,20 @@ if __name__ == "__main__":
     runstart = timer()
 
     P = 0.1
-    aIBi = -0.32
-    cParams = [P, aIBi]
+    # aIBi = -0.32
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5])
 
-    DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-    aSi = pfs.aSi_interp(DP, aSi_tck)
-    PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-    # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-    # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-    # nu_const = nu(gBB)
-    eMass = pfs.effMass(P, PB_Val, mI)
-    # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
-    # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-    # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-    end = timer()
-    print('Mass: {0}'.format(eMass / mI))
-    print('aSi-aIBi: {0}'.format(aSi - aIBi))
+    for Aind, aIBi in enumerate(aIBi_Vals):
+        DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+        aSi = pfs.aSi_interp(DP, aSi_tck)
+        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+        # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+        # nu_const = nu(gBB)
+        eMass = pfs.effMass(P, PB_Val, mI)
+        # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+        # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        end = timer()
+        print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
+        # print('aSi-aIBi: {0}'.format(aSi - aIBi))

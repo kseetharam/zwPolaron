@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import pf_static_sph as pfs
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -86,7 +87,7 @@ if __name__ == "__main__":
     aIBi = -1.17
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
-    dP = attrs['dP'] - 0.1
+    dP = attrs['dP']
     mI = attrs['mI']
     Fscale = attrs['nu'] / attrs['xi']**2
     FVals = qds['F'].values
@@ -102,8 +103,9 @@ if __name__ == "__main__":
     #     # ax.set_xscale('log'); ax.set_yscale('log')
     #     # print('TF: {0}'.format(dP / F))
     #     vf = v_ds.sel(F=F).isel(t=-1).values
+    #     print(F / Fscale)
     #     ms = dP / vf
-    #     print('ms/mI: {0}'.format(ms / attrs['mI']))
+    #     # print('ms/mI: {0}'.format(ms / attrs['mI']))
     #     plt.show()
 
     x_ds = qds_aIBi['X']
@@ -122,11 +124,11 @@ if __name__ == "__main__":
     # # Plotting
     # fig, ax = plt.subplots()
 
-    # ax.plot(FVals / Fscale, vf_Vals, 'r-')
-    # ax.set_ylim([0.975 * vf_ave, 1.025 * vf_ave])
-    # ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dx}|_{t=\infty}$')
-    # ax.set_xlabel(r'$\frac{F}{\eta}$' + ' with ' + r'$\eta=\frac{c}{\xi^{2}}$')
-    # ax.set_title('Final (avergae) impurity velocity')
+    # # ax.plot(FVals / Fscale, vf_Vals, 'r-')
+    # # ax.set_ylim([0.975 * vf_ave, 1.025 * vf_ave])
+    # # ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dx}|_{t=\infty}$')
+    # # ax.set_xlabel(r'$\frac{F}{\eta}$' + ' with ' + r'$\eta=\frac{c}{\xi^{2}}$')
+    # # ax.set_title('Final (average) impurity velocity')
 
     # ax.plot(FVals, ms_Vals / mI, 'b-')
     # ax.set_ylim([0.975 * ms_ave / mI, 1.025 * ms_ave / mI])
@@ -153,9 +155,83 @@ if __name__ == "__main__":
         vf_AVals[aind] = np.average(vf_Vals)
         ms_AVals[aind] = np.average(ms_Vals)
 
+    # print(ms_AVals / mI)
     fig, ax = plt.subplots()
     ax.plot(aIBi_Vals, ms_AVals / mI, 'ro')
     ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
     ax.set_xlabel(r'$a_{IB}^{-1}$')
     ax.set_title('Impurity mass enhancement')
     plt.show()
+
+    # Steady state calc
+
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+
+    NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+
+    # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
+        print('k ARRAY GENERATION ERROR')
+
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+
+    mI = 1.7
+    mB = 1
+    n0 = 1
+    aBB = 0.062
+    gBB = (4 * np.pi / mB) * aBB
+    nu = pfs.nu(gBB)
+    xi = np.sqrt(8 * np.pi * n0 * aBB)
+
+    # Interpolation
+
+    Nsteps = 1e2
+    pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+
+    aSi_tck = np.load('aSi_spline_sph.npy')
+    PBint_tck = np.load('PBint_spline_sph.npy')
+
+    sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
+
+    # # ---- SINGLE FUNCTION RUN ----
+
+    P = 0.1
+    # aIBi = -0.32
+    SS_ms_Avals = np.zeros(aIBi_Vals.size)
+
+    for Aind, aIBi in enumerate(aIBi_Vals):
+        DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+        aSi = pfs.aSi_interp(DP, aSi_tck)
+        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+        # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+        # nu_const = nu(gBB)
+        SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
+        # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+        # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        # print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
+        # print('aSi-aIBi: {0}'.format(aSi - aIBi))
+
+    mE = ms_AVals / mI
+    SS_mE = SS_ms_Avals / mI
+    print(mE)
+    print(SS_mE)
+    mE_diff = np.abs(mE - SS_mE) / mE
+    print(mE_diff)
