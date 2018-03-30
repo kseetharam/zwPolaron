@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -108,19 +108,19 @@ if __name__ == "__main__":
     #     ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
     #     plt.show()
 
-    # # VELOCITY AS A FUNCTION OF FORCE
+    # VELOCITY AS A FUNCTION OF TIME
 
-    # v_ds = (qds_aIBi['X'].diff('t')).rename('v')
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     v_ds.sel(F=F).plot(ax=ax, label='')
-    #     ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, v_ds.sel(F=F).max('t'), tVals.size), 'g--', label='TF')
-    #     ax.legend()
-    #     ax.set_xlim([0, 20])
-    #     ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dx}$')
-    #     ax.set_xlabel('t')
-    #     ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
-    #     plt.show()
+    v_ds = (qds_aIBi['X'].diff('t')).rename('v')
+    for Find, F in enumerate(FVals):
+        fig, ax = plt.subplots()
+        v_ds.sel(F=F).plot(ax=ax, label='')
+        ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, v_ds.sel(F=F).max('t'), tVals.size), 'g--', label='TF')
+        ax.legend()
+        ax.set_xlim([0, 20])
+        ax.set_ylabel(r'$v=\frac{d<X>}{dx}$')
+        ax.set_xlabel('t')
+        ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
+        plt.show()
 
     # # VELOCITY AND EFFECTIVE MASS AS A FUNCTION OF FORCE
 
