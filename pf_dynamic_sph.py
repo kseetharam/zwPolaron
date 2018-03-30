@@ -115,10 +115,10 @@ def spectFunc(t_Vec, S_Vec):
     domega = 2 * np.pi / (Nt * dt)
     tdecay = 20
     decayFactor = np.exp(-1 * t_Vec / tdecay)
-    Sarg = np.ifftshift(S_Vec * decayFactor)
+    Sarg = np.fft.ifftshift(S_Vec * decayFactor)
     sf_preshift = 2 * np.real((1 / domega) * np.fft.ifft(Sarg))
-    sf = np.fftshift(sf_preshift)
-    omega = np.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
+    sf = np.fft.fftshift(sf_preshift)
+    omega = np.fft.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
     return omega, sf
 
 # ---- DYNAMICS ----
