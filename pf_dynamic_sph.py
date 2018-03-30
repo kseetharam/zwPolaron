@@ -87,17 +87,41 @@ def g(kgrid, aIBi, mI, mB, n0, gBB):
 
 #     return DP + PB
 
+def dirRF(dataset, kgrid):
+    CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+    Phase = dataset['Phase']
+    dVk = kgrid.dV()
+    tgrid = CSAmp.coords['t'].values
+    CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+    Phase0 = Phase.isel(t=0).values
+    DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+
+    for tind, t in enumerate(tgrid):
+        CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+        Phaset = Phase.sel(t=t).values
+        exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
+        DynOv_Vec[tind] = np.exp(-1j * (Phaset - Phase0)) * np.exp((-1 / 2) * exparg)
+
+    ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
+    ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
+    dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+    return dirRF_ds
+
 
 def spectFunc(t_Vec, S_Vec):
     # spectral function (Fourier Transform of dynamical overlap)
-    tstep = t_Vec[1] - t_Vec[0]
-    N = t_Vec.size
-    tdecay = 3
+    dt = t_Vec[1] - t_Vec[0]
+    Nt = t_Vec.size
+    domega = 2 * np.pi / (Nt * dt)
+    tdecay = 20
     decayFactor = np.exp(-1 * t_Vec / tdecay)
-    # decayFactor = 1
-    sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
-    omega = 2 * np.pi * np.fft.fftfreq(N, d=tstep)
+    Sarg = np.ifftshift(S_Vec * decayFactor)
+    sf_preshift = 2 * np.real((1 / domega) * np.fft.ifft(Sarg))
+    sf = np.fftshift(sf_preshift)
+    omega = np.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
     return omega, sf
+
+# ---- DYNAMICS ----
 
 
 def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
