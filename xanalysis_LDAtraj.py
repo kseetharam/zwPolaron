@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -94,34 +94,49 @@ if __name__ == "__main__":
     tVals = qds['t'].values
     qds_aIBi = qds.sel(aIBi=aIBi)
 
+    # # MOMENTUM CHECK
+
+    # for Find, F in enumerate(FVals):
+    #     fig, ax = plt.subplots()
+    #     qds_aIBi.sel(F=F)['P'].plot(ax=ax, label='')
+    #     ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, qds_aIBi.sel(F=F)['P'].max('t'), tVals.size), 'g--', label='TF')
+    #     ax.plot(tVals, dP * np.ones(tVals.size), 'r--', label=r'$\Delta P=F \cdot TF$')
+    #     ax.legend()
+    #     ax.set_xlim([0, 20])
+    #     ax.set_ylabel('P')
+    #     ax.set_xlabel('t')
+    #     ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
+    #     plt.show()
+
+    # # VELOCITY AS A FUNCTION OF FORCE
+
     # v_ds = (qds_aIBi['X'].diff('t')).rename('v')
     # for Find, F in enumerate(FVals):
     #     fig, ax = plt.subplots()
-    #     v_ds.sel(F=F).plot(ax=ax)
-    #     ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, v_ds.sel(F=F).max('t'), tVals.size), 'g--')
+    #     v_ds.sel(F=F).plot(ax=ax, label='')
+    #     ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, v_ds.sel(F=F).max('t'), tVals.size), 'g--', label='TF')
+    #     ax.legend()
     #     ax.set_xlim([0, 20])
-    #     # ax.set_xscale('log'); ax.set_yscale('log')
-    #     # print('TF: {0}'.format(dP / F))
-    #     vf = v_ds.sel(F=F).isel(t=-1).values
-    #     print(F / Fscale)
-    #     ms = dP / vf
-    #     # print('ms/mI: {0}'.format(ms / attrs['mI']))
+    #     ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dx}$')
+    #     ax.set_xlabel('t')
+    #     ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
     #     plt.show()
 
-    x_ds = qds_aIBi['X']
-    numPoints = 10
-    vf_Vals = np.zeros(FVals.size)
-    ms_Vals = np.zeros(FVals.size)
-    for Find, F in enumerate(FVals):
-        XTail = x_ds.sel(F=F).isel(t=np.arange(-1 * numPoints, 0))
-        tTail = XTail.coords['t']
-        [vf_Vals[Find], const] = np.polyfit(tTail.values, XTail.values, deg=1)
-        ms_Vals[Find] = dP / vf_Vals[Find]
+    # # VELOCITY AND EFFECTIVE MASS AS A FUNCTION OF FORCE
 
-    vf_ave = np.average(vf_Vals)
-    ms_ave = np.average(ms_Vals)
+    # x_ds = qds_aIBi['X']
+    # numPoints = 10
+    # vf_Vals = np.zeros(FVals.size)
+    # ms_Vals = np.zeros(FVals.size)
+    # for Find, F in enumerate(FVals):
+    #     XTail = x_ds.sel(F=F).isel(t=np.arange(-1 * numPoints, 0))
+    #     tTail = XTail.coords['t']
+    #     [vf_Vals[Find], const] = np.polyfit(tTail.values, XTail.values, deg=1)
+    #     ms_Vals[Find] = dP / vf_Vals[Find]
 
-    # # Plotting
+    # vf_ave = np.average(vf_Vals)
+    # ms_ave = np.average(ms_Vals)
+
     # fig, ax = plt.subplots()
 
     # # ax.plot(FVals / Fscale, vf_Vals, 'r-')
@@ -130,108 +145,102 @@ if __name__ == "__main__":
     # # ax.set_xlabel(r'$\frac{F}{\eta}$' + ' with ' + r'$\eta=\frac{c}{\xi^{2}}$')
     # # ax.set_title('Final (average) impurity velocity')
 
-    # ax.plot(FVals, ms_Vals / mI, 'b-')
+    # ax.plot(FVals / Fscale, ms_Vals / mI, 'b-')
     # ax.set_ylim([0.975 * ms_ave / mI, 1.025 * ms_ave / mI])
-    # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}=\frac{1}{m_{I}} \cdot \frac{F \cdot T_{F}}{v_{f}}$')
+    # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}=\frac{1}{m_{I}} (\frac{F \cdot T_{F}}{v_{f}})$')
     # ax.set_xlabel(r'$\frac{F}{\eta}$' + ' with ' + r'$\eta=\frac{c}{\xi^{2}}$')
-    # ax.set_title('Impurity mass enhancement')
+    # ax.set_title('Polaron Mass Enhancement vs. Applied Force ($P=0.1$)')
 
     # plt.show()
 
-    aIBi_Vals = qds['aIBi'].values
-    vf_AVals = np.zeros(aIBi_Vals.size)
-    ms_AVals = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        x_ds = qds.sel(aIBi=aIBi)['X']
-        numPoints = 10
-        vf_Vals = np.zeros(FVals.size)
-        ms_Vals = np.zeros(FVals.size)
-        for Find, F in enumerate(FVals):
-            XTail = x_ds.sel(F=F).isel(t=np.arange(-1 * numPoints, 0))
-            tTail = XTail.coords['t']
-            [vf_Vals[Find], const] = np.polyfit(tTail.values, XTail.values, deg=1)
-            ms_Vals[Find] = dP / vf_Vals[Find]
+    # # EFFECTIVE MASS CALCULATION AND COMPARISON
 
-        vf_AVals[aind] = np.average(vf_Vals)
-        ms_AVals[aind] = np.average(ms_Vals)
+    # aIBi_Vals = qds['aIBi'].values
+    # vf_AVals = np.zeros(aIBi_Vals.size)
+    # ms_AVals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     x_ds = qds.sel(aIBi=aIBi)['X']
+    #     numPoints = 10
+    #     vf_Vals = np.zeros(FVals.size)
+    #     ms_Vals = np.zeros(FVals.size)
+    #     for Find, F in enumerate(FVals):
+    #         XTail = x_ds.sel(F=F).isel(t=np.arange(-1 * numPoints, 0))
+    #         tTail = XTail.coords['t']
+    #         [vf_Vals[Find], const] = np.polyfit(tTail.values, XTail.values, deg=1)
+    #         ms_Vals[Find] = dP / vf_Vals[Find]
 
-    # print(ms_AVals / mI)
-    fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals, ms_AVals / mI, 'ro')
-    ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    ax.set_xlabel(r'$a_{IB}^{-1}$')
-    ax.set_title('Impurity mass enhancement')
-    plt.show()
+    #     vf_AVals[aind] = np.average(vf_Vals)
+    #     ms_AVals[aind] = np.average(ms_Vals)
 
-    # Steady state calc
+    # # Steady state calc
 
-    (Lx, Ly, Lz) = (20, 20, 20)
-    (dx, dy, dz) = (0.2, 0.2, 0.2)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # # (Lx, Ly, Lz) = (21, 21, 21)
+    # # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
-    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 50
-    Nk = np.ceil(NGridPoints_desired / Ntheta)
+    # NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    # Ntheta = 50
+    # Nk = np.ceil(NGridPoints_desired / Ntheta)
 
-    theta_max = np.pi
-    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    # theta_max = np.pi
+    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
-    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    # # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
 
-    k_min = 1e-5
-    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    if dk < k_min:
-        print('k ARRAY GENERATION ERROR')
+    # k_min = 1e-5
+    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    # if dk < k_min:
+    #     print('k ARRAY GENERATION ERROR')
 
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
 
-    mI = 1.7
-    mB = 1
-    n0 = 1
-    aBB = 0.062
-    gBB = (4 * np.pi / mB) * aBB
-    nu = pfs.nu(gBB)
-    xi = np.sqrt(8 * np.pi * n0 * aBB)
+    # mI = 1.7
+    # mB = 1
+    # n0 = 1
+    # aBB = 0.062
+    # gBB = (4 * np.pi / mB) * aBB
+    # nu = pfs.nu(gBB)
+    # xi = np.sqrt(8 * np.pi * n0 * aBB)
 
-    # Interpolation
+    # Nsteps = 1e2
+    # pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
 
-    Nsteps = 1e2
-    pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # aSi_tck = np.load('aSi_spline_sph.npy')
+    # PBint_tck = np.load('PBint_spline_sph.npy')
 
-    aSi_tck = np.load('aSi_spline_sph.npy')
-    PBint_tck = np.load('PBint_spline_sph.npy')
+    # P = 0.1
+    # SS_ms_Avals = np.zeros(aIBi_Vals.size)
 
-    sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
+    # for Aind, aIBi in enumerate(aIBi_Vals):
+    #     DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pfs.aSi_interp(DP, aSi_tck)
+    #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    #     # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+    #     # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+    #     # nu_const = nu(gBB)
+    #     SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
+    #     # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    #     # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+    #     # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
 
-    # # ---- SINGLE FUNCTION RUN ----
+    # mE = ms_AVals / mI
+    # SS_mE = SS_ms_Avals / mI
+    # print(mE)
+    # print(SS_mE)
+    # mE_diff = np.abs(mE - SS_mE) / mE
+    # print(mE_diff)
 
-    P = 0.1
-    # aIBi = -0.32
-    SS_ms_Avals = np.zeros(aIBi_Vals.size)
-
-    for Aind, aIBi in enumerate(aIBi_Vals):
-        DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = pfs.aSi_interp(DP, aSi_tck)
-        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-        # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-        # nu_const = nu(gBB)
-        SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
-        # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
-        # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        # print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
-        # print('aSi-aIBi: {0}'.format(aSi - aIBi))
-
-    mE = ms_AVals / mI
-    SS_mE = SS_ms_Avals / mI
-    print(mE)
-    print(SS_mE)
-    mE_diff = np.abs(mE - SS_mE) / mE
-    print(mE_diff)
+    # fig, ax = plt.subplots()
+    # ax.plot(aIBi_Vals, mE, 'ro', label='Force Protocol Calculation')
+    # ax.plot(aIBi_Vals, SS_mE, 'bo', label='Analytical Steady State Calculation')
+    # ax.legend()
+    # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
+    # ax.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax.set_title('Polaron Mass Enhancement vs. Interaction Strength ($P=0.1$)')
+    # plt.show()
