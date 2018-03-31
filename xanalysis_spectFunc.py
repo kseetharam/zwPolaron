@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'RF': 'inverse'}
+    toggleDict = {'Location': 'home', 'RF': 'inverse'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -78,14 +78,19 @@ if __name__ == "__main__":
     aIBi_Vals = qds.coords['aIBi'].values
     P_Vals = qds.coords['P'].values
     tgrid = qds.coords['t'].values
+    spectFunc_da = xr.DataArray(np.full((aIBi_Vals.size, P_Vals.size, tgrid.size), np.nan, dtype=float), coords=[aIBi_Vals, P_Vals, np.arange(tgrid.size)], dims=['aIBi', 'P', 'omega'])
+    tdecay = 20
 
     for Aind, aIBi in enumerate(aIBi_Vals):
         for Pind, P in enumerate(P_Vals):
             qPA = qds.sel(aIBi=aIBi, P=P)
             St = qPA['Real_DynOv'].values + 1j * qPA['Imag_DynOv'].values
-            omega, sf = pfs.spectFunc(tgrid, St)
-            fig, ax = plt.subplots()
-            ax.plot(omega, sf)
+            # fig, ax = plt.subplots()
+            # ax.plot(tgrid, np.abs(St))
+            omega, sf = pfs.spectFunc(tgrid, St, tdecay)
+            spectFunc_da.coords['omega'] = omega
+            spectFunc_da.sel(aIBi=aIBi, P=P)[:] = sf
+            spectFunc_da.sel(aIBi=aIBi, P=P).plot()
             plt.show()
 
     # # # Analysis of Total Dataset

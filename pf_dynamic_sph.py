@@ -108,12 +108,11 @@ def dirRF(dataset, kgrid):
     return dirRF_ds
 
 
-def spectFunc(t_Vec, S_Vec):
+def spectFunc(t_Vec, S_Vec, tdecay):
     # spectral function (Fourier Transform of dynamical overlap)
     dt = t_Vec[1] - t_Vec[0]
     Nt = t_Vec.size
     domega = 2 * np.pi / (Nt * dt)
-    tdecay = 20
     decayFactor = np.exp(-1 * t_Vec / tdecay)
     Sarg = np.fft.ifftshift(S_Vec * decayFactor)
     sf_preshift = 2 * np.real((1 / domega) * np.fft.ifft(Sarg))
