@@ -4,6 +4,7 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 import pf_dynamic_sph as pfs
+import itertools
 import os
 
 if __name__ == "__main__":
@@ -21,7 +22,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'RF': 'inverse'}
+    toggleDict = {'Location': 'home', 'RF': 'direct'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -74,25 +75,33 @@ if __name__ == "__main__":
 
     # # Add Spectral Function
 
-    qds = xr.open_dataset(ds_path)
-    aIBi_Vals = qds.coords['aIBi'].values
-    P_Vals = qds.coords['P'].values
-    tgrid = qds.coords['t'].values
-    spectFunc_da = xr.DataArray(np.full((aIBi_Vals.size, P_Vals.size, tgrid.size), np.nan, dtype=float), coords=[aIBi_Vals, P_Vals, np.arange(tgrid.size)], dims=['aIBi', 'P', 'omega'])
-    tdecay = 20
+    with xr.open_dataset(ds_path) as qds:
+        if 'SpectFunc' in qds.data_vars:
+            qds = qds.drop('SpectFunc')
+            qds = qds.drop('omega')
+        aIBi_Vals = qds.coords['aIBi'].values
+        P_Vals = qds.coords['P'].values
+        tgrid = qds.coords['t'].values
+        spectFunc_da = xr.DataArray(np.full((aIBi_Vals.size, P_Vals.size, tgrid.size), np.nan, dtype=float), coords=[aIBi_Vals, P_Vals, np.arange(tgrid.size)], dims=['aIBi', 'P', 'omega'])
+        tdecay = 20
+        for Aind, aIBi in enumerate(aIBi_Vals):
+            for Pind, P in enumerate(P_Vals):
+                qPA = qds.sel(aIBi=aIBi, P=P)
+                St = qPA['Real_DynOv'].values + 1j * qPA['Imag_DynOv'].values
+                # fig, ax = plt.subplots()
+                # ax.plot(tgrid, np.abs(St))
+                omega, sf = pfs.spectFunc(tgrid, St, tdecay)
+                spectFunc_da.coords['omega'] = omega
+                spectFunc_da.sel(aIBi=aIBi, P=P)[:] = sf
 
-    for Aind, aIBi in enumerate(aIBi_Vals):
-        for Pind, P in enumerate(P_Vals):
-            qPA = qds.sel(aIBi=aIBi, P=P)
-            St = qPA['Real_DynOv'].values + 1j * qPA['Imag_DynOv'].values
-            # fig, ax = plt.subplots()
-            # ax.plot(tgrid, np.abs(St))
-            omega, sf = pfs.spectFunc(tgrid, St, tdecay)
-            spectFunc_da.coords['omega'] = omega
-            spectFunc_da.sel(aIBi=aIBi, P=P)[:] = sf
-            spectFunc_da.sel(aIBi=aIBi, P=P).plot()
-            plt.show()
+                spectFunc_da.sel(aIBi=aIBi, P=P).plot()
+                plt.show()
+        qds['SpectFunc'] = spectFunc_da
+        RF_ds = qds.copy(deep=True)
+
+    RF_ds.to_netcdf(ds_path)
 
     # # # Analysis of Total Dataset
 
     # qds = xr.open_dataset(ds_path)
+    # print(qds)
