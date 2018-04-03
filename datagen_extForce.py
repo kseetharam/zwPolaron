@@ -148,8 +148,8 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-5.0, -1.17, -0.5])
-    aIBi_Vals = np.array([0.05, 0.1])
+    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05])
+    aIBi_Vals = np.array([0.1])
 
     # F_Vals = np.linspace(0.1 * Fscale, 2 * Fscale, 30)
     # F_Vals = np.geomspace(3 * Fscale, 1000 * Fscale, num=30)
