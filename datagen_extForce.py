@@ -41,7 +41,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 50; dt = 0.1
+    tMax = 25; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     dP = 0.5 * mI * nu
+    Fscale = (nu / xi**2)
     fParams = [dP]
     print('Force Time scale: {0}'.format(dP / (nu / xi**2)))
 
@@ -86,7 +87,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -128,30 +129,31 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
-    runstart = timer()
-    F = 0.1 * nu / xi**2
-    print('TF: {0}'.format(dP / F))
-    aIBi = -1.17
+    # runstart = timer()
+    # F = 0.1 * Fscale
+    # print('TF: {0}'.format(dP / F))
+    # aIBi = 0.1
 
-    cParams = [F, aIBi]
+    # cParams = [F, aIBi]
 
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
     # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5])
-    Fscale = (nu / xi**2)
+    # aIBi_Vals = np.array([-5.0, -1.17, -0.5])
+    aIBi_Vals = np.array([0.05, 0.1])
 
     # F_Vals = np.linspace(0.1 * Fscale, 2 * Fscale, 30)
-    F_Vals = np.geomspace(3 * Fscale, 1000 * Fscale, num=30)
+    # F_Vals = np.geomspace(3 * Fscale, 1000 * Fscale, num=30)
+    F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 30), np.geomspace(3 * Fscale, 1000 * Fscale, num=30)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for F in F_Vals:
