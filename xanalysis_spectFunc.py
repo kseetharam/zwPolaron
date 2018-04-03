@@ -73,35 +73,41 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(ds_path)
 
-    # # Add Spectral Function
+    # # # Add Spectral Function
 
-    with xr.open_dataset(ds_path) as qds:
-        if 'SpectFunc' in qds.data_vars:
-            qds = qds.drop('SpectFunc')
-            qds = qds.drop('omega')
-        aIBi_Vals = qds.coords['aIBi'].values
-        P_Vals = qds.coords['P'].values
-        tgrid = qds.coords['t'].values
-        spectFunc_da = xr.DataArray(np.full((aIBi_Vals.size, P_Vals.size, tgrid.size), np.nan, dtype=float), coords=[aIBi_Vals, P_Vals, np.arange(tgrid.size)], dims=['aIBi', 'P', 'omega'])
-        tdecay = 3
-        for Aind, aIBi in enumerate(aIBi_Vals):
-            for Pind, P in enumerate(P_Vals):
-                qPA = qds.sel(aIBi=aIBi, P=P)
-                St = qPA['Real_DynOv'].values + 1j * qPA['Imag_DynOv'].values
-                # fig, ax = plt.subplots()
-                # ax.plot(tgrid, np.abs(St))
-                omega, sf = pfs.spectFunc(tgrid, St, tdecay)
-                spectFunc_da.coords['omega'] = omega
-                spectFunc_da.sel(aIBi=aIBi, P=P)[:] = sf
+    # with xr.open_dataset(ds_path) as qds:
+    #     if 'SpectFunc' in qds.data_vars:
+    #         qds = qds.drop('SpectFunc')
+    #         qds = qds.drop('omega')
+    #     aIBi_Vals = qds.coords['aIBi'].values
+    #     P_Vals = qds.coords['P'].values
+    #     tgrid = qds.coords['t'].values
+    #     spectFunc_da = xr.DataArray(np.full((aIBi_Vals.size, P_Vals.size, tgrid.size), np.nan, dtype=float), coords=[aIBi_Vals, P_Vals, np.arange(tgrid.size)], dims=['aIBi', 'P', 'omega'])
+    #     tdecay = 3
+    #     for Aind, aIBi in enumerate(aIBi_Vals):
+    #         for Pind, P in enumerate(P_Vals):
+    #             qPA = qds.sel(aIBi=aIBi, P=P)
+    #             St = qPA['Real_DynOv'].values + 1j * qPA['Imag_DynOv'].values
 
-                spectFunc_da.sel(aIBi=aIBi, P=P).plot()
-                plt.show()
-        qds['SpectFunc'] = spectFunc_da
-        RF_ds = qds.copy(deep=True)
+    #             if toggleDict['RF'] == 'direct':  # why do we need this?
+    #                 prefac = -1
+    #             elif toggleDict['RF'] == 'inverse':
+    #                 prefac = 1
+    #             omega, sf = pfs.spectFunc(tgrid, St, tdecay)
+    #             spectFunc_da.coords['omega'] = omega
+    #             spectFunc_da.sel(aIBi=aIBi, P=P)[:] = prefac * sf
 
-    RF_ds.to_netcdf(ds_path)
+    #             spectFunc_da.sel(aIBi=aIBi, P=P).plot()
+    #             plt.show()
+    #     qds['SpectFunc'] = spectFunc_da
+    #     RF_ds = qds.copy(deep=True)
 
-    # # # Analysis of Total Dataset
+    # RF_ds.to_netcdf(ds_path)
 
-    # qds = xr.open_dataset(ds_path)
-    # print(qds)
+    # # Analysis of Total Dataset
+
+    qds = xr.open_dataset(ds_path)
+    aIBi = -1.17
+    qds['SpectFunc'].isel(P=1).sel(aIBi=aIBi).plot()
+    # qds['SpectFunc'].sel(aIBi=aIBi).mean(dim='P').plot()
+    plt.show()
