@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'RF': 'direct'}
+    toggleDict = {'Location': 'work', 'RF': 'direct'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
