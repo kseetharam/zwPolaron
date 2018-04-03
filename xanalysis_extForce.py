@@ -206,7 +206,7 @@ if __name__ == "__main__":
     # aBB = 0.062
     # gBB = (4 * np.pi / mB) * aBB
     # nu = pfs.nu(gBB)
-    # xi = np.sqrt(8 * np.pi * n0 * aBB)
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     # Nsteps = 1e2
     # pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)

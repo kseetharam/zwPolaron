@@ -254,7 +254,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
     nu_const = nu(gBB)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     aBB = (mB / (4 * np.pi)) * gBB
-    xi = np.sqrt(8 * np.pi * n0 * aBB)
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
