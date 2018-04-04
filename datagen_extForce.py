@@ -148,12 +148,13 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05])
-    aIBi_Vals = np.array([0.1])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
+    # aIBi_Vals = np.array([0.1])
 
     # F_Vals = np.linspace(0.1 * Fscale, 2 * Fscale, 30)
     # F_Vals = np.geomspace(3 * Fscale, 1000 * Fscale, num=30)
-    F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 30), np.geomspace(3 * Fscale, 1000 * Fscale, num=30)))
+    # F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 30), np.geomspace(3 * Fscale, 1000 * Fscale, num=30)))
+    F_Vals = np.geomspace(450 * Fscale, 1000 * Fscale, num=10)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for F in F_Vals:
@@ -175,24 +176,24 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON CLUSTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount > len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
-    #     [F, aIBi] = cParams
+    if(taskCount > len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [F, aIBi] = cParams
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    # end = timer()
-    # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
+    end = timer()
+    print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))

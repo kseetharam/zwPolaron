@@ -50,6 +50,27 @@ if __name__ == "__main__":
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
 
+    # # # # Fix Datasets
+
+    # mI = 1.7
+    # mB = 1
+    # n0 = 1
+    # aBB = 0.062
+    # gBB = (4 * np.pi / mB) * aBB
+    # nu = pfs.nu(gBB)
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # dP = 0.5 * mI * nu
+
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename == 'LDA_Dataset_sph.nc':
+    #         continue
+    #     print(filename)
+    #     with xr.open_dataset(innerdatapath + '/' + filename) as ds:
+    #         ds_fixed = ds.copy(deep=True)
+    #     ds_fixed.attrs['xi'] = xi
+    #     ds_fixed.attrs['Delta_P'] = dP
+    #     ds_fixed.to_netcdf(innerdatapath + '/' + filename)
+
     # # # # Concatenate Individual Datasets
 
     # ds_list = []; F_list = []; aIBi_list = []
@@ -79,7 +100,7 @@ if __name__ == "__main__":
 
     # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
     # del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF'])
-    # ds_tot.attrs['dP'] = dP
+    # ds_tot.attrs['Delta_P'] = dP
     # ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset_sph.nc')
 
     # # # Analysis of Total Dataset
@@ -87,12 +108,13 @@ if __name__ == "__main__":
     aIBi = -1.17
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
-    dP = attrs['dP']
+    dP = attrs['Delta_P']
     mI = attrs['mI']
     Fscale = attrs['nu'] / attrs['xi']**2
     FVals = qds['F'].values
     tVals = qds['t'].values
     qds_aIBi = qds.sel(aIBi=aIBi)
+    print(FVals / Fscale)
 
     # # MOMENTUM CHECK
 
@@ -117,7 +139,7 @@ if __name__ == "__main__":
         ax.plot((dP / F) * np.ones(tVals.size), np.linspace(0, v_ds.sel(F=F).max('t'), tVals.size), 'g--', label='TF')
         ax.legend()
         ax.set_xlim([0, 20])
-        ax.set_ylabel(r'$v=\frac{d<X>}{dx}$')
+        ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
         ax.set_xlabel('t')
         ax.set_title(r'$\frac{F}{\eta}$' + '={0} with '.format(F / Fscale) + r'$\eta=\frac{c}{\xi^{2}}$')
         plt.show()
@@ -141,7 +163,7 @@ if __name__ == "__main__":
 
     # # ax.plot(FVals / Fscale, vf_Vals, 'r-')
     # # ax.set_ylim([0.975 * vf_ave, 1.025 * vf_ave])
-    # # ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dx}|_{t=\infty}$')
+    # # ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dt}|_{t=\infty}$')
     # # ax.set_xlabel(r'$\frac{F}{\eta}$' + ' with ' + r'$\eta=\frac{c}{\xi^{2}}$')
     # # ax.set_title('Final (average) impurity velocity')
 
