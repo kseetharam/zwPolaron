@@ -2,9 +2,9 @@
 #SBATCH -J quench
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 0-2:00
+#SBATCH -t 0-14:00
 #SBATCH -p shared
-#SBATCH --mem=4000
+#SBATCH --mem=6000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
@@ -13,4 +13,4 @@
 
 module load Anaconda3/5.0.1-fasrc01
 source activate anaclone
-python datagen_LDAtraj.py
+python datagen_SSextForce.py
