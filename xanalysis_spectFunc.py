@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'RF': 'inverse'}
+    toggleDict = {'Location': 'home', 'RF': 'inverse'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -108,6 +108,7 @@ if __name__ == "__main__":
 
     qds = xr.open_dataset(ds_path)
     aIBi = -1.17
-    qds['SpectFunc'].isel(P=1).sel(aIBi=aIBi).plot()
+    # qds['SpectFunc'].isel(P=1).sel(aIBi=aIBi).plot()
+    qds['SpectFunc'].sel(aIBi=aIBi).plot()
     # qds['SpectFunc'].sel(aIBi=aIBi).mean(dim='P').plot()
     plt.show()

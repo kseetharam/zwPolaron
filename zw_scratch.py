@@ -69,23 +69,20 @@ if __name__ == "__main__":
 
     # # ---- SINGLE FUNCTION RUN ----
 
-    runstart = timer()
-
     P = 0.1
-    # aIBi = -0.32
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
 
     for Aind, aIBi in enumerate(aIBi_Vals):
         DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
         aSi = pfs.aSi_interp(DP, aSi_tck)
         PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-        # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-        # nu_const = nu(gBB)
+        # Pcrit = pfs.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
+        # En = pfs.Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
+        # nu_const = pfs.nu(gBB)
         eMass = pfs.effMass(P, PB_Val, mI)
-        # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
-        # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        end = timer()
+        # gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
+        Nph = pfs.num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        # Z_factor = pfs.z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
         print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
+        print('Nph: {0}'.format(Nph))
         # print('aSi-aIBi: {0}'.format(aSi - aIBi))

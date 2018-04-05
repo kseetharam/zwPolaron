@@ -120,11 +120,11 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
