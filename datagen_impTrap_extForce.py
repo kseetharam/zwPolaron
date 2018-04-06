@@ -79,6 +79,8 @@ if __name__ == "__main__":
             return 0
 
     def F_Vconf_func(X):
+        omegat_imp = 3e-3
+        mI = 1.7
         return -1 * mI * (omegat_imp**2) * X
 
     def F_Vden_func(X):
