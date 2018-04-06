@@ -43,9 +43,6 @@ if __name__ == "__main__":
     aIB_th = aIB_exp * L_th_exp
     (omega_x_th, omega_y_th, omega_z_th) = (omega_x_exp / T_th_exp, omega_y_exp / T_th_exp, omega_z_exp / T_th_exp)
 
-    print(aBB_th, aIB_th)
-    print(omega_x_th, omega_y_th, omega_z_th)
-
     # Derived quantities (theory units)
     kn_th = (6 * np.pi**2 * n0_th)**(1 / 3)
     En_th = hbar**2 * kn_th**2 / (2 * mB_th)
@@ -55,3 +52,7 @@ if __name__ == "__main__":
     xi_th = (8 * np.pi * n0_th * aBB_th)**(-1 / 2)
     tscale_th = xi_th / nu_th
     Fscale_th = 2 * np.pi * hbar_th * nu_th / (xi_th**2)
+
+    print(aBB_th, 1 / aIB_th)
+    print(omega_x_th, omega_y_th, omega_z_th)
+    print(15 * T_th_exp)
