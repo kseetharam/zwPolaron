@@ -71,4 +71,5 @@ if __name__ == "__main__":
     print(10 * T_th_exp * 1e-3)
     print(En_exp_Hz, En_th_Hz * T_th_exp)
     print(TF_th, TF_th / T_th_exp)
+    print(X_exp * 1e6)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))

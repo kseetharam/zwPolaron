@@ -49,6 +49,8 @@ if __name__ == "__main__":
 
     print('Total time steps: {0}'.format(tgrid.size))
     print('UV cutoff: {0}'.format(k_max))
+    print('dk: {0}'.format(dk))
+    print('Box size: {0}'.format(2 * np.pi / dk))
     print('NGridPoints: {0}'.format(NGridPoints))
 
     # Basic parameters
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     dP = 0.5 * mI * nu
     Fscale = (nu / xi**2)
     fParams = [dP]
-    print('Force Time scale: {0}'.format(dP / Fscale))
+    print('TF: {0}'.format(dP / Fscale))
 
     # LDA functions
 
@@ -87,7 +89,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -175,24 +177,24 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount > len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
-        [F, aIBi] = cParams
+    # if(taskCount > len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [F, aIBi] = cParams
 
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    end = timer()
-    print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
+    # end = timer()
+    # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
