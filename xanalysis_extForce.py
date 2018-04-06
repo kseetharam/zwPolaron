@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    aIBi = -0.05
+    aIBi = -1.17
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
     dP = attrs['Delta_P']
@@ -101,21 +101,21 @@ if __name__ == "__main__":
     tVals = qds_aIBi['t'].values
     ts = tVals / tscale
 
-    # PHONON NUMBER VS TIME
+    # # PHONON NUMBER VS TIME
 
-    for Find, F in enumerate(FVals):
-        fig, ax = plt.subplots()
-        ds = qds_aIBi.sel(F=F)['Nph'].sel(t=slice(0, 20 * tscale))
-        ts = ds['t'].values / tscale
-        ax.plot(ts, ds.values, label='')
-        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, ds.max('t'), ts.size), 'g--', label=r'$TF$')
-        ax.legend()
-        ax.set_ylabel('Nph')
-        ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
-        plt.show()
+    # for Find, F in enumerate(FVals):
+    #     fig, ax = plt.subplots()
+    #     ds = qds_aIBi.sel(F=F)['Nph'].sel(t=slice(0, 20 * tscale))
+    #     ts = ds['t'].values / tscale
+    #     ax.plot(ts, ds.values, label='')
+    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, ds.max('t'), ts.size), 'g--', label=r'$TF$')
+    #     ax.legend()
+    #     ax.set_ylabel('Nph')
+    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     ax.set_xscale('log')
+    #     ax.set_yscale('log')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     plt.show()
 
     # # IMPURITY AND PHONON MOMENTUM VS TIME
 
@@ -135,18 +135,18 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
     #     plt.show()
 
-    # # POSITION VS TIME
+    # POSITION VS TIME
 
-    # x_ds = qds_aIBi['X']
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     ax.plot(ts, x_ds.sel(F=F).values, label='')
-    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
-    #     ax.legend()
-    #     ax.set_ylabel(r'$<X>$')
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
-    #     plt.show()
+    x_ds = qds_aIBi['X']
+    for Find, F in enumerate(FVals):
+        fig, ax = plt.subplots()
+        ax.plot(ts, x_ds.sel(F=F).values, label='')
+        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
+        ax.legend()
+        ax.set_ylabel(r'$<X>$')
+        ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+        ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+        plt.show()
 
     # # VELOCITY VS TIME
 
