@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -J quench
-#SBATCH -n 2
+#SBATCH -n 3
 #SBATCH -N 1
-#SBATCH -t 0-8:00
+#SBATCH -t 0-20:00
 #SBATCH -p shared
-#SBATCH --mem=4000
+#SBATCH --mem=6000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
