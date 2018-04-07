@@ -60,16 +60,10 @@ if __name__ == "__main__":
     # Comparing impurity trap and external force
     X_th = np.linspace(0, 10, 20)
     X_exp = X_th / L_th_exp
-    impTrap_Force_th = -1 * mI_th * (omega_y_th**2) * X_th
-    impTrap_Force_exp = -1 * mI_exp * (omega_y_exp**2) * X_exp
-    print(impTrap_Force_exp / Fscale_exp)
-    print(impTrap_Force_th / Fscale_th)
 
     # Other
     # print(aBB_th, (aIB_th)**(-1))
-    print(omega_x_th, omega_y_th, omega_z_th)
     print(10 * T_th_exp * 1e-3)
-    print(En_exp_Hz, En_th_Hz * T_th_exp)
-    print(TF_th, TF_th / T_th_exp)
-    print(X_exp * 1e6)
+    print(En_exp_Hz, En_th_Hz)
+    print(10 / L_th_exp)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))

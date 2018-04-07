@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    aIBi = -1.17
+    aIBi = -0.05
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
     dP = attrs['Delta_P']
