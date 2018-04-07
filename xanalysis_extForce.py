@@ -17,7 +17,10 @@ if __name__ == "__main__":
 
     # gParams
 
-    (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
@@ -50,7 +53,7 @@ if __name__ == "__main__":
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
 
-    # # # # Concatenate Individual Datasets
+    # # # Concatenate Individual Datasets
 
     # ds_list = []; F_list = []; aIBi_list = []
     # for ind, filename in enumerate(os.listdir(innerdatapath)):
@@ -89,7 +92,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    aIBi = -0.05
+    aIBi = -1.17
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
     dP = attrs['Delta_P']
@@ -117,36 +120,36 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
     #     plt.show()
 
-    # # IMPURITY AND PHONON MOMENTUM VS TIME
+    # IMPURITY AND PHONON MOMENTUM VS TIME
 
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     qds_aIBi_F = qds_aIBi.sel(F=F)
-    #     ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
-    #     ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
-    #     ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
-
-    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
-    #     ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
-    #     ax.legend()
-    #     ax.set_ylim([-0.1 * dP, 1.1 * dP])
-    #     ax.set_ylabel('Momentum')
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
-    #     plt.show()
-
-    # POSITION VS TIME
-
-    x_ds = qds_aIBi['X']
     for Find, F in enumerate(FVals):
         fig, ax = plt.subplots()
-        ax.plot(ts, x_ds.sel(F=F).values, label='')
-        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
+        qds_aIBi_F = qds_aIBi.sel(F=F)
+        ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
+        ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
+        ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
+
+        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
+        ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
         ax.legend()
-        ax.set_ylabel(r'$<X>$')
+        ax.set_ylim([-0.1 * dP, 1.1 * dP])
+        ax.set_ylabel('Momentum')
         ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
         ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
         plt.show()
+
+    # # POSITION VS TIME
+
+    # x_ds = qds_aIBi['X']
+    # for Find, F in enumerate(FVals):
+    #     fig, ax = plt.subplots()
+    #     ax.plot(ts, x_ds.sel(F=F).values, label='')
+    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
+    #     ax.legend()
+    #     ax.set_ylabel(r'$<X>$')
+    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     plt.show()
 
     # # VELOCITY VS TIME
 
