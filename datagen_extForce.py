@@ -18,7 +18,10 @@ if __name__ == "__main__":
     # (Lx, Ly, Lz) = (20, 20, 20)
     # (dx, dy, dz) = (0.2, 0.2, 0.2)
 
-    (Lx, Ly, Lz) = (10, 10, 10)
+    # (Lx, Ly, Lz) = (10, 10, 10)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    (Lx, Ly, Lz) = (30, 30, 30)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     dP = 0.5 * mI * nu
     Fscale = (nu / xi**2)
     fParams = [dP]
-    print('TF: {0}'.format(dP / Fscale))
+    # print('TF: {0}'.format(dP / Fscale))
 
     # LDA functions
 
@@ -92,7 +95,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -139,7 +142,7 @@ if __name__ == "__main__":
     # runstart = timer()
     # F = 0.1 * Fscale
     # print('TF: {0}'.format(dP / F))
-    # aIBi = -1.17
+    # aIBi = -0.05
 
     # cParams = [F, aIBi]
 
@@ -166,40 +169,40 @@ if __name__ == "__main__":
         for F in F_Vals:
             cParams_List.append([F, aIBi])
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-
-    for ind, cParams in enumerate(cParams_List):
-        loopstart = timer()
-        [F, aIBi] = cParams
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
-
-        loopend = timer()
-        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
-
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # if(taskCount > len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
+    # for ind, cParams in enumerate(cParams_List):
+    #     loopstart = timer()
     #     [F, aIBi] = cParams
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    #     loopend = timer()
+    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
 
     # end = timer()
-    # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount > len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [F, aIBi] = cParams
+
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+
+    end = timer()
+    print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
