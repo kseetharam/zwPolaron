@@ -15,7 +15,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 30; dt = 0.1
+    tMax = 25; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -84,7 +85,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -120,18 +121,18 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    # if os.path.isdir(datapath) is False:
-    #     os.mkdir(datapath)
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
 
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
     # F = 0.1 * Fscale
-    # aIBi = 0.1
-    # dP = 1.5 * mI * nu
+    # aIBi = -0.05
+    # dP = 0.9 * mI * nu
 
     # cParams = [F, aIBi]
     # fParams = [dP]
@@ -147,31 +148,51 @@ if __name__ == "__main__":
 
     cfParams_List = []
 
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
-    F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 10), np.geomspace(3 * Fscale, 1000 * Fscale, num=10)))
-    dP_Vals = np.linspace(1.5 * mI * nu, 3.0 * mI * nu, 3)
+    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
+    aIBi_Vals = np.array([-1.17, -0.5, -0.05])
+
+    # F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 10), np.geomspace(3 * Fscale, 1000 * Fscale, num=10)))
+    F_Vals = np.linspace(0.1 * Fscale, 10 * Fscale, 20)
+    dP_Vals = np.array([0.3 * mI * nu, 0.9 * mI * nu])
 
     for aIBi in aIBi_Vals:
         for F in F_Vals:
             for dP in dP_Vals:
                 cfParams_List.append([F, aIBi, dP])
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    if(taskCount > len(cfParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        sys.exit()
-    else:
-        [F, aIBi, dP] = cfParams_List[taskID]
+    for ind, cParams in enumerate(cfParams_List):
+        loopstart = timer()
+        [F, aIBi, dP] = cfParams_List[ind]
         cParams = [F, aIBi]
         fParams = [dP]
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/dP_{:.3f}_F_{:.3f}_aIBi_{:.2f}.nc'.format(dP, F, aIBi))
+        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/dP_{:.3f}_F_{:.3f}_aIBi_{:.2f}.nc'.format(dP, F, aIBi))
+        loopend = timer()
+        print('Index: {:d}, dP: {:.2f}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, dP, F, aIBi, loopend - loopstart))
 
     end = timer()
-    print('Task ID: {:d}, dP: {.2f}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, dP, F, aIBi, end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # if(taskCount > len(cfParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     sys.exit()
+    # else:
+    #     [F, aIBi, dP] = cfParams_List[taskID]
+    #     cParams = [F, aIBi]
+    #     fParams = [dP]
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/dP_{:.3f}_F_{:.3f}_aIBi_{:.2f}.nc'.format(dP, F, aIBi))
+
+    # end = timer()
+    # print('Task ID: {:d}, dP: {:.2f}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, dP, F, aIBi, end - runstart))

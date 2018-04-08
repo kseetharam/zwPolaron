@@ -17,9 +17,8 @@ if __name__ == "__main__":
 
     # gParams
 
+    # (Lx, Ly, Lz) = (30, 30, 30)
     # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
-
     (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    aIBi = -1.17
+    aIBi = -0.05
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
     dP = attrs['Delta_P']
