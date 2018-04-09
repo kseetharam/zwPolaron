@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -J quench
-#SBATCH -n 3
+#SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 0-20:00
+#SBATCH -t 0-5:00
 #SBATCH -p shared
 #SBATCH --mem=6000
 #SBATCH --mail-type=ALL

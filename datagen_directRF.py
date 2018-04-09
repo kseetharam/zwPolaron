@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
     # toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -145,48 +145,48 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-
-    for ind, cParams in enumerate(cParams_List):
-        loopstart = timer()
-        [P, aIBi] = cParams
-        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-
-        if toggleDict['LastTimeStepOnly'] == 'yes':
-            CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-        else:
-            CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
-
-        loopend = timer()
-        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
-
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # if(taskCount != len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
+    # for ind, cParams in enumerate(cParams_List):
+    #     loopstart = timer()
     #     [P, aIBi] = cParams
+    #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    #     if toggleDict['LastTimeStepOnly'] == 'yes':
+    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    #     else:
+    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
-    # if toggleDict['LastTimeStepOnly'] == 'yes':
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
-    # else:
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #     loopend = timer()
+    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
     # end = timer()
-    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount != len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [P, aIBi] = cParams
+
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+
+    if toggleDict['LastTimeStepOnly'] == 'yes':
+        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
+    else:
+        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+
+    end = timer()
+    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
