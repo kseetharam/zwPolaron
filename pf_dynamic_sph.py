@@ -29,8 +29,8 @@ def ur(mI, mB):
     return (mB * mI) / (mB + mI)
 
 
-def nu(gBB):
-    return np.sqrt(gBB)
+def nu(mB, n0, gBB):
+    return np.sqrt(n0 * gBB / mB)
 
 
 def epsilon(k, mB):
@@ -69,7 +69,7 @@ def g(kgrid, aIBi, mI, mB, n0, gBB):
 
 # def PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB):
 #     #
-#     DP = mI * nu(gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
+#     DP = mI * nu(mB, n0, gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
 #     # non-grid helper function
 
 #     def Wk(k, gBB, mB, n0):
@@ -152,7 +152,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     thVec = kgrid.getArray('th')
 
     # calculate some parameters
-    nu_const = nu(gBB)
+    nu_const = nu(mB, n0, gBB)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
 
     # Initialization CoherentState
@@ -251,7 +251,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
     thVec = kgrid.getArray('th')
 
     # calculate some parameters
-    nu_const = nu(gBB)
+    nu_const = nu(mB, n0, gBB)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     aBB = (mB / (4 * np.pi)) * gBB
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)

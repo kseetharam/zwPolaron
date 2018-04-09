@@ -57,7 +57,9 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     aBB = 0.062
-    nu = pfs.nu((4 * np.pi / mB) * aBB)
+    n0 = 1
+    gBB = (4 * np.pi / mB) * aBB
+    nu = pfs.nu(mB, n0, gBB)
     dP_Vals = np.array([0.3 * mI * nu, 0.9 * mI * nu])
     dP = dP_Vals[1]
     print('dP: {0}'.format(dP / (mI * nu)))

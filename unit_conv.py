@@ -18,6 +18,7 @@ if __name__ == "__main__":
     (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 47)  # impurity trapping frequencies
     mI_exp = 39.96 * u
     mB_exp = 22.99 * u
+    EF_exp_Hz = 10e3  # (impurity) Fermi energy
 
     # Derived quantities (SI units)
     kn_exp = (6 * np.pi**2 * n0_exp)**(1 / 3)
@@ -29,6 +30,10 @@ if __name__ == "__main__":
     xi_exp = (8 * np.pi * n0_exp * aBB_exp)**(-1 / 2)
     tscale_exp = xi_exp / nu_exp
     Fscale_exp = 2 * np.pi * hbar * nu_exp / (xi_exp**2)
+    EF_exp = 2 * np.pi * hbar * EF_exp_Hz
+    # kF_exp = np.sqrt(2 * mI_exp * EF_exp) / hbar  # (impurity) Fermi momentum
+    EF_nu_ratio_exp = np.sqrt(2 * mI_exp * 2 * np.pi * hbar * EF_exp_Hz) / (mI_exp * nu_exp)
+    EF_nu_rat_exp = (2 * np.pi * hbar * nI_exp**(1 / 3)) / (mI_exp * nu_exp)
 
     # Theory parameters (n0^(-1/3)=1, mB = 1, hbar = 1 scale)
     mB_th = 1
@@ -60,14 +65,17 @@ if __name__ == "__main__":
     # Comparing impurity trap and external force
     X_th = np.linspace(0, 10, 20)
     X_exp = X_th / L_th_exp
-    omega_impTrap_th = 2 * np.pi * 5e3 / T_th_exp
-    impTrap_Force_th = -mI_th * omega_impTrap_th**2 * X_th
-    print(impTrap_Force_th / Fscale_th)
+    omega_impTrap_shallow_th = 2 * np.pi * 40 / T_th_exp
+    omega_impTrap_deep_th = 2 * np.pi * 143 / T_th_exp
+    impTrap_Force_th = -mI_th * omega_impTrap_deep_th**2 * X_th
 
     # Other
-    # print(aBB_th, (aIB_th)**(-1))
-    print(10 * T_th_exp * 1e-3)
-    print(En_exp_Hz, En_th_Hz)
+
+    print(aBB_th)
+    print(omega_impTrap_deep_th)
+    print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
+    # print(EF_nu_ratio_exp)
+    # print(EF_nu_rat_exp)
+    print(impTrap_Force_th / Fscale_th)
     print(10 / L_th_exp)
-    print(2 * np.pi * 5e3 / T_th_exp)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))

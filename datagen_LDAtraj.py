@@ -58,7 +58,7 @@ if __name__ == "__main__":
     n0 = 1
     aBB = 0.062
     gBB = (4 * np.pi / mB) * aBB
-    nu = pf_dynamic_sph.nu(gBB)
+    nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = np.sqrt(8 * np.pi * n0 * aBB)
 
     sParams = [mI, mB, n0, gBB]

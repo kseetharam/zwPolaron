@@ -273,7 +273,7 @@ if __name__ == "__main__":
     # n0 = 1
     # aBB = 0.062
     # gBB = (4 * np.pi / mB) * aBB
-    # nu = pfs.nu(gBB)
+    # nu = pfs.nu(mB, n0, gBB)
     # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     # Nsteps = 1e2
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
     #     # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
     #     # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-    #     # nu_const = nu(gBB)
+    #     # nu_const = nu(mB, n0, gBB)
     #     SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
     #     # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     #     # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
