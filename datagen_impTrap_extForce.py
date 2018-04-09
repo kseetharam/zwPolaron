@@ -60,14 +60,12 @@ if __name__ == "__main__":
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    omegat_imp = 3e-3
 
     sParams = [mI, mB, n0, gBB]
 
     dP = 0.5 * mI * nu
     Fscale = (nu / xi**2)
     fParams = [dP]
-    print('TF: {0}'.format(dP / Fscale))
 
     # LDA functions
 
@@ -79,7 +77,7 @@ if __name__ == "__main__":
             return 0
 
     def F_Vconf_func(X):
-        omegat_imp = 3e-3
+        omegat_imp = 3.323e-1  # corresponds to 5 kHz
         mI = 1.7
         return -1 * mI * (omegat_imp**2) * X
 
@@ -151,7 +149,7 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
+    aIBi_Vals = np.array([-1.17, -0.5, -0.05])
 
     F_Vals = np.linspace(0.1 * Fscale, 10 * Fscale, 20)
     for ind, aIBi in enumerate(aIBi_Vals):
