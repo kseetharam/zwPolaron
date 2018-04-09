@@ -17,9 +17,9 @@ if __name__ == "__main__":
 
     # gParams
 
-    (Lx, Ly, Lz) = (30, 30, 30)
+    # (Lx, Ly, Lz) = (30, 30, 30)
     # (Lx, Ly, Lz) = (20, 20, 20)
-    # (Lx, Ly, Lz) = (10, 10, 10)
+    (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
@@ -31,9 +31,9 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA/diff_DP'.format(NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA/diff_DP'.format(NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
         datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
 
@@ -54,47 +54,55 @@ if __name__ == "__main__":
 
     # # # Concatenate Individual Datasets
 
-    # ds_list = []; F_list = []; aIBi_list = []
-    # for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #     if filename == 'LDA_Dataset_sph.nc':
-    #         continue
-    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #     if ds.attrs['Delta_P'] / ds.attrs['Fext_mag'] < 0.05:
-    #         print('EXCLUDED: ' + filename)
-    #         continue
+    mI = 1.7
+    mB = 1
+    aBB = 0.062
+    nu = pfs.nu((4 * np.pi / mB) * aBB)
+    dP_Vals = np.array([0.3 * mI * nu, 0.9 * mI * nu])
+    dP = dP_Vals[1]
+    print('dP: {0}'.format(dP / (mI * nu)))
 
-    #     print(filename)
-    #     ds = ds.sel(t=slice(0, 25))
-    #     ds_list.append(ds)
-    #     F_list.append(ds.attrs['Fext_mag'])
-    #     aIBi_list.append(ds.attrs['aIBi'])
+    ds_list = []; F_list = []; aIBi_list = []; dP_list = []
+    for ind, filename in enumerate(os.listdir(innerdatapath)):
+        if filename == 'LDA_Dataset_sph.nc':
+            continue
+        ds = xr.open_dataset(innerdatapath + '/' + filename)
+        # if ds.attrs['Delta_P'] / ds.attrs['Fext_mag'] < 0.05:
+        #     # print('EXCLUDED: ' + filename)
+        #     continue
+        if ds.attrs['Delta_P'] != dP:
+            continue
 
-    # dP = ds_list[0].attrs['Fext_mag'] * ds_list[0].attrs['TF']
-    # s = sorted(zip(aIBi_list, F_list, ds_list))
-    # g = itertools.groupby(s, key=lambda x: x[0])
+        # print(filename)
+        ds = ds.sel(t=slice(0, 25))
+        ds_list.append(ds)
+        F_list.append(ds.attrs['Fext_mag'])
+        aIBi_list.append(ds.attrs['aIBi'])
+        dP_list.append(ds.attrs['Delta_P'])
 
-    # aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
-    # for key, group in g:
-    #     aIBi_keys.append(key)
-    #     aIBi_groups.append(list(group))
+    s = sorted(zip(aIBi_list, F_list, ds_list))
+    g = itertools.groupby(s, key=lambda x: x[0])
 
-    # for ind, group in enumerate(aIBi_groups):
-    #     aIBi = aIBi_keys[ind]
-    #     _, F_list_temp, ds_list_temp = zip(*group)
-    #     ds_temp = xr.concat(ds_list_temp, pd.Index(F_list_temp, name='F'))
-    #     aIBi_ds_list.append(ds_temp)
+    aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
+    for key, group in g:
+        aIBi_keys.append(key)
+        aIBi_groups.append(list(group))
 
-    # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    # del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF'])
-    # ds_tot.attrs['Delta_P'] = dP
-    # ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset_sph.nc')
+    for ind, group in enumerate(aIBi_groups):
+        aIBi = aIBi_keys[ind]
+        _, F_list_temp, ds_list_temp = zip(*group)
+        ds_temp = xr.concat(ds_list_temp, pd.Index(F_list_temp, name='F'))
+        aIBi_ds_list.append(ds_temp)
+
+    ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
+    del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
+    ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset_sph.nc')
 
     # # # Analysis of Total Dataset
 
     aIBi = -0.05
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
-    dP = attrs['Delta_P']
     mI = attrs['mI']
     Fscale = attrs['nu'] / attrs['xi']**2
     tscale = attrs['xi'] / attrs['nu']

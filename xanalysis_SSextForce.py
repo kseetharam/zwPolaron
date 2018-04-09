@@ -17,7 +17,9 @@ if __name__ == "__main__":
 
     # gParams
 
+    # (Lx, Ly, Lz) = (30, 30, 30)
     (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
