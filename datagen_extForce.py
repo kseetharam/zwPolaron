@@ -16,8 +16,8 @@ if __name__ == "__main__":
     # ---- INITIALIZE GRIDS ----
 
     # (Lx, Ly, Lz) = (30, 30, 30)
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    (Lx, Ly, Lz) = (10, 10, 10)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -52,7 +52,6 @@ if __name__ == "__main__":
     print('Total time steps: {0}'.format(tgrid.size))
     print('UV cutoff: {0}'.format(k_max))
     print('dk: {0}'.format(dk))
-    print('Box size: {0}'.format(2 * np.pi / dk))
     print('NGridPoints: {0}'.format(NGridPoints))
 
     # Basic parameters
@@ -60,7 +59,7 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     dP = 0.5 * mI * nu
-    Fscale = (nu / xi**2)
+    Fscale = 2 * np.pi * (nu / xi**2)
     fParams = [dP]
     # print('TF: {0}'.format(dP / Fscale))
 
@@ -91,16 +90,16 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -152,15 +151,10 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
-    aIBi_Vals = np.array([-1.17, -0.5, -0.05])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.1])
+    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
-    # F_Vals = np.linspace(0.1 * Fscale, 2 * Fscale, 30)
-    # F_Vals = np.geomspace(3 * Fscale, 1000 * Fscale, num=30)
-    # F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 30), np.geomspace(3 * Fscale, 1000 * Fscale, num=30), np.geomspace(450 * Fscale, 1000 * Fscale, num=10)))
-    F_Vals = np.linspace(0.1 * Fscale, 10 * Fscale, 20)
-
-    # print(dP / F_Vals)
+    print(dP / F_Vals)
     for ind, aIBi in enumerate(aIBi_Vals):
         for F in F_Vals:
             cParams_List.append([F, aIBi])

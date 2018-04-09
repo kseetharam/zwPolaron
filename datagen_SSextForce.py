@@ -54,17 +54,19 @@ if __name__ == "__main__":
 
     # Basic parameters
 
+    # Basic parameters
+
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     sParams = [mI, mB, n0, gBB]
 
-    Fscale = (nu / xi**2)
+    Fscale = 2 * np.pi * (nu / xi**2)
 
     # LDA functions
 
@@ -148,11 +150,8 @@ if __name__ == "__main__":
 
     cfParams_List = []
 
-    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
     aIBi_Vals = np.array([-1.17, -0.5, -0.05])
-
-    # F_Vals = np.concatenate((np.linspace(0.1 * Fscale, 2 * Fscale, 10), np.geomspace(3 * Fscale, 1000 * Fscale, num=10)))
-    F_Vals = np.linspace(0.1 * Fscale, 10 * Fscale, 20)
+    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
     dP_Vals = np.array([0.3 * mI * nu, 0.9 * mI * nu])
 
     for aIBi in aIBi_Vals:

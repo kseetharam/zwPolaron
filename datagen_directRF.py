@@ -15,10 +15,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
-
-    (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (20, 20, 20)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
@@ -61,7 +58,7 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
 
@@ -75,11 +72,11 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -106,13 +103,13 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    # if os.path.isdir(datapath) is False:
-    #     os.mkdir(datapath)
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
 
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
-    # # # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
 
@@ -139,7 +136,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
     # P_Vals = np.linspace(0.1, mI * nu, 30)
 
-    aIBi_Vals = np.array([-1.17, -0.5, -0.05])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
     P_Vals = np.array([0.1])
 
     for ind, aIBi in enumerate(aIBi_Vals):

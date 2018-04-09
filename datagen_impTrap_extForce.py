@@ -56,7 +56,7 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     dP = 0.5 * mI * nu
-    Fscale = (nu / xi**2)
+    Fscale = 2 * np.pi * (nu / xi**2)
     fParams = [dP]
 
     # LDA functions
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             return 0
 
     def F_Vconf_func(X):
-        omegat_imp = 3.323e-1  # corresponds to 5 kHz
+        omegat_imp = 9.5e-3  # corresponds to 143 Hz
         mI = 1.7
         return -1 * mI * (omegat_imp**2) * X
 
@@ -88,16 +88,16 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}/LDA'.format(NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -149,9 +149,9 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-1.17, -0.5, -0.05])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.1])
+    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
-    F_Vals = np.linspace(0.1 * Fscale, 10 * Fscale, 20)
     for ind, aIBi in enumerate(aIBi_Vals):
         for F in F_Vals:
             cParams_List.append([F, aIBi])
@@ -172,24 +172,24 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount > len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
-        [F, aIBi] = cParams
+    # if(taskCount > len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [F, aIBi] = cParams
 
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    end = timer()
-    print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
+    # end = timer()
+    # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))

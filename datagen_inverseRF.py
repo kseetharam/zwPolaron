@@ -42,7 +42,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # tMax = 1000; dt = 100
-    tMax = 50; dt = 0.2
+    tMax = 25; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
 
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
