@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.1])
+    aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
     F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
     for ind, aIBi in enumerate(aIBi_Vals):

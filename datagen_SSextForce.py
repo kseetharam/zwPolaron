@@ -15,8 +15,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    (Lx, Ly, Lz) = (10, 10, 10)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
