@@ -77,5 +77,5 @@ if __name__ == "__main__":
     # print(EF_nu_ratio_exp)
     # print(EF_nu_rat_exp)
     print(impTrap_Force_th / Fscale_th)
-    print(10 / L_th_exp)
+    # print(10 / L_th_exp)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))

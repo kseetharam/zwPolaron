@@ -52,9 +52,9 @@ if __name__ == "__main__":
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.062
+    aBB = 0.016
     gBB = (4 * np.pi / mB) * aBB
-    nu = pfs.nu(gBB)
+    nu = pfs.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     # Interpolation
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # # ---- SINGLE FUNCTION RUN ----
 
     P = 0.1
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5, 0.05, 0.1])
+    aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
 
     for Aind, aIBi in enumerate(aIBi_Vals):
         DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
@@ -82,7 +82,8 @@ if __name__ == "__main__":
         eMass = pfs.effMass(P, PB_Val, mI)
         # gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
         Nph = pfs.num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        # Z_factor = pfs.z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        Z_factor = pfs.z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
         print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
         print('Nph: {0}'.format(Nph))
+        print(Z_factor)
         # print('aSi-aIBi: {0}'.format(aSi - aIBi))

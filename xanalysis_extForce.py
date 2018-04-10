@@ -224,7 +224,7 @@ if __name__ == "__main__":
                 continue
             FM_Vals.append(F)
             TF = dP / F
-            XTail = x_ds.sel(F=F).sel(t=slice(TF + 3 * tscale, TF + 4 * tscale))
+            XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
             tTail = XTail.coords['t']
             [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
             vf_Vals.append(vf)
