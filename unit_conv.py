@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     # Other
 
-    print(aBB_th)
+    print(1 / aIB_th, aBB_th)
     print(omega_impTrap_deep_th)
     print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
     # print(EF_nu_ratio_exp)

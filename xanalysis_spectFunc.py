@@ -20,6 +20,8 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
+    aBB = 0.062
+
     # Toggle parameters
 
     toggleDict = {'Location': 'home', 'RF': 'inverse'}
@@ -27,11 +29,11 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
     if toggleDict['RF'] == 'direct':
         innerdatapath = datapath + '/dirRF'

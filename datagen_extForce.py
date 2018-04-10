@@ -43,7 +43,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 20; dt = 0.1
+    tMax = 20; dt = 0.01
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
     # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
-    aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
+    aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
     F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 5)
     # print(dP / F_Vals)
 
