@@ -238,27 +238,8 @@ if __name__ == "__main__":
     #     vf_AVals[aind] = np.average(np.array(vf_Vals))
     #     ms_AVals[aind] = np.average(np.array(ms_Vals))
 
-    # # # Manual input for high interaction strength
-
-    # # aIBi_Large = aIBi_Vals[aIBi_Vals > 0]
-    # # F_fit = 5.02 * Fscale
-    # # for aLind, aIBi in enumerate(aIBi_Large):
-    # #     x_ds = qds.sel(aIBi=aIBi).sel(F=F)['X']
-    # #     XTail = x_ds.sel(t=slice(3, 4))
-    # #     tTail = XTail.coords['t']
-    # #     ind = -1 * len(aIBi_Large) + aLind
-    # #     [vf_AVals[ind], const] = np.polyfit(tTail.values, XTail.values, deg=1)
-    # #     ms_AVals[ind] = dP / vf_AVals[ind]
-
     # # Steady state calc
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
-
-    # # (Lx, Ly, Lz) = (21, 21, 21)
-    # # (dx, dy, dz) = (0.25, 0.25, 0.25)
-
-    # NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
     # Ntheta = 50
     # Nk = np.ceil(NGridPoints_desired / Ntheta)
@@ -298,13 +279,7 @@ if __name__ == "__main__":
     #     DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
     #     aSi = pfs.aSi_interp(DP, aSi_tck)
     #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-    #     # Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-    #     # En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-    #     # nu_const = nu(mB, n0, gBB)
     #     SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
-    #     # gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
-    #     # Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-    #     # Z_factor = z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
 
     # mE = ms_AVals / mI
     # SS_mE = SS_ms_Avals / mI

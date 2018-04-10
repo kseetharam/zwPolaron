@@ -264,7 +264,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
     LDA_Params = [Fext_mag, dP]
     ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, LDA_Params, toggleDict)
 
-    # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
+    # Change initialization of CoherentState and PolaronHamiltonian
     if toggleDict['InitCS'] == 'file':
         ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
