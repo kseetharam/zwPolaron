@@ -153,7 +153,7 @@ if __name__ == "__main__":
     # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
     aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
-    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 5)
+    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
 
     # print((dP / F_Vals) > dt)
 
