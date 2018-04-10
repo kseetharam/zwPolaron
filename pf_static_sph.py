@@ -32,8 +32,8 @@ def ur(mI, mB):
     return (mB * mI) / (mB + mI)
 
 
-def nu(gBB):
-    return np.sqrt(gBB)
+def nu(mB, n0, gBB):
+    return np.sqrt(n0 * gBB / mB)
 
 
 def epsilon(k, mB):
@@ -124,7 +124,7 @@ def PB_integral_grid(kgrid, DP, mI, mB, n0, gBB):
 
 
 def createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB):
-    DP_max = mI * nu(gBB)
+    DP_max = mI * nu(mB, n0, gBB)
     DP_step = DP_max / Nsteps
     DPVals = np.arange(0, DP_max, DP_step)
     aSiVals = np.zeros(DPVals.size)
@@ -176,7 +176,7 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
 
 
 def PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB):
-    DPc = mI * nu(gBB)
+    DPc = mI * nu(mB, n0, gBB)
     aSi = aSi_grid(kgrid, DPc, mI, mB, n0, gBB)
     PB = (aIBi - aSi)**(-2) * PB_integral_grid(kgrid, DPc, mI, mB, n0, gBB)
     return DPc + PB
@@ -201,7 +201,7 @@ def static_DataGeneration(cParams, gParams, sParams):
     PB_Val = PB_interp(DP, aIBi, aSi_tck, PBint_tck)
     Pcrit = PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
     En = Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-    nu_const = nu(gBB)
+    nu_const = nu(mB, n0, gBB)
     eMass = effMass(P, PB_Val, mI)
     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
     Nph = num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)

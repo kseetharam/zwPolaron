@@ -17,8 +17,8 @@ if __name__ == "__main__":
 
     # gParams
 
-    (Lx, Ly, Lz) = (30, 30, 30)
-    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (20, 20, 20)
     # (Lx, Ly, Lz) = (10, 10, 10)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
@@ -98,8 +98,10 @@ if __name__ == "__main__":
     attrs = qds.attrs
     dP = attrs['Delta_P']
     mI = attrs['mI']
-    Fscale = attrs['nu'] / attrs['xi']**2
-    tscale = attrs['xi'] / attrs['nu']
+    nu = attrs['nu']
+    xi = attrs['xi']
+    Fscale = 2 * np.pi * nu / xi**2
+    tscale = xi / nu
     qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
     FVals = qds_aIBi['F'].values
     tVals = qds_aIBi['t'].values
@@ -139,18 +141,18 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
     #     plt.show()
 
-    # POSITION VS TIME
+    # # POSITION VS TIME
 
-    x_ds = qds_aIBi['X']
-    for Find, F in enumerate(FVals):
-        fig, ax = plt.subplots()
-        ax.plot(ts, x_ds.sel(F=F).values, label='')
-        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
-        ax.legend()
-        ax.set_ylabel(r'$<X>$')
-        ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-        ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
-        plt.show()
+    # x_ds = qds_aIBi['X']
+    # for Find, F in enumerate(FVals):
+    #     fig, ax = plt.subplots()
+    #     ax.plot(ts, x_ds.sel(F=F).values, label='')
+    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, x_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
+    #     ax.legend()
+    #     ax.set_ylabel(r'$<X>$')
+    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     plt.show()
 
     # # VELOCITY VS TIME
 

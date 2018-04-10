@@ -96,13 +96,15 @@ if __name__ == "__main__":
     # omegat_imp = 3.323e-1  # corresponds to 5 kHz
     omegat_imp = 9.5e-3  # corresponds to 143 Hz
 
-    aIBi = -1.17
+    aIBi = 0.1
     qds = xr.open_dataset(innerdatapath + '/LDA_Dataset_sph.nc')
     attrs = qds.attrs
     dP = attrs['Delta_P']
     mI = attrs['mI']
-    Fscale = attrs['nu'] / attrs['xi']**2
-    tscale = attrs['xi'] / attrs['nu']
+    nu = attrs['nu']
+    xi = attrs['xi']
+    Fscale = 2 * np.pi * nu / xi**2
+    tscale = xi / nu
     qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
     FVals = qds_aIBi['F'].values
     tVals = qds_aIBi['t'].values
@@ -121,26 +123,26 @@ if __name__ == "__main__":
     #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
     #     ax.set_xscale('log')
     #     ax.set_yscale('log')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
-    # IMPURITY AND PHONON MOMENTUM VS TIME
+    # # IMPURITY AND PHONON MOMENTUM VS TIME
 
-    for Find, F in enumerate(FVals):
-        fig, ax = plt.subplots()
-        qds_aIBi_F = qds_aIBi.sel(F=F)
-        ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
-        ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
-        ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
+    # for Find, F in enumerate(FVals):
+    #     fig, ax = plt.subplots()
+    #     qds_aIBi_F = qds_aIBi.sel(F=F)
+    #     ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
+    #     ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
+    #     ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
 
-        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
-        ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
-        ax.legend()
-        # ax.set_ylim([-0.1 * dP, 1.1 * dP])
-        ax.set_ylabel('Momentum')
-        ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-        ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
-        plt.show()
+    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
+    #     ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
+    #     ax.legend()
+    #     # ax.set_ylim([-0.1 * dP, 1.1 * dP])
+    #     ax.set_ylabel('Momentum')
+    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
+    #     plt.show()
 
     # # POSITION VS TIME
 
@@ -152,7 +154,7 @@ if __name__ == "__main__":
     #     ax.legend()
     #     ax.set_ylabel(r'$<X>$')
     #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
     # # VELOCITY VS TIME
@@ -166,7 +168,7 @@ if __name__ == "__main__":
     #     ax.legend()
     #     ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
     #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{c}{\xi^{2}}$]')
+    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
     # # VELOCITY AND EFFECTIVE MASS VS FORCE
@@ -174,11 +176,11 @@ if __name__ == "__main__":
     # x_ds = qds_aIBi['X']
     # FM_Vals = []; vf_Vals = []; ms_Vals = []
     # for Find, F in enumerate(FVals):
-    #     if(F / Fscale < 1):
-    #         continue
+    #     # if(F / Fscale < 1):
+    #     #     continue
     #     FM_Vals.append(F)
     #     TF = dP / F
-    #     XTail = x_ds.sel(F=F).sel(t=slice(TF + 2 * tscale, TF + 3 * tscale))
+    #     XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
     #     tTail = XTail.coords['t']
     #     [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
     #     vf_Vals.append(vf)
@@ -195,14 +197,14 @@ if __name__ == "__main__":
     # # ax.plot(FM_Vals / Fscale, vf_Vals, 'r-')
     # # ax.set_ylim([0.975 * vf_ave, 1.025 * vf_ave])
     # # ax.set_ylabel(r'$v_{f}=\frac{d<X>}{dt}|_{t=\infty}$')
-    # # ax.set_xlabel(r'$F$ [$\frac{c}{\xi^{2}}$]')
+    # # ax.set_xlabel(r'$F$ [$\frac{2 \pi c}{\xi^{2}}$]')
     # # ax.set_xscale('log')
     # # ax.set_title('Final (average) impurity velocity')
 
     # ax.plot(FM_Vals / Fscale, ms_Vals / mI, 'b-')
     # ax.set_ylim([0.975 * ms_ave / mI, 1.025 * ms_ave / mI])
     # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}=\frac{1}{m_{I}} (\frac{F \cdot T_{F}}{v_{f}})$')
-    # ax.set_xlabel(r'$F$ [$\frac{c}{\xi^{2}}$]')
+    # ax.set_xlabel(r'$F$ [$\frac{2 \pi c}{\xi^{2}}$]')
     # # ax.set_xscale('log')
     # ax.set_title('Polaron Mass Enhancement vs. Applied Force ($P=0.1$)')
 
@@ -220,8 +222,8 @@ if __name__ == "__main__":
     #     x_ds = qds_aIBi['X']
     #     FM_Vals = []; vf_Vals = []; ms_Vals = []
     #     for Find, F in enumerate(FVals):
-    #         if(F / Fscale < 1):
-    #             continue
+    #         # if(F / Fscale < 1):
+    #         #     continue
     #         FM_Vals.append(F)
     #         TF = dP / F
     #         XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
