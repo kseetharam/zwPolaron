@@ -70,7 +70,7 @@ if __name__ == "__main__":
     impTrap_Force_th = -mI_th * omega_impTrap_deep_th**2 * X_th
 
     # Other
-
+    print((kn_exp * aIB_exp)**-1)
     print(1 / aIB_th, aBB_th)
     print(omega_impTrap_deep_th)
     print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))

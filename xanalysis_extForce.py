@@ -124,23 +124,23 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
-    # # IMPURITY AND PHONON MOMENTUM VS TIME
+    # IMPURITY AND PHONON MOMENTUM VS TIME
 
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     qds_aIBi_F = qds_aIBi.sel(F=F)
-    #     ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
-    #     ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
-    #     ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
+    for Find, F in enumerate(FVals):
+        fig, ax = plt.subplots()
+        qds_aIBi_F = qds_aIBi.sel(F=F)
+        ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
+        ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
+        ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
 
-    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
-    #     ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
-    #     ax.legend()
-    #     ax.set_ylim([-0.1 * dP, 1.1 * dP])
-    #     ax.set_ylabel('Momentum')
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
-    #     plt.show()
+        ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
+        ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
+        ax.legend()
+        ax.set_ylim([-0.1 * dP, 1.1 * dP])
+        ax.set_ylabel('Momentum')
+        ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+        ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
+        plt.show()
 
     # # POSITION VS TIME
 
@@ -208,86 +208,86 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # EFFECTIVE MASS CALCULATION AND COMPARISON
+    # # EFFECTIVE MASS CALCULATION AND COMPARISON
 
-    aIBi_Vals = qds['aIBi'].values
-    vf_AVals = np.zeros(aIBi_Vals.size)
-    ms_AVals = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
-        FVals = qds_aIBi['F'].values
-        tVals = qds_aIBi['t'].values
-        x_ds = qds_aIBi['X']
-        FM_Vals = []; vf_Vals = []; ms_Vals = []
-        for Find, F in enumerate(FVals):
-            if(F / Fscale < 1):
-                continue
-            FM_Vals.append(F)
-            TF = dP / F
-            XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
-            tTail = XTail.coords['t']
-            [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
-            vf_Vals.append(vf)
-            ms_Vals.append(dP / vf)
+    # aIBi_Vals = qds['aIBi'].values
+    # vf_AVals = np.zeros(aIBi_Vals.size)
+    # ms_AVals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
+    #     FVals = qds_aIBi['F'].values
+    #     tVals = qds_aIBi['t'].values
+    #     x_ds = qds_aIBi['X']
+    #     FM_Vals = []; vf_Vals = []; ms_Vals = []
+    #     for Find, F in enumerate(FVals):
+    #         if(F / Fscale < 1):
+    #             continue
+    #         FM_Vals.append(F)
+    #         TF = dP / F
+    #         XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
+    #         tTail = XTail.coords['t']
+    #         [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
+    #         vf_Vals.append(vf)
+    #         ms_Vals.append(dP / vf)
 
-        vf_AVals[aind] = np.average(np.array(vf_Vals))
-        ms_AVals[aind] = np.average(np.array(ms_Vals))
+    #     vf_AVals[aind] = np.average(np.array(vf_Vals))
+    #     ms_AVals[aind] = np.average(np.array(ms_Vals))
 
-    # Steady state calc
+    # # Steady state calc
 
-    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 50
-    Nk = np.ceil(NGridPoints_desired / Ntheta)
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    # Ntheta = 50
+    # Nk = np.ceil(NGridPoints_desired / Ntheta)
 
-    theta_max = np.pi
-    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    # theta_max = np.pi
+    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
-    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    # # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
+    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
 
-    k_min = 1e-5
-    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    if dk < k_min:
-        print('k ARRAY GENERATION ERROR')
+    # k_min = 1e-5
+    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    # if dk < k_min:
+    #     print('k ARRAY GENERATION ERROR')
 
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
 
-    mI = 1.7
-    mB = 1
-    n0 = 1
-    gBB = (4 * np.pi / mB) * aBB
-    nu = pfs.nu(mB, n0, gBB)
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # mI = 1.7
+    # mB = 1
+    # n0 = 1
+    # gBB = (4 * np.pi / mB) * aBB
+    # nu = pfs.nu(mB, n0, gBB)
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
-    Nsteps = 1e2
-    pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # Nsteps = 1e2
+    # pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
 
-    aSi_tck = np.load('aSi_spline_sph.npy')
-    PBint_tck = np.load('PBint_spline_sph.npy')
+    # aSi_tck = np.load('aSi_spline_sph.npy')
+    # PBint_tck = np.load('PBint_spline_sph.npy')
 
-    P = 0.1
-    SS_ms_Avals = np.zeros(aIBi_Vals.size)
+    # P = 0.1
+    # SS_ms_Avals = np.zeros(aIBi_Vals.size)
 
-    for Aind, aIBi in enumerate(aIBi_Vals):
-        DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = pfs.aSi_interp(DP, aSi_tck)
-        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
+    # for Aind, aIBi in enumerate(aIBi_Vals):
+    #     DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pfs.aSi_interp(DP, aSi_tck)
+    #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    #     SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
 
-    mE = ms_AVals / mI
-    SS_mE = SS_ms_Avals / mI
-    print('Force Protocol: {0}'.format(mE))
-    print('Steady State: {0}'.format(SS_mE))
-    mE_diff = np.abs(mE - SS_mE) / mE
-    print('Percentage Error: {0}'.format(mE_diff * 100))
+    # mE = ms_AVals / mI
+    # SS_mE = SS_ms_Avals / mI
+    # print('Force Protocol: {0}'.format(mE))
+    # print('Steady State: {0}'.format(SS_mE))
+    # mE_diff = np.abs(mE - SS_mE) / mE
+    # print('Percentage Error: {0}'.format(mE_diff * 100))
 
-    fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals, mE, 'ro', label='Force Protocol Calculation')
-    ax.plot(aIBi_Vals, SS_mE, 'bo', label='Analytical Steady State Calculation')
-    ax.legend()
-    ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    ax.set_xlabel(r'$a_{IB}^{-1}$')
-    ax.set_title('Polaron Mass Enhancement vs. Interaction Strength ($P=0.1$)')
-    plt.show()
+    # fig, ax = plt.subplots()
+    # ax.plot(aIBi_Vals, mE, 'ro', label='Force Protocol Calculation')
+    # ax.plot(aIBi_Vals, SS_mE, 'bo', label='Analytical Steady State Calculation')
+    # ax.legend()
+    # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
+    # ax.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax.set_title('Polaron Mass Enhancement vs. Interaction Strength ($P=0.1$)')
+    # plt.show()
