@@ -15,7 +15,7 @@ if __name__ == "__main__":
     aBB_exp = 52 * a0
     n0_exp = 2e14 * 1e6  # BEC peak density
     nI_exp = 1.4e11 * 1e6  # impurity peak density
-    (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 47)  # BEC trapping frequencies
+    (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 101)  # BEC trapping frequencies
     mI_exp = 39.96 * u
     mB_exp = 22.99 * u
     EF_exp_Hz = 10e3  # (impurity) Fermi energy
@@ -73,9 +73,11 @@ if __name__ == "__main__":
     impTrap_Force_th = -mI_th * omega_impTrap_deep_th**2 * X_th
 
     # Other
-    print((kn_exp * aIB_exp)**-1)
+    # print((kn_exp * aIB_exp)**-1)
+    print(kn_exp * aIB_exp, kn_exp * aBB_exp)
     print(1 / aIB_th, aBB_th)
-    print(RTF_x_exp, RTF_y_exp, RTF_z_exp)
+    print(RTF_x_exp * 1e6, RTF_y_exp * 1e6, RTF_z_exp * 1e6)
+    print(70e-6 * L_th_exp)
     # print(omega_impTrap_deep_th)
     # print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
     # print(impTrap_Force_th / Fscale_th)

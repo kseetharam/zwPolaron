@@ -1,13 +1,12 @@
 import numpy as np
 import Grid
 import pf_static_sph as pfs
-import os
-from timeit import default_timer as timer
+import matplotlib
+import matplotlib.pyplot as plt
+from scipy import interpolate
 
 
 if __name__ == "__main__":
-
-    start = timer()
 
     # ---- INITIALIZE GRIDS ----
 
@@ -41,43 +40,92 @@ if __name__ == "__main__":
     print('UV cutoff: {0}'.format(k_max))
     print('NGridPoints: {0}'.format(NGridPoints))
 
+    # Functions
+
+    def n_BEC(X, n0, RTF):
+        return n0 * (1 - X**2 / RTF**2)
+
     # Basic parameters
 
     mI = 1.7
     mB = 1
     n0 = 1
-    aBB = 0.016
-    gBB = (4 * np.pi / mB) * aBB
-    nu = pfs.nu(mB, n0, gBB)
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    kb = (6 * np.pi**2)**(1 / 3)
+    kn_aBB = 0.0161
+    kn_aIB = -1.243
 
-    # Interpolation
+    # Unit Conversion
 
-    Nsteps = 1e2
-    pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+    u = 1.661e-27  # atomic mass unit (kg)
+    n0_exp = 2e14 * 1e6  # BEC peak density
+    mB_exp = 22.99 * u
+    mB_th = 1
+    n0_th = 1
+    hbar_th = 1
+    L_th_exp = n0_th**(-1 / 3) / n0_exp**(-1 / 3)
+    M_th_exp = mB_th / mB_exp
+    T_th_exp = (mB_th * (n0_th)**(-2 / 3) / (2 * np.pi * hbar_th)) / (mB_exp * (n0_exp)**(-2 / 3) / (2 * np.pi * hbar))
 
-    aSi_tck = np.load('aSi_spline_sph.npy')
-    PBint_tck = np.load('PBint_spline_sph.npy')
+    E_th_exp = M_th_exp * L_th_exp**2 / T_th_exp**2
+    F_th_exp = M_th_exp * L_th_exp / T_th_exp**2
 
-    sParams = [mI, mB, n0, gBB, aSi_tck, PBint_tck]
+    # Real Space
+    RTF_exp = 112e-6  # Thomas-Fermi radius in um
+    RTF = RTF_exp * L_th_exp
+    X_Vals = np.linspace(-RTF * 0.99, RTF * 0.99, 100)
+    X_Vals_m = X_Vals / L_th_exp
 
-    # # ---- SINGLE FUNCTION RUN ----
+    DP = 0
+    P = 0
 
-    P = 0.1
-    aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
+    EpVals = np.zeros(X_Vals.size)
+    for ind, X in enumerate(X_Vals):
+        n = n_BEC(X, n0, RTF)
+        kn = kb * n**(1 / 3)
+        aBB = kn_aBB / kn
+        aIB = kn_aIB / kn
+        gBB = (4 * np.pi / mB) * aBB
 
-    for Aind, aIBi in enumerate(aIBi_Vals):
-        DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = pfs.aSi_interp(DP, aSi_tck)
-        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        # Pcrit = pfs.PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB)
-        # En = pfs.Energy(P, PB_Val, aIBi, aSi, mI, mB, n0)
-        # nu_const = pfs.nu(gBB)
-        eMass = pfs.effMass(P, PB_Val, mI)
-        # gIB = pfs.g(kgrid, aIBi, mI, mB, n0, gBB)
-        Nph = pfs.num_phonons(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        Z_factor = pfs.z_factor(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        print('aIBi: {0}, m*/mI: {1}'.format(aIBi, eMass / mI))
-        print('Nph: {0}'.format(Nph))
-        print(Z_factor)
-        # print('aSi-aIBi: {0}'.format(aSi - aIBi))
+        aIBi = aIB**(-1)
+        aSi = pfs.aSi_grid(kgrid, DP, mI, mB, n, gBB)
+        PB = pfs.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
+        EpVals[ind] = pfs.Energy(P, PB, aIBi, aSi, mI, mB, n)
+
+    EpVals_tck = interpolate.splrep(X_Vals, EpVals, s=0)
+    EpVals_interp = 1 * interpolate.splev(X_Vals, EpVals_tck, der=0)
+    FpVals_interp = -1 * interpolate.splev(X_Vals, EpVals_tck, der=1)
+
+    X_Vals_poly = np.linspace(-RTF * 0.1, RTF * 0.1, 50)
+    EpVals_poly = 1 * interpolate.splev(X_Vals_poly, EpVals_tck, der=0)
+    [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
+    omegap = np.sqrt(2 * p2 / mI)
+    EpVals_harm = p2 * X_Vals**2 + p0
+
+    # EpVals_Hz = (2 * np.pi * hbar)**(-1) * EpVals / E_th_exp
+    EpVals_Hz = (2 * np.pi * hbar)**(-1) * EpVals_interp / E_th_exp
+    FpVals_N = FpVals_interp / F_th_exp
+    EpVals_harm_Hz = (2 * np.pi * hbar)**(-1) * EpVals_harm / E_th_exp
+    freq_p_Hz = (omegap / (2 * np.pi)) * T_th_exp
+
+    VtB = (gBB * n0 / RTF**2) * X_Vals**2
+    VtB_Hz = (2 * np.pi * hbar)**(-1) * VtB / E_th_exp
+
+    print('f_p (kHz) = {0}'.format(freq_p_Hz * 1e-3))
+
+    fig, ax = plt.subplots(nrows=1, ncols=2)
+    # ax.plot(X_Vals, n_BEC(X_Vals, n0, RTF), 'k-')
+    ax[0].plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
+    ax[0].plot(X_Vals_m * 1e6, EpVals_harm_Hz * 1e-3, 'b-', label='Harmonic Fit')
+    ax[0].plot(X_Vals_m * 1e6, VtB_Hz * 1e-3 + np.min(EpVals_Hz * 1e-3), 'g-', label='Shifted BEC Trap')
+    ax[0].legend()
+    ax[0].set_xlabel('X ($\mu$m)')
+    ax[0].set_ylabel('Frequency (kHz)')
+    ax[0].set_title('Traps')
+
+    ax[1].plot(X_Vals_m * 1e6, FpVals_interp * 1e3, 'g-')
+    ax[1].set_xlabel('X ($\mu$m)')
+    ax[1].set_ylabel('Force (mN)')
+    ax[1].set_title(r'$F_{pol}(n(X))$')
+    fig.tight_layout()
+    plt.show()
