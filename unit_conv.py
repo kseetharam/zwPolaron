@@ -15,7 +15,7 @@ if __name__ == "__main__":
     aBB_exp = 52 * a0
     n0_exp = 2e14 * 1e6  # BEC peak density
     nI_exp = 1.4e11 * 1e6  # impurity peak density
-    (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 47)  # impurity trapping frequencies
+    (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 47)  # BEC trapping frequencies
     mI_exp = 39.96 * u
     mB_exp = 22.99 * u
     EF_exp_Hz = 10e3  # (impurity) Fermi energy
@@ -34,6 +34,9 @@ if __name__ == "__main__":
     # kF_exp = np.sqrt(2 * mI_exp * EF_exp) / hbar  # (impurity) Fermi momentum
     EF_nu_ratio_exp = np.sqrt(2 * mI_exp * 2 * np.pi * hbar * EF_exp_Hz) / (mI_exp * nu_exp)
     EF_nu_rat_exp = (2 * np.pi * hbar * nI_exp**(1 / 3)) / (mI_exp * nu_exp)
+    RTF_x_exp = np.sqrt(2 * gBB_exp * n0_exp / (mB_exp * omega_x_exp**2))
+    RTF_y_exp = np.sqrt(2 * gBB_exp * n0_exp / (mB_exp * omega_y_exp**2))
+    RTF_z_exp = np.sqrt(2 * gBB_exp * n0_exp / (mB_exp * omega_z_exp**2))
 
     # Theory parameters (n0^(-1/3)=1, mB = 1, hbar = 1 scale)
     mB_th = 1
@@ -72,10 +75,8 @@ if __name__ == "__main__":
     # Other
     print((kn_exp * aIB_exp)**-1)
     print(1 / aIB_th, aBB_th)
-    print(omega_impTrap_deep_th)
-    print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
-    # print(EF_nu_ratio_exp)
-    # print(EF_nu_rat_exp)
-    print(impTrap_Force_th / Fscale_th)
-    # print(10 / L_th_exp)
+    print(RTF_x_exp, RTF_y_exp, RTF_z_exp)
+    # print(omega_impTrap_deep_th)
+    # print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
+    # print(impTrap_Force_th / Fscale_th)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))
