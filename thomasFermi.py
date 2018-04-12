@@ -71,7 +71,7 @@ if __name__ == "__main__":
     F_th_exp = M_th_exp * L_th_exp / T_th_exp**2
 
     # Real Space
-    RTF_exp = 112e-6  # Thomas-Fermi radius in um
+    RTF_exp = 126e-6  # Thomas-Fermi radius in um
     RTF = RTF_exp * L_th_exp
     X_Vals = np.linspace(-RTF * 0.99, RTF * 0.99, 100)
     X_Vals_m = X_Vals / L_th_exp
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     VtB = (gBB * n0 / RTF**2) * X_Vals**2
     VtB_Hz = (2 * np.pi * hbar)**(-1) * VtB / E_th_exp
 
-    print('f_p (kHz) = {0}'.format(freq_p_Hz * 1e-3))
+    print('freq_poly (Hz) = {0}'.format(freq_p_Hz))
 
     fig, ax = plt.subplots(nrows=1, ncols=2)
     # ax.plot(X_Vals, n_BEC(X_Vals, n0, RTF), 'k-')
