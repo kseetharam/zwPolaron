@@ -71,7 +71,7 @@ if __name__ == "__main__":
     F_th_exp = M_th_exp * L_th_exp / T_th_exp**2
 
     # Real Space
-    RTF_exp = 126e-6  # Thomas-Fermi radius in um
+    RTF_exp = 35e-6  # Thomas-Fermi radius in um
     RTF = RTF_exp * L_th_exp
     X_Vals = np.linspace(-RTF * 0.99, RTF * 0.99, 100)
     X_Vals_m = X_Vals / L_th_exp
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     EpVals_interp = 1 * interpolate.splev(X_Vals, EpVals_tck, der=0)
     FpVals_interp = -1 * interpolate.splev(X_Vals, EpVals_tck, der=1)
 
-    X_Vals_poly = np.linspace(-RTF * 0.1, RTF * 0.1, 50)
+    X_Vals_poly = np.linspace(-RTF * 0.5, RTF * 0.5, 50)
     EpVals_poly = 1 * interpolate.splev(X_Vals_poly, EpVals_tck, der=0)
     [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
     omegap = np.sqrt(2 * p2 / mI)
@@ -123,9 +123,11 @@ if __name__ == "__main__":
     ax[0].set_ylabel('Frequency (kHz)')
     ax[0].set_title('Traps')
 
-    ax[1].plot(X_Vals_m * 1e6, FpVals_interp * 1e3, 'g-')
+    ax[1].plot(X_Vals_m * 1e6, FpVals_interp * 1e24 / F_th_exp, 'r-', label=r'$F_{pol}(n(X))$')
+    ax[1].plot(X_Vals_m * 1e6, (-mI * omegap**2 * X_Vals) * 1e24 / F_th_exp, 'b-', label='Harmonic Fit')
+    ax[1].legend()
     ax[1].set_xlabel('X ($\mu$m)')
-    ax[1].set_ylabel('Force (mN)')
+    ax[1].set_ylabel('Force (yN)')
     ax[1].set_title(r'$F_{pol}(n(X))$')
     fig.tight_layout()
     plt.show()
