@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from scipy.integrate import quad
+import pf_static_sph
 from timeit import default_timer as timer
 import os
 
@@ -269,7 +270,14 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
         ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
         CSPhase = ds['Phase'].values
-        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0, X=0)
+        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0.1, X=0)
+    elif toggleDict['InitCS'] == 'steadystate':
+        Nsteps = 1e2
+        aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+        DP = pf_static_sph.DP_interp(0, 0, aIBi, aSi_tck, PBint_tck)
+        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+        CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        cs.set_initState(amplitude=CSAmp, phase=0, P=0, X=0)
 
     if toggleDict['Interaction'] == 'off':
         ham.gnum = 0

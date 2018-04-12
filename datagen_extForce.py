@@ -107,9 +107,9 @@ if __name__ == "__main__":
         innerdatapath = datapath + '/imdyn'
 
     if toggleDict['Grid'] == 'cartesian':
-        innerdatapath = innerdatapath + '_cart'
+        innerdatapath = innerdatapath + '_cart_extForce'
     elif toggleDict['Grid'] == 'spherical':
-        innerdatapath = innerdatapath + '_spherical'
+        innerdatapath = innerdatapath + '_spherical_extForce'
 
     if toggleDict['Coupling'] == 'frohlich':
         innerdatapath = innerdatapath + '_froh'
@@ -118,6 +118,10 @@ if __name__ == "__main__":
 
     if toggleDict['InitCS'] == 'file':
         toggleDict['InitCS_datapath'] = datapath + '/P_0_PolStates'
+        innerdatapath = innerdatapath + '_ImDynStart'
+    elif toggleDict['InitCS'] == 'steadystate':
+        toggleDict['InitCS_datapath'] = 'InitCS ERROR'
+        innerdatapath = innerdatapath + '_SteadyStart'
     elif toggleDict['InitCS'] == 'default':
         toggleDict['InitCS_datapath'] = 'InitCS ERROR'
 
@@ -162,21 +166,21 @@ if __name__ == "__main__":
         for F in F_Vals:
             cParams_List.append([F, aIBi])
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [F, aIBi] = cParams
-    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
+        [F, aIBi] = cParams
+        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
-    #     loopend = timer()
-    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+        loopend = timer()
+        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
 
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # ---- COMPUTE DATA ON CLUSTER ----
 

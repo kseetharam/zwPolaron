@@ -137,8 +137,9 @@ def createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB):
     aSi_tck = interpolate.splrep(DPVals, aSiVals, s=0)
     PBint_tck = interpolate.splrep(DPVals, PBintVals, s=0)
 
-    np.save('aSi_spline_sph.npy', aSi_tck)
-    np.save('PBint_spline_sph.npy', PBint_tck)
+    # np.save('aSi_spline_sph.npy', aSi_tck)
+    # np.save('PBint_spline_sph.npy', PBint_tck)
+    return aSi_tck, PBint_tck
 
 
 def aSi_interp(DP, aSi_tck):

@@ -289,10 +289,7 @@ if __name__ == "__main__":
     # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     # Nsteps = 1e2
-    # pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-
-    # aSi_tck = np.load('aSi_spline_sph.npy')
-    # PBint_tck = np.load('PBint_spline_sph.npy')
+    # aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
 
     # P = 0.1
     # SS_ms_Avals = np.zeros(aIBi_Vals.size)
