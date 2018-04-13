@@ -272,12 +272,13 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
         CSPhase = ds['Phase'].values
         cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0.1, X=0)
     elif toggleDict['InitCS'] == 'steadystate':
+        Pss = 0.1
         Nsteps = 1e2
         aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-        DP = pf_static_sph.DP_interp(0, 0, aIBi, aSi_tck, PBint_tck)
+        DP = pf_static_sph.DP_interp(0, Pss, aIBi, aSi_tck, PBint_tck)
         aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
         CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        cs.set_initState(amplitude=CSAmp, phase=0, P=0, X=0)
+        cs.set_initState(amplitude=CSAmp, phase=0, P=Pss, X=0)
 
     if toggleDict['Interaction'] == 'off':
         ham.gnum = 0
