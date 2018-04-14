@@ -3,6 +3,7 @@ import pandas as pd
 import xarray as xr
 from scipy.integrate import quad
 import pf_static_sph
+from scipy import interpolate
 from timeit import default_timer as timer
 import os
 
@@ -65,7 +66,7 @@ def g(kgrid, aIBi, mI, mB, n0, gBB):
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
 
-# ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
+# ---- SPECTRUM RELATED FUNCTIONS ----
 
 
 # def PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB):
@@ -132,6 +133,54 @@ def spectFunc(t_Vec, S_Vec, tdecay):
     sf = np.fft.fftshift(sf_preshift)
     omega = np.fft.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
     return omega, sf
+
+
+# ---- LDA/FORCE FUNCTIONS ----
+
+
+def n_thomasFermi(X, n0, RTF):
+    # returns density using Thomas-Fermi approximation where n0 is the peak density and RTF is the Thomas-Fermi radius
+    return n0 * (1 - X**2 / RTF**2)
+
+
+def V_Pol_interp(kgrid, X_Vals, sParams, RTF_BEC):
+    # returns the force on the impurity due to the polaron energy
+    [mI, mB, n0, gBB] = sParams
+    kb = (6 * np.pi**2)**(1 / 3)
+
+    # ***PROBLEM -> ASSUMING THESE VALUES OF KN_ABB, KN_AIB, AND ASSUMING POTENTIAL IS FOR ZERO MOMENTUM...
+    kn_aBB = 0.0161
+    kn_aIB = -1.243
+    DP = 0
+    P = 0
+
+    EpVals = np.zeros(X_Vals.size)
+    for ind, X in enumerate(X_Vals):
+        n = n_thomasFermi(X, n0, RTF_BEC)
+        kn = kb * n**(1 / 3)
+        aBB = kn_aBB / kn
+        aIB = kn_aIB / kn
+        gBB = (4 * np.pi / mB) * aBB
+
+        aIBi = aIB**(-1)
+        aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
+        PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
+        EpVals[ind] = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
+
+    E_Pol_tck = interpolate.splrep(X_Vals, EpVals, s=0)
+    return E_Pol_tck
+
+
+def F_pol(X, E_Pol_tck):
+    return -1 * interpolate.splev(X, E_Pol_tck, der=1)
+
+
+def F_ext(t, F, dP):
+    TF = dP / F
+    if t <= TF:
+        return F
+    else:
+        return 0
 
 
 # ---- DYNAMICS ----
@@ -235,16 +284,16 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     return dynsph_ds
 
 
-def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict):
+def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
     import LDA_CoherentState
     import LDA_PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
-    [Fext_mag, aIBi] = cParams
+    [aIBi] = cParams
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
-    [dP] = fParams
+    [dP, Fext_mag, RTF_BEC] = fParams
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
@@ -257,13 +306,25 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_fu
     aBB = (mB / (4 * np.pi)) * gBB
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
+    # LDA Force functions
+    LDA_funcs = {}
+    if toggleDict['F_ext'] == 'on':
+        LDA_funcs['F_ext'] = F_ext
+    else:
+        LDA_funcs['F_ext'] = lambda t, F, dP: 0
+    if toggleDict['BEC_density'] == 'on':
+        X_Vals = np.linspace(-RTF_BEC * 0.99, RTF_BEC * 0.99, 100)
+        E_Pol_tck = V_Pol_interp(kgrid, X_Vals, sParams, RTF_BEC)
+        LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
+    else:
+        LDA_funcs['F_pol'] = lambda X: 0
+
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
-    LDA_Params = [Fext_mag, dP]
-    ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, LDA_Params, toggleDict)
+    ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, fParams, toggleDict)
 
     # Change initialization of CoherentState and PolaronHamiltonian
     if toggleDict['InitCS'] == 'file':

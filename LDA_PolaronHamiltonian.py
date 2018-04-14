@@ -6,16 +6,13 @@ import pf_dynamic_cart as pfc
 class LDA_PolaronHamiltonian:
         # """ This is a class that stores information about the Hamiltonian"""
 
-    def __init__(self, coherent_state, Params, LDA_funcs, LDA_Params, toggleDict):
+    def __init__(self, coherent_state, Params, LDA_funcs, fParams, toggleDict):
 
         # Params = [aIBi, mI, mB, n0, gBB]
         self.Params = Params
 
-        # LDA_funcs = [F_ext_func, F_Vconf_func, F_Vden_func] corresponding to external force, effective force from confining potential (F_Vconf = - d(V_conf)/dx |x=X), and effective force from density inhomogeneity (F_Vden = - d(V_den)/dx |x=X)
         self.LDA_funcs = LDA_funcs
-
-        # LDA_Params = [Fext_mag]
-        self.LDA_Params = LDA_Params
+        self.fParams = fParams
 
         self.grid = coherent_state.kgrid
         self.coordinate_system = coherent_state.coordinate_system
@@ -26,6 +23,7 @@ class LDA_PolaronHamiltonian:
 
         self.dynamicsType = toggleDict['Dynamics']
         self.couplingType = toggleDict['Coupling']
+        self.BEC_density_var = toggleDict['BEC_density']
 
         if self.couplingType == 'frohlich':
             [aIBi, mI, mB, n0, gBB] = self.Params
@@ -54,8 +52,23 @@ class LDA_PolaronHamiltonian:
         X = system_vars[-1].real.astype(float)
 
         [aIBi, mI, mB, n0, gBB] = self.Params
-        [F_ext_func, F_Vconf_func, F_Vden_func] = self.LDA_funcs
-        [F, dP] = self.LDA_Params
+        F_ext = self.LDA_funcs['F_ext']; F_pol = self.LDA_funcs['F_pol']
+        [dP, F, RTF_BEC] = self.fParams
+
+        # Update BEC density dependent quantities
+
+        if self.BEC_density_var == 'on':
+            n = pfs.n_thomasFermi(X, n0, RTF_BEC)
+            if(self.coordinate_system == "SPHERICAL_2D"):
+                self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
+                self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)
+                self.Wki_grid = 1 / self.Wk_grid
+            if(self.coordinate_system == "CARTESIAN_3D"):
+                self.Omega0_grid = pfc.Omega(self.kxg, self.kyg, self.kzg, 0, mI, mB, n, gBB).flatten()
+                self.Wk_grid = pfc.Wk(self.kxg, self.kyg, self.kzg, mB, n, gBB).flatten(); self.Wk_grid[self.k0mask] = 1
+                self.Wki_grid = 1 / self.Wk_grid
+        else:
+            n = n0
 
         # Calculate updates
 
@@ -79,20 +92,20 @@ class LDA_PolaronHamiltonian:
 
         if self.dynamicsType == 'real':
             # FOR REAL TIME DYNAMICS:
-            amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+            amplitude_new_temp = -1j * (self.gnum * np.sqrt(n) * self.Wk_grid +
                                         amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                         self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-            phase_new_temp = self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI)
-            P_new_temp = F_ext_func(t, F, dP) + F_Vconf_func(X) + F_Vconf_func(X)
+            phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
+            P_new_temp = F_ext(t, F, dP) + F_pol(X)
             X_new_temp = (P - PB) / mI
 
         elif self.dynamicsType == 'imaginary':
             # FOR IMAGINARY TIME DYNAMICS
-            amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+            amplitude_new_temp = -1 * (self.gnum * np.sqrt(n) * self.Wk_grid +
                                        amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                        self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-            phase_new_temp = -1j * (self.gnum * n0 + self.gnum * np.sqrt(n0) * xp + (P**2 - PB**2) / (2 * mI))
-            P_new_temp = -1j * (F_ext_func(t, F) + F_Vconf_func(X) + F_Vconf_func(X))
+            phase_new_temp = -1j * (self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI))
+            P_new_temp = -1j * (F_ext(t, F, dP) + F_pol(X))
             X_new_temp = -1j * (P - PB) / mI
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)

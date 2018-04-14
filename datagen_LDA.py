@@ -66,31 +66,15 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    dP = 0.5 * mI * nu
+    n0_exp = 2e14 * 1e6  # BEC peak density
     Fscale = 2 * np.pi * (nu / xi**2)
-    fParams = [dP]
-    # print('TF: {0}'.format(dP / Fscale))
-
-    # LDA functions
-
-    def F_ext_func(t, F, dP):
-        TF = dP / F
-        if t <= TF:
-            return F
-        else:
-            return 0
-
-    def F_Vconf_func(X):
-        return 0
-
-    def F_Vden_func(X):
-        return 0
-
-    LDA_funcs = [F_ext_func, F_Vconf_func, F_Vden_func]
+    L_th_exp = n0**(-1 / 3) / n0_exp**(-1 / 3)
+    RTF_BEC = 35e-6 * L_th_exp  # BEC Thomas-Fermi radius (35 um)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'on', 'BEC_density': 'on'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -136,51 +120,53 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
-
-    # runstart = timer()
-    # F = 0.1 * Fscale
-    # print('TF: {0}'.format(dP / F))
-    # aIBi = -0.05
-
-    # cParams = [F, aIBi]
-
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
-
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
-
-    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
-
-    cParams_List = []
-
-    # aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
-    # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
-
-    aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
-    F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
-    # print(dP / F_Vals)
-
-    for ind, aIBi in enumerate(aIBi_Vals):
-        for F in F_Vals:
-            cParams_List.append([F, aIBi])
-
-    # ---- COMPUTE DATA ON COMPUTER ----
+    # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
+    aIBi = -0.05
+    dP = 0.5 * mI * nu
+    F = 0.1 * Fscale
+    print('TF: {0}'.format(dP / F))
 
-    for ind, cParams in enumerate(cParams_List):
-        loopstart = timer()
-        [F, aIBi] = cParams
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    cParams = [aIBi]
+    fParams = [dP, F, RTF_BEC]
 
-        loopend = timer()
-        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
+    print('Time: {:.2f}'.format(end - runstart))
+
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
+
+    # cParams_List = []
+
+    # # aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
+    # # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
+
+    # aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
+    # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
+    # # print(dP / F_Vals)
+
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     for F in F_Vals:
+    #         cParams_List.append([F, aIBi])
+
+    # # ---- COMPUTE DATA ON COMPUTER ----
+
+    # runstart = timer()
+
+    # for ind, cParams in enumerate(cParams_List):
+    #     loopstart = timer()
+    #     [F, aIBi] = cParams
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+
+    #     loopend = timer()
+    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+
+    # end = timer()
+    # print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
@@ -198,7 +184,7 @@ if __name__ == "__main__":
     #     cParams = cParams_List[taskID]
     #     [F, aIBi] = cParams
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, LDA_funcs, toggleDict)
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
     # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     # end = timer()
