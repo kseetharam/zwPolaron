@@ -25,10 +25,12 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     aBB = 0.016
+    P0 = 0.1
+    tfin = 20
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'InitCS': 'file'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -49,6 +51,11 @@ if __name__ == "__main__":
     elif toggleDict['Grid'] == 'spherical':
         innerdatapath = innerdatapath + '_spherical_extForce'
 
+    if toggleDict['InitCS'] == 'file':
+        innerdatapath = innerdatapath + '_ImDynStart_P_{:.1f}'.format(P0)
+    elif toggleDict['InitCS'] == 'steadystate':
+        innerdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(P0)
+
     if toggleDict['Coupling'] == 'frohlich':
         innerdatapath = innerdatapath + '_froh'
     elif toggleDict['Coupling'] == 'twophonon':
@@ -66,7 +73,7 @@ if __name__ == "__main__":
     #         continue
 
     #     print(filename)
-    #     ds = ds.sel(t=slice(0, 25))
+    #     ds = ds.sel(t=slice(0, tfin))
     #     ds_list.append(ds)
     #     F_list.append(ds.attrs['Fext_mag'])
     #     aIBi_list.append(ds.attrs['aIBi'])
@@ -100,12 +107,14 @@ if __name__ == "__main__":
     mI = attrs['mI']
     nu = attrs['nu']
     xi = attrs['xi']
+    Ptot = dP + P0
     Fscale = 2 * np.pi * nu / xi**2
     tscale = xi / nu
     qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
     FVals = qds_aIBi['F'].values
     tVals = qds_aIBi['t'].values
     ts = tVals / tscale
+    v0 = (P0 - qds_aIBi['Pph'].isel(F=0, t=0).values) / mI
     print('mI*c: {0}'.format(mI * nu))
 
     # # PHONON NUMBER VS TIME
@@ -134,9 +143,9 @@ if __name__ == "__main__":
         ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
 
         ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
-        ax.plot(ts, dP * np.ones(ts.size), 'r--', label=r'$\Delta P=F \cdot T_{F}$')
+        ax.plot(ts, Ptot * np.ones(ts.size), 'r--', label=r'$P_{0}+F \cdot T_{F}$')
         ax.legend()
-        ax.set_ylim([-0.1 * dP, 1.1 * dP])
+        ax.set_ylim([-0.1 * Ptot, 1.1 * Ptot])
         ax.set_ylabel('Momentum')
         ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
         ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
@@ -181,6 +190,7 @@ if __name__ == "__main__":
     #     XTail = x_ds.sel(F=F).sel(t=slice(TF + 2 * tscale, TF + 3 * tscale))
     #     tTail = XTail.coords['t']
     #     [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
+    #     vf = vf - v0
     #     vf_Vals.append(vf)
     #     ms_Vals.append(dP / vf)
 
@@ -218,6 +228,7 @@ if __name__ == "__main__":
     #     FVals = qds_aIBi['F'].values
     #     tVals = qds_aIBi['t'].values
     #     x_ds = qds_aIBi['X']
+    #     v0 = (P0 - qds_aIBi['Pph'].isel(F=0, t=0).values) / mI
     #     FM_Vals = []; vf_Vals = []; ms_Vals = []
     #     for Find, F in enumerate(FVals):
     #         if(F / Fscale < 1):
@@ -228,7 +239,8 @@ if __name__ == "__main__":
     #         tTail = XTail.coords['t']
     #         [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
     #         vf_Vals.append(vf)
-    #         ms_Vals.append(dP / vf)
+    #         ms_Vals.append(dP / (vf - v0))
+    #         # ms_Vals.append(Ptot / vf)
 
     #     vf_AVals[aind] = np.average(np.array(vf_Vals))
     #     ms_AVals[aind] = np.average(np.array(ms_Vals))
@@ -242,7 +254,6 @@ if __name__ == "__main__":
     # theta_max = np.pi
     # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    # # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
     # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
 
     # k_min = 1e-5
@@ -263,21 +274,19 @@ if __name__ == "__main__":
 
     # Nsteps = 1e2
     # aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-
-    # P = 0.1
     # SS_ms_Avals = np.zeros(aIBi_Vals.size)
 
     # for Aind, aIBi in enumerate(aIBi_Vals):
-    #     DP = pfs.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    #     DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
     #     aSi = pfs.aSi_interp(DP, aSi_tck)
     #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-    #     SS_ms_Avals[Aind] = pfs.effMass(P, PB_Val, mI)
+    #     SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
 
     # mE = ms_AVals / mI
     # SS_mE = SS_ms_Avals / mI
     # print('Force Protocol: {0}'.format(mE))
     # print('Steady State: {0}'.format(SS_mE))
-    # mE_diff = np.abs(mE - SS_mE) / mE
+    # mE_diff = np.abs(mE - SS_mE) / SS_mE
     # print('Percentage Error: {0}'.format(mE_diff * 100))
 
     # fig, ax = plt.subplots()
@@ -288,3 +297,29 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # ax.set_title('Polaron Mass Enhancement vs. Interaction Strength ($P=0.1$)')
     # plt.show()
+
+    # # COMBINING EFFECTIVE MASS
+
+    # mE_da = xr.DataArray(mE, coords=[aIBi_Vals], dims=['aIBi'])
+    # SSmE_da = xr.DataArray(SS_mE, coords=[aIBi_Vals], dims=['aIBi'])
+    # mE_ds = xr.Dataset({'mE_file': mE_da, 'SSmE': SSmE_da}, coords={'aIBi': aIBi_Vals})
+    # mE_ds.to_netcdf(datapath + '/extF_mE.nc')
+
+    # with xr.open_dataset(datapath + '/extF_mE.nc') as mE_ds:
+    #     mE_ds['mE_s'] = mE_da
+    #     mE_ds_new = mE_ds.copy(deep=True)
+    # mE_ds_new.to_netcdf(datapath + '/extF_mE.nc')
+
+    # with xr.open_dataset(datapath + '/extF_mE.nc') as mE_ds:
+    #     fig, ax = plt.subplots()
+    #     aIBi_Vals = mE_ds['aIBi'].values
+    #     mE = mE_ds['mE_file']
+    #     mE_s = mE_ds['mE_s']
+    #     ax.plot(aIBi_Vals, mE, 'ro', label='Force Protocol Imdyn State')
+    #     ax.plot(aIBi_Vals, mE_s, 'go', label='Force Protocol Steady State')
+    #     ax.plot(aIBi_Vals, SS_mE, 'bo', label='Analytical Steady State')
+    #     ax.legend()
+    #     ax.set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
+    #     ax.set_xlabel(r'$a_{IB}^{-1}$')
+    #     ax.set_title('Polaron Mass Enhancement vs. Interaction Strength ($P=0.1$)')
+    #     plt.show()
