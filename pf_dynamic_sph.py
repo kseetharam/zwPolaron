@@ -5,7 +5,6 @@ from scipy.integrate import quad
 import pf_static_sph
 from scipy import interpolate
 from timeit import default_timer as timer
-import os
 
 # ---- HELPER FUNCTIONS ----
 
