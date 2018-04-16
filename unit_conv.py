@@ -74,6 +74,9 @@ if __name__ == "__main__":
 
     # Other
     # print((kn_exp * aIB_exp)**-1)
+    print(0.5 * mI_exp * 1e-6 * 2 * np.pi * 10)
+    print(Fscale_exp)
+    print(np.linspace(0, 8) / L_th_exp)
     print(kn_exp * aIB_exp, kn_exp * aBB_exp)
     print(1 / aIB_th, aBB_th)
     print(RTF_x_exp * 1e6, RTF_y_exp * 1e6, RTF_z_exp * 1e6)
