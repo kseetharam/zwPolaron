@@ -137,31 +137,37 @@ def spectFunc(t_Vec, S_Vec, tdecay):
 # ---- LDA/FORCE FUNCTIONS ----
 
 
-def n_thomasFermi(X, n0, RTF):
-    # returns density using Thomas-Fermi approximation where n0 is the peak density and RTF is the Thomas-Fermi radius
-    return n0 * (1 - X**2 / RTF**2)
+def n_thomasFermi(X, Y, Z, n0, RTF_X, RTF_Y, RTF_Z):
+    # returns 3D density using Thomas-Fermi approximation where n0 is the peak density and RTF is the Thomas-Fermi radius in each direction
+    nTF = (n0 * 15 / (8 * np.pi * RTF_X * RTF_Y * RTF_Z)) * (1 - X**2 / RTF_X**2 - Y**2 / RTF_Y**2 - Z**2 / RTF_Z**2)
+    if nTF >= 0:
+        return nTF
+    else:
+        return 0
 
 
-def V_Pol_interp(kgrid, X_Vals, sParams, RTF_BEC):
-    # returns the force on the impurity due to the polaron energy
+def n_thermal(X, Y, Z, n0_thermal, RG_X, RG_Y, RG_Z):
+    # returns thermal correction to density assuming Gaussian profile
+    return (n0_thermal / (RG_X * RG_Y * RG_Z * np.pi**(3 / 2))) * np.exp(-1 * (X**2 / RG_X**2 + Y**2 / RG_Y**2 + Z**2 / RG_Z**2))
+
+
+def n_BEC(X, Y, Z, n0, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z):
+    return n_thomasFermi(X, Y, Z, n0, RTF_X, RTF_Y, RTF_Z) + n_thermal(X, Y, Z, n0_thermal, RG_X, RG_Y, RG_Z)
+
+
+def V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams):
+    # returns an interpolation function for the polaron energy
     [mI, mB, n0, gBB] = sParams
-    kb = (6 * np.pi**2)**(1 / 3)
+    [aIBi] = cParams
+    RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']; n0_thermal = trapParams['n0_thermal_BEC']
 
-    # ***PROBLEM -> ASSUMING THESE VALUES OF KN_ABB, KN_AIB, AND ASSUMING POTENTIAL IS FOR ZERO MOMENTUM...
-    kn_aBB = 0.0161
-    kn_aIB = -1.243
+    # ASSUMING FIXED ABB, KIB, ASSUMING POTENTIAL IS FOR ZERO MOMENTUM, AND ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
     DP = 0
     P = 0
 
     EpVals = np.zeros(X_Vals.size)
     for ind, X in enumerate(X_Vals):
-        n = n_thomasFermi(X, n0, RTF_BEC)
-        kn = kb * n**(1 / 3)
-        aBB = kn_aBB / kn
-        aIB = kn_aIB / kn
-        gBB = (4 * np.pi / mB) * aBB
-
-        aIBi = aIB**(-1)
+        n = n_BEC(X, 0, 0, n0, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
         aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
         PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
         EpVals[ind] = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
@@ -181,6 +187,51 @@ def F_ext(t, F, dP):
     else:
         return 0
 
+
+# ---- OTHER FUNCTIONS ----
+
+def unitConv_th_exp(n0_exp, mB_exp):
+    # Theory scale is set by peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time)
+    # This function takes experimental values for these quantities in SI units
+    # The output are conversion factors for length, mass, and time from experiment (SI units) to theory
+    # For example, if I have a quantity aBB_exp in meters, then aBB_th = aBB_exp * L_exp2th gives the quantity in theory units
+
+    # Constants (SI units)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+
+    # Choice of theoretical scale
+    n0_th = 1
+    mB_th = 1
+    hbar_th = 1
+
+    # Conversion factors for length, mass, time
+    L_exp2th = n0_th**(-1 / 3) / n0_exp**(-1 / 3)
+    M_exp2th = mB_th / mB_exp
+    T_exp2th = (mB_th * (n0_th)**(-2 / 3) / (2 * np.pi * hbar_th)) / (mB_exp * (n0_exp)**(-2 / 3) / (2 * np.pi * hbar))
+
+    return L_exp2th, M_exp2th, T_exp2th
+
+
+def Zw_exp_params():
+    # Constants (SI units)
+    a0 = 5.29e-11  # Bohr radius (m)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+    u = 1.661e-27  # atomic mass unit (kg)
+    params = {}
+
+    # Experimental parameters (SI units)
+    params['aIB'] = -2600 * a0
+    params['aBB'] = 52 * a0
+    params['n0'] = 6e13 * 1e6  # BEC peak density in m^(-3)
+    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian density in m^(-3)
+    params['nI'] = 1.4e11 * 1e6  # impurity peak density
+    params['omega_x'] = 2 * np.pi * 101; params['omega_y'] = 2 * np.pi * 41; params['omega_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz
+    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (um) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
+    params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (um)
+    params['mI'] = 39.96 * u
+    params['mB'] = 22.99 * u
+
+    return params
 
 # ---- DYNAMICS ----
 
@@ -283,7 +334,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     return dynsph_ds
 
 
-def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict):
+def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
     import LDA_CoherentState
@@ -292,7 +343,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggle
     [aIBi] = cParams
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
-    [dP, Fext_mag, RTF_BEC] = fParams
+    [dP, Fext_mag] = fParams
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
@@ -312,8 +363,9 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggle
     else:
         LDA_funcs['F_ext'] = lambda t, F, dP: 0
     if toggleDict['BEC_density'] == 'on':
-        X_Vals = np.linspace(-RTF_BEC * 0.99, RTF_BEC * 0.99, 100)
-        E_Pol_tck = V_Pol_interp(kgrid, X_Vals, sParams, RTF_BEC)
+        # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
+        X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
+        E_Pol_tck = V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
     else:
         LDA_funcs['F_pol'] = lambda X: 0
@@ -323,7 +375,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggle
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
-    ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, fParams, toggleDict)
+    ham = LDA_PolaronHamiltonian.LDA_PolaronHamiltonian(cs, Params, LDA_funcs, fParams, trapParams, toggleDict)
 
     # Change initialization of CoherentState and PolaronHamiltonian
     if toggleDict['InitCS'] == 'file':

@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     aIB_exp = -2600 * a0
     aBB_exp = 52 * a0
-    n0_exp = 2e14 * 1e6  # BEC peak density
+    n0_exp = 6e13 * 1e6  # BEC peak density
     nI_exp = 1.4e11 * 1e6  # impurity peak density
     (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 101)  # BEC trapping frequencies
     mI_exp = 39.96 * u

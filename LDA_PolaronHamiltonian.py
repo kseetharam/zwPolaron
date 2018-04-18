@@ -6,13 +6,14 @@ import pf_dynamic_cart as pfc
 class LDA_PolaronHamiltonian:
         # """ This is a class that stores information about the Hamiltonian"""
 
-    def __init__(self, coherent_state, Params, LDA_funcs, fParams, toggleDict):
+    def __init__(self, coherent_state, Params, LDA_funcs, fParams, trapParams, toggleDict):
 
         # Params = [aIBi, mI, mB, n0, gBB]
         self.Params = Params
 
         self.LDA_funcs = LDA_funcs
         self.fParams = fParams
+        self.trapParams = trapParams
 
         self.grid = coherent_state.kgrid
         self.coordinate_system = coherent_state.coordinate_system
@@ -53,12 +54,13 @@ class LDA_PolaronHamiltonian:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         F_ext = self.LDA_funcs['F_ext']; F_pol = self.LDA_funcs['F_pol']
-        [dP, F, RTF_BEC] = self.fParams
+        [dP, F] = self.fParams
+        RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']; n0_thermal = self.trapParams['n0_thermal_BEC']
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            n = pfs.n_thomasFermi(X, n0, RTF_BEC)
+            n = pfs.n_BEC(X, 0, 0, n0, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)

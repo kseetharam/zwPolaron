@@ -56,20 +56,30 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 1.7
-    mB = 1
+    exp_params = pf_dynamic_sph.Zw_exp_params()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_th_exp(exp_params['n0'], exp_params['mB'])
+
     n0 = 1
-    aBB = 0.016
+    mB = 1
+    mI = exp_params['mI'] * M_exp2th
+    aBB = exp_params['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
-    nu = pf_dynamic_sph.nu(mB, n0, gBB)
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
     sParams = [mI, mB, n0, gBB]
 
-    n0_exp = 2e14 * 1e6  # BEC peak density
+    # Trap parameters
+
+    n0_thermal = exp_params['n0_thermal'] / (L_exp2th**3)
+    RTF_BEC_X = exp_params['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = exp_params['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = exp_params['RTF_BEC_Z'] * L_exp2th
+    RG_BEC_X = exp_params['RG_BEC_X'] * L_exp2th; RG_BEC_Y = exp_params['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = exp_params['RG_BEC_Z'] * L_exp2th
+
+    trapParams = {'n0_BEC': n0, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z}
+
+    # Derived quantities
+
+    nu = pf_dynamic_sph.nu(mB, n0, gBB)
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     Fscale = 2 * np.pi * (nu / xi**2)
-    L_th_exp = n0**(-1 / 3) / n0_exp**(-1 / 3)
-    RTF_BEC = 35e-6 * L_th_exp  # BEC Thomas-Fermi radius (35 um)
 
     # Toggle parameters
 
@@ -123,16 +133,17 @@ if __name__ == "__main__":
     # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
-    aIBi = -0.05
+    aIBi = (exp_params['aIB'] * L_exp2th)**(-1)
     dP = 0.5 * mI * nu
     F = 0.1 * Fscale
+    print('mI: {0}, mB:{1}, aBB: {2}, aIBi: {3}'.format(mI, mB, aBB, aIBi))
     print('TF: {0}'.format(dP / F))
 
     cParams = [aIBi]
-    fParams = [dP, F, RTF_BEC]
+    fParams = [dP, F]
 
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
-    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
