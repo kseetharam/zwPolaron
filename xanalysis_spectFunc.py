@@ -20,11 +20,11 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    aBB = 0.062
+    aBB = 0.011
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'RF': 'inverse'}
+    toggleDict = {'Location': 'work', 'RF': 'inverse'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -35,10 +35,15 @@ if __name__ == "__main__":
     elif toggleDict['Location'] == 'cluster':
         datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
+    # if toggleDict['RF'] == 'direct':
+    #     innerdatapath = datapath + '/dirRF'
+    # elif toggleDict['RF'] == 'inverse':
+    #     innerdatapath = datapath + '/invRF'
+
     if toggleDict['RF'] == 'direct':
-        innerdatapath = datapath + '/dirRF'
+        innerdatapath = datapath + '/redyn_spherical_nonint'
     elif toggleDict['RF'] == 'inverse':
-        innerdatapath = datapath + '/invRF'
+        innerdatapath = datapath + '/redyn_spherical'
 
     ds_name = toggleDict['RF'] + 'RF_Dataset_sph.nc'
     ds_path = innerdatapath + '/' + ds_name
@@ -108,9 +113,21 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    qds = xr.open_dataset(ds_path)
-    aIBi = -1.17
-    qds['SpectFunc'].isel(P=1).sel(aIBi=aIBi).plot()
-    # qds['SpectFunc'].sel(aIBi=aIBi).plot()
-    # qds['SpectFunc'].sel(aIBi=aIBi).mean(dim='P').plot()
+    # qds = xr.open_dataset(ds_path)
+    # aIBi = -1.17
+    # qds['SpectFunc'].isel(P=1).sel(aIBi=aIBi).plot()
+    # # qds['SpectFunc'].sel(aIBi=aIBi).plot()
+    # # qds['SpectFunc'].sel(aIBi=aIBi).mean(dim='P').plot()
+    # plt.show()
+
+    P = 1.073
+    aIBi = -1.77
+    qds = xr.open_dataset(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    DynOv_da = qds['Real_DynOv'] + 1j * qds['Real_DynOv']
+    # np.imag(DynOv_da).plot()
+
+    tdecay = 3
+    omega, sf = pfs.spectFunc(DynOv_da.coords['t'].values, DynOv_da.values, tdecay)
+    fig, ax = plt.subplots()
+    ax.plot(omega, sf)
     plt.show()

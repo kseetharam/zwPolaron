@@ -41,8 +41,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1000; dt = 100
-    # tMax = 50; dt = 0.2
+    # tMax = 1000; dt = 100
+    tMax = 25; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -53,21 +53,37 @@ if __name__ == "__main__":
     print('dk: {0}'.format(dk))
     print('NGridPoints: {0}'.format(NGridPoints))
 
+    # # Basic parameters
+
+    # mI = 1.7
+    # mB = 1
+    # n0 = 1
+    # aBB = 0.016
+    # gBB = (4 * np.pi / mB) * aBB
+    # nu = pf_dynamic_sph.nu(mB, n0, gBB)
+
+    # sParams = [mI, mB, n0, gBB]
+
     # Basic parameters
 
-    mI = 1.7
-    mB = 1
-    n0 = 1
-    aBB = 0.016
+    expParams = pf_dynamic_sph.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC'], expParams['mB'])
+
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
+    mB = expParams['mB'] * M_exp2th  # should = 1
+    mI = expParams['mI'] * M_exp2th
+    aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
-    nu = pf_dynamic_sph.nu(mB, n0, gBB)
+
+    vI_init = expParams['vI_init'] * L_exp2th / T_exp2th
+    PI_init = mI * vI_init
 
     sParams = [mI, mB, n0, gBB]
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
-    # toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    # toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'yes', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'off', 'InitCS': 'file', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -103,18 +119,18 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # ---- SINGLE FUNCTION RUN ----
 
     runstart = timer()
 
     P = 0.1
-    aIBi = -1.24
+    aIBi = -1.77
 
     cParams = [P, aIBi]
 
@@ -123,7 +139,8 @@ if __name__ == "__main__":
     if toggleDict['LastTimeStepOnly'] == 'yes':
         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
     else:
-        CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+        # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+        DynOv_ds = pf_dynamic_sph.dirRF(dynsph_ds, kgrid, cParams, sParams); DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
@@ -136,7 +153,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
     # P_Vals = np.linspace(0.1, mI * nu, 30)
 
-    aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
+    aIBi_Vals = np.array([-5.0, -1.77, -0.5, -0.05, 0.1])
     P_Vals = np.array([0.1])
 
     for ind, aIBi in enumerate(aIBi_Vals):
@@ -157,7 +174,8 @@ if __name__ == "__main__":
     #     if toggleDict['LastTimeStepOnly'] == 'yes':
     #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
     #     else:
-    #         CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #         # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #         DynOv_ds = pf_dynamic_sph.dirRF(dynsph_ds, kgrid, cParams, sParams); DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     #     loopend = timer()
     #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -186,7 +204,8 @@ if __name__ == "__main__":
     # if toggleDict['LastTimeStepOnly'] == 'yes':
     #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']].isel(t=-1); CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # imag time evolution to get polaron state
     # else:
-    #     CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #     # CSAmp_ds = dynsph_ds[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; CSAmp_ds.attrs = dynsph_ds.attrs; CSAmp_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
+    #     DynOv_ds = pf_dynamic_sph.dirRF(dynsph_ds, kgrid, cParams, sParams); DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))  # real time evolution to get direct S(t)
 
     # end = timer()
     # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

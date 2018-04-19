@@ -88,7 +88,7 @@ def g(kgrid, aIBi, mI, mB, n0, gBB):
 
 #     return DP + PB
 
-def dirRF(dataset, kgrid):
+def dirRF(dataset, kgrid, cParams, sParams):
     CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
     Phase = dataset['Phase']
     dVk = kgrid.dV()
@@ -103,10 +103,23 @@ def dirRF(dataset, kgrid):
         exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
         DynOv_Vec[tind] = np.exp(-1j * (Phaset - Phase0)) * np.exp((-1 / 2) * exparg)
 
+    # calculate polaron energy (energy of initial state CSA0)
+    [P, aIBi] = cParams
+    [mI, mB, n0, gBB] = sParams
+    dVk = kgrid.dV()
+    kzg_flat = kcos_func(kgrid)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    PB0 = np.dot(kzg_flat * np.abs(CSA0)**2, dVk).real.astype(float)
+    DP0 = P - PB0
+    Energy0 = (P**2 - PB0**2) / (2 * mI) + np.dot(Omega(kgrid, DP0, mI, mB, n0, gBB) * np.abs(CSA0)**2, dVk) + gIB * (np.dot(Wk(kgrid, mB, n0, gBB) * CSA0, dVk) + np.sqrt(n0))**2
+
+    # calculate full dynamical overlap
+    DynOv_Vec = np.exp(1j * Energy0) * DynOv_Vec
     ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
     ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
-    dirRF_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
-    return dirRF_ds
+    # DynOv_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+    DynOv_ds = dataset[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds['Real_DynOv'] = ReDynOv_da; DynOv_ds['Imag_DynOv'] = ImDynOv_da; DynOv_ds.attrs = dataset.attrs
+    return DynOv_ds
 
 
 # def spectFunc(t_Vec, S_Vec, tdecay):
@@ -137,29 +150,36 @@ def spectFunc(t_Vec, S_Vec, tdecay):
 # ---- LDA/FORCE FUNCTIONS ----
 
 
-def n_thomasFermi(X, Y, Z, n0, RTF_X, RTF_Y, RTF_Z):
-    # returns 3D density using Thomas-Fermi approximation where n0 is the peak density and RTF is the Thomas-Fermi radius in each direction
-    nTF = (n0 * 15 / (8 * np.pi * RTF_X * RTF_Y * RTF_Z)) * (1 - X**2 / RTF_X**2 - Y**2 / RTF_Y**2 - Z**2 / RTF_Z**2)
-    if nTF >= 0:
-        return nTF
+def n_thomasFermi(X, Y, Z, n0_TF, RTF_X, RTF_Y, RTF_Z):
+    # returns 3D density using Thomas-Fermi approximation where n0 is the central density and RTF is the Thomas-Fermi radius in each direction
+    # nTF = (n0 * 15 / (8 * np.pi * RTF_X * RTF_Y * RTF_Z)) * (1 - X**2 / RTF_X**2 - Y**2 / RTF_Y**2 - Z**2 / RTF_Z**2)
+    nTF = n0_TF * (1 - X**2 / RTF_X**2 - Y**2 / RTF_Y**2 - Z**2 / RTF_Z**2)
+    if np.isscalar(nTF):
+        if nTF > 0:
+            return nTF
+        else:
+            return 0
     else:
-        return 0
+        nTF[nTF < 0] = 0
+        return nTF
 
 
 def n_thermal(X, Y, Z, n0_thermal, RG_X, RG_Y, RG_Z):
-    # returns thermal correction to density assuming Gaussian profile
-    return (n0_thermal / (RG_X * RG_Y * RG_Z * np.pi**(3 / 2))) * np.exp(-1 * (X**2 / RG_X**2 + Y**2 / RG_Y**2 + Z**2 / RG_Z**2))
+    # returns thermal correction to density assuming Gaussian profile given Gaussian waists and n0_thermal which is central thermal density
+    # return (n0_thermal / (RG_X * RG_Y * RG_Z * np.pi**(1.5))) * np.exp(-1 * (X**2 / RG_X**2 + Y**2 / RG_Y**2 + Z**2 / RG_Z**2))
+    return n0_thermal * np.exp(-1 * (X**2 / RG_X**2 + Y**2 / RG_Y**2 + Z**2 / RG_Z**2))
 
 
-def n_BEC(X, Y, Z, n0, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z):
-    return n_thomasFermi(X, Y, Z, n0, RTF_X, RTF_Y, RTF_Z) + n_thermal(X, Y, Z, n0_thermal, RG_X, RG_Y, RG_Z)
+def n_BEC(X, Y, Z, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z):
+    return n_thomasFermi(X, Y, Z, n0_TF, RTF_X, RTF_Y, RTF_Z) + n_thermal(X, Y, Z, n0_thermal, RG_X, RG_Y, RG_Z)
 
 
 def V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams):
     # returns an interpolation function for the polaron energy
     [mI, mB, n0, gBB] = sParams
-    [aIBi] = cParams
-    RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']; n0_thermal = trapParams['n0_thermal_BEC']
+    aIBi = cParams['aIBi']
+    n0_TF = trapParams['n0_TF_BEC']; RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']
+    n0_thermal = trapParams['n0_thermal_BEC']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']
 
     # ASSUMING FIXED ABB, KIB, ASSUMING POTENTIAL IS FOR ZERO MOMENTUM, AND ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
     DP = 0
@@ -167,7 +187,7 @@ def V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams):
 
     EpVals = np.zeros(X_Vals.size)
     for ind, X in enumerate(X_Vals):
-        n = n_BEC(X, 0, 0, n0, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
+        n = n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
         aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
         PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
         EpVals[ind] = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
@@ -191,7 +211,7 @@ def F_ext(t, F, dP):
 # ---- OTHER FUNCTIONS ----
 
 def unitConv_exp2th(n0_exp, mB_exp):
-    # Theory scale is set by peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time)
+    # Theory scale is set by total peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time)
     # This function takes experimental values for these quantities in SI units
     # The output are conversion factors for length, mass, and time from experiment (SI units) to theory
     # For example, if I have a quantity aBB_exp in meters, then aBB_th = aBB_exp * L_exp2th gives the quantity in theory units
@@ -212,24 +232,25 @@ def unitConv_exp2th(n0_exp, mB_exp):
     return L_exp2th, M_exp2th, T_exp2th
 
 
-def Zw_exp_params():
+def Zw_expParams():
     # Constants (SI units)
     a0 = 5.29e-11  # Bohr radius (m)
-    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
     u = 1.661e-27  # atomic mass unit (kg)
     params = {}
 
     # Experimental parameters (SI units)
     params['aIB'] = -2600 * a0
     params['aBB'] = 52 * a0
-    params['n0'] = 6e13 * 1e6  # BEC peak density in m^(-3)
-    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian density in m^(-3)
+    params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
+    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
+    params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
     params['nI'] = 1.4e11 * 1e6  # impurity peak density
-    params['omega_x'] = 2 * np.pi * 101; params['omega_y'] = 2 * np.pi * 41; params['omega_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz
+    params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (um) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (um)
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
+    params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
 
     return params
 
@@ -296,7 +317,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 
         PB_da[ind] = cs.get_PhononMomentum()
         NB_da[ind] = cs.get_PhononNumber()
-        DynOv = cs.get_DynOverlap()
+        DynOv = np.exp(1j * P**2 / (2 * mI)) * cs.get_DynOverlap()
         ReDynOv_da[ind] = np.real(DynOv)
         ImDynOv_da[ind] = np.imag(DynOv)
         Phase_da[ind] = cs.get_Phase()
@@ -340,10 +361,10 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     import LDA_CoherentState
     import LDA_PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
-    [aIBi] = cParams
+    aIBi = cParams['aIBi']
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
-    [dP, Fext_mag] = fParams
+    dP = fParams['dP_ext']; Fext_mag = fParams['Fext_mag']
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
@@ -379,7 +400,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     # Change initialization of CoherentState and PolaronHamiltonian
     if toggleDict['InitCS'] == 'file':
-        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
+        # ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
+        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_0.100_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
         CSPhase = ds['Phase'].values
         cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0.1, X=0)

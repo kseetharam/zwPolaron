@@ -90,4 +90,7 @@ if __name__ == "__main__":
     RTF_BEC_X = 103e-6; RTF_BEC_Y = 32e-6; RTF_BEC_Z = 13e-6
     RG_BEC_X = 95e-6; RG_BEC_Y = 29e-6; RG_BEC_Z = 12e-6
     nBEC_peak_exp = pfs.n_BEC(0, 0, 0, nTF_peak_exp, nG_peak_exp, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
-    print(nBEC_peak_exp)
+
+    NTF = nTF_peak_exp * (15 / (8 * np.pi * RTF_BEC_X * RTF_BEC_Y * RTF_BEC_Z)) ** (-1)
+    NG = nG_peak_exp * (1 / (RG_BEC_X * RG_BEC_Y * RG_BEC_Z * np.pi**(1.5)))**(-1)
+    print('{:E}, {:E}, {:E}'.format(NTF, NG, NTF + NG))

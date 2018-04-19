@@ -52,20 +52,37 @@ if __name__ == "__main__":
     print('UV cutoff: {0}'.format(k_max))
     print('NGridPoints: {0}'.format(NGridPoints))
 
+    # # Basic parameters
+
+    # mI = 1.7
+    # mB = 1
+    # n0 = 1
+    # aBB = 0.016
+    # gBB = (4 * np.pi / mB) * aBB
+    # nu = pf_dynamic_sph.nu(mB, n0, gBB)
+
+    # sParams = [mI, mB, n0, gBB]
+
     # Basic parameters
 
-    mI = 1.7
-    mB = 1
-    n0 = 1
-    aBB = 0.016
+    expParams = pf_dynamic_sph.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC'], expParams['mB'])
+
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
+    mB = expParams['mB'] * M_exp2th  # should = 1
+    mI = expParams['mI'] * M_exp2th
+    aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
+
+    vI_init = expParams['vI_init'] * L_exp2th / T_exp2th
+    PI_init = mI * vI_init
 
     sParams = [mI, mB, n0, gBB]
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'none', 'InitCS_datapath': '', 'LastTimeStepOnly': 'no', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -107,34 +124,34 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
+    # ---- SINGLE FUNCTION RUN ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # P = 0.5829473548404368
-    # aIBi = -1.17
+    P = 0.1
+    aIBi = -1.77
 
-    # cParams = [P, aIBi]
+    cParams = [P, aIBi]
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
 
-    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    cParams_List = []
+    # cParams_List = []
 
-    # aIBi_Vals = (n0*6 * np.pi**2)**(1 / 3) * np.array([-0.3])
-    # aIBi_Vals = np.array([-1.17])
-    aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
+    # # aIBi_Vals = (n0*6 * np.pi**2)**(1 / 3) * np.array([-0.3])
+    # # aIBi_Vals = np.array([-1.17])
+    # aIBi_Vals = np.array([-1.17, -0.5, 0.1, 0.7])
 
-    P_Vals = np.linspace(0.1, mI * nu, 30)
+    # P_Vals = np.linspace(0.1, mI * nu, 30)
 
-    for ind, aIBi in enumerate(aIBi_Vals):
-        for P in P_Vals:
-            cParams_List.append([P, aIBi])
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
@@ -152,24 +169,24 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount > len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
-        [P, aIBi] = cParams
+    # if(taskCount > len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
 
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    # DynOv_ds = dynsph_ds[['Real_DynOv', 'Imag_DynOv', 'Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds.attrs = dynsph_ds.attrs; DynOv_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

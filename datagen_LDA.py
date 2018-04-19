@@ -56,35 +56,37 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    exp_params = pf_dynamic_sph.Zw_exp_params()
-    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(exp_params['n0'], exp_params['mB'])
+    expParams = pf_dynamic_sph.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC'], expParams['mB'])
 
-    n0 = 1
-    mB = 1
-    mI = exp_params['mI'] * M_exp2th
-    aBB = exp_params['aBB'] * L_exp2th
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
+    mB = expParams['mB'] * M_exp2th  # should = 1
+    mI = expParams['mI'] * M_exp2th
+    aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
 
     sParams = [mI, mB, n0, gBB]
 
     # Trap parameters
 
-    n0_thermal = exp_params['n0_thermal'] / (L_exp2th**3)
-    RTF_BEC_X = exp_params['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = exp_params['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = exp_params['RTF_BEC_Z'] * L_exp2th
-    RG_BEC_X = exp_params['RG_BEC_X'] * L_exp2th; RG_BEC_Y = exp_params['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = exp_params['RG_BEC_Z'] * L_exp2th
+    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
 
-    trapParams = {'n0_BEC': n0, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z}
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z}
 
     # Derived quantities
 
     nu = pf_dynamic_sph.nu(mB, n0 + n0_thermal, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     Fscale = 2 * np.pi * (nu / xi**2)
-    print(nu * (T_exp2th / L_exp2th))
+    vI_init = expParams['vI_init'] * L_exp2th / T_exp2th
+    PI_init = mI * vI_init
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'on', 'BEC_density': 'on'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -105,6 +107,11 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath + '_cart_extForce'
     elif toggleDict['Grid'] == 'spherical':
         innerdatapath = innerdatapath + '_spherical_extForce'
+
+    if toggleDict['BEC_density'] == 'on':
+        innerdatapath = innerdatapath + '_BECden'
+    elif toggleDict['BEC_density'] == 'off':
+        innerdatapath = innerdatapath
 
     if toggleDict['Coupling'] == 'frohlich':
         innerdatapath = innerdatapath + '_froh'
@@ -131,54 +138,55 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # ---- SINGLE FUNCTION RUN ----
-
-    runstart = timer()
-    aIBi = (exp_params['aIB'] * L_exp2th)**(-1)
-    dP = 0.5 * mI * nu
-    F = 0.1 * Fscale
-    print('mI: {0}, mB:{1}, aBB: {2}, aIBi: {3}'.format(mI, mB, aBB, aIBi))
-    print('TF: {0}'.format(dP / F))
-
-    cParams = [aIBi]
-    fParams = [dP, F]
-
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
-
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
-
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
-
-    # cParams_List = []
-
-    # # aIBi_Vals = np.array([-5.0, -1.17, -0.5, -0.05, 0.1])
-    # # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
-
-    # aIBi_Vals = np.array([-5.0, -1.24, -0.5, -0.05, 0.1])
-    # F_Vals = np.linspace(0.1 * Fscale, 35 * Fscale, 20)
-    # # print(dP / F_Vals)
-
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     for F in F_Vals:
-    #         cParams_List.append([F, aIBi])
-
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
+    # aIBi = -1.77
+    # dP = 0.5 * mI * nu
+    # F = 0.1 * Fscale
+    # print('mI: {:.2f}, mB:{:.1f}, aBB: {:.3f}, aIBi: {:.2f}, n0: {:.1f}'.format(mI, mB, aBB, aIBi, n0))
+    # # print('TF: {0}'.format(dP / F))
 
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [F, aIBi] = cParams
-    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
-    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    # cParams = {'aIBi': aIBi}
+    # fParams = {'dP_ext': dP, 'Fext_mag': F}
 
-    #     loopend = timer()
-    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
 
     # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    # print('Time: {:.2f}'.format(end - runstart))
+
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
+
+    cFParams_List = []
+
+    aIBi_Vals = np.array([-5.0, -1.77, -0.5, -0.05, 0.1])
+    dP_Vals = np.array([0.5 * mI * nu, PI_init, 3 * mI * nu])
+    F_Vals = np.array([0.2 * Fscale, 10 * Fscale, 35 * Fscale])
+
+    for aIBi in aIBi_Vals:
+        for dP in dP_Vals:
+            for Fext_mag in F_Vals:
+                cFParams = {'aIBi': aIBi, 'dP': dP, 'Fext_mag': Fext_mag}
+                cFParams_List.append(cFParams)
+
+    # ---- COMPUTE DATA ON COMPUTER ----
+
+    runstart = timer()
+
+    for ind, cFParams in enumerate(cFParams_List):
+        loopstart = timer()
+        aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+        cParams = {'aIBi': aIBi}
+        fParams = {'dP_ext': dP, 'Fext_mag': F}
+        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
+
+        loopend = timer()
+        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
@@ -187,17 +195,19 @@ if __name__ == "__main__":
     # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount > len(cParams_List)):
+    # if(taskCount > len(cFParams_List)):
     #     print('ERROR: TASK COUNT MISMATCH')
     #     P = float('nan')
     #     aIBi = float('nan')
     #     sys.exit()
     # else:
-    #     cParams = cParams_List[taskID]
-    #     [F, aIBi] = cParams
+    #     cFParams = cFParams_List[taskID]
+    #     aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': dP, 'Fext_mag': F}
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
 
     # end = timer()
     # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
