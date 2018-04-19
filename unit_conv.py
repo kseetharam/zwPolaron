@@ -1,5 +1,5 @@
 import numpy as np
-
+import pf_dynamic_sph as pfs
 
 if __name__ == "__main__":
 
@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     aIB_exp = -2600 * a0
     aBB_exp = 52 * a0
-    n0_exp = 6e13 * 1e6  # BEC peak density
+    n0_exp = 2e14 * 1e6  # BEC peak density
     nI_exp = 1.4e11 * 1e6  # impurity peak density
     (omega_x_exp, omega_y_exp, omega_z_exp) = (2 * np.pi * 13, 2 * np.pi * 41, 2 * np.pi * 101)  # BEC trapping frequencies
     mI_exp = 39.96 * u
@@ -73,15 +73,21 @@ if __name__ == "__main__":
     impTrap_Force_th = -mI_th * omega_impTrap_deep_th**2 * X_th
 
     # Other
-    # print((kn_exp * aIB_exp)**-1)
-    print(0.5 * mI_exp * 1e-6 * 2 * np.pi * 10)
     print(Fscale_exp)
-    print(np.linspace(0, 8) / L_th_exp)
-    print(kn_exp * aIB_exp, kn_exp * aBB_exp)
+    print(8 / L_th_exp)
+    print(1 / (kn_exp * aIB_exp), kn_exp * aBB_exp)
     print(1 / aIB_th, aBB_th)
     print(RTF_x_exp * 1e6, RTF_y_exp * 1e6, RTF_z_exp * 1e6)
-    print(70e-6 * L_th_exp)
     # print(omega_impTrap_deep_th)
     # print(omega_impTrap_deep_th / (2 * np.pi * nu_th / xi_th))
     # print(impTrap_Force_th / Fscale_th)
     # print(xi_th / L_th_exp, nu_th * T_th_exp / L_th_exp, tscale_th / T_th_exp, Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp), (Fscale_th * T_th_exp**2 / (M_th_exp * L_th_exp)) / (2 * np.pi))
+
+    # density
+
+    nTF_peak_exp = 6e13 * 1e6
+    nG_peak_exp = 0.9e13 * 1e6
+    RTF_BEC_X = 103e-6; RTF_BEC_Y = 32e-6; RTF_BEC_Z = 13e-6
+    RG_BEC_X = 95e-6; RG_BEC_Y = 29e-6; RG_BEC_Z = 12e-6
+    nBEC_peak_exp = pfs.n_BEC(0, 0, 0, nTF_peak_exp, nG_peak_exp, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+    print(nBEC_peak_exp)

@@ -190,7 +190,7 @@ def F_ext(t, F, dP):
 
 # ---- OTHER FUNCTIONS ----
 
-def unitConv_th_exp(n0_exp, mB_exp):
+def unitConv_exp2th(n0_exp, mB_exp):
     # Theory scale is set by peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time)
     # This function takes experimental values for these quantities in SI units
     # The output are conversion factors for length, mass, and time from experiment (SI units) to theory

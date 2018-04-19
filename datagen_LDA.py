@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # Basic parameters
 
     exp_params = pf_dynamic_sph.Zw_exp_params()
-    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_th_exp(exp_params['n0'], exp_params['mB'])
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(exp_params['n0'], exp_params['mB'])
 
     n0 = 1
     mB = 1
@@ -77,9 +77,10 @@ if __name__ == "__main__":
 
     # Derived quantities
 
-    nu = pf_dynamic_sph.nu(mB, n0, gBB)
+    nu = pf_dynamic_sph.nu(mB, n0 + n0_thermal, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     Fscale = 2 * np.pi * (nu / xi**2)
+    print(nu * (T_exp2th / L_exp2th))
 
     # Toggle parameters
 
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     cParams = [aIBi]
     fParams = [dP, F]
 
-    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
     # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/F_{:.3f}_aIBi_{:.2f}.nc'.format(F, aIBi))
 
     end = timer()
