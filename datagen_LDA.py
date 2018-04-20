@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # Derived quantities
 
-    nu = pf_dynamic_sph.nu(mB, n0 + n0_thermal, gBB)
+    nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     Fscale = 2 * np.pi * (nu / xi**2)
     vI_init = expParams['vI_init'] * L_exp2th / T_exp2th
@@ -170,23 +170,23 @@ if __name__ == "__main__":
                 cFParams = {'aIBi': aIBi, 'dP': dP, 'Fext_mag': Fext_mag}
                 cFParams_List.append(cFParams)
 
-    # ---- COMPUTE DATA ON COMPUTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    for ind, cFParams in enumerate(cFParams_List):
-        loopstart = timer()
-        aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
-        cParams = {'aIBi': aIBi}
-        fParams = {'dP_ext': dP, 'Fext_mag': F}
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
+    # for ind, cFParams in enumerate(cFParams_List):
+    #     loopstart = timer()
+    #     aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': dP, 'Fext_mag': F}
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
 
-        loopend = timer()
-        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+    #     loopend = timer()
+    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
 
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
