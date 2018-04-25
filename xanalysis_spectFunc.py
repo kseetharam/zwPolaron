@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'RF': 'inverse'}
+    toggleDict = {'Location': 'home', 'RF': 'direct'}
 
     # kgrid
 
@@ -70,10 +70,12 @@ if __name__ == "__main__":
         innerdatapath = datapath + '/redyn_spherical_nonint'
         plotTitle = 'Direct RF Spectral Function'
         prefac = 1
+        prefac2 = -1
     elif toggleDict['RF'] == 'inverse':
         innerdatapath = datapath + '/redyn_spherical'
         plotTitle = 'Inverse RF Spectral Function'
         prefac = -1
+        prefac2 = 1
 
     ds_name = toggleDict['RF'] + 'RF_Dataset_sph.nc'
     ds_path = innerdatapath + '/' + ds_name
@@ -152,6 +154,7 @@ if __name__ == "__main__":
 
     def dirRF(dataset, kgrid, cParams):
         CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+        # print(CSAmp)
         Phase = dataset['Phase']
         dVk = kgrid.dV()
         tgrid = CSAmp.coords['t'].values
@@ -176,6 +179,8 @@ if __name__ == "__main__":
         # Energy0 = (P**2 - PB0**2) / (2 * mI) + np.dot(Omega(kgrid, DP0, mI, mB, n0, gBB) * np.abs(CSA0)**2, dVk) + gIB * (np.dot(Wk(kgrid, mB, n0, gBB) * CSA0, dVk) + np.sqrt(n0))**2
 
         # calculate full dynamical overlap
+        [P, aIBi] = cParams
+        Energy0 = pfs.Energy(CSA0, kgrid, P, aIBi, dataset.attrs['mI'], dataset.attrs['mB'], dataset.attrs['n0'], dataset.attrs['gBB'])
         # DynOv_Vec = np.exp(1j * Energy0) * DynOv_Vec
         ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
         ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])

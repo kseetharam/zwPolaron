@@ -148,6 +148,27 @@ def spectFunc(t_Vec, S_Vec, tdecay):
     return omega, sf
 
 
+def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
+    dVk = kgrid.dV()
+    kzg_flat = kcos_func(kgrid)
+    Wk_grid = Wk(kgrid, mB, n0, gBB)
+    Wki_grid = 1 / Wk_grid
+
+    amplitude = CSAmp.reshape(CSAmp.size)
+    PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
+    DP = P - PB
+    Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+
+    xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
+    xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
+    En = ((P**2 - PB**2) / (2 * mI) +
+          np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
+          gIB * (2 * np.real(xp) + np.sqrt(n0))**2 -
+          gIB * (2 * np.imag(xm))**2)
+
+    return En.real.astype(float)
+
 # ---- LDA/FORCE FUNCTIONS ----
 
 
