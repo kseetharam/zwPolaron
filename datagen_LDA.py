@@ -63,7 +63,7 @@ if __name__ == "__main__":
     mB = expParams['mB'] * M_exp2th  # should = 1
     mI = expParams['mI'] * M_exp2th
     aBB = expParams['aBB'] * L_exp2th
-    gBB = (2 * np.pi / pf_dynamic_sph.ur(mI, mB)) * aBB
+    gBB = (4 * np.pi / mB) * aBB
 
     sParams = [mI, mB, n0, gBB]
 
