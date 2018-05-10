@@ -216,4 +216,20 @@ if __name__ == "__main__":
 
     fig.delaxes(ax[1, 1])
     fig.tight_layout()
+
+    fig2, ax2 = plt.subplots()
+    ax2.plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'k-')
+    ax2.set_xlabel('$X$ ($\mu$m)')
+    ax2.set_ylabel('$n(X)$ ($cm^{-3}$)')
+    ax2.set_title('BEC Density Profile')
+
+    fig3, ax3 = plt.subplots()
+    ax3.plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
+    ax3.plot(X_Vals_m * 1e6, EpVals_harm_Hz * 1e-3, 'b-', label='Harmonic Fit ({:.0f} Hz)'.format(freq_p_Hz))
+    ax3.plot(X_Vals_m * 1e6, VtB_Hz * 1e-3 + np.min(EpVals_Hz * 1e-3), 'g-', label='Shifted BEC Trap ({:.0f} Hz)'.format(freq_tB_Hz))
+    ax3.legend()
+    ax3.set_xlabel('X ($\mu$m)')
+    ax3.set_ylabel('Frequency (kHz)')
+    ax3.set_title('Traps')
+
     plt.show()
