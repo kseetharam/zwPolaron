@@ -15,10 +15,13 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (30, 30, 30)
-    (Lx, Ly, Lz) = (20, 20, 20)
-    # (Lx, Ly, Lz) = (10, 10, 10)
-    (dx, dy, dz) = (0.2, 0.2, 0.2)
+    # # (Lx, Ly, Lz) = (30, 30, 30)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # # (Lx, Ly, Lz) = (10, 10, 10)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -43,7 +46,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 20; dt = 0.01
+    tMax = 25; dt = 0.01
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -59,10 +62,20 @@ if __name__ == "__main__":
     expParams = pf_dynamic_sph.Zw_expParams()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC'], expParams['mB'])
 
-    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
-    mB = expParams['mB'] * M_exp2th  # should = 1
-    mI = expParams['mI'] * M_exp2th
-    aBB = expParams['aBB'] * L_exp2th
+    # n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
+    # mB = expParams['mB'] * M_exp2th  # should = 1
+    # mI = expParams['mI'] * M_exp2th
+    # aBB = expParams['aBB'] * L_exp2th
+    # gBB = (4 * np.pi / mB) * aBB
+
+    # sParams = [mI, mB, n0, gBB]
+
+    # Basic parameters
+
+    mI = 1
+    mB = 1
+    n0 = 1
+    aBB = 0.05
     gBB = (4 * np.pi / mB) * aBB
 
     sParams = [mI, mB, n0, gBB]
@@ -86,8 +99,8 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'on', 'BEC_density': 'on'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'on', 'BEC_density': 'off'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -141,7 +154,7 @@ if __name__ == "__main__":
     # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
-    # aIBi = -1.77
+    # aIBi = -2
     # dP = 0.5 * mI * nu
     # F = 0.1 * Fscale
     # print('mI: {:.2f}, mB:{:.1f}, aBB: {:.3f}, aIBi: {:.2f}, n0: {:.1f}'.format(mI, mB, aBB, aIBi, n0))
@@ -160,9 +173,13 @@ if __name__ == "__main__":
 
     cFParams_List = []
 
-    aIBi_Vals = np.array([-5.0, -1.77, -0.5, -0.05, 0.1])
-    dP_Vals = np.array([0.5 * mI * nu, PI_init, 3 * mI * nu])
+    aIBi_Vals = np.array([-10, -5, -2, -1])
+    dP_Vals = np.array([0.5 * mI * nu, 1.3 * mI * nu, 3 * mI * nu])
     F_Vals = np.array([0.2 * Fscale, 10 * Fscale, 35 * Fscale])
+
+    # aIBi_Vals = np.array([-5.0, -1.77, -0.5, -0.05, 0.1])
+    # dP_Vals = np.array([0.5 * mI * nu, PI_init, 3 * mI * nu])
+    # F_Vals = np.array([0.2 * Fscale, 10 * Fscale, 35 * Fscale])
 
     for aIBi in aIBi_Vals:
         for dP in dP_Vals:
@@ -188,26 +205,26 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON CLUSTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount > len(cFParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cFParams = cFParams_List[taskID]
-    #     aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
-    #     cParams = {'aIBi': aIBi}
-    #     fParams = {'dP_ext': dP, 'Fext_mag': F}
+    if(taskCount > len(cFParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cFParams = cFParams_List[taskID]
+        aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+        cParams = {'aIBi': aIBi}
+        fParams = {'dP_ext': dP, 'Fext_mag': F}
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F))
 
-    # end = timer()
-    # print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
+    end = timer()
+    print('Task ID: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, F, aIBi, end - runstart))
