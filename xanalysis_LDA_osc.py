@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    aIBi = -5
+    aIBi = 0.1
     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
     qds = xr.open_dataset(filepath)
     attrs = qds.attrs
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     x_ds = qds['X']
     fig, ax = plt.subplots()
     ax.plot(ts, x_ds.values, label='Impurity Trajectory')
-    ax.plot(ts, pf_dynamic_sph.n_BEC_osc(tVals, omega_BEC_osc), label='BEC Peak Oscillation')
+    ax.plot(ts, np.sin(omega_BEC_osc * tVals), label='BEC Peak Oscillation')
     ax.legend()
     ax.set_ylabel(r'$<X>$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
