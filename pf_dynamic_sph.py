@@ -230,9 +230,10 @@ def F_ext(t, F, dP):
         return 0
 
 
-def n_BEC_osc(t, omega_BEC_osc):
+def n_BEC_osc(t, omega_BEC_osc, X, Y, Z, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z):
     # returns function describing oscillation of BEC over time
-    return np.cos(omega_BEC_osc * t)
+    xt = 0.5 * RTF_X * np.cos(omega_BEC_osc * t)
+    return n_BEC(X + xt, Y, Z, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
 
 # ---- OTHER FUNCTIONS ----
 
@@ -420,8 +421,11 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
         E_Pol_tck = V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
+        if toggleDict['BEC_density_osc'] == 'on':
+            omega_BEC_osc = trapParams['omega_BEC_osc']
     else:
         LDA_funcs['F_pol'] = lambda X: 0
+        omega_BEC_osc = 0
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
@@ -487,7 +491,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 

@@ -64,9 +64,10 @@ class LDA_PolaronHamiltonian:
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            n = pfs.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
             if self.BEC_density_osc == 'on':
-                n = n * pfs.n_BEC_osc(t, omega_BEC_osc)
+                n = pfs.n_BEC_osc(t, omega_BEC_osc, X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+            elif self.BEC_density_osc == 'off':
+                n = pfs.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)
