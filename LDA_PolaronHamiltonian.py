@@ -25,6 +25,7 @@ class LDA_PolaronHamiltonian:
         self.dynamicsType = toggleDict['Dynamics']
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
+        self.BEC_density_osc = toggleDict['BEC_density_osc']
 
         if self.couplingType == 'frohlich':
             [aIBi, mI, mB, n0, gBB] = self.Params
@@ -58,11 +59,14 @@ class LDA_PolaronHamiltonian:
 
         RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']
         n0_TF = self.trapParams['n0_TF_BEC']; n0_thermal = self.trapParams['n0_thermal_BEC']
+        omega_BEC_osc = self.trapParams['omega_BEC_osc']
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
             n = pfs.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+            if self.BEC_density_osc == 'on':
+                n = n * pfs.n_BEC_osc(t, omega_BEC_osc)
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)

@@ -230,10 +230,15 @@ def F_ext(t, F, dP):
         return 0
 
 
+def n_BEC_osc(t, omega_BEC_osc):
+    # returns function describing oscillation of BEC over time
+    return np.cos(omega_BEC_osc * t)
+
 # ---- OTHER FUNCTIONS ----
 
-def unitConv_exp2th(n0_exp, mB_exp):
-    # Theory scale is set by total peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time)
+
+def unitConv_exp2th(n0_exp_scale, mB_exp):
+    # Theory scale is set by experimental order of magnitude of total peak BEC density n0=1 (length), boson mass mB=1 (mass), hbar = 1 (time) -> note that n0_exp_scale isn't the actual peak BEC density, just a fixed order of magnitude (here ~1e14 cm^(-3))
     # This function takes experimental values for these quantities in SI units
     # The output are conversion factors for length, mass, and time from experiment (SI units) to theory
     # For example, if I have a quantity aBB_exp in meters, then aBB_th = aBB_exp * L_exp2th gives the quantity in theory units
@@ -247,9 +252,9 @@ def unitConv_exp2th(n0_exp, mB_exp):
     hbar_th = 1
 
     # Conversion factors for length, mass, time
-    L_exp2th = n0_th**(-1 / 3) / n0_exp**(-1 / 3)
+    L_exp2th = n0_th**(-1 / 3) / n0_exp_scale**(-1 / 3)
     M_exp2th = mB_th / mB_exp
-    T_exp2th = (mB_th * (n0_th)**(-2 / 3) / (2 * np.pi * hbar_th)) / (mB_exp * (n0_exp)**(-2 / 3) / (2 * np.pi * hbar))
+    T_exp2th = (mB_th * (n0_th)**(-2 / 3) / (2 * np.pi * hbar_th)) / (mB_exp * (n0_exp_scale)**(-2 / 3) / (2 * np.pi * hbar))
 
     return L_exp2th, M_exp2th, T_exp2th
 
@@ -261,18 +266,20 @@ def Zw_expParams():
     params = {}
 
     # Experimental parameters (SI units)
-    params['aIB'] = -2600 * a0
+    params['aIB'] = -3000 * a0
     params['aBB'] = 52 * a0
     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
     params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
     params['nI'] = 1.4e11 * 1e6  # impurity peak density
+    params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (um) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (um)
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
+    params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
 
     return params
 
@@ -403,8 +410,11 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     LDA_funcs = {}
     if toggleDict['F_ext'] == 'on':
         LDA_funcs['F_ext'] = F_ext
+        TF = dP / Fext_mag
     else:
         LDA_funcs['F_ext'] = lambda t, F, dP: 0
+        TF = 0
+        dP = 0
     if toggleDict['BEC_density'] == 'on':
         # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
         X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
@@ -477,7 +487,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': dP / Fext_mag, 'Delta_P': dP}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
