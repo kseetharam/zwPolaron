@@ -46,7 +46,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 25; dt = 0.01
+    tMax = 100; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on'}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'off'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -157,11 +157,11 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    # if os.path.isdir(datapath) is False:
-    #     os.mkdir(datapath)
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
 
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
@@ -196,7 +196,8 @@ if __name__ == "__main__":
     # dP_Vals = np.array([0.5 * mI * nu, PI_init, 3 * mI * nu])
     # F_Vals = np.array([0.2 * Fscale, 10 * Fscale, 35 * Fscale])
 
-    aIBi_Vals = np.array([-5.0, -1.3, -0.05, 0.1])
+    aIBi_Vals = np.array([-10.0, -5.0, -1.3, -0.05, 0.1])
+    # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])
 

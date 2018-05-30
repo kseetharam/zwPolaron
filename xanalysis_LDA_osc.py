@@ -24,10 +24,11 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     aBB = 0.013
+    tfin = 100
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -106,18 +107,16 @@ if __name__ == "__main__":
 
     # for ind, group in enumerate(aIBi_groups):
     #     aIBi = aIBi_keys[ind]
-    #     _, F_list_temp, ds_list_temp = zip(*group)
-    #     ds_temp = xr.concat(ds_list_temp, pd.Index(F_list_temp, name='F'))
-    #     aIBi_ds_list.append(ds_temp)
+    #     _, ds_temp = zip(*group)
+    #     aIBi_ds_list.append(ds_temp[0])
 
     # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    # del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['dP'])
+    # del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
     # ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
 
     # # # Analysis of Total Dataset
 
-    aIBi = 0.1
-    filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    filepath = innerdatapath + '/LDA_Dataset.nc'
     qds = xr.open_dataset(filepath)
     attrs = qds.attrs
     mI = attrs['mI']
@@ -125,9 +124,11 @@ if __name__ == "__main__":
     xi = attrs['xi']
     tscale = xi / nu
     tVals = qds['t'].values
+    aIBiVals = qds['aIBi'].values
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     omega_BEC_osc = attrs['omega_BEC_osc']
+    aIBi = -10
 
     # # IMPURITY AND PHONON MOMENTUM VS TIME
 
@@ -147,28 +148,30 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
-    # POSITION VS TIME
+    # # POSITION VS TIME
 
-    x_ds = qds['X']
+    # x_ds = qds['X']
+    # fig, ax = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     ax.plot(ts, x_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    # ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k--', label='BEC Peak Oscillation')
+    # ax.legend()
+    # ax.set_ylabel(r'$<X>$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # ax.set_title('Impurity Trajectory')
+    # plt.show()
+
+    # VELOCITY VS TIME
+
+    v_ds = (qds['X'].diff('t') / dt).rename('v')
+    ts = v_ds['t'].values / tscale
     fig, ax = plt.subplots()
-    ax.plot(ts, x_ds.values, label='Impurity Trajectory')
-    ax.plot(ts, np.sin(omega_BEC_osc * tVals), label='BEC Peak Oscillation')
+    for ind, aIBi in enumerate(aIBiVals):
+        ax.plot(ts, v_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
+    # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
     ax.legend()
-    ax.set_ylabel(r'$<X>$')
+    ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    ax.set_title('Impurity Velocity')
     plt.show()
-
-    # # VELOCITY VS TIME
-
-    # v_ds = (qds_aIBi['X'].diff('t') / dt).rename('v')
-    # ts = v_ds['t'].values / tscale
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     ax.plot(ts, v_ds.sel(F=F).values, label='')
-    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, v_ds.sel(F=F).max('t'), ts.size), 'g--', label=r'$T_{F}$')
-    #     ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
-    #     ax.legend()
-    #     ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
-    #     plt.show()
