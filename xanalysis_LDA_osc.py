@@ -128,7 +128,7 @@ if __name__ == "__main__":
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     omega_BEC_osc = attrs['omega_BEC_osc']
-    aIBi = -10
+    print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc)
 
     # # IMPURITY AND PHONON MOMENTUM VS TIME
 
@@ -148,30 +148,30 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
-    # # POSITION VS TIME
+    # POSITION VS TIME
 
-    # x_ds = qds['X']
-    # fig, ax = plt.subplots()
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     ax.plot(ts, x_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    # ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k--', label='BEC Peak Oscillation')
-    # ax.legend()
-    # ax.set_ylabel(r'$<X>$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # ax.set_title('Impurity Trajectory')
-    # plt.show()
-
-    # VELOCITY VS TIME
-
-    v_ds = (qds['X'].diff('t') / dt).rename('v')
-    ts = v_ds['t'].values / tscale
+    x_ds = qds['X']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
-        ax.plot(ts, v_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
-    # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
+        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k--', label='BEC Peak Oscillation')
     ax.legend()
-    ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
+    ax.set_ylabel(r'$<X>$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax.set_title('Impurity Velocity')
+    ax.set_title('Impurity Trajectory')
     plt.show()
+
+    # # VELOCITY VS TIME
+
+    # v_ds = (qds['X'].diff('t') / dt).rename('v')
+    # ts = v_ds['t'].values / tscale
+    # fig, ax = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     ax.plot(ts, v_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    # # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
+    # # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
+    # ax.legend()
+    # ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # ax.set_title('Impurity Velocity')
+    # plt.show()
