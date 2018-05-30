@@ -24,12 +24,12 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     aBB = 0.013
-    tfin = 100
+    # tfin = 100
 
     # Toggle parameters
 
     toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on'}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -62,6 +62,8 @@ if __name__ == "__main__":
 
     if toggleDict['BEC_density_osc'] == 'on':
         innerdatapath = innerdatapath + '_BECosc'
+        if toggleDict['Large_freq'] == 'true':
+            innerdatapath = innerdatapath + 'LF'
     elif toggleDict['BEC_density_osc'] == 'off':
         innerdatapath = innerdatapath
 
@@ -93,7 +95,7 @@ if __name__ == "__main__":
     #     ds = xr.open_dataset(innerdatapath + '/' + filename)
 
     #     print(filename)
-    #     ds = ds.sel(t=slice(0, tfin))
+    #     # ds = ds.sel(t=slice(0, tfin))
     #     ds_list.append(ds)
     #     aIBi_list.append(ds.attrs['aIBi'])
 
@@ -118,6 +120,9 @@ if __name__ == "__main__":
 
     filepath = innerdatapath + '/LDA_Dataset.nc'
     qds = xr.open_dataset(filepath)
+    qds_nonosc = xr.open_dataset(datapath + '/redyn_spherical_BECden_SteadyStart_P_0.1/LDA_Dataset.nc')
+    if toggleDict['Large_freq'] == 'true':
+        qds_nonosc = qds_nonosc.sel(t=slice(0, 25))
     attrs = qds.attrs
     mI = attrs['mI']
     nu = attrs['nu']
@@ -128,7 +133,8 @@ if __name__ == "__main__":
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     omega_BEC_osc = attrs['omega_BEC_osc']
-    print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc)
+    print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc, qds_nonosc.attrs['omega_BEC_osc'])
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
     # # IMPURITY AND PHONON MOMENTUM VS TIME
 
@@ -151,10 +157,12 @@ if __name__ == "__main__":
     # POSITION VS TIME
 
     x_ds = qds['X']
+    x_ds_nonosc = qds_nonosc['X']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
-        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k--', label='BEC Peak Oscillation')
+        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        ax.plot(ts, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+    ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
     ax.legend()
     ax.set_ylabel(r'$<X>$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
