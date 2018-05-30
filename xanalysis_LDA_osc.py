@@ -28,8 +28,8 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -154,32 +154,36 @@ if __name__ == "__main__":
     #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
     #     plt.show()
 
-    # POSITION VS TIME
+    # # POSITION VS TIME
 
-    x_ds = qds['X']
-    x_ds_nonosc = qds_nonosc['X']
-    fig, ax = plt.subplots()
-    for ind, aIBi in enumerate(aIBiVals):
-        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax.plot(ts, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
-    ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
-    ax.legend()
-    ax.set_ylabel(r'$<X>$')
-    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax.set_title('Impurity Trajectory')
-    plt.show()
-
-    # # VELOCITY VS TIME
-
-    # v_ds = (qds['X'].diff('t') / dt).rename('v')
-    # ts = v_ds['t'].values / tscale
+    # x_ds = qds['X']
+    # x_ds_nonosc = qds_nonosc['X']
     # fig, ax = plt.subplots()
     # for ind, aIBi in enumerate(aIBiVals):
-    #     ax.plot(ts, v_ds.sel(aIBi=aIBi).values, label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    # # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
-    # # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
+    #     ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    #     ax.plot(x_ds_nonosc['t'].values / tscale, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+    # ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
     # ax.legend()
-    # ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
+    # ax.set_ylabel(r'$<X>$')
     # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # ax.set_title('Impurity Velocity')
+    # ax.set_title('Impurity Trajectory')
     # plt.show()
+
+    # VELOCITY VS TIME
+
+    v_ds = (qds['X'].diff('t') / dt).rename('v')
+    ts = v_ds['t'].values / tscale
+    v_ds_nonosc = (qds_nonosc['X'].diff('t') / dt).rename('v')
+
+    fig, ax = plt.subplots()
+    for ind, aIBi in enumerate(aIBiVals):
+        ax.plot(ts, v_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        ax.plot(v_ds_nonosc['t'].values / tscale, v_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+
+    # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
+    # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
+    ax.legend()
+    ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
+    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    ax.set_title('Impurity Velocity')
+    plt.show()
