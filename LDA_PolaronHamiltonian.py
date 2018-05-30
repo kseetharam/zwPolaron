@@ -60,14 +60,15 @@ class LDA_PolaronHamiltonian:
         RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']
         n0_TF = self.trapParams['n0_TF_BEC']; n0_thermal = self.trapParams['n0_thermal_BEC']
         omega_BEC_osc = self.trapParams['omega_BEC_osc']
+        if self.BEC_density_osc == 'on':
+            Xeff = X + pfs.x_BEC_osc(t, omega_BEC_osc, RTF_X)
+        else:
+            Xeff = X
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            if self.BEC_density_osc == 'on':
-                n = pfs.n_BEC_osc(t, omega_BEC_osc, X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
-            elif self.BEC_density_osc == 'off':
-                n = pfs.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+            n = pfs.n_BEC(Xeff, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)
@@ -105,7 +106,7 @@ class LDA_PolaronHamiltonian:
                                         amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                         self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
             phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
-            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X)
+            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(Xeff)
             X_new_temp = (P - PB) / mI
 
         elif self.dynamicsType == 'imaginary':
@@ -114,7 +115,7 @@ class LDA_PolaronHamiltonian:
                                        amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                        self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
             phase_new_temp = -1j * (self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI))
-            P_new_temp = -1j * (F_ext_func(t, F, dP) + F_pol_func(X))
+            P_new_temp = -1j * (F_ext_func(t, F, dP) + F_pol_func(Xeff))
             X_new_temp = -1j * (P - PB) / mI
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)

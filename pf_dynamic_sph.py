@@ -230,10 +230,9 @@ def F_ext(t, F, dP):
         return 0
 
 
-def n_BEC_osc(t, omega_BEC_osc, X, Y, Z, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z):
-    # returns function describing oscillation of BEC over time
-    xt = 0.5 * RTF_X * np.cos(omega_BEC_osc * t)
-    return n_BEC(X + xt, Y, Z, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
+def x_BEC_osc(t, omega_BEC_osc, RTF_X):
+    # returns function describing oscillation of BEC (peak) over time
+    return 0.5 * RTF_X * np.cos(omega_BEC_osc * t)
 
 # ---- OTHER FUNCTIONS ----
 
@@ -423,6 +422,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
         if toggleDict['BEC_density_osc'] == 'on':
             omega_BEC_osc = trapParams['omega_BEC_osc']
+        else:
+            omega_BEC_osc = 0
     else:
         LDA_funcs['F_pol'] = lambda X: 0
         omega_BEC_osc = 0
