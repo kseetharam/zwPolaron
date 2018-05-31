@@ -28,8 +28,8 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'false'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     filepath = innerdatapath + '/LDA_Dataset.nc'
     qds = xr.open_dataset(filepath)
     qds_nonosc = xr.open_dataset(datapath + '/redyn_spherical_BECden_SteadyStart_P_0.1/LDA_Dataset.nc')
-    if toggleDict['Large_freq'] == 'true':
-        qds_nonosc = qds_nonosc.sel(t=slice(0, 25))
+    # if toggleDict['Large_freq'] == 'true':
+    #     qds_nonosc = qds_nonosc.sel(t=slice(0, 25))
     attrs = qds.attrs
     mI = attrs['mI']
     nu = attrs['nu']
@@ -136,38 +136,20 @@ if __name__ == "__main__":
     print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc, qds_nonosc.attrs['omega_BEC_osc'])
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
-    # # IMPURITY AND PHONON MOMENTUM VS TIME
+    # POSITION VS TIME
 
-    # for Find, F in enumerate(FVals):
-    #     fig, ax = plt.subplots()
-    #     qds_aIBi_F = qds_aIBi.sel(F=F)
-    #     ax.plot(ts, qds_aIBi_F['P'].values, label=r'$P$')
-    #     ax.plot(ts, (qds_aIBi_F['P'] - qds_aIBi_F['Pph']).values, label=r'$P_{I}$')
-    #     ax.plot(ts, qds_aIBi_F['Pph'].values, label=r'$P_{ph}$')
-
-    #     ax.plot(((dP / F) / tscale) * np.ones(ts.size), np.linspace(0, qds_aIBi_F['P'].max('t'), ts.size), 'g--', label=r'$T_{F}$')
-    #     ax.plot(ts, Ptot * np.ones(ts.size), 'r--', label=r'$P_{0}+F \cdot T_{F}$')
-    #     ax.legend()
-    #     ax.set_ylim([-0.1 * Ptot, 1.1 * Ptot])
-    #     ax.set_ylabel('Momentum')
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    #     ax.set_title(r'$F$' + '={:.2f} '.format(F / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]')
-    #     plt.show()
-
-    # # POSITION VS TIME
-
-    # x_ds = qds['X']
-    # x_ds_nonosc = qds_nonosc['X']
-    # fig, ax = plt.subplots()
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    #     ax.plot(x_ds_nonosc['t'].values / tscale, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
-    # ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
-    # ax.legend()
-    # ax.set_ylabel(r'$<X>$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # ax.set_title('Impurity Trajectory')
-    # plt.show()
+    x_ds = qds['X']
+    x_ds_nonosc = qds_nonosc['X']
+    fig, ax = plt.subplots()
+    for ind, aIBi in enumerate(aIBiVals):
+        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        ax.plot(x_ds_nonosc['t'].values / tscale, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+    ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
+    ax.legend()
+    ax.set_ylabel(r'$<X>$')
+    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    ax.set_title('Impurity Trajectory')
+    plt.show()
 
     # VELOCITY VS TIME
 
@@ -180,8 +162,6 @@ if __name__ == "__main__":
         ax.plot(ts, v_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax.plot(v_ds_nonosc['t'].values / tscale, v_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
 
-    # ax.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), label='BEC Peak Oscillation')
-    # ax.plot(ts, nu * np.ones(ts.size), 'r--', label=r'$c_{BEC}$')
     ax.legend()
     ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
