@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -123,6 +123,9 @@ if __name__ == "__main__":
     qds_nonosc = xr.open_dataset(datapath + '/redyn_spherical_BECden_SteadyStart_P_0.1/LDA_Dataset.nc')
     # if toggleDict['Large_freq'] == 'true':
     #     qds_nonosc = qds_nonosc.sel(t=slice(0, 25))
+    expParams = pf_dynamic_sph.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
+
     attrs = qds.attrs
     mI = attrs['mI']
     nu = attrs['nu']
@@ -135,6 +138,7 @@ if __name__ == "__main__":
     omega_BEC_osc = attrs['omega_BEC_osc']
     print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc, qds_nonosc.attrs['omega_BEC_osc'])
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    print(1e6 * tscale / T_exp2th)
 
     # POSITION VS TIME
 
@@ -142,11 +146,11 @@ if __name__ == "__main__":
     x_ds_nonosc = qds_nonosc['X']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
-        ax.plot(ts, x_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax.plot(x_ds_nonosc['t'].values / tscale, x_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+        ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        ax.plot(x_ds_nonosc['t'].values / tscale, 1e6 * x_ds_nonosc.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='--', label='')
     ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
     ax.legend()
-    ax.set_ylabel(r'$<X>$')
+    ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
     ax.set_title('Impurity Trajectory')
     plt.show()
