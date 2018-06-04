@@ -106,7 +106,7 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true', 'P0': 0.6, 'a_osc': 0.75}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true', 'P0': 0.1, 'a_osc': 0.75}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath + '_ImDynStart'
     elif toggleDict['InitCS'] == 'steadystate':
         toggleDict['InitCS_datapath'] = 'InitCS ERROR'
-        innerdatapath = innerdatapath + '_SteadyStart_P_0.1'
+        innerdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(toggleDict['P0'])
     elif toggleDict['InitCS'] == 'default':
         toggleDict['InitCS_datapath'] = 'InitCS ERROR'
 
