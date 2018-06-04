@@ -26,6 +26,7 @@ class LDA_PolaronHamiltonian:
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
         self.BEC_density_osc = toggleDict['BEC_density_osc']
+        self.a_osc = toggleDict['a_osc']
 
         if self.couplingType == 'frohlich':
             [aIBi, mI, mB, n0, gBB] = self.Params
@@ -61,7 +62,7 @@ class LDA_PolaronHamiltonian:
         n0_TF = self.trapParams['n0_TF_BEC']; n0_thermal = self.trapParams['n0_thermal_BEC']
         omega_BEC_osc = self.trapParams['omega_BEC_osc']
         if self.BEC_density_osc == 'on':
-            Xeff = X + pfs.x_BEC_osc(t, omega_BEC_osc, RTF_X)
+            Xeff = X + pfs.x_BEC_osc(t, omega_BEC_osc, RTF_X, self.a_osc)
         else:
             Xeff = X
 

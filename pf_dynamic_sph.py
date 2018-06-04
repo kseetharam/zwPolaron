@@ -230,9 +230,9 @@ def F_ext(t, F, dP):
         return 0
 
 
-def x_BEC_osc(t, omega_BEC_osc, RTF_X):
+def x_BEC_osc(t, omega_BEC_osc, RTF_X, a):
     # returns function describing oscillation of BEC (peak) over time
-    return 0.5 * RTF_X * np.cos(omega_BEC_osc * t)
+    return a * RTF_X * np.cos(omega_BEC_osc * t)
 
 # ---- OTHER FUNCTIONS ----
 
@@ -445,7 +445,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         CSPhase = ds['Phase'].values
         cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0.1, X=0)
     elif toggleDict['InitCS'] == 'steadystate':
-        Pss = 0.1
+        Pss = toggleDict['P0']
         Nsteps = 1e2
         aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
         DP = pf_static_sph.DP_interp(0, Pss, aIBi, aSi_tck, PBint_tck)

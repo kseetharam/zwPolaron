@@ -106,16 +106,16 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true', 'P0': 0.6, 'a_osc': 0.75}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, toggleDict['P0'], toggleDict['a_osc'])
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, toggleDict['P0'], toggleDict['a_osc'])
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, toggleDict['P0'], toggleDict['a_osc'])
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -213,26 +213,26 @@ if __name__ == "__main__":
                 cFParams = {'aIBi': aIBi, 'dP': dP, 'Fext_mag': Fext_mag}
                 cFParams_List.append(cFParams)
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # for ind, cFParams in enumerate(cFParams_List):
-    #     loopstart = timer()
-    #     aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
-    #     cParams = {'aIBi': aIBi}
-    #     fParams = {'dP_ext': dP, 'Fext_mag': F}
-    #     filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
-    #     if toggleDict['F_ext'] == 'off':
-    #         dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    for ind, cFParams in enumerate(cFParams_List):
+        loopstart = timer()
+        aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+        cParams = {'aIBi': aIBi}
+        fParams = {'dP_ext': dP, 'Fext_mag': F}
+        filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
+        if toggleDict['F_ext'] == 'off':
+            dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
 
-    #     loopend = timer()
-    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+        loopend = timer()
+        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
 
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 

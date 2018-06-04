@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true', 'P0': 0.6, 'a_osc': 0.75}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
