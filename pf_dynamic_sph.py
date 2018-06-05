@@ -396,7 +396,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     [xgrid, kgrid, tgrid] = gParams
     [mI, mB, n0, gBB] = sParams
     dP = fParams['dP_ext']; Fext_mag = fParams['Fext_mag']
-    P0 = toggleDict['P0']
+    P0 = trapParams['P0']
+    X0 = trapParams['X0']
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
@@ -425,7 +426,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
         if toggleDict['BEC_density_osc'] == 'on':
             omega_BEC_osc = trapParams['omega_BEC_osc']
-            a_osc = toggleDict['a_osc']
+            a_osc = trapParams['a_osc']
         else:
             omega_BEC_osc = 0
             a_osc = 0
@@ -447,15 +448,14 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_0.100_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
         CSPhase = ds['Phase'].values
-        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=0.1, X=0)
+        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=P0, X=X0)
     elif toggleDict['InitCS'] == 'steadystate':
-        Pss = toggleDict['P0']
         Nsteps = 1e2
         aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-        DP = pf_static_sph.DP_interp(0, Pss, aIBi, aSi_tck, PBint_tck)
+        DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
         aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
         CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        cs.set_initState(amplitude=CSAmp, phase=0, P=Pss, X=0)
+        cs.set_initState(amplitude=CSAmp, phase=0, P=P0, X=X0)
 
     if toggleDict['Interaction'] == 'off':
         ham.gnum = 0
@@ -498,7 +498,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'P0': P0, 'a_osc': a_osc}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
