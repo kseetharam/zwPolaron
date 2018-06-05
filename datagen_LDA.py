@@ -89,7 +89,7 @@ if __name__ == "__main__":
     RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
     omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
 
-    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_BEC_osc': omega_BEC_osc, 'X0': 0.2 * RTF_BEC_X, 'P0': 0.1, 'a_osc': 0.75}
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_BEC_osc': omega_BEC_osc, 'X0': 0.2 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.75}
 
     # Derived quantities
 
