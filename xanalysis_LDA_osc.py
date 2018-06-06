@@ -29,62 +29,46 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true', 'P0': 0.6, 'a_osc': 0.75}
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+                       {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.75},
+                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.75},
+                       {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.75},
+                       {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.75}]
+
+    trapParams_noscList = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
+                           {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
+                           {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.0},
+                           {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.0}]
+
+    # trapParams_noscList = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0}]
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
+    datapath_List = []
+    for trapParams in trapParams_List:
+        if toggleDict['Location'] == 'home':
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        elif toggleDict['Location'] == 'work':
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        innerdatapath = datapath + '/redyn_spherical_BECden'
+        if toggleDict['BEC_density_osc'] == 'on':
+            innerdatapath = innerdatapath + '_BECosc'
+            if toggleDict['Large_freq'] == 'true':
+                innerdatapath = innerdatapath + 'LF'
+        elif toggleDict['BEC_density_osc'] == 'off':
+            innerdatapath = innerdatapath
+        innerdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(trapParams['P0'])
+        datapath_List.append(innerdatapath)
 
-    if toggleDict['Dynamics'] == 'real':
-        innerdatapath = datapath + '/redyn'
-    elif toggleDict['Dynamics'] == 'imaginary':
-        innerdatapath = datapath + '/imdyn'
-
-    if toggleDict['Grid'] == 'cartesian':
-        innerdatapath = innerdatapath + '_cart'
-    elif toggleDict['Grid'] == 'spherical':
-        innerdatapath = innerdatapath + '_spherical'
-
-    if toggleDict['F_ext'] == 'on':
-        innerdatapath = innerdatapath + '_extForce'
-    elif toggleDict['F_ext'] == 'off':
-        innerdatapath = innerdatapath
-
-    if toggleDict['BEC_density'] == 'on':
-        innerdatapath = innerdatapath + '_BECden'
-    elif toggleDict['BEC_density'] == 'off':
-        innerdatapath = innerdatapath
-
-    if toggleDict['BEC_density_osc'] == 'on':
-        innerdatapath = innerdatapath + '_BECosc'
-        if toggleDict['Large_freq'] == 'true':
-            innerdatapath = innerdatapath + 'LF'
-    elif toggleDict['BEC_density_osc'] == 'off':
-        innerdatapath = innerdatapath
-
-    if toggleDict['Coupling'] == 'frohlich':
-        innerdatapath = innerdatapath + '_froh'
-    elif toggleDict['Coupling'] == 'twophonon':
-        innerdatapath = innerdatapath
-
-    if toggleDict['InitCS'] == 'file':
-        toggleDict['InitCS_datapath'] = datapath + '/P_0_PolStates'
-        innerdatapath = innerdatapath + '_ImDynStart'
-    elif toggleDict['InitCS'] == 'steadystate':
-        toggleDict['InitCS_datapath'] = 'InitCS ERROR'
-        innerdatapath = innerdatapath + '_SteadyStart_P_0.1'
-    elif toggleDict['InitCS'] == 'default':
-        toggleDict['InitCS_datapath'] = 'InitCS ERROR'
-
-    if toggleDict['Interaction'] == 'off':
-        innerdatapath = innerdatapath + '_nonint'
-    elif toggleDict['Interaction'] == 'on':
-        innerdatapath = innerdatapath
+    datapath_noscList = []
+    for trapParams in trapParams_noscList:
+        if toggleDict['Location'] == 'home':
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        elif toggleDict['Location'] == 'work':
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        innerdatapath = datapath + '/redyn_spherical_BECden_SteadyStart_P_{:.1f}'.format(trapParams['P0'])
+        datapath_noscList.append(innerdatapath)
 
     # # # Concatenate Individual Datasets
 
@@ -118,56 +102,64 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    filepath = innerdatapath + '/LDA_Dataset.nc'
-    qds = xr.open_dataset(filepath)
-    qds_nonosc = xr.open_dataset(datapath + '/redyn_spherical_BECden_SteadyStart_P_0.1/LDA_Dataset.nc')
+    ds_Dict = {}
+    for ind, innerdatapath in enumerate(datapath_List):
+        trapParams = trapParams_List[ind]
+        ds_Dict[(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
+    ds_noscDict = {}
+    for ind, innerdatapath in enumerate(datapath_noscList):
+        trapParams = trapParams_noscList[ind]
+        ds_noscDict[(trapParams['X0'], trapParams['P0'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
     # if toggleDict['Large_freq'] == 'true':
-    #     qds_nonosc = qds_nonosc.sel(t=slice(0, 25))
+    #     qds_nosc = qds_nosc.sel(t=slice(0, 25))
     expParams = pf_dynamic_sph.Zw_expParams()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
+
+    X0 = 0.0; P0 = 0.1; a_osc = 0.75
+    qds = ds_Dict[(X0, P0, a_osc)]
+    qds_nosc = ds_noscDict[(X0, P0)]
 
     attrs = qds.attrs
     mI = attrs['mI']
     nu = attrs['nu']
     xi = attrs['xi']
     tscale = xi / nu
-    tVals = qds['t'].values
-    aIBiVals = qds['aIBi'].values
+    tVals = qds_nosc['t'].values
+    aIBiVals = qds_nosc['aIBi'].values
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     omega_BEC_osc = attrs['omega_BEC_osc']
-    print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc, qds_nonosc.attrs['omega_BEC_osc'])
+    print(omega_BEC_osc, 2 * np.pi / omega_BEC_osc, qds_nosc.attrs['omega_BEC_osc'])
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     print(1e6 * tscale / T_exp2th)
 
     # POSITION VS TIME
 
     x_ds = qds['X']
-    x_ds_nonosc = qds_nonosc['X']
+    x_ds_nosc = qds_nosc['X']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax.plot(x_ds_nonosc['t'].values / tscale, 1e6 * x_ds_nonosc.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='--', label='')
+        ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * x_ds_nosc.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='--', label='')
     ax.plot(ts, np.sin(omega_BEC_osc * tVals), 'k:', label='BEC Peak Oscillation')
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
     ax.set_title('Impurity Trajectory')
-    plt.show()
 
     # VELOCITY VS TIME
 
     v_ds = (qds['X'].diff('t') / dt).rename('v')
     ts = v_ds['t'].values / tscale
-    v_ds_nonosc = (qds_nonosc['X'].diff('t') / dt).rename('v')
+    v_ds_nosc = (qds_nosc['X'].diff('t') / dt).rename('v')
 
-    fig, ax = plt.subplots()
+    fig2, ax2 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
-        ax.plot(ts, v_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax.plot(v_ds_nonosc['t'].values / tscale, v_ds_nonosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
+        ax2.plot(ts, v_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values, color=colors[ind], linestyle='--', label='')
 
-    ax.legend()
-    ax.set_ylabel(r'$v=\frac{d<X>}{dt}$')
-    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax.set_title('Impurity Velocity')
+    ax2.legend()
+    ax2.set_ylabel(r'$v=\frac{d<X>}{dt}$')
+    ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    ax2.set_title('Impurity Velocity')
     plt.show()
