@@ -89,7 +89,8 @@ if __name__ == "__main__":
     RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
     omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
 
-    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_BEC_osc': omega_BEC_osc, 'X0': 0.0 * RTF_BEC_X, 'P0': 0.1, 'a_osc': 0.75}
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
+                  'omega_BEC_osc': omega_BEC_osc, 'X0': 0.2 * RTF_BEC_X, 'P0': 1.8, 'a_osc': 0.75}
 
     # Derived quantities
 
@@ -107,22 +108,27 @@ if __name__ == "__main__":
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+
     if toggleDict['BEC_density_osc'] == 'off':
         trapParams['a_osc'] = 0.0
+
+    if trapParams['P0'] >= 1.1 * mI * nu:
+        toggleDict['InitCS'] = 'file'
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
+    innerdatapath0 = datapath + '/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
     if toggleDict['Dynamics'] == 'real':
-        innerdatapath = datapath + '/redyn'
+        innerdatapath = innerdatapath0 + '/redyn'
     elif toggleDict['Dynamics'] == 'imaginary':
-        innerdatapath = datapath + '/imdyn'
+        innerdatapath = innerdatapath0 + '/imdyn'
 
     if toggleDict['Grid'] == 'cartesian':
         innerdatapath = innerdatapath + '_cart'
@@ -152,8 +158,8 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath
 
     if toggleDict['InitCS'] == 'file':
-        toggleDict['InitCS_datapath'] = datapath + '/P_0_PolStates'
-        innerdatapath = innerdatapath + '_ImDynStart'
+        toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
+        innerdatapath = innerdatapath + '_ImDynStart_P_{:.1f}'.format(trapParams['P0'])
     elif toggleDict['InitCS'] == 'steadystate':
         toggleDict['InitCS_datapath'] = 'InitCS ERROR'
         innerdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(trapParams['P0'])
@@ -165,8 +171,8 @@ if __name__ == "__main__":
     elif toggleDict['Interaction'] == 'on':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    if os.path.isdir(innerdatapath0) is False:
+        os.mkdir(innerdatapath0)
 
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)

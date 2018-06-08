@@ -445,7 +445,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     # Change initialization of CoherentState and PolaronHamiltonian
     if toggleDict['InitCS'] == 'file':
         # ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
-        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_0.100_aIBi_{:.2f}.nc'.format(aIBi))
+        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P0, aIBi))
         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
         CSPhase = ds['Phase'].values
         cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=P0, X=X0)
