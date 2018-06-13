@@ -90,7 +90,7 @@ if __name__ == "__main__":
     omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
 
     trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-                  'omega_BEC_osc': omega_BEC_osc, 'X0': 0.2 * RTF_BEC_X, 'P0': 1.8, 'a_osc': 0.75}
+                  'omega_BEC_osc': omega_BEC_osc, 'X0': 0.0 * RTF_BEC_X, 'P0': 1.8, 'a_osc': 0.75}
 
     # Derived quantities
 
