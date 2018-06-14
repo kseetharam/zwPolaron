@@ -46,7 +46,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 100; dt = 0.1
+    tMax = 1000; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -233,6 +233,8 @@ if __name__ == "__main__":
         filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
         if toggleDict['F_ext'] == 'off':
             dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+            if aIBi == 0.1:
+                filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
         ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
         Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
 
