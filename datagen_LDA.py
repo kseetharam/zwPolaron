@@ -46,7 +46,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1000; dt = 0.1
+    tMax = 100; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -103,6 +103,7 @@ if __name__ == "__main__":
     To = 2 * np.pi / omega_BEC_osc
     print(To, To / tscale)
     print(1 / L_exp2th, expParams['RTF_BEC_X'], RTF_BEC_X / L_exp2th)
+    print(0.75 * RTF_BEC_X / xi, omega_BEC_osc * tscale)
 
     # Toggle parameters
 
