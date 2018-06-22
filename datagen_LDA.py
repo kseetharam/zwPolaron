@@ -104,6 +104,7 @@ if __name__ == "__main__":
     print(To, To / tscale)
     print(1 / L_exp2th, expParams['RTF_BEC_X'], RTF_BEC_X / L_exp2th)
     print(0.75 * RTF_BEC_X / xi, omega_BEC_osc * tscale)
+    print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
     # Toggle parameters
 
@@ -222,28 +223,28 @@ if __name__ == "__main__":
                 cFParams = {'aIBi': aIBi, 'dP': dP, 'Fext_mag': Fext_mag}
                 cFParams_List.append(cFParams)
 
-    # ---- COMPUTE DATA ON COMPUTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    for ind, cFParams in enumerate(cFParams_List):
-        loopstart = timer()
-        aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
-        cParams = {'aIBi': aIBi}
-        fParams = {'dP_ext': dP, 'Fext_mag': F}
-        filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
-        if toggleDict['F_ext'] == 'off':
-            dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-            if aIBi == 0.1:
-                filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    # for ind, cFParams in enumerate(cFParams_List):
+    #     loopstart = timer()
+    #     aIBi = cFParams['aIBi']; dP = cFParams['dP']; F = cFParams['Fext_mag']
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': dP, 'Fext_mag': F}
+    #     filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
+    #     if toggleDict['F_ext'] == 'off':
+    #         dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    #         if aIBi == 0.1:
+    #             filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
 
-        loopend = timer()
-        print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
+    #     loopend = timer()
+    #     print('Index: {:d}, F: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, F, aIBi, loopend - loopstart))
 
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
