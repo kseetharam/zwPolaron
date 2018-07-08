@@ -117,9 +117,8 @@ if __name__ == "__main__":
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'false'}
-        if toggleDict['BEC_density_osc'] == 'off':
-            trapParams['a_osc'] = 0.0
+                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'off', 'Large_freq': 'false'}
+
         if trapParams['P0'] >= 1.1 * mI * nu:
             toggleDict['InitCS'] = 'file'
 
@@ -137,6 +136,7 @@ if __name__ == "__main__":
             innerdatapath = innerdatapath + '_BECosc'
         elif toggleDict['BEC_density_osc'] == 'off':
             innerdatapath = innerdatapath
+            trapParams['a_osc'] = 0.0
         if toggleDict['InitCS'] == 'file':
             toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
         else:
@@ -144,14 +144,14 @@ if __name__ == "__main__":
 
         metaList.append((toggleDict, trapParams, innerdatapath0, innerdatapath))
 
-    # ---- CREATE OUTPUT DATA FOLDERS  ----
+    # # ---- CREATE OUTPUT DATA FOLDERS  ----
 
-    for tup in metaList:
-        (toggleDict, trapParams, innerdatapath0, innerdatapath) = tup
-        if os.path.isdir(innerdatapath0) is False:
-            os.mkdir(innerdatapath0)
-        if os.path.isdir(innerdatapath) is False:
-            os.mkdir(innerdatapath)
+    # for tup in metaList:
+    #     (toggleDict, trapParams, innerdatapath0, innerdatapath) = tup
+    #     if os.path.isdir(innerdatapath0) is False:
+    #         os.mkdir(innerdatapath0)
+    #     if os.path.isdir(innerdatapath) is False:
+    #         os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
