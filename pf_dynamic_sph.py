@@ -234,6 +234,11 @@ def x_BEC_osc(t, omega_BEC_osc, RTF_X, a):
     # returns function describing oscillation of BEC (peak) over time
     return a * RTF_X * np.cos(omega_BEC_osc * t)
 
+
+def F_BEC_osc(t, omega_BEC_osc, RTF_X, a):
+    # returns function describing oscillation of BEC (peak) over time
+    return -1 * (a * RTF_X * omega_BEC_osc**2) * np.cos(omega_BEC_osc * t)
+
 # ---- OTHER FUNCTIONS ----
 
 
@@ -281,7 +286,8 @@ def Zw_expParams():
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
     # params['omega_BEC_osc'] = 2 * np.pi * 5e2  # BEC oscillation frequency in rad*Hz
     # params['omega_BEC_osc'] = 2 * np.pi * 1e4  # BEC oscillation frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+    # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 160  # BEC oscillation frequency in rad*Hz
 
     return params
 
@@ -424,16 +430,18 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
         E_Pol_tck = V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
-        if toggleDict['BEC_density_osc'] == 'on':
-            omega_BEC_osc = trapParams['omega_BEC_osc']
-            a_osc = trapParams['a_osc']
-        else:
-            omega_BEC_osc = 0
-            a_osc = 0
     else:
         LDA_funcs['F_pol'] = lambda X: 0
         omega_BEC_osc = 0
         a_osc = 0
+    if toggleDict['BEC_density_osc'] == 'on':
+        omega_BEC_osc = trapParams['omega_BEC_osc']
+        a_osc = trapParams['a_osc']
+        LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
+    else:
+        omega_BEC_osc = 0
+        a_osc = 0
+        LDA_funcs['F_BEC_osc'] = lambda t: 0
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
@@ -471,6 +479,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    XLab_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -489,6 +498,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         ImAmp_da[ind] = np.imag(Amp)
         P_da[ind] = cs.get_totMom()
         X_da[ind] = cs.get_impPos()
+        XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
@@ -496,7 +506,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     # Create Data Set
 
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
 

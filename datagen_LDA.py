@@ -90,7 +90,7 @@ if __name__ == "__main__":
     omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
 
     trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-                  'omega_BEC_osc': omega_BEC_osc, 'X0': 0.0 * RTF_BEC_X, 'P0': 3.0, 'a_osc': 0.75}
+                  'omega_BEC_osc': omega_BEC_osc, 'X0': 0.0 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.75}
 
     # Derived quantities
 
@@ -108,8 +108,8 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'false'}
 
     if toggleDict['BEC_density_osc'] == 'off':
         trapParams['a_osc'] = 0.0
@@ -127,15 +127,7 @@ if __name__ == "__main__":
         datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
     innerdatapath0 = datapath + '/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
-    if toggleDict['Dynamics'] == 'real':
-        innerdatapath = innerdatapath0 + '/redyn'
-    elif toggleDict['Dynamics'] == 'imaginary':
-        innerdatapath = innerdatapath0 + '/imdyn'
-
-    if toggleDict['Grid'] == 'cartesian':
-        innerdatapath = innerdatapath + '_cart'
-    elif toggleDict['Grid'] == 'spherical':
-        innerdatapath = innerdatapath + '_spherical'
+    innerdatapath = innerdatapath0 + '/redyn_spherical'
 
     if toggleDict['F_ext'] == 'on':
         innerdatapath = innerdatapath + '_extForce'
@@ -149,14 +141,7 @@ if __name__ == "__main__":
 
     if toggleDict['BEC_density_osc'] == 'on':
         innerdatapath = innerdatapath + '_BECosc'
-        if toggleDict['Large_freq'] == 'true':
-            innerdatapath = innerdatapath + 'LF'
     elif toggleDict['BEC_density_osc'] == 'off':
-        innerdatapath = innerdatapath
-
-    if toggleDict['Coupling'] == 'frohlich':
-        innerdatapath = innerdatapath + '_froh'
-    elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
 
     if toggleDict['InitCS'] == 'file':
@@ -179,26 +164,26 @@ if __name__ == "__main__":
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
-    # # ---- SINGLE FUNCTION RUN ----
+    # ---- SINGLE FUNCTION RUN ----
 
-    # runstart = timer()
-    # aIBi = -1.3
-    # dP = 0.5 * mI * nu
-    # F = 0.1 * Fscale
-    # filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
-    # if toggleDict['F_ext'] == 'off':
-    #     dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    # print('mI: {:.2f}, mB:{:.1f}, aBB: {:.3f}, aIBi: {:.2f}, n0: {:.1f}'.format(mI, mB, aBB, aIBi, n0))
-    # # print('TF: {0}'.format(dP / F))
+    runstart = timer()
+    aIBi = -1.3
+    dP = 0.5 * mI * nu
+    F = 0.1 * Fscale
+    filepath = innerdatapath + '/aIBi_{:.2f}_dP_{:.2f}mIc_F_{:.2f}.nc'.format(aIBi, dP / (mI * nu), F)
+    if toggleDict['F_ext'] == 'off':
+        dP = 0; F = 0; filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    print('mI: {:.2f}, mB:{:.1f}, aBB: {:.3f}, aIBi: {:.2f}, n0: {:.1f}'.format(mI, mB, aBB, aIBi, n0))
+    # print('TF: {0}'.format(dP / F))
 
-    # cParams = {'aIBi': aIBi}
-    # fParams = {'dP_ext': dP, 'Fext_mag': F}
+    cParams = {'aIBi': aIBi}
+    fParams = {'dP_ext': dP, 'Fext_mag': F}
 
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
 
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
