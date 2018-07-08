@@ -1,13 +1,14 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import pf_static_sph as pfs
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
 import itertools
 import Grid
-import pf_dynamic_sph as pfs
+import pf_dynamic_sph
 
 if __name__ == "__main__":
 
@@ -27,25 +28,60 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home'}
-    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.75},
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'true'}
+    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+                       {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.75},
                        {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.75},
                        {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.75},
                        {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.75},
                        {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.75},
                        {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.75}]
 
+    trapParams_noscList = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
+                           {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
+                           {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0},
+                           {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.0},
+                           {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.0},
+                           {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.0}]
+
+    # trapParams_noscList = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0}]
+
     # ---- SET OUTPUT DATA FOLDER ----
 
     datapath_List = []
-    datapath_noscList = []
     for trapParams in trapParams_List:
         if toggleDict['Location'] == 'home':
-            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}/redyn_spherical_BECden'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
         elif toggleDict['Location'] == 'work':
-            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}/redyn_spherical_BECden'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
-        datapath_noscList.append(datapath)
-        datapath_List.append(datapath + '_BECosc')
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        innerdatapath = datapath + '/redyn_spherical_BECden'
+        if toggleDict['BEC_density_osc'] == 'on':
+            innerdatapath = innerdatapath + '_BECosc'
+            if toggleDict['Large_freq'] == 'true':
+                innerdatapath = innerdatapath + 'LF'
+        elif toggleDict['BEC_density_osc'] == 'off':
+            innerdatapath = innerdatapath
+
+        if(trapParams['P0'] > 0.7):
+            innerdatapath = innerdatapath + '_ImDynStart_P_{:.1f}'.format(trapParams['P0'])
+        else:
+            innerdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(trapParams['P0'])
+
+        datapath_List.append(innerdatapath)
+
+    datapath_noscList = []
+    for trapParams in trapParams_noscList:
+        if toggleDict['Location'] == 'home':
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        elif toggleDict['Location'] == 'work':
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+
+        if(trapParams['P0'] > 0.7):
+            innerdatapath = datapath + '/redyn_spherical_BECden_ImDynStart_P_{:.1f}'.format(trapParams['P0'])
+        else:
+            innerdatapath = datapath + '/redyn_spherical_BECden_SteadyStart_P_{:.1f}'.format(trapParams['P0'])
+        datapath_noscList.append(innerdatapath)
 
     # # # Concatenate Individual Datasets
 
@@ -86,16 +122,15 @@ if __name__ == "__main__":
         ds_Dict[(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
     ds_noscDict = {}
     for ind, innerdatapath in enumerate(datapath_noscList):
-        trapParams = trapParams_List[ind]
+        trapParams = trapParams_noscList[ind]
         ds_noscDict[(trapParams['X0'], trapParams['P0'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
     # if toggleDict['Large_freq'] == 'true':
     #     qds_nosc = qds_nosc.sel(t=slice(0, 25))
-    expParams = pfs.Zw_expParams()
-    L_exp2th, M_exp2th, T_exp2th = pfs.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
-    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
+    expParams = pf_dynamic_sph.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
     # X0 = 95.6; P0 = 0.6; a_osc = 0.75
-    X0 = 0.0; P0 = 1.8; a_osc = 0.75
+    X0 = 95.6; P0 = 1.8; a_osc = 0.75
     qds = ds_Dict[(X0, P0, a_osc)]
     qds_nosc = ds_noscDict[(X0, P0)]
 
@@ -115,13 +150,13 @@ if __name__ == "__main__":
 
     # POSITION VS TIME
 
-    x_ds = qds['XLab']
-    x_ds_nosc = qds_nosc['XLab']
+    x_ds = qds['X']
+    x_ds_nosc = qds_nosc['X']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * x_ds_nosc.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='--', label='')
-    ax.plot(ts, pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Position)')
+    ax.plot(ts, np.sin(omega_BEC_osc * tVals) + np.min(1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th), 'k:', label='BEC Peak Oscillation (arbit amp)')
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
@@ -129,15 +164,15 @@ if __name__ == "__main__":
 
     # VELOCITY VS TIME
 
-    v_ds = (qds['XLab'].diff('t') / dt).rename('v')
+    v_ds = (qds['X'].diff('t') / dt).rename('v')
     ts = v_ds['t'].values / tscale
-    v_ds_nosc = (qds_nosc['XLab'].diff('t') / dt).rename('v')
+    v_ds_nosc = (qds_nosc['X'].diff('t') / dt).rename('v')
 
     fig2, ax2 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax2.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
-    ax2.plot(ts, -1 * omega_BEC_osc * pfs.x_BEC_osc(v_ds['t'].values, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Velocity)')
+    ax2.plot(ts, np.sin(omega_BEC_osc * v_ds['t'].values), 'k:', label='BEC Peak Oscillation (arbit amp)')
     ax2.legend()
     ax2.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
     ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
