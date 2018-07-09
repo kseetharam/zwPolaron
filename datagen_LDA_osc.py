@@ -105,12 +105,12 @@ if __name__ == "__main__":
     print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
     # ---- SET OSC PARAMS ----
-    oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.75},
-                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.75},
-                      {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.75},
-                      {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.75},
-                      {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.75},
-                      {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.75}]
+    oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
+                      {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
+                      {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.5},
+                      {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.5},
+                      {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.5}]
 
     metaList = []
     for oscParams in oscParams_List:

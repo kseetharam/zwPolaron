@@ -235,9 +235,9 @@ def x_BEC_osc(t, omega_BEC_osc, RTF_X, a):
     return a * RTF_X * np.cos(omega_BEC_osc * t)
 
 
-def F_BEC_osc(t, omega_BEC_osc, RTF_X, a):
+def F_BEC_osc(t, omega_BEC_osc, RTF_X, a, mI):
     # returns function describing oscillation of BEC (peak) over time
-    return -1 * (a * RTF_X * omega_BEC_osc**2) * np.cos(omega_BEC_osc * t)
+    return -1 * mI * (omega_BEC_osc**2) * x_BEC_osc(t, omega_BEC_osc, RTF_X, a)
 
 # ---- OTHER FUNCTIONS ----
 
@@ -287,7 +287,7 @@ def Zw_expParams():
     # params['omega_BEC_osc'] = 2 * np.pi * 5e2  # BEC oscillation frequency in rad*Hz
     # params['omega_BEC_osc'] = 2 * np.pi * 1e4  # BEC oscillation frequency in rad*Hz
     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 160  # BEC oscillation frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 750  # BEC oscillation frequency in rad*Hz
 
     return params
 
@@ -437,7 +437,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     if toggleDict['BEC_density_osc'] == 'on':
         omega_BEC_osc = trapParams['omega_BEC_osc']
         a_osc = trapParams['a_osc']
-        LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
+        LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc, mI)
     else:
         omega_BEC_osc = 0
         a_osc = 0

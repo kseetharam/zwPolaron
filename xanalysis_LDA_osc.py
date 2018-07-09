@@ -95,7 +95,7 @@ if __name__ == "__main__":
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
 
     # X0 = 95.6; P0 = 0.6; a_osc = 0.75
-    X0 = 0.0; P0 = 1.8; a_osc = 0.75
+    X0 = 0.0; P0 = 0.1; a_osc = 0.75
     qds = ds_Dict[(X0, P0, a_osc)]
     qds_nosc = ds_noscDict[(X0, P0)]
 
@@ -119,8 +119,9 @@ if __name__ == "__main__":
     x_ds_nosc = qds_nosc['XLab']
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
+        x0 = x_ds.sel(aIBi=aIBi).isel(t=0).values
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * x_ds_nosc.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='--', label='')
+        ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * (x0 + x_ds_nosc.sel(aIBi=aIBi).values) / L_exp2th, color=colors[ind], linestyle='--', label='')
     ax.plot(ts, pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Position)')
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
@@ -132,12 +133,13 @@ if __name__ == "__main__":
     v_ds = (qds['XLab'].diff('t') / dt).rename('v')
     ts = v_ds['t'].values / tscale
     v_ds_nosc = (qds_nosc['XLab'].diff('t') / dt).rename('v')
+    v_BEC_osc = np.diff(pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)) / dt
 
     fig2, ax2 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax2.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
-    ax2.plot(ts, -1 * omega_BEC_osc * pfs.x_BEC_osc(v_ds['t'].values, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Velocity)')
+    ax2.plot(ts, v_BEC_osc, 'k:', label='BEC Peak Oscillation (Velocity)')
     ax2.legend()
     ax2.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
     ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
