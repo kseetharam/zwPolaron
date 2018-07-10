@@ -89,6 +89,7 @@ if __name__ == "__main__":
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
     RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
     omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
+    omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
 
     # Derived quantities
 
@@ -108,21 +109,30 @@ if __name__ == "__main__":
     oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
                       {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
-                      {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.5},
-                      {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.5},
-                      {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.5}]
+                      {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
+                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
+                      {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
 
     metaList = []
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Large_freq': 'false'}
+                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'true'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-                      'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
+                      'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
 
         if trapParams['P0'] >= 1.1 * mI * nu:
             toggleDict['InitCS'] = 'file'
+
+        if trapParams['a_osc'] == 0.0:
+            toggleDict['BEC_density_osc'] = 'off'
+
+        if toggleDict['BEC_density_osc'] == 'off':
+            trapParams['a_osc'] = 0.0
+
+        if toggleDict['Imp_trap'] == 'off':
+            trapParams['omega_Imp_x'] = 0.0
 
         # ---- SET OUTPUT DATA FOLDER ----
 
@@ -132,26 +142,18 @@ if __name__ == "__main__":
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
             datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-        innerdatapath0 = datapath + '/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
-        innerdatapath = innerdatapath0 + '/redyn_spherical_BECden'
-        if toggleDict['BEC_density_osc'] == 'on':
-            innerdatapath = innerdatapath + '_BECosc'
-        elif toggleDict['BEC_density_osc'] == 'off':
-            innerdatapath = innerdatapath
-            trapParams['a_osc'] = 0.0
+        innerdatapath = datapath + '/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
         if toggleDict['InitCS'] == 'file':
             toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
         else:
             toggleDict['InitCS_datapath'] = 'InitCS ERROR'
 
-        metaList.append((toggleDict, trapParams, innerdatapath0, innerdatapath))
+        metaList.append((toggleDict, trapParams, innerdatapath))
 
     # # ---- CREATE OUTPUT DATA FOLDERS  ----
 
     # for tup in metaList:
-    #     (toggleDict, trapParams, innerdatapath0, innerdatapath) = tup
-    #     if os.path.isdir(innerdatapath0) is False:
-    #         os.mkdir(innerdatapath0)
+    #     (toggleDict, trapParams, innerdatapath) = tup
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
 
@@ -179,7 +181,7 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
-    aIBi_Vals = np.array([-10.0, -5.0, -1.3, -0.05, 0.1])
+    aIBi_Vals = np.array([-1000.0, -5.0, -1.3, -0.05, 0.1])
     # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])
@@ -189,7 +191,7 @@ if __name__ == "__main__":
     # runstart = timer()
     # for tup in metaList:
     #     tupstart = timer()
-    #     (toggleDict, trapParams, innerdatapath0, innerdatapath) = tup
+    #     (toggleDict, trapParams, innerdatapath) = tup
     #     for ind, aIBi in enumerate(aIBi_Vals):
     #         loopstart = timer()
     #         cParams = {'aIBi': aIBi}
@@ -218,7 +220,7 @@ if __name__ == "__main__":
         sys.exit()
     else:
         tup = metaList[taskID]
-        (toggleDict, trapParams, innerdatapath0, innerdatapath) = tup
+        (toggleDict, trapParams, innerdatapath) = tup
 
     for ind, aIBi in enumerate(aIBi_Vals):
         loopstart = timer()

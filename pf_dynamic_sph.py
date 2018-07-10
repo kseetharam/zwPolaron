@@ -230,14 +230,20 @@ def F_ext(t, F, dP):
         return 0
 
 
-def x_BEC_osc(t, omega_BEC_osc, RTF_X, a):
+def x_BEC_osc(t, omega_BEC_osc, RTF_X, a_osc):
     # returns function describing oscillation of BEC (peak) over time
-    return a * RTF_X * np.cos(omega_BEC_osc * t)
+    return a_osc * RTF_X * np.cos(omega_BEC_osc * t)
 
 
-def F_BEC_osc(t, omega_BEC_osc, RTF_X, a, mI):
+def F_BEC_osc(t, omega_BEC_osc, RTF_X, a_osc, mI):
     # returns function describing oscillation of BEC (peak) over time
-    return -1 * mI * (omega_BEC_osc**2) * x_BEC_osc(t, omega_BEC_osc, RTF_X, a)
+    return -1 * mI * (omega_BEC_osc**2) * x_BEC_osc(t, omega_BEC_osc, RTF_X, a_osc)
+
+
+def F_Imp_trap(X, omega_Imp_x, mI):
+    # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
+    return -1 * mI * (omega_Imp_x**2) * X
+
 
 # ---- OTHER FUNCTIONS ----
 
@@ -281,6 +287,7 @@ def Zw_expParams():
     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+    params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
@@ -443,6 +450,13 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         a_osc = 0
         LDA_funcs['F_BEC_osc'] = lambda t: 0
 
+    if toggleDict['Imp_trap'] == 'on':
+        omega_Imp_x = trapParams['omega_Imp_x']
+        LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
+    else:
+        omega_Imp_x = 0
+        LDA_funcs['F_Imp_trap'] = lambda X: 0
+
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
 
@@ -508,7 +522,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 

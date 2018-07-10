@@ -53,9 +53,10 @@ class LDA_PolaronHamiltonian:
         # phase = system_vars[-3].real.astype(float)
         P = system_vars[-2].real.astype(float)
         X = system_vars[-1].real.astype(float)
+        XLab = X + pfs.x_BEC_osc(t, self.trapParams['omega_BEC_osc'], self.trapParams['RTF_BEC_X'], self.trapParams['a_osc'])
 
         [aIBi, mI, mB, n0, gBB] = self.Params
-        F_ext_func = self.LDA_funcs['F_ext']; F_pol_func = self.LDA_funcs['F_pol']; F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']
+        F_ext_func = self.LDA_funcs['F_ext']; F_pol_func = self.LDA_funcs['F_pol']; F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']
         dP = self.fParams['dP_ext']; F = self.fParams['Fext_mag']
 
         RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']
@@ -109,7 +110,7 @@ class LDA_PolaronHamiltonian:
                                         self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
             phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
             # P_new_temp = F_ext_func(t, F, dP) + F_pol_func(Xeff)
-            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t)
+            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
             X_new_temp = (P - PB) / mI
 
         elif self.dynamicsType == 'imaginary':
@@ -119,7 +120,7 @@ class LDA_PolaronHamiltonian:
                                        self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
             phase_new_temp = -1j * (self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI))
             # P_new_temp = -1j * (F_ext_func(t, F, dP) + F_pol_func(Xeff))
-            P_new_temp = -1j * (F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t))
+            P_new_temp = -1j * (F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab))
             X_new_temp = -1j * (P - PB) / mI
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
