@@ -106,18 +106,21 @@ if __name__ == "__main__":
     print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
     # ---- SET OSC PARAMS ----
+    x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
+    print('X0: {0}'.format(x0))
+
     oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
                       {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
-                      {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
-                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
-                      {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
+                      {'X0': x0, 'P0': 0.1, 'a_osc': 0.0},
+                      {'X0': x0, 'P0': 0.6, 'a_osc': 0.0},
+                      {'X0': x0, 'P0': 1.8, 'a_osc': 0.0}]
 
     metaList = []
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'true'}
+                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
@@ -181,7 +184,7 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
-    aIBi_Vals = np.array([-1000.0, -5.0, -1.3, -0.05, 0.1])
+    aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])

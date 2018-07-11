@@ -28,12 +28,12 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'home'}
-    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.75},
-                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.75},
-                       {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.75},
-                       {'X0': 95.6, 'P0': 0.1, 'a_osc': 0.75},
-                       {'X0': 95.6, 'P0': 0.6, 'a_osc': 0.75},
-                       {'X0': 95.6, 'P0': 1.8, 'a_osc': 0.75}]
+    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
+                       {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
+                       {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
+                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
+                       {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -41,11 +41,10 @@ if __name__ == "__main__":
     datapath_noscList = []
     for trapParams in trapParams_List:
         if toggleDict['Location'] == 'home':
-            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}/redyn_spherical_BECden'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
         elif toggleDict['Location'] == 'work':
-            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA/X0={:.1f}_P0={:.1f}_aosc={:.2f}/redyn_spherical_BECden'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
-        datapath_noscList.append(datapath)
-        datapath_List.append(datapath + '_BECosc')
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        datapath_List.append(datapath)
 
     # # # Concatenate Individual Datasets
 
@@ -84,28 +83,24 @@ if __name__ == "__main__":
     for ind, innerdatapath in enumerate(datapath_List):
         trapParams = trapParams_List[ind]
         ds_Dict[(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
-    ds_noscDict = {}
-    for ind, innerdatapath in enumerate(datapath_noscList):
-        trapParams = trapParams_List[ind]
-        ds_noscDict[(trapParams['X0'], trapParams['P0'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
     # if toggleDict['Large_freq'] == 'true':
     #     qds_nosc = qds_nosc.sel(t=slice(0, 25))
     expParams = pfs.Zw_expParams()
     L_exp2th, M_exp2th, T_exp2th = pfs.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
+    omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
 
-    # X0 = 95.6; P0 = 0.6; a_osc = 0.75
-    X0 = 0.0; P0 = 0.1; a_osc = 0.75
+    X0 = 0.0; P0 = 1.8; a_osc = 0.5
     qds = ds_Dict[(X0, P0, a_osc)]
-    qds_nosc = ds_noscDict[(X0, P0)]
+    qds_nosc = ds_Dict[(X0, P0, 0.0)]
 
     attrs = qds.attrs
     mI = attrs['mI']
     nu = attrs['nu']
     xi = attrs['xi']
     tscale = xi / nu
-    tVals = qds_nosc['t'].values
-    aIBiVals = qds_nosc['aIBi'].values
+    tVals = qds['t'].values
+    aIBiVals = qds['aIBi'].values
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     omega_BEC_osc = attrs['omega_BEC_osc']
@@ -120,9 +115,12 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         x0 = x_ds.sel(aIBi=aIBi).isel(t=0).values
+        x0 = 0
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * (x0 + x_ds_nosc.sel(aIBi=aIBi).values) / L_exp2th, color=colors[ind], linestyle='--', label='')
     ax.plot(ts, pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Position)')
+    ax.plot(ts, np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='Impurity Harmonic Trap $V(X_{Lab})$')
+    ax.plot(ts, -1 * np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='')
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
