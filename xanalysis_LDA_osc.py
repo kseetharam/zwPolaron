@@ -119,13 +119,13 @@ if __name__ == "__main__":
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         # ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * (x0 + x_ds_nosc.sel(aIBi=aIBi).values) / L_exp2th, color=colors[ind], linestyle='--', label='')
     xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
-    ax.plot(ts, xBEC, 'k:', label='BEC Peak Oscillation (Position)')
-    ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), 'y:', label='Impurity Trap Frequency')
+    ax.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
 
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax.set_title('Impurity Trajectory')
+    ax.set_title('Impurity Trajectory (Lab Frame)')
 
     # # OSCILLATION FREQUENCY PLOT
     # fig3, ax3 = plt.subplots()
@@ -148,20 +148,20 @@ if __name__ == "__main__":
     v_ds = (qds['XLab'].diff('t') / dt).rename('v')
     ts = v_ds['t'].values / tscale
     v_ds_nosc = (qds_nosc['XLab'].diff('t') / dt).rename('v')
-    v_BEC_osc = np.diff(pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)) / dt
+    v_BEC_osc = np.diff(xBEC) / dt
     cBEC = nu * np.ones(v_BEC_osc.size)
-
+    v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
     fig2, ax2 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax2.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         # ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
-    ax2.plot(ts, v_BEC_osc * (1e3 * T_exp2th / L_exp2th), 'k:', label='BEC Peak Oscillation (Velocity)')
-    ax2.plot(ts, cBEC * (1e3 * T_exp2th / L_exp2th), 'y:', label='$c_{BEC}$')
-    ax2.plot(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), 'y:')
+    ax2.plot(ts[::20], v_BEC_osc[::20] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
+    ax2.plot(ts[::20], v_ImpTrap[::20] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
+    # ax2.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region')
 
     ax2.legend()
     ax2.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
     ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax2.set_title('Impurity Velocity')
+    ax2.set_title('Impurity Velocity (Lab Frame)')
 
     plt.show()
