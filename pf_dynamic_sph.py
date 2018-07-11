@@ -291,10 +291,9 @@ def Zw_expParams():
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-    # params['omega_BEC_osc'] = 2 * np.pi * 5e2  # BEC oscillation frequency in rad*Hz
-    # params['omega_BEC_osc'] = 2 * np.pi * 1e4  # BEC oscillation frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 160  # BEC oscillation frequency in rad*Hz
+    # params['omega_BEC_osc'] = 2 * np.pi * 750  # BEC oscillation frequency in rad*Hz
     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 750  # BEC oscillation frequency in rad*Hz
 
     return params
 

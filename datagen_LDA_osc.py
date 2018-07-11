@@ -16,13 +16,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # # (Lx, Ly, Lz) = (30, 30, 30)
-    (Lx, Ly, Lz) = (20, 20, 20)
-    # # (Lx, Ly, Lz) = (10, 10, 10)
-    (dx, dy, dz) = (0.2, 0.2, 0.2)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (30, 30, 30)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -47,7 +45,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 100; dt = 0.1
+    tMax = 400; dt = 0.1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -109,15 +107,13 @@ if __name__ == "__main__":
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}'.format(x0))
 
-    # oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
-    #                   {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
-    #                   {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
+    oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+
+    # oscParams_List = [{'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
     #                   {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
     #                   {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
     #                   {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
-
-    oscParams_List = [{'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
-                      {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
 
     metaList = []
     for oscParams in oscParams_List:
@@ -156,6 +152,12 @@ if __name__ == "__main__":
 
         metaList.append((toggleDict, trapParams, innerdatapath))
 
+    # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
+
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
+    #     os.mkdir(datapath + '/BEC_osc')
+
     # # ---- CREATE OUTPUT DATA FOLDERS  ----
 
     # for tup in metaList:
@@ -187,8 +189,8 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
-    aIBi_Vals = np.array([-5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
+    aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
     # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])
@@ -207,7 +209,7 @@ if __name__ == "__main__":
     #         if aIBi == 0.1:
     #             filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
     #         ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #         Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    #         # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
     #         loopend = timer()
     #         print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     #     tupend = timer()
