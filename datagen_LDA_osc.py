@@ -209,7 +209,7 @@ if __name__ == "__main__":
     #         if aIBi == 0.1:
     #             filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
     #         ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #         # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    #         Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
     #         loopend = timer()
     #         print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     #     tupend = timer()
