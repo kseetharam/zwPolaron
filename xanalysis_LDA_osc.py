@@ -118,28 +118,47 @@ if __name__ == "__main__":
         x0 = 0
         ax.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
         ax.plot(x_ds_nosc['t'].values / tscale, 1e6 * (x0 + x_ds_nosc.sel(aIBi=aIBi).values) / L_exp2th, color=colors[ind], linestyle='--', label='')
-    ax.plot(ts, pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc), 'k:', label='BEC Peak Oscillation (Position)')
-    ax.plot(ts, np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='Impurity Harmonic Trap $V(X_{Lab})$')
-    ax.plot(ts, -1 * np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='')
+    xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
+    ax.plot(ts, xBEC, 'k:', label='BEC Peak Oscillation (Position)')
+    ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), 'y:', label='Impurity Trap Frequency')
+    # ax.plot(ts, np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='Impurity Harmonic Trap $V(X_{Lab})$')
+    # ax.plot(ts, -1 * np.sqrt(2 * tVals / (mI * omega_Imp_x**2)), 'y:', label='')
     ax.legend()
     ax.set_ylabel(r'$<X> (\mu m)$')
     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
     ax.set_title('Impurity Trajectory')
 
-    # VELOCITY VS TIME
+    # # OSCILLATION FREQUENCY PLOT
+    # fig3, ax3 = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     ax3.plot(fVals * T_exp2th, np.abs(FTVals), label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
 
-    v_ds = (qds['XLab'].diff('t') / dt).rename('v')
-    ts = v_ds['t'].values / tscale
-    v_ds_nosc = (qds_nosc['XLab'].diff('t') / dt).rename('v')
-    v_BEC_osc = np.diff(pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)) / dt
+    # ax3.legend()
+    # # ax3.set_xlim([-500, 2000])
+    # ax3.set_xlabel('f (Hz)')
+    # ax3.set_ylabel('Fourier Transform of Impurity Trajectory')
+    # ax3.set_title('Impurity Trajectory Frequency Spectrum')
 
-    fig2, ax2 = plt.subplots()
-    for ind, aIBi in enumerate(aIBiVals):
-        ax2.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-        ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
-    ax2.plot(ts, v_BEC_osc, 'k:', label='BEC Peak Oscillation (Velocity)')
-    ax2.legend()
-    ax2.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
-    ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    ax2.set_title('Impurity Velocity')
+    # # VELOCITY VS TIME
+
+    # v_ds = (qds['XLab'].diff('t') / dt).rename('v')
+    # ts = v_ds['t'].values / tscale
+    # v_ds_nosc = (qds_nosc['XLab'].diff('t') / dt).rename('v')
+    # v_BEC_osc = np.diff(pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)) / dt
+
+    # fig2, ax2 = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     ax2.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    #     ax2.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
+    # ax2.plot(ts, v_BEC_osc, 'k:', label='BEC Peak Oscillation (Velocity)')
+    # ax2.legend()
+    # ax2.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
+    # ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # ax2.set_title('Impurity Velocity')
+
     plt.show()
