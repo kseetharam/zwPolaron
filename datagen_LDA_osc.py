@@ -192,8 +192,8 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
-    aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
-    # aIBi_Vals = np.array([-5.0, -0.05])
+    # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
+    aIBi_Vals = np.array([-0.2])
     # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])
