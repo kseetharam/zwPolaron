@@ -107,8 +107,10 @@ if __name__ == "__main__":
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}'.format(x0))
 
-    oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
-                      {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+    oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+
+    # oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
+    #                   {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
 
     # oscParams_List = [{'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
     #                   {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
@@ -118,7 +120,7 @@ if __name__ == "__main__":
     metaList = []
     for oscParams in oscParams_List:
 
-        toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+        toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                       'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
@@ -191,57 +193,58 @@ if __name__ == "__main__":
 
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
+    # aIBi_Vals = np.array([-5.0, -0.05])
     # aIBi_Vals = np.array([0.1])
     dP_Vals = np.array([0])
     F_Vals = np.array([0])
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-    # for tup in metaList:
-    #     tupstart = timer()
-    #     (toggleDict, trapParams, innerdatapath) = tup
-    #     for ind, aIBi in enumerate(aIBi_Vals):
-    #         loopstart = timer()
-    #         cParams = {'aIBi': aIBi}
-    #         fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    #         if aIBi == 0.1:
-    #             filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    #         ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #         Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-    #         loopend = timer()
-    #         print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    #     tupend = timer()
-    #     print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], tupend - tupstart))
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
-
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    if(taskCount > len(metaList)):
-        print('ERROR: TASK COUNT MISMATCH')
-        sys.exit()
-    else:
-        tup = metaList[taskID]
+    for tup in metaList:
+        tupstart = timer()
         (toggleDict, trapParams, innerdatapath) = tup
-
-    for ind, aIBi in enumerate(aIBi_Vals):
-        loopstart = timer()
-        cParams = {'aIBi': aIBi}
-        fParams = {'dP_ext': 0, 'Fext_mag': 0}
-        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-        if aIBi == 0.1:
-            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-        loopend = timer()
-        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-
+        for ind, aIBi in enumerate(aIBi_Vals):
+            loopstart = timer()
+            cParams = {'aIBi': aIBi}
+            fParams = {'dP_ext': 0, 'Fext_mag': 0}
+            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+            if aIBi == 0.1:
+                filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+            ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+            Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+            loopend = timer()
+            print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
+        tupend = timer()
+        print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], tupend - tupstart))
     end = timer()
-    print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # if(taskCount > len(metaList)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     sys.exit()
+    # else:
+    #     tup = metaList[taskID]
+    #     (toggleDict, trapParams, innerdatapath) = tup
+
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     loopstart = timer()
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    #     if aIBi == 0.1:
+    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    #     loopend = timer()
+    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
+
+    # end = timer()
+    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], end - runstart))

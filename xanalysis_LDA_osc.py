@@ -90,7 +90,7 @@ if __name__ == "__main__":
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
     omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
 
-    X0 = 0.0; P0 = 0.6; a_osc = 0.5
+    X0 = 0.0; P0 = 0.1; a_osc = 0.5
     qds = ds_Dict[(X0, P0, a_osc)]
     qds_nosc = ds_Dict[(X0, P0, 0.0)]
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         # ax3.plot(v_ds_nosc['t'].values / tscale, v_ds_nosc.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='--', label='')
     ax3.plot(ts[::20], v_BEC_osc[::20] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
     ax3.plot(ts[::20], v_ImpTrap[::20] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
-    ax3.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='$|v|<c_{BEC}$')
+    # ax3.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='$|v|<c_{BEC}$')
 
     ax3.legend()
     ax3.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     fig4, ax4 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='$|v|<c_{BEC}$')
+    ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
     ax4.legend()
     ax4.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
     ax4.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
