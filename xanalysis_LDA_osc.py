@@ -31,25 +31,17 @@ if __name__ == "__main__":
     # Toggle parameters
 
     toggleDict = {'Location': 'home'}
-    # trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
-    #                    {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5},
-    #                    {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.5},
-    #                    {'X0': 0.0, 'P0': 0.1, 'a_osc': 0.0},
-    #                    {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
-    #                    {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
-
-    trapParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
-                       {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+    dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     datapath_List = []
     datapath_noscList = []
-    for trapParams in trapParams_List:
+    for dParams in dParams_List:
         if toggleDict['Location'] == 'home':
-            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
         elif toggleDict['Location'] == 'work':
-            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(aBB, NGridPoints_cart, trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
         datapath_List.append(datapath)
 
     # # # Concatenate Individual Datasets
@@ -87,8 +79,8 @@ if __name__ == "__main__":
 
     ds_Dict = {}
     for ind, innerdatapath in enumerate(datapath_List):
-        trapParams = trapParams_List[ind]
-        ds_Dict[(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
+        dParams = dParams_List[ind]
+        ds_Dict[(dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])] = xr.open_dataset(innerdatapath + '/LDA_Dataset.nc')
     # if toggleDict['Large_freq'] == 'true':
     #     qds_nosc = qds_nosc.sel(t=slice(0, 25))
     expParams = pfs.Zw_expParams()
@@ -96,8 +88,8 @@ if __name__ == "__main__":
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
     omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
 
-    X0 = 0.0; P0 = 0.6; a_osc = 0.5
-    qds = ds_Dict[(X0, P0, a_osc)]
+    f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 0.0; P0 = 0.6
+    qds = ds_Dict[(f_BEC_osc, f_Imp_x, a_osc, X0, P0)]
     # qds_nosc = ds_Dict[(X0, P0, 0.0)]
 
     attrs = qds.attrs
@@ -115,7 +107,8 @@ if __name__ == "__main__":
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     print('xi/c (exp in ms): {0}'.format(1e3 * tscale_exp))
 
-    aIBi_noPlotList = [-20.0]
+    # aIBi_noPlotList = [-20.0]
+    aIBi_noPlotList = []
 
     # POSITION VS TIME
 

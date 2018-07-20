@@ -16,7 +16,10 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    (Lx, Ly, Lz) = (30, 30, 30)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     # (Lx, Ly, Lz) = (30, 30, 30)
@@ -46,7 +49,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # tMax = 400; dt = 1
-    tMax = 240; dt = 0.2
+    tMax = 240; dt = 0.1
     # tMax = 1; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -156,18 +159,18 @@ if __name__ == "__main__":
 
         TTList.append((toggleDict, trapParams, innerdatapath))
 
-    # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
+    # # ---- CREATE EXTERNAL DATA FOLDERS  ----
 
-    # if os.path.isdir(datapath) is False:
-    #     os.mkdir(datapath)
-    #     os.mkdir(datapath + '/BEC_osc')
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
+        os.mkdir(datapath + '/BEC_osc')
 
-    # # ---- CREATE OUTPUT DATA FOLDERS  ----
+    # ---- CREATE OUTPUT DATA FOLDERS  ----
 
-    # for tup in TTList:
-    #     (toggleDict, trapParams, innerdatapath) = tup
-    #     if os.path.isdir(innerdatapath) is False:
-    #         os.mkdir(innerdatapath)
+    for tup in TTList:
+        (toggleDict, trapParams, innerdatapath) = tup
+        if os.path.isdir(innerdatapath) is False:
+            os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
