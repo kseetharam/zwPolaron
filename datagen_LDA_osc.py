@@ -16,11 +16,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
 
-    (Lx, Ly, Lz) = (30, 30, 30)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -45,7 +45,9 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 400; dt = 1
+    # tMax = 400; dt = 1
+    tMax = 240; dt = 0.2
+    # tMax = 1; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -105,7 +107,7 @@ if __name__ == "__main__":
 
     # ---- SET OSC PARAMS ----
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
-    print('X0: {0}'.format(x0))
+    print('X0: {0}, Tosc: {1}'.format(x0, To))
 
     oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
 
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     #                   {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.0},
     #                   {'X0': 0.0, 'P0': 1.8, 'a_osc': 0.0}]
 
-    metaList = []
+    TTList = []
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
@@ -146,13 +148,13 @@ if __name__ == "__main__":
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
             datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-        innerdatapath = datapath + '/BEC_osc/X0={:.1f}_P0={:.1f}_aosc={:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'])
+        innerdatapath = datapath + '/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
         if toggleDict['InitCS'] == 'file':
             toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
         else:
             toggleDict['InitCS_datapath'] = 'InitCS ERROR'
 
-        metaList.append((toggleDict, trapParams, innerdatapath))
+        TTList.append((toggleDict, trapParams, innerdatapath))
 
     # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
 
@@ -162,7 +164,7 @@ if __name__ == "__main__":
 
     # # ---- CREATE OUTPUT DATA FOLDERS  ----
 
-    # for tup in metaList:
+    # for tup in TTList:
     #     (toggleDict, trapParams, innerdatapath) = tup
     #     if os.path.isdir(innerdatapath) is False:
     #         os.mkdir(innerdatapath)
@@ -170,7 +172,7 @@ if __name__ == "__main__":
     # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
-    # (toggleDict, trapParams, innerdatapath0, innerdatapath) = metaList[0]
+    # (toggleDict, trapParams, innerdatapath0, innerdatapath) = TTList[0]
     # aIBi = -1.3
     # dP = 0.5 * mI * nu
     # F = 0.1 * Fscale
@@ -193,30 +195,30 @@ if __name__ == "__main__":
 
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
-    aIBi_Vals = np.array([-0.2])
+    aIBi_Vals = np.array([-5.0])
     # aIBi_Vals = np.array([0.1])
-    dP_Vals = np.array([0])
-    F_Vals = np.array([0])
+
+    metaList = []
+    for tup in TTList:
+        (toggleDict, trapParams, innerdatapath) = tup
+        for aIBi in aIBi_Vals:
+            metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
     # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
     for tup in metaList:
-        tupstart = timer()
-        (toggleDict, trapParams, innerdatapath) = tup
-        for ind, aIBi in enumerate(aIBi_Vals):
-            loopstart = timer()
-            cParams = {'aIBi': aIBi}
-            fParams = {'dP_ext': 0, 'Fext_mag': 0}
-            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-            if aIBi == 0.1:
-                filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-            ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-            Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-            loopend = timer()
-            print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-        tupend = timer()
-        print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], tupend - tupstart))
+        loopstart = timer()
+        (toggleDict, trapParams, innerdatapath, aIBi) = tup
+        cParams = {'aIBi': aIBi}
+        fParams = {'dP_ext': 0, 'Fext_mag': 0}
+        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+        if aIBi == 0.1:
+            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+        Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+        loopend = timer()
+        print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
     end = timer()
     print('Total Time: {:.2f}'.format(end - runstart))
 
@@ -227,24 +229,20 @@ if __name__ == "__main__":
     # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount > len(metaList)):
+    # if(taskCount > len(TTList)):
     #     print('ERROR: TASK COUNT MISMATCH')
     #     sys.exit()
     # else:
     #     tup = metaList[taskID]
-    #     (toggleDict, trapParams, innerdatapath) = tup
+    #     (toggleDict, trapParams, innerdatapath, aIBi) = tup
 
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     loopstart = timer()
-    #     cParams = {'aIBi': aIBi}
-    #     fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    #     if aIBi == 0.1:
-    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-    #     loopend = timer()
-    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
+    # cParams = {'aIBi': aIBi}
+    # fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    # filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    # if aIBi == 0.1:
+    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
 
     # end = timer()
-    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], end - runstart))
+    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))

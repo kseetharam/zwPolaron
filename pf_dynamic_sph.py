@@ -158,14 +158,14 @@ def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
     PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
     DP = P - PB
     Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
-    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    gnum = g(kgrid, aIBi, mI, mB, n0, gBB)
 
     xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
     xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
     En = ((P**2 - PB**2) / (2 * mI) +
           np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
-          gIB * (2 * np.real(xp) + np.sqrt(n0))**2 -
-          gIB * (2 * np.imag(xm))**2)
+          gnum * (2 * np.real(xp) + np.sqrt(n0))**2 -
+          gnum * (2 * np.imag(xm))**2)
 
     return En.real.astype(float)
 
@@ -287,12 +287,12 @@ def Zw_expParams():
     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
-    params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-    params['omega_BEC_osc'] = 2 * np.pi * 160  # BEC oscillation frequency in rad*Hz
-    # params['omega_BEC_osc'] = 2 * np.pi * 750  # BEC oscillation frequency in rad*Hz
+    # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
+    params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
 
     return params
@@ -489,6 +489,7 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
     ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    Energy_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
@@ -513,13 +514,19 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         X_da[ind] = cs.get_impPos()
         XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
 
+        if toggleDict['BEC_density'] == 'on':
+            n = n_BEC(cs.get_impPos(), 0, 0, trapParams['n0_TF_BEC'], trapParams['n0_thermal_BEC'], trapParams['RTF_BEC_X'], trapParams['RTF_BEC_Y'], trapParams['RTF_BEC_Z'], trapParams['RG_BEC_X'], trapParams['RG_BEC_Y'], trapParams['RG_BEC_Z'])  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        else:
+            n = n0
+        Energy_da[ind] = Energy(Amp, kgrid, cs.get_totMom(), aIBi, mI, mB, n, gBB)
+
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
         start = timer()
 
     # Create Data Set
 
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
 
