@@ -232,7 +232,7 @@ if __name__ == "__main__":
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount > len(TTList)):
+    if(taskCount > len(metaList)):
         print('ERROR: TASK COUNT MISMATCH')
         sys.exit()
     else:
