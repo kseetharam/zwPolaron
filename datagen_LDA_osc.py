@@ -125,7 +125,7 @@ if __name__ == "__main__":
     TTList = []
     for oscParams in oscParams_List:
 
-        toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+        toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                       'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
@@ -159,18 +159,18 @@ if __name__ == "__main__":
 
         TTList.append((toggleDict, trapParams, innerdatapath))
 
-    # # ---- CREATE EXTERNAL DATA FOLDERS  ----
+    # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
-        os.mkdir(datapath + '/BEC_osc')
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
+    #     os.mkdir(datapath + '/BEC_osc')
 
-    # ---- CREATE OUTPUT DATA FOLDERS  ----
+    # # ---- CREATE OUTPUT DATA FOLDERS  ----
 
-    for tup in TTList:
-        (toggleDict, trapParams, innerdatapath) = tup
-        if os.path.isdir(innerdatapath) is False:
-            os.mkdir(innerdatapath)
+    # for tup in TTList:
+    #     (toggleDict, trapParams, innerdatapath) = tup
+    #     if os.path.isdir(innerdatapath) is False:
+    #         os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
@@ -207,45 +207,45 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-    for tup in metaList:
-        loopstart = timer()
-        (toggleDict, trapParams, innerdatapath, aIBi) = tup
-        cParams = {'aIBi': aIBi}
-        fParams = {'dP_ext': 0, 'Fext_mag': 0}
-        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-        if aIBi == 0.1:
-            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-        loopend = timer()
-        print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
-
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # if(taskCount > len(TTList)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     sys.exit()
-    # else:
-    #     tup = metaList[taskID]
+    # for tup in metaList:
+    #     loopstart = timer()
     #     (toggleDict, trapParams, innerdatapath, aIBi) = tup
-
-    # cParams = {'aIBi': aIBi}
-    # fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    # filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    # if aIBi == 0.1:
-    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    #     if aIBi == 0.1:
+    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    #     loopend = timer()
+    #     print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
     # end = timer()
-    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount > len(TTList)):
+        print('ERROR: TASK COUNT MISMATCH')
+        sys.exit()
+    else:
+        tup = metaList[taskID]
+        (toggleDict, trapParams, innerdatapath, aIBi) = tup
+
+    cParams = {'aIBi': aIBi}
+    fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    if aIBi == 0.1:
+        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+
+    end = timer()
+    print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
