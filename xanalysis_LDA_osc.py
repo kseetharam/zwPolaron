@@ -113,24 +113,24 @@ if __name__ == "__main__":
     # aIBi_noPlotList = [-1000.0]
     aIBi_noPlotList = []
 
-    # POSITION VS TIME
+    # # POSITION VS TIME
 
-    x_ds = qds['XLab']
-    fig1, ax1 = plt.subplots()
-    for ind, aIBi in enumerate(aIBiVals):
-        if aIBi in aIBi_noPlotList:
-            continue
-        x0 = x_ds.sel(aIBi=aIBi).isel(t=0).values
-        x0 = 0
-        ax1.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
-    ax1.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    ax1.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # x_ds = qds['XLab']
+    # fig1, ax1 = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     x0 = x_ds.sel(aIBi=aIBi).isel(t=0).values
+    #     x0 = 0
+    #     ax1.plot(ts, 1e6 * x_ds.sel(aIBi=aIBi).values / L_exp2th, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    # xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
+    # ax1.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    # ax1.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
 
-    ax1.legend()
-    ax1.set_ylabel(r'$<X> (\mu m)$')
-    ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    ax1.set_title('Impurity Trajectory (Lab Frame)')
+    # ax1.legend()
+    # ax1.set_ylabel(r'$<X> (\mu m)$')
+    # ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax1.set_title('Impurity Trajectory (Lab Frame)')
 
     # # OSCILLATION FREQUENCY PLOT
     # maxph = 0
@@ -155,42 +155,61 @@ if __name__ == "__main__":
     # ax2.set_ylabel(r'$\mathscr{F}[<X>]$')
     # ax2.set_title('Impurity Trajectory Frequency Spectrum')
 
-    # VELOCITY VS TIME (LAB FRAME)
+    # # VELOCITY VS TIME (LAB FRAME)
 
-    v_ds = (qds['XLab'].diff('t') / dt).rename('v')
-    ts = v_ds['t'].values / tscale
-    v_BEC_osc = np.diff(xBEC) / dt
-    cBEC = nu * np.ones(v_BEC_osc.size)
-    v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
-    fig3, ax3 = plt.subplots()
+    # v_ds = (qds['XLab'].diff('t') / dt).rename('v')
+    # ts = v_ds['t'].values / tscale
+    # v_BEC_osc = np.diff(xBEC) / dt
+    # cBEC = nu * np.ones(v_BEC_osc.size)
+    # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
+    # fig3, ax3 = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     ax3.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+
+    # ax3.plot(ts[::20], v_BEC_osc[::20] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
+    # ax3.plot(ts[::20], v_ImpTrap[::20] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
+    # # ax3.plot(ts[::10], v_BEC_osc[::10] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
+    # # ax3.plot(ts[::2], v_ImpTrap[::2] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
+    # ax3.legend()
+    # ax3.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
+    # ax3.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax3.set_title('Impurity Velocity (Lab Frame)')
+
+    # # VELOCITY VS TIME (BEC FRAME)
+
+    # v_ds = (qds['X'].diff('t') / dt).rename('v')
+    # ts = v_ds['t'].values / tscale
+    # cBEC = nu * np.ones(ts.size)
+    # fig4, ax4 = plt.subplots()
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    # ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
+    # ax4.legend()
+    # ax4.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
+    # ax4.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax4.set_title('Impurity Velocity (BEC Frame)')
+
+    # ENERGY VS TIME
+
+    E_ds = qds['Energy']
+    fig5, ax5 = plt.subplots()
     for ind, aIBi in enumerate(aIBiVals):
         if aIBi in aIBi_noPlotList:
             continue
-        ax3.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+        E0 = E_ds.sel(aIBi=aIBi).isel(t=0).values
+        E0 = 0
+        ax5.plot(ts, E_ds.sel(aIBi=aIBi).values, color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
+    xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
+    ax5.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    # ax5.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
 
-    ax3.plot(ts[::20], v_BEC_osc[::20] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
-    ax3.plot(ts[::20], v_ImpTrap[::20] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
-    # ax3.plot(ts[::10], v_BEC_osc[::10] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
-    # ax3.plot(ts[::2], v_ImpTrap[::2] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
-    ax3.legend()
-    ax3.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
-    ax3.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    ax3.set_title('Impurity Velocity (Lab Frame)')
-
-    # VELOCITY VS TIME (BEC FRAME)
-
-    v_ds = (qds['X'].diff('t') / dt).rename('v')
-    ts = v_ds['t'].values / tscale
-    cBEC = nu * np.ones(ts.size)
-    fig4, ax4 = plt.subplots()
-    for ind, aIBi in enumerate(aIBiVals):
-        if aIBi in aIBi_noPlotList:
-            continue
-        ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind], linestyle='-', label=r'$aIB^{-1}=$' + '{:.2f}'.format(aIBi))
-    ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
-    ax4.legend()
-    ax4.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
-    ax4.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    ax4.set_title('Impurity Velocity (BEC Frame)')
+    ax5.legend()
+    ax5.set_ylabel(r'$Energy$')
+    ax5.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    ax5.set_title('Total System Energy')
 
     plt.show()
