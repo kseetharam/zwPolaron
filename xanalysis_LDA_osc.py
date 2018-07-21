@@ -17,11 +17,11 @@ if __name__ == "__main__":
 
     # gParams
 
-    (Lx, Ly, Lz) = (30, 30, 30)
-    (dx, dy, dz) = (0.2, 0.2, 0.2)
-
-    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (Lx, Ly, Lz) = (30, 30, 30)
     # (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     # (Lx, Ly, Lz) = (30, 30, 30)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
@@ -49,34 +49,34 @@ if __name__ == "__main__":
 
     # # Concatenate Individual Datasets
 
-    for innerdatapath in datapath_List:
-        ds_list = []; aIBi_list = []
-        for ind, filename in enumerate(os.listdir(innerdatapath)):
-            if filename[0:3] == 'LDA':
-                continue
-            ds = xr.open_dataset(innerdatapath + '/' + filename)
+    # for innerdatapath in datapath_List:
+    #     ds_list = []; aIBi_list = []
+    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #         if filename[0:3] == 'LDA':
+    #             continue
+    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
 
-            print(filename)
-            # ds = ds.sel(t=slice(0, tfin))
-            ds_list.append(ds)
-            aIBi_list.append(ds.attrs['aIBi'])
+    #         print(filename)
+    #         # ds = ds.sel(t=slice(0, tfin))
+    #         ds_list.append(ds)
+    #         aIBi_list.append(ds.attrs['aIBi'])
 
-        s = sorted(zip(aIBi_list, ds_list))
-        g = itertools.groupby(s, key=lambda x: x[0])
+    #     s = sorted(zip(aIBi_list, ds_list))
+    #     g = itertools.groupby(s, key=lambda x: x[0])
 
-        aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
-        for key, group in g:
-            aIBi_keys.append(key)
-            aIBi_groups.append(list(group))
+    #     aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
+    #     for key, group in g:
+    #         aIBi_keys.append(key)
+    #         aIBi_groups.append(list(group))
 
-        for ind, group in enumerate(aIBi_groups):
-            aIBi = aIBi_keys[ind]
-            _, ds_temp = zip(*group)
-            aIBi_ds_list.append(ds_temp[0])
+    #     for ind, group in enumerate(aIBi_groups):
+    #         aIBi = aIBi_keys[ind]
+    #         _, ds_temp = zip(*group)
+    #         aIBi_ds_list.append(ds_temp[0])
 
-        ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-        del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
-        ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
+    #     ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
+    #     del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
+    #     ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
 
     # # # Analysis of Total Dataset
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
     print('xi/c (exp in ms): {0}'.format(1e3 * tscale_exp))
 
-    # aIBi_noPlotList = [-20.0]
+    # aIBi_noPlotList = [-1000.0]
     aIBi_noPlotList = []
 
     # POSITION VS TIME

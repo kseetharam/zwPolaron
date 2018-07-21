@@ -16,11 +16,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
-
-    (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (20, 20, 20)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
+
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     # (Lx, Ly, Lz) = (30, 30, 30)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
@@ -198,8 +198,7 @@ if __name__ == "__main__":
 
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
-    aIBi_Vals = np.array([-1000.0, -5.0])
-    # aIBi_Vals = np.array([0.1])
+    aIBi_Vals = np.concatenate((np.linspace(-1000, -10, 100), np.linspace(-5, -.05, 5)))
 
     metaList = []
     for tup in TTList:
