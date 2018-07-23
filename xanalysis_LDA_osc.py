@@ -49,36 +49,36 @@ if __name__ == "__main__":
             animpath = '/media/kis/Storage/Dropbox/aBB={:.3f}/BEC_osc'.format(aBB)
         datapath_List.append(datapath)
 
-    # # Concatenate Individual Datasets
+    # Concatenate Individual Datasets
 
-    # for innerdatapath in datapath_List:
-    #     ds_list = []; aIBi_list = []
-    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #         if filename[0:3] == 'LDA':
-    #             continue
-    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
+    for innerdatapath in datapath_List:
+        ds_list = []; aIBi_list = []
+        for ind, filename in enumerate(os.listdir(innerdatapath)):
+            if filename[0:3] == 'LDA':
+                continue
+            ds = xr.open_dataset(innerdatapath + '/' + filename)
 
-    #         print(filename)
-    #         # ds = ds.sel(t=slice(0, tfin))
-    #         ds_list.append(ds)
-    #         aIBi_list.append(ds.attrs['aIBi'])
+            print(filename)
+            # ds = ds.sel(t=slice(0, tfin))
+            ds_list.append(ds)
+            aIBi_list.append(ds.attrs['aIBi'])
 
-    #     s = sorted(zip(aIBi_list, ds_list))
-    #     g = itertools.groupby(s, key=lambda x: x[0])
+        s = sorted(zip(aIBi_list, ds_list))
+        g = itertools.groupby(s, key=lambda x: x[0])
 
-    #     aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
-    #     for key, group in g:
-    #         aIBi_keys.append(key)
-    #         aIBi_groups.append(list(group))
+        aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
+        for key, group in g:
+            aIBi_keys.append(key)
+            aIBi_groups.append(list(group))
 
-    #     for ind, group in enumerate(aIBi_groups):
-    #         aIBi = aIBi_keys[ind]
-    #         _, ds_temp = zip(*group)
-    #         aIBi_ds_list.append(ds_temp[0])
+        for ind, group in enumerate(aIBi_groups):
+            aIBi = aIBi_keys[ind]
+            _, ds_temp = zip(*group)
+            aIBi_ds_list.append(ds_temp[0])
 
-    #     ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    #     del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
-    #     ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
+        ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
+        del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
+        ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
 
     # # # Analysis of Total Dataset
 
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
-    anim_p = FuncAnimation(fig6, animate_pos, interval=1000, frames=range(ts.size))
+    anim_p = FuncAnimation(fig6, animate_pos, interval=500, frames=range(ts.size))
     anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     anim_p.save(animpath + anim_p_filename, writer='imagemagick')
 
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         curve.set_ydata(freq_array[i])
         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
-    anim_freq = FuncAnimation(fig7, animate_freq, interval=1000, frames=range(fVals.size))
+    anim_freq = FuncAnimation(fig7, animate_freq, interval=500, frames=range(fVals.size))
     anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     anim_freq.save(animpath + anim_freq_filename, writer='imagemagick')
 
