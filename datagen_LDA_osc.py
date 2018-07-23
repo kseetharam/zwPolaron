@@ -199,7 +199,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
     # aIBi_Vals = np.concatenate((np.linspace(-1000, -10, 100), np.linspace(-5, -.05, 5)))
-    aIBi_Vals = np.linspace(-50, -10, 50)
+    aIBi_Vals = np.linspace(-100, -1, 199)
     # aIBi_Vals = [-0.25]
 
     metaList = []
