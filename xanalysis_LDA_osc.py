@@ -325,6 +325,7 @@ if __name__ == "__main__":
     y0Vals = np.empty(aIBiVals.size, dtype=np.object)
     gVals = np.empty(aIBiVals.size)
     bVals = np.empty(aIBiVals.size)
+    msVals = np.empty(aIBiVals.size)
     for ind, aIBi in enumerate(aIBiVals):
         # if ind != 10:
         #     continue
@@ -350,6 +351,10 @@ if __name__ == "__main__":
         vI_DatArray[ind] = vVals
         xI_FitArray[ind] = xfit
         vI_FitArray[ind] = vfit
+
+        P = qds['P'].sel(aIBi=aIBi).isel(t=0).values
+        Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
+        msVals[ind] = mI * P / (P - Pph)
 
         # print(aIBi, gopt, bopt)
         # ax.plot(tVals, xVals, 'ko')
@@ -386,8 +391,11 @@ if __name__ == "__main__":
     # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
 
-    ax.plot(aIBiVals, gVals, 'g-', label='Gamma')
-    ax.plot(aIBiVals, bVals, 'b-', label='Beta')
+    ax.plot(aIBiVals, gVals, 'g-', label=r'$\gamma$')
+    ax.plot(aIBiVals, bVals, 'b-', label=r'$\beta$')
+    ax.plot(aIBiVals, msVals * gVals, 'g:', label=r'$m^{*}\gamma$')
+    ax.plot(aIBiVals, msVals * bVals, 'b:', label=r'$m^{*}\beta$')
+    ax.plot(aIBiVals, bVals + gVals**2 - omega_Imp_x**2, 'm--', label=r'$\beta + \gamma^{2}-\omega_{0}^{2}$')
     ax.legend()
     ax.set_xlabel('aIBi')
 
