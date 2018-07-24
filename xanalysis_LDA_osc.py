@@ -357,37 +357,38 @@ if __name__ == "__main__":
         # ax.plot(tVals, vVals, 'ko')
         # ax.plot(tVals, vfit, 'r-')
 
-    # ax.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    # ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    curve_Dat = ax.plot(tVals[::20], xI_DatArray[0][::20], color='k', linestyle='', marker='o', label='')[0]
-    curve_Fit = ax.plot(tVals, xI_FitArray[0], color='orange', lw=2, label='')[0]
+    # # ax.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    # # ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # curve_Dat = ax.plot(tVals[::20], xI_DatArray[0][::20], color='k', linestyle='', marker='o', label='')[0]
+    # curve_Fit = ax.plot(tVals, xI_FitArray[0], color='orange', lw=2, label='')[0]
 
-    aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
-    Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
-    Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
+    # aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
+    # Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
+    # Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
 
-    # ax.legend(loc=2)
-    # ax.set_ylabel(r'$<X> (\mu m)$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    ax.set_xlabel('t')
-    ax.set_ylabel('<X>')
-    ax.set_title('Impurity Trajectory (Lab Frame)')
+    # # ax.legend(loc=2)
+    # # ax.set_ylabel(r'$<X> (\mu m)$')
+    # # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax.set_xlabel('t')
+    # ax.set_ylabel('<X>')
+    # ax.set_title('Impurity Trajectory (Lab Frame)')
 
-    def animate_fit(i):
-        if i >= aIBiVals.size:
-            return
-        curve_Dat.set_ydata(xI_DatArray[i][::20])
-        curve_Fit.set_ydata(xI_FitArray[i])
-        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
-        Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
-        Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
+    # def animate_fit(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve_Dat.set_ydata(xI_DatArray[i][::20])
+    #     curve_Fit.set_ydata(xI_FitArray[i])
+    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
+    #     Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
 
-    anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
-    anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
+    # anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
+    # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
 
-    # ax.plot(aIBiVals, gVals, 'g-', label='Gamma')
-    # ax.plot(aIBiVals, bVals, 'b-', label='Beta')
-    # ax.legend()
+    ax.plot(aIBiVals, gVals, 'g-', label='Gamma')
+    ax.plot(aIBiVals, bVals, 'b-', label='Beta')
+    ax.legend()
+    ax.set_xlabel('aIBi')
 
     plt.show()
