@@ -317,12 +317,17 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
     x_ds = qds['XLab']
+    xI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    vI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    xI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+    vI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+
     y0Vals = np.empty(aIBiVals.size, dtype=np.object)
     gVals = np.empty(aIBiVals.size)
     bVals = np.empty(aIBiVals.size)
     for ind, aIBi in enumerate(aIBiVals):
-        if ind != 190:
-            continue
+        # if ind != 10:
+        #     continue
         xVals = x_ds.sel(aIBi=aIBi).values
         vVals = np.gradient(xVals, tVals)
         x0 = xVals[0]
@@ -330,13 +335,59 @@ if __name__ == "__main__":
         # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
         y0 = [x0, v0]
         data = np.concatenate((xVals, vVals))
-        popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=[0.01, 0.01])
+        if ind == 0:
+            p0 = [1e-5, 1e-5]
+        else:
+            p0 = [gVals[ind - 1], bVals[ind - 1]]
+        popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=p0, bounds=(0, np.inf))
         gopt, bopt = popt
         y0Vals[ind] = y0; gVals[ind] = gopt; bVals[ind] = bopt
 
         fitvals = yint(tVals, gVals[ind], bVals[ind], y0Vals[ind])
         xfit = fitvals[0:tVals.size]
-        ax.plot(tVals, xVals, 'bo')
-        ax.plot(tVals, xfit, 'g-')
+        vfit = fitvals[tVals.size:]
+        xI_DatArray[ind] = xVals
+        vI_DatArray[ind] = vVals
+        xI_FitArray[ind] = xfit
+        vI_FitArray[ind] = vfit
+
+        # print(aIBi, gopt, bopt)
+        # ax.plot(tVals, xVals, 'ko')
+        # ax.plot(tVals, xfit, 'g-')
+        # ax.plot(tVals, vVals, 'ko')
+        # ax.plot(tVals, vfit, 'r-')
+
+    # ax.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    # ax.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    curve_Dat = ax.plot(tVals[::20], xI_DatArray[0][::20], color='k', linestyle='', marker='o', label='')[0]
+    curve_Fit = ax.plot(tVals, xI_FitArray[0], color='orange', lw=2, label='')[0]
+
+    aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
+    Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
+    Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
+
+    # ax.legend(loc=2)
+    # ax.set_ylabel(r'$<X> (\mu m)$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    ax.set_xlabel('t')
+    ax.set_ylabel('<X>')
+    ax.set_title('Impurity Trajectory (Lab Frame)')
+
+    def animate_fit(i):
+        if i >= aIBiVals.size:
+            return
+        curve_Dat.set_ydata(xI_DatArray[i][::20])
+        curve_Fit.set_ydata(xI_FitArray[i])
+        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+        Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
+        Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
+
+    anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
+    anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
+
+    # ax.plot(aIBiVals, gVals, 'g-', label='Gamma')
+    # ax.plot(aIBiVals, bVals, 'b-', label='Beta')
+    # ax.legend()
 
     plt.show()
