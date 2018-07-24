@@ -308,7 +308,8 @@ if __name__ == "__main__":
         # y1 = x, y2 = dx/dt
         y1, y2 = y
         dy1dt = y2
-        dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 - beta) * y1 + beta * xB0 * np.cos(omega_BEC_osc * t)
+        # dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 - beta) * y1 + beta * xB0 * np.cos(omega_BEC_osc * t)
+        dy2dt = -2 * gamma * y2 - (omega_Imp_x**2) * y1 + beta * xB0 * np.cos(omega_BEC_osc * t)
         return [dy1dt, dy2dt]
 
     def yint(t, gamma, beta, y0):
@@ -398,5 +399,38 @@ if __name__ == "__main__":
     ax.plot(aIBiVals, bVals + gVals**2 - omega_Imp_x**2, 'm--', label=r'$\beta + \gamma^{2}-\omega_{0}^{2}$')
     ax.legend()
     ax.set_xlabel('aIBi')
+
+    # calculate alpha = m*Beta
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
+                  'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
+    mB = expParams['mB'] * M_exp2th  # should = 1
+    mI = expParams['mI'] * M_exp2th
+    aBB = expParams['aBB'] * L_exp2th
+    gBB = (4 * np.pi / mB) * aBB
+    sParams = [mI, mB, n0, gBB]
+
+    X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
+
+    aVals_Est = np.empty(aIBiVals.size)
+    for ind, aIBi in enumerate(aIBiVals):
+        cParams = {'aIBi': aIBi}
+        E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        aVals_Est[ind] = pfs.F_pol(0, E_Pol_tck)
 
     plt.show()

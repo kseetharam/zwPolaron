@@ -49,7 +49,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # tMax = 400; dt = 1
-    tMax = 240; dt = 0.1
+    # tMax = 240; dt = 0.1
+    tMax = 480; dt = 0.1
     # tMax = 1; dt = 0.2
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -199,7 +200,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
     # aIBi_Vals = np.concatenate((np.linspace(-1000, -10, 100), np.linspace(-5, -.05, 5)))
-    aIBi_Vals = np.linspace(-100, -1, 199)
+    aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199)))
     # aIBi_Vals = [-0.25]
 
     metaList = []
