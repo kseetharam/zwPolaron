@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+from scipy.optimize import curve_fit
+from scipy.integrate import odeint
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -109,6 +111,7 @@ if __name__ == "__main__":
     tscale_exp = tscale / T_exp2th
     omega_BEC_osc = attrs['omega_BEC_osc']
     xBEC = pfs.x_BEC_osc(tVals, omega_BEC_osc, RTF_BEC_X, a_osc)
+    xB0 = xBEC[0]
     x_ds = qds['XLab']
     # print(omega_BEC_osc, (2 * np.pi / omega_BEC_osc), (1e-3 * T_exp2th * omega_BEC_osc / (2 * np.pi)), qds_nosc.attrs['omega_BEC_osc'])
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
@@ -134,33 +137,33 @@ if __name__ == "__main__":
     # ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
     # ax1.set_title('Impurity Trajectory (Lab Frame)')
 
-    # POSITION VS TIME ANIMATION
+    # # POSITION VS TIME ANIMATION
 
-    x_ds = qds['XLab']
-    xI_array = np.empty(aIBiVals.size, dtype=np.object)
-    for ind, aIBi in enumerate(aIBiVals):
-        xI_array[ind] = x_ds.isel(aIBi=ind).values
+    # x_ds = qds['XLab']
+    # xI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     xI_array[ind] = x_ds.isel(aIBi=ind).values
 
-    fig6, ax6 = plt.subplots()
-    ax6.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    ax6.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
-    aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
+    # fig6, ax6 = plt.subplots()
+    # ax6.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    # ax6.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
+    # aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
 
-    ax6.legend(loc=2)
-    ax6.set_ylabel(r'$<X> (\mu m)$')
-    ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    ax6.set_title('Impurity Trajectory (Lab Frame)')
+    # ax6.legend(loc=2)
+    # ax6.set_ylabel(r'$<X> (\mu m)$')
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_title('Impurity Trajectory (Lab Frame)')
 
-    def animate_pos(i):
-        if i >= aIBiVals.size:
-            return
-        curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
-        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    # def animate_pos(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
+    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
-    anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(ts.size))
-    anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    anim_p.save(animpath + anim_p_filename, writer='imagemagick')
+    # anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(ts.size))
+    # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_p.save(animpath + anim_p_filename, writer='imagemagick')
 
     # # OSCILLATION FREQUENCY PLOT
 
@@ -186,56 +189,73 @@ if __name__ == "__main__":
     # ax2.set_ylabel(r'$\mathscr{F}[<X>]$')
     # ax2.set_title('Impurity Trajectory Frequency Spectrum')
 
-    # OSCILLATION FREQUENCY ANIMATION
+    # # OSCILLATION FREQUENCY ANIMATION
 
-    freq_array = np.empty(aIBiVals.size, dtype=np.object)
-    maxph = 0
-    for ind, aIBi in enumerate(aIBiVals):
-        if aIBi in aIBi_noPlotList:
-            continue
-        xVals = x_ds.sel(aIBi=aIBi).values
-        x0 = xVals[0]
-        dt = tVals[1] - tVals[0]
-        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-        freq_array[ind] = np.abs(FTVals)
-        if np.max(np.abs(FTVals)) > maxph:
-            maxph = np.max(np.abs(FTVals))
+    # freq_array = np.empty(aIBiVals.size, dtype=np.object)
+    # maxph = 0
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     freq_array[ind] = np.abs(FTVals)
+    #     if np.max(np.abs(FTVals)) > maxph:
+    #         maxph = np.max(np.abs(FTVals))
 
-    fig7, ax7 = plt.subplots()
-    curve = ax7.plot(fVals * T_exp2th, freq_array[0], color='g', lw=2, label='')[0]
-    aIBi_text = ax7.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax7.transAxes, color='r')
+    # fig7, ax7 = plt.subplots()
+    # curve = ax7.plot(fVals * T_exp2th, freq_array[0], color='g', lw=2, label='')[0]
+    # aIBi_text = ax7.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax7.transAxes, color='r')
 
-    ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(fVals.size), np.linspace(0, maxph, fVals.size), 'k:', label='BEC Oscillation Frequency')
-    ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(fVals.size), np.linspace(0, maxph, fVals.size), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    ax7.legend(loc=2)
-    ax7.set_xlim([0, 1500])
-    ax7.set_xlabel('f (Hz)')
-    ax7.set_ylabel(r'$\mathscr{F}[<X>]$')
-    ax7.set_title('Impurity Trajectory Frequency Spectrum')
+    # ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(fVals.size), np.linspace(0, maxph, fVals.size), 'k:', label='BEC Oscillation Frequency')
+    # ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(fVals.size), np.linspace(0, maxph, fVals.size), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # ax7.legend(loc=2)
+    # ax7.set_xlim([0, 1500])
+    # ax7.set_xlabel('f (Hz)')
+    # ax7.set_ylabel(r'$\mathscr{F}[<X>]$')
+    # ax7.set_title('Impurity Trajectory Frequency Spectrum')
 
-    def animate_freq(i):
-        if i >= aIBiVals.size:
-            return
-        curve.set_ydata(freq_array[i])
-        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    # def animate_freq(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve.set_ydata(freq_array[i])
+    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
-    anim_freq = FuncAnimation(fig7, animate_freq, interval=50, frames=range(fVals.size))
-    anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    anim_freq.save(animpath + anim_freq_filename, writer='imagemagick')
+    # anim_freq = FuncAnimation(fig7, animate_freq, interval=50, frames=range(fVals.size))
+    # anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_freq.save(animpath + anim_freq_filename, writer='imagemagick')
 
     # # VELOCITY VS TIME (LAB FRAME)
 
-    # v_ds = (qds['XLab'].diff('t') / dt).rename('v')
-    # ts = v_ds['t'].values / tscale
-    # v_BEC_osc = np.diff(xBEC) / dt
+    # # v_ds = (qds['XLab'].diff('t') / dt).rename('v')
+    # # ts = v_ds['t'].values / tscale
+    # # v_BEC_osc = np.diff(xBEC) / dt
+    # # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
+
+    # v_BEC_osc = np.gradient(xBEC, tVals)
+    # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * tVals)
+
     # cBEC = nu * np.ones(v_BEC_osc.size)
-    # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
     # fig3, ax3 = plt.subplots()
     # for ind, aIBi in enumerate(aIBiVals):
     #     if aIBi in aIBi_noPlotList:
     #         continue
-    #     ax3.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+
+    #     # qds_aIBi = qds.sel(aIBi=aIBi)
+    #     # P = 0.5 * (qds_aIBi['P'].isel(t=1).values + qds_aIBi['P'].isel(t=0).values)
+    #     # Pph = 0.5 * (qds_aIBi['Pph'].isel(t=1).values + qds_aIBi['Pph'].isel(t=0).values)
+    #     # PI = P - Pph
+    #     # ms = mI * P / (P - Pph)
+    #     # # print(P, P - Pph)
+    #     # v0 = v_ds.sel(aIBi=aIBi).values[0]
+    #     # print(np.abs(v0 - PI / mI) / v0)
+
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     vVals = np.gradient(xVals, tVals)
+    #     ax3.plot(ts, vVals * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    #     # ax3.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
 
     # ax3.plot(ts[::20], v_BEC_osc[::20] * (1e3 * T_exp2th / L_exp2th), 'ko', mfc='none', label='BEC Peak Velocity')
     # ax3.plot(ts[::20], v_ImpTrap[::20] * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle='', marker='o', mfc='none', label='Impurity Trap Frequency')
@@ -248,14 +268,15 @@ if __name__ == "__main__":
 
     # # VELOCITY VS TIME (BEC FRAME)
 
-    # v_ds = (qds['X'].diff('t') / dt).rename('v')
-    # ts = v_ds['t'].values / tscale
+    # # v_ds = (qds['X'].diff('t') / dt).rename('v')
+    # # ts = v_ds['t'].values / tscale
     # cBEC = nu * np.ones(ts.size)
     # fig4, ax4 = plt.subplots()
     # for ind, aIBi in enumerate(aIBiVals):
     #     if aIBi in aIBi_noPlotList:
     #         continue
-    #     ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    #     ax4.plot(ts, np.gradient(qds['X'].sel(aIBi=aIBi).values, tVals) * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    #     # ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
     # ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
     # ax4.legend()
     # ax4.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
@@ -281,4 +302,41 @@ if __name__ == "__main__":
     # ax5.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
     # ax5.set_title('Total System Energy')
 
-    # plt.show()
+    # ODE FIT TO POSITION (TRAJECTORY)
+
+    def EqMotion(y, t, gamma, beta):
+        # y1 = x, y2 = dx/dt
+        y1, y2 = y
+        dy1dt = y2
+        dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 - beta) * y1 + beta * xB0 * np.cos(omega_BEC_osc * t)
+        return [dy1dt, dy2dt]
+
+    def yint(t, gamma, beta, y0):
+        y = odeint(EqMotion, y0, t, args=(gamma, beta))
+        return y.ravel(order='F')
+
+    fig, ax = plt.subplots()
+    x_ds = qds['XLab']
+    y0Vals = np.empty(aIBiVals.size, dtype=np.object)
+    gVals = np.empty(aIBiVals.size)
+    bVals = np.empty(aIBiVals.size)
+    for ind, aIBi in enumerate(aIBiVals):
+        if ind != 190:
+            continue
+        xVals = x_ds.sel(aIBi=aIBi).values
+        vVals = np.gradient(xVals, tVals)
+        x0 = xVals[0]
+        v0 = vVals[0]
+        # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
+        y0 = [x0, v0]
+        data = np.concatenate((xVals, vVals))
+        popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=[0.01, 0.01])
+        gopt, bopt = popt
+        y0Vals[ind] = y0; gVals[ind] = gopt; bVals[ind] = bopt
+
+        fitvals = yint(tVals, gVals[ind], bVals[ind], y0Vals[ind])
+        xfit = fitvals[0:tVals.size]
+        ax.plot(tVals, xVals, 'bo')
+        ax.plot(tVals, xfit, 'g-')
+
+    plt.show()
