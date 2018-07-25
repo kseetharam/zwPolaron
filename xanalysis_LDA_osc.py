@@ -7,6 +7,7 @@ from scipy import interpolate
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.animation import writers
 import os
 import itertools
 import Grid
@@ -17,6 +18,7 @@ if __name__ == "__main__":
     # # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
+    mpegWriter = writers['ffmpeg'](fps=20, bitrate=1800)
 
     # gParams
 
@@ -49,7 +51,7 @@ if __name__ == "__main__":
             animpath = '/home/kis/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
         elif toggleDict['Location'] == 'work':
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
-            animpath = '/media/kis/Storage/Dropbox/aBB={:.3f}/BEC_osc'.format(aBB)
+            animpath = '/media/kis/Storage/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
         datapath_List.append(datapath)
 
     # # Concatenate Individual Datasets
@@ -163,8 +165,10 @@ if __name__ == "__main__":
     #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
     # anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(ts.size))
-    # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # anim_p.save(animpath + anim_p_filename, writer='imagemagick')
+    # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
     # # OSCILLATION FREQUENCY PLOT
 
@@ -215,7 +219,7 @@ if __name__ == "__main__":
     # ax7.legend(loc=2)
     # ax7.set_xlim([0, 1500])
     # ax7.set_xlabel('f (Hz)')
-    # ax7.set_ylabel(r'$\mathscr{F}[<X>]$')
+    # ax7.set_ylabel(r'$|\mathscr{F}[<X>]|$')
     # ax7.set_title('Impurity Trajectory Frequency Spectrum')
 
     # def animate_freq(i):
@@ -225,8 +229,10 @@ if __name__ == "__main__":
     #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
 
     # anim_freq = FuncAnimation(fig7, animate_freq, interval=50, frames=range(fVals.size))
-    # anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # anim_freq.save(animpath + anim_freq_filename, writer='imagemagick')
+    # anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
 
     # # VELOCITY VS TIME (LAB FRAME)
 
@@ -411,31 +417,33 @@ if __name__ == "__main__":
         Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
         msVals[ind] = mI * P / (P - Pph)
 
-    # POSITION (LAB) ANIMATION
+    # # POSITION (LAB) ANIMATION
 
-    fig, ax = plt.subplots()
-    curve_Dat = ax.plot(tVals[::20], xI_DatArray[0][::20], color='k', linestyle='', marker='o', label='')[0]
-    curve_Fit = ax.plot(tVals, xI_FitArray[0], color='orange', lw=2, label='')[0]
-    aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
-    Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
-    Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
+    # fig, ax = plt.subplots()
+    # curve_Dat = ax.plot(tVals[::20], xI_DatArray[0][::20], color='k', linestyle='', marker='o', label='')[0]
+    # curve_Fit = ax.plot(tVals, xI_FitArray[0], color='orange', lw=2, label='')[0]
+    # aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
+    # Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
+    # Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
 
-    ax.set_xlabel('t')
-    ax.set_ylabel('<X>')
-    ax.set_title('Impurity Trajectory (Lab Frame)')
+    # ax.set_xlabel('t')
+    # ax.set_ylabel('<X>')
+    # ax.set_title('Impurity Trajectory (Lab Frame)')
 
-    def animate_fit(i):
-        if i >= aIBiVals.size:
-            return
-        curve_Dat.set_ydata(xI_DatArray[i][::20])
-        curve_Fit.set_ydata(xI_FitArray[i])
-        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
-        Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
-        Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
+    # def animate_fit(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve_Dat.set_ydata(xI_DatArray[i][::20])
+    #     curve_Fit.set_ydata(xI_FitArray[i])
+    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
+    #     Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
 
-    anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
-    anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
+    # anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
+    # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
+    # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
     # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
 
@@ -465,25 +473,27 @@ if __name__ == "__main__":
 
     X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
 
-    # # aIBiVals = aIBiVals[::10]
-    # aVals_Est = np.empty(aIBiVals.size)
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     cParams = {'aIBi': aIBi}
-    #     E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-    #     aVals_Est[ind] = interpolate.splev(0.5 * RTF_BEC_X, E_Pol_tck, der=2)
+    # aIBiVals = aIBiVals[::10]
+    aVals_Est = np.empty(aIBiVals.size)
+    for ind, aIBi in enumerate(aIBiVals):
+        cParams = {'aIBi': aIBi}
+        E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        aVals_Est[ind] = interpolate.splev(0.5 * RTF_BEC_X, E_Pol_tck, der=1)
 
     # PLOT PARAMETERS
 
     fig2, ax2 = plt.subplots()
-    ax2.plot(aIBiVals, gVals, 'g-', label=r'$\gamma$')
-    ax2.plot(aIBiVals, bVals, 'b-', label=r'$\beta$')
-    ax2.plot(aIBiVals, msVals * gVals, 'g:', label=r'$\xi=m^{*}\gamma$')
-    ax2.plot(aIBiVals, msVals * bVals, 'b:', label=r'$\alpha=m^{*}\beta$')
-    ax2.plot(aIBiVals, deltaVals, color='orange', linestyle=':', label=r'$\delta$')
+    # ax2.plot(aIBiVals, gVals, 'g-', label=r'$\gamma$')
+    # ax2.plot(aIBiVals, bVals, 'b-', label=r'$\beta$')
+    # ax2.plot(aIBiVals, msVals * gVals, 'g:', label=r'$\xi=m^{*}\gamma$')
+    # ax2.plot(aIBiVals, msVals * bVals, 'b:', label=r'$\alpha=m^{*}\beta$')
+    # ax2.plot(aIBiVals, deltaVals, color='orange', linestyle=':', label=r'$\delta$')
     # ax2.plot(aIBiVals, bVals + gVals**2 - omega_Imp_x**2, 'm--', label=r'$\beta + \gamma^{2}-\omega_{0}^{2}$')
     # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\frac{d^{2}E_{pol}}{dx^{2}}|_{0.5*X_{TF}}$')
+    ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\frac{dE_{pol}}{dx}|_{0.5*X_{TF}}$')
     # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
     ax2.legend()
     ax2.set_xlabel('aIBi')
+    ax2.set_title('Oscillation Fit Parameters')
 
     plt.show()
