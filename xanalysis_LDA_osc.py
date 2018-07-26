@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
-    mpegWriter = writers['ffmpeg'](fps=20, bitrate=1800)
+    # mpegWriter = writers['ffmpeg'](fps=20, bitrate=1800)
 
     # gParams
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work'}
+    toggleDict = {'Location': 'home'}
     dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -703,13 +703,12 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0, gBB]
 
     X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
-
     # aIBiVals = aIBiVals[::10]
     aVals_Est = np.empty(aIBiVals.size)
     for ind, aIBi in enumerate(aIBiVals):
         cParams = {'aIBi': aIBi}
         E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-        aVals_Est[ind] = interpolate.splev(0.5 * RTF_BEC_X, E_Pol_tck, der=1)
+        aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=1)
 
     # PLOT PARAMETERS
     rhoVals = gVals**2 - bVals - omega_Imp_x**2
@@ -722,7 +721,7 @@ if __name__ == "__main__":
     # ax2.plot(aIBiVals, deltaVals, color='orange', linestyle=':', label=r'$\delta$')
     ax2.plot(aIBiVals, gVals**2 - bVals - omega_Imp_x**2, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
     ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gVals), aIBiVals.size), 'y--', label='Critical Damping')
-    ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{0.5*X_{TF}}$')
+    ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
     # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\frac{dE_{pol}}{dx}|_{0.5*X_{TF}}$'))
     # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
     ax2.legend(loc=2)
