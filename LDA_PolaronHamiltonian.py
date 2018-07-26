@@ -26,6 +26,7 @@ class LDA_PolaronHamiltonian:
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
         self.BEC_density_osc = toggleDict['BEC_density_osc']
+        self.CS_Dyn = toggleDict['CS_Dyn']
         self.a_osc = trapParams['a_osc']
 
         if self.couplingType == 'frohlich':
@@ -124,6 +125,10 @@ class LDA_PolaronHamiltonian:
             X_new_temp = -1j * (P - PB) / mI
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
+
+        if self.CS_Dyn == 'off':
+            amplitude_new_temp = 0 * amplitude_new_temp
+            phase_new_temp = 0 * phase_new_temp
 
         # Assign updates
 
