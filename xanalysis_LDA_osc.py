@@ -690,20 +690,21 @@ if __name__ == "__main__":
     #     Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
 
     # anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
-    # # # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    # # # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
-    # # anim_fit_filename = '/TrajFitBECAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_fit_filename = '/TrajFitBECAnim_BECFit_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # if toggleDict['CS_Dyn'] == 'off':
+    #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
     # POSITION (LAB) ANIMATION
 
     fig, ax = plt.subplots()
-    curve_Dat = ax.plot(tVals[::20], xI_DatArray_LAB[0][::20], color='k', linestyle='', marker='o', label='')[0]
-    curve_Fit = ax.plot(tVals, xI_FitArray_LAB[0], color='orange', lw=2, label='')[0]
+    curve_Dat = ax.plot(tVals[::20], xI_DatArray_LAB[0][::20], color='k', linestyle='', marker='o', label='Simulation Data')[0]
+    curve_Fit = ax.plot(tVals, xI_FitArray_LAB[0], color='orange', lw=2, label='ODE Fit')[0]
     aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
     Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
     Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
 
+    ax.legend(loc=2)
     ax.set_xlabel('t')
     ax.set_ylabel('<X>')
     ax.set_title('Impurity Trajectory (Lab Frame)')
@@ -720,7 +721,7 @@ if __name__ == "__main__":
     anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
     # # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
-    anim_fit_filename = '/TrajFitAnim_RevBEC_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    anim_fit_filename = '/TrajFitAnim_BECFit_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     if toggleDict['CS_Dyn'] == 'off':
         anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
