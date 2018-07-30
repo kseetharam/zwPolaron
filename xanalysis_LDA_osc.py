@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'CS_Dyn': 'off'}
+    toggleDict = {'Location': 'home', 'CS_Dyn': 'on'}
     dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -322,10 +322,8 @@ if __name__ == "__main__":
     # # ENERGY VS TIME ANIMATION
 
     # Energy_array = np.empty(aIBiVals.size, dtype=np.object)
-    # AveEnergy_array = np.empty(aIBiVals.size, dtype=np.object)
     # for ind, aIBi in enumerate(aIBiVals):
     #     Energy_array[ind] = qds['Energy'].isel(aIBi=ind).values
-    #     AveEnergy_array[ind] = np.average(Energy_array[ind])
 
     # fig6, ax6 = plt.subplots()
     # ax6.plot(ts, 10 * xBEC, 'k:', label='BEC Frequency')
@@ -350,11 +348,6 @@ if __name__ == "__main__":
     # # anim_e.save(animpath + anim_e_filename, writer='imagemagick')
     # anim_e_filename = '/EnergyAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # anim_e.save(animpath + anim_e_filename, writer=mpegWriter)
-
-    # fig7, ax7 = plt.subplots()
-    # ax7.plot(aIBiVals, AveEnergy_array)
-    # ax7.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax7.set_title('Finite Time Average Energy')
 
     # # ODE FIT TO POSITION (TRAJECTORY)
 
@@ -695,36 +688,36 @@ if __name__ == "__main__":
     #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
-    # POSITION (LAB) ANIMATION
+    # # POSITION (LAB) ANIMATION
 
-    fig, ax = plt.subplots()
-    curve_Dat = ax.plot(tVals[::20], xI_DatArray_LAB[0][::20], color='k', linestyle='', marker='o', label='Simulation Data')[0]
-    curve_Fit = ax.plot(tVals, xI_FitArray_LAB[0], color='orange', lw=2, label='ODE Fit')[0]
-    aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
-    Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
-    Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
+    # fig, ax = plt.subplots()
+    # curve_Dat = ax.plot(tVals[::20], xI_DatArray_LAB[0][::20], color='k', linestyle='', marker='o', label='Simulation Data')[0]
+    # curve_Fit = ax.plot(tVals, xI_FitArray_LAB[0], color='orange', lw=2, label='ODE Fit')[0]
+    # aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
+    # Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gVals[0]), transform=ax.transAxes, color='g')
+    # Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(bVals[0]), transform=ax.transAxes, color='b')
 
-    ax.legend(loc=2)
-    ax.set_xlabel('t')
-    ax.set_ylabel('<X>')
-    ax.set_title('Impurity Trajectory (Lab Frame)')
+    # ax.legend(loc=2)
+    # ax.set_xlabel('t')
+    # ax.set_ylabel('<X>')
+    # ax.set_title('Impurity Trajectory (Lab Frame)')
 
-    def animate_fit(i):
-        if i >= aIBiVals.size:
-            return
-        curve_Dat.set_ydata(xI_DatArray_LAB[i][::20])
-        curve_Fit.set_ydata(xI_FitArray_LAB[i])
-        aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
-        Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
-        Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
+    # def animate_fit(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve_Dat.set_ydata(xI_DatArray_LAB[i][::20])
+    #     curve_Fit.set_ydata(xI_FitArray_LAB[i])
+    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gVals[i]))
+    #     Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(bVals[i]))
 
-    anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
-    # # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    # # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
-    anim_fit_filename = '/TrajFitAnim_BECFit_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
-    if toggleDict['CS_Dyn'] == 'off':
-        anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
-    anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
+    # anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(tVals.size))
+    # # # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
+    # anim_fit_filename = '/TrajFitAnim_BECFit_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # if toggleDict['CS_Dyn'] == 'off':
+    #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
+    # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
     # # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
 
@@ -779,4 +772,36 @@ if __name__ == "__main__":
     # ax2.set_xlim([-14.5, 0])
     # ax2.set_ylim([-2, 12])
 
-    # plt.show()
+    # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
+
+    x_ds = qds['XLab']
+    FTDiff_array = np.empty(aIBiVals.size, dtype=np.object)
+    AveEnergy_array = np.empty(aIBiVals.size, dtype=np.object)
+    for ind, aIBi in enumerate(aIBiVals):
+        AveEnergy_array[ind] = np.average(qds['Energy'].isel(aIBi=ind).values)
+        xVals = x_ds.sel(aIBi=aIBi).values
+        x0 = xVals[0]
+        dt = tVals[1] - tVals[0]
+        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+        FTAmp_Vals = np.abs(FTVals)
+        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+        ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
+        ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
+        FTAmp_BEC = FTAmp_Vals[ind_fBEC]
+        FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
+        FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
+        # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
+        # print(FTAmp_BEC, FTAmp_ImpTrap)
+
+    fig7, ax7 = plt.subplots()
+    ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Finite Time Averaged Energy (Normalzed)')
+    ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectra Weight Difference (Normalzed)')
+    xiVals = msVals * gVals
+    ax7.plot(aIBiVals, xiVals / np.max(xiVals), label='Decay Constant (Normalzed)')
+    ax7.legend(loc=2)
+    # ax7.legend()
+    ax7.set_xlabel(r'$a_{IB}^{-1}$')
+    ax7.set_title('Dissipation Characterization')
+    ax7.set_ylim([0, 1.05])
+
+    plt.show()
