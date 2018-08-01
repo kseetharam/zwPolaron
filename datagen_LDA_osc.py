@@ -126,8 +126,8 @@ if __name__ == "__main__":
     TTList = []
     for oscParams in oscParams_List:
 
-        toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'off'}
+        toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
@@ -152,10 +152,14 @@ if __name__ == "__main__":
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
             datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-        if toggleDict['CS_Dyn'] == 'off':
-            innerdatapath = datapath + '/BEC_osc/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+        if toggleDict['PosScat'] == 'on':
+            innerdatapath = datapath + '/BEC_osc/PosScat'
         else:
-            innerdatapath = datapath + '/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+            innerdatapath = datapath + '/BEC_osc'
+        if toggleDict['CS_Dyn'] == 'off':
+            innerdatapath = innerdatapath + '/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+        else:
+            innerdatapath = innerdatapath + '/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
         if toggleDict['InitCS'] == 'file':
             toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
         else:
@@ -201,57 +205,54 @@ if __name__ == "__main__":
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
     # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
-    # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -0.05])
-    # aIBi_Vals = np.concatenate((np.linspace(-1000, -10, 100), np.linspace(-5, -.05, 5)))
-    aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
-    # aIBi_Vals = [-29.0]
-    aIBi_Vals = aIBi_Vals[[8, 14, 15, 180, 181, 182, 183]]
-
+    # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
+    # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
+    aIBi_Vals = -1 * np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199)))
     metaList = []
     for tup in TTList:
         (toggleDict, trapParams, innerdatapath) = tup
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-    for tup in metaList:
-        loopstart = timer()
-        (toggleDict, trapParams, innerdatapath, aIBi) = tup
-        cParams = {'aIBi': aIBi}
-        fParams = {'dP_ext': 0, 'Fext_mag': 0}
-        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-        if aIBi == 0.1:
-            filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-        ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-        Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-        loopend = timer()
-        print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
-
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # if(taskCount > len(metaList)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     sys.exit()
-    # else:
-    #     tup = metaList[taskID]
+    # for tup in metaList:
+    #     loopstart = timer()
     #     (toggleDict, trapParams, innerdatapath, aIBi) = tup
-
-    # cParams = {'aIBi': aIBi}
-    # fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    # filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    # if aIBi == 0.1:
-    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-
+    #     cParams = {'aIBi': aIBi}
+    #     fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    #     if aIBi == 0.1:
+    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    #     Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    #     loopend = timer()
+    #     print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
     # end = timer()
-    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    if(taskCount > len(metaList)):
+        print('ERROR: TASK COUNT MISMATCH')
+        sys.exit()
+    else:
+        tup = metaList[taskID]
+        (toggleDict, trapParams, innerdatapath, aIBi) = tup
+
+    cParams = {'aIBi': aIBi}
+    fParams = {'dP_ext': 0, 'Fext_mag': 0}
+    filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
+    if aIBi == 0.1:
+        filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
+    ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
+    Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+
+    end = timer()
+    print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
