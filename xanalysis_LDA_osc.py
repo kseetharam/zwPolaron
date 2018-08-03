@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'CS_Dyn': 'on'}
+    toggleDict = {'Location': 'home', 'CS_Dyn': 'on', 'PosScat': 'on'}
     dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -47,18 +47,24 @@ if __name__ == "__main__":
     datapath_noscList = []
     for dParams in dParams_List:
         if toggleDict['Location'] == 'home':
-            if toggleDict['CS_Dyn'] == 'off':
-                datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
-            else:
-                datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
             animpath = '/home/kis/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
         elif toggleDict['Location'] == 'work':
-            if toggleDict['CS_Dyn'] == 'off':
-                datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
-            else:
-                datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
             animpath = '/media/kis/Storage/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
-        datapath_List.append(datapath)
+        if toggleDict['PosScat'] == 'on':
+            innerdatapath = datapath + '/BEC_osc/PosScat'
+        else:
+            innerdatapath = datapath + '/BEC_osc'
+        if toggleDict['CS_Dyn'] == 'off':
+            innerdatapath = innerdatapath + '/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+        else:
+            innerdatapath = innerdatapath + '/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+
+        datapath_List.append(innerdatapath)
+
+    if toggleDict['PosScat'] == 'on':
+        animpath = animpath + '/PosScat'
 
     # # Concatenate Individual Datasets
 
@@ -86,6 +92,10 @@ if __name__ == "__main__":
     #         aIBi = aIBi_keys[ind]
     #         _, ds_temp = zip(*group)
     #         aIBi_ds_list.append(ds_temp[0])
+
+    #     if toggleDict['PosScat'] == 'on':
+    #         aIBi_keys = aIBi_keys[::-1]
+    #         aIBi_ds_list = aIBi_ds_list[::-1]
 
     #     ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
     #     del(ds_tot.attrs['Fext_mag']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['gIB']); del(ds_tot.attrs['TF']); del(ds_tot.attrs['Delta_P'])
@@ -176,7 +186,7 @@ if __name__ == "__main__":
     # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
-    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
+    # # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
     # # OSCILLATION FREQUENCY PLOT
 
@@ -242,7 +252,7 @@ if __name__ == "__main__":
     # anim_freq_filename = '/FreqAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_freq_filename = '/NoCSdyn_' + anim_freq_filename[1:]
-    # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
+    # # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
 
     # # VELOCITY VS TIME (LAB FRAME)
 
@@ -731,89 +741,96 @@ if __name__ == "__main__":
     #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
-    # # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
+    # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
 
-    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    # Ntheta = 50
-    # Nk = np.ceil(NGridPoints_desired / Ntheta)
-    # theta_max = np.pi
-    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
-    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
-    # k_min = 1e-5
-    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    # kgrid = Grid.Grid("SPHERICAL_2D")
-    # kgrid.initArray_premade('k', kArray)
-    # kgrid.initArray_premade('th', thetaArray)
-    # n0_TF = expParams['n0_TF'] / (L_exp2th**3)
-    # n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
-    # RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
-    # RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
-    # trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-    #               'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
-    # n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
-    # mB = expParams['mB'] * M_exp2th  # should = 1
-    # mI = expParams['mI'] * M_exp2th
-    # aBB = expParams['aBB'] * L_exp2th
-    # gBB = (4 * np.pi / mB) * aBB
-    # sParams = [mI, mB, n0, gBB]
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
+                  'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
+    mB = expParams['mB'] * M_exp2th  # should = 1
+    mI = expParams['mI'] * M_exp2th
+    aBB = expParams['aBB'] * L_exp2th
+    gBB = (4 * np.pi / mB) * aBB
+    sParams = [mI, mB, n0, gBB]
 
-    # X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
-    # # aIBiVals = aIBiVals[::10]
-    # aVals_Est = np.empty(aIBiVals.size)
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     cParams = {'aIBi': aIBi}
-    #     E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-    #     aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=1)
-
-    # # PLOT PARAMETERS
-    # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
-    # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
-    # fig2, ax2 = plt.subplots()
-    # ax2.plot(aIBiVals, gammaVals, 'g-', label=r'$\gamma$')
-    # ax2.plot(aIBiVals, betaVals, 'b-', label=r'$\beta$')
-    # ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
-    # ax2.plot(aIBiVals, msVals * betaVals, 'b:', label=r'$\alpha=m^{*}\beta$')
-    # ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
-    # ax2.plot(aIBiVals, gammaVals**2 - betaVals - omega_Imp_x**2, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
-    # ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
-    # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
-    # # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
-    # ax2.legend(loc=2)
-    # ax2.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax2.set_title('Oscillation Fit Parameters')
-    # ax2.set_xlim([-40, 0])
-    # ax2.set_ylim([-2, 4])
-
-    # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
-
-    x_ds = qds['XLab']
-    FTDiff_array = np.empty(aIBiVals.size, dtype=np.object)
-    AveEnergy_array = np.empty(aIBiVals.size, dtype=np.object)
+    X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
+    # aIBiVals = aIBiVals[::10]
+    aVals_Est = np.empty(aIBiVals.size)
     for ind, aIBi in enumerate(aIBiVals):
-        AveEnergy_array[ind] = np.average(qds['Energy'].isel(aIBi=ind).values)
-        xVals = x_ds.sel(aIBi=aIBi).values
-        x0 = xVals[0]
-        dt = tVals[1] - tVals[0]
-        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-        FTAmp_Vals = np.abs(FTVals)
-        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-        ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
-        ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
-        FTAmp_BEC = FTAmp_Vals[ind_fBEC]
-        FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
-        FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
-        # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
-        # print(FTAmp_BEC, FTAmp_ImpTrap)
+        cParams = {'aIBi': aIBi}
+        E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=1)
 
-    fig7, ax7 = plt.subplots()
-    ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Finite Time Averaged Energy (Normalzed)')
-    ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectra Weight Difference (Normalzed)')
-    xiVals = msVals * gammaVals
-    ax7.plot(aIBiVals, xiVals, label='Decay Constant')
-    ax7.legend(loc=2)
-    # ax7.legend()
-    ax7.set_xlabel(r'$a_{IB}^{-1}$')
-    ax7.set_title('Dissipation Characterization')
-    ax7.set_ylim([0, 1.05])
+    # PLOT PARAMETERS
+    rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
+    fig2, ax2 = plt.subplots()
+    ax2.plot(aIBiVals, gammaVals, 'g-', label=r'$\gamma$')
+    ax2.plot(aIBiVals, betaVals, 'b-', label=r'$\beta$')
+    ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
+    ax2.plot(aIBiVals, msVals * betaVals, 'b:', label=r'$\alpha=m^{*}\beta$')
+    ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
+    ax2.plot(aIBiVals, gammaVals**2 - betaVals - omega_Imp_x**2, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
+    ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
+    ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
+    # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
+    ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    ax2.set_title('Oscillation Fit Parameters')
+    ax2.set_ylim([-2, 4])
+    if toggleDict['PosScat'] == 'on':
+        ax2.legend(loc=1)
+        ax2.set_xlim([0, 40])
+    else:
+        ax2.legend(loc=2)
+        ax2.set_xlim([-40, 0])
+
+    # # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
+
+    # x_ds = qds['XLab']
+    # FTDiff_array = np.empty(aIBiVals.size, dtype=np.object)
+    # AveEnergy_array = np.empty(aIBiVals.size, dtype=np.object)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     AveEnergy_array[ind] = np.average(qds['Energy'].isel(aIBi=ind).values)
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     FTAmp_Vals = np.abs(FTVals)
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
+    #     ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
+    #     FTAmp_BEC = FTAmp_Vals[ind_fBEC]
+    #     FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
+    #     FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
+    #     # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
+    #     # print(FTAmp_BEC, FTAmp_ImpTrap)
+
+    # fig7, ax7 = plt.subplots()
+    # ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Finite Time Averaged Energy (Normalzed)')
+    # ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectra Weight Difference (Normalzed)')
+    # xiVals = msVals * gammaVals
+    # ax7.plot(aIBiVals, xiVals, label='Decay Constant')
+    # if toggleDict['PosScat'] == 'on':
+    #     ax7.legend(loc=1)
+    # else:
+    #     ax7.legend(loc=2)
+    # # ax7.legend()
+    # ax7.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax7.set_title('Dissipation Characterization')
+    # ax7.set_ylim([0, 1.05])
 
     plt.show()

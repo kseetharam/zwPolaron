@@ -208,7 +208,7 @@ if __name__ == "__main__":
     # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
     # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
     aIBi_Vals = -1 * np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199)))
-    aIBi_Vals = aIBi_Vals[180]; print(aIBi_Vals)
+    aIBi_Vals = np.array([aIBi_Vals[180]]); print(aIBi_Vals)
     metaList = []
     for tup in TTList:
         (toggleDict, trapParams, innerdatapath) = tup
