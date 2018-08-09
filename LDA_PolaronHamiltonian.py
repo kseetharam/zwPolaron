@@ -62,6 +62,7 @@ class LDA_PolaronHamiltonian:
 
         RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']
         n0_TF = self.trapParams['n0_TF_BEC']; n0_thermal = self.trapParams['n0_thermal_BEC']
+
         # omega_BEC_osc = self.trapParams['omega_BEC_osc']
         # if self.BEC_density_osc == 'on':
         #     Xeff = X + pfs.x_BEC_osc(t, omega_BEC_osc, RTF_X, self.a_osc)
@@ -83,6 +84,10 @@ class LDA_PolaronHamiltonian:
                 self.Wki_grid = 1 / self.Wk_grid
         else:
             n = n0
+
+        if np.abs(X) >= RTF_X:
+            F_pol_func = lambda X: 0
+            n = 0
 
         # Calculate updates
 
