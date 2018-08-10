@@ -190,6 +190,18 @@ if __name__ == "__main__":
     #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
     # # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
+    # # POSITION 2D PLOT
+
+    # x_ds = qds['XLab'].sel(aIBi=aIBiVals[5:])
+    # x_ds = 1e6 * x_ds / L_exp2th
+    # x_interp, t_interp, aIBi_interp = pfs.xinterp2D(x_ds, 't', 'aIBi', 5)
+    # fig6, ax6 = plt.subplots()
+    # quadx = ax6.pcolormesh(t_interp / tscale, aIBi_interp, x_interp, vmin=-70, vmax=70)
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_ylabel(r'$a_{IB}^{-1}$')
+    # ax6.set_title('Impurity Trajectory (Lab Frame) in ' + r'$\mu m$')
+    # fig6.colorbar(quadx, ax=ax6, extend='max')
+
     # # OSCILLATION FREQUENCY PLOT
 
     # maxph = 0
@@ -255,6 +267,38 @@ if __name__ == "__main__":
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_freq_filename = '/NoCSdyn_' + anim_freq_filename[1:]
     # # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
+
+    # OSCILLATION FREQUENCY 2D PLOT
+
+    dt = tVals[1] - tVals[0]
+    fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    aIBiVals = aIBiVals[5:]
+    freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+    maxph = 0
+    for ind, aIBi in enumerate(aIBiVals):
+        if aIBi in aIBi_noPlotList:
+            continue
+        xVals = x_ds.sel(aIBi=aIBi).values
+        x0 = xVals[0]
+        dt = tVals[1] - tVals[0]
+        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+        # fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+        absFTVals = np.abs(FTVals)
+        freq_da.sel(aIBi=aIBi)[:] = absFTVals
+        if np.max(absFTVals) > maxph:
+            maxph = np.max(absFTVals)
+
+    absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 1)
+    fig7, ax7 = plt.subplots()
+    quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp)
+    ax7.set_xlabel('f (Hz)')
+    ax7.set_ylabel(r'$a_{IB}^{-1}$')
+    ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
+    ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # ax7.legend()
+    ax7.set_xlim([0, 1500])
+    ax7.set_title('Impurity Trajectory Frequency (Power) Spectrum')
+    fig7.colorbar(quadF, ax=ax7, extend='max')
 
     # # VELOCITY VS TIME (LAB FRAME)
 
@@ -554,81 +598,81 @@ if __name__ == "__main__":
     # # FIT IN THE BEC FRAME
     ###############################################################################################################################
 
-    # ODE FIT TO POSITION (TRAJECTORY)
+    # # ODE FIT TO POSITION (TRAJECTORY)
 
-    def EqMotion(y, t, gamma, beta):
-        # y1 = x, y2 = dx/dt
-        y1, y2 = y
-        dy1dt = y2
-        dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 + beta) * y1 + (omega_BEC_osc**2 - omega_Imp_x**2) * xB0 * np.cos(omega_BEC_osc * t)
-        return [dy1dt, dy2dt]
+    # def EqMotion(y, t, gamma, beta):
+    #     # y1 = x, y2 = dx/dt
+    #     y1, y2 = y
+    #     dy1dt = y2
+    #     dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 + beta) * y1 + (omega_BEC_osc**2 - omega_Imp_x**2) * xB0 * np.cos(omega_BEC_osc * t)
+    #     return [dy1dt, dy2dt]
 
-    def yint(t, gamma, beta, y0):
-        y = odeint(EqMotion, y0, t, args=(gamma, beta))
-        return y.ravel(order='F')
+    # def yint(t, gamma, beta, y0):
+    #     y = odeint(EqMotion, y0, t, args=(gamma, beta))
+    #     return y.ravel(order='F')
 
-    def gphiVals(gamma, beta, omega_Imp_x, omega_BEC_osc, xB0):
-        kappa = omega_Imp_x**2 + beta
-        zeta = omega_BEC_osc**2 - omega_Imp_x**2
-        d = zeta * xB0 / np.sqrt((kappa - omega_BEC_osc**2)**2 + 4 * gamma**2 * omega_BEC_osc**2)
-        delta = np.arctan(2 * gamma * omega_BEC_osc / (omega_BEC_osc**2 - kappa))
-        g = np.sqrt(d**2 + xB0**2 + d * xB0 * np.cos(delta))
-        phi = np.arctan(np.sin(delta) / (np.cos(delta) + xB0 / d))
-        return g, phi
+    # def gphiVals(gamma, beta, omega_Imp_x, omega_BEC_osc, xB0):
+    #     kappa = omega_Imp_x**2 + beta
+    #     zeta = omega_BEC_osc**2 - omega_Imp_x**2
+    #     d = zeta * xB0 / np.sqrt((kappa - omega_BEC_osc**2)**2 + 4 * gamma**2 * omega_BEC_osc**2)
+    #     delta = np.arctan(2 * gamma * omega_BEC_osc / (omega_BEC_osc**2 - kappa))
+    #     g = np.sqrt(d**2 + xB0**2 + d * xB0 * np.cos(delta))
+    #     phi = np.arctan(np.sin(delta) / (np.cos(delta) + xB0 / d))
+    #     return g, phi
 
-    x_ds = qds['X']
-    xI_DatArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
-    xI_FitArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
+    # x_ds = qds['X']
+    # xI_DatArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_FitArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
 
-    xI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
-    vI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
-    xI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
-    vI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    # vI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+    # vI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
 
-    y0Vals = np.empty(aIBiVals.size, dtype=np.object)
-    gammaVals = np.empty(aIBiVals.size)
-    betaVals = np.empty(aIBiVals.size)
-    gVals = np.empty(aIBiVals.size)
-    phiVals = np.empty(aIBiVals.size)
-    msVals = np.empty(aIBiVals.size)
-    for ind, aIBi in enumerate(aIBiVals):
-        # if ind != 10:
-        #     continue
-        xVals = x_ds.sel(aIBi=aIBi).values
-        vVals = np.gradient(xVals, tVals)
-        x0 = xVals[0]
-        v0 = vVals[0]
-        # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
-        y0 = [x0, v0]
-        data = np.concatenate((xVals, vVals))
-        if ind == 0:
-            p0 = [1e-3, 1e-3]
-            lowerbound = [0, 0]
-            upperbound = [np.inf, np.inf]
+    # y0Vals = np.empty(aIBiVals.size, dtype=np.object)
+    # gammaVals = np.empty(aIBiVals.size)
+    # betaVals = np.empty(aIBiVals.size)
+    # gVals = np.empty(aIBiVals.size)
+    # phiVals = np.empty(aIBiVals.size)
+    # msVals = np.empty(aIBiVals.size)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     # if ind != 10:
+    #     #     continue
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     vVals = np.gradient(xVals, tVals)
+    #     x0 = xVals[0]
+    #     v0 = vVals[0]
+    #     # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
+    #     y0 = [x0, v0]
+    #     data = np.concatenate((xVals, vVals))
+    #     if ind == 0:
+    #         p0 = [1e-3, 1e-3]
+    #         lowerbound = [0, 0]
+    #         upperbound = [np.inf, np.inf]
 
-        else:
-            p0 = [gammaVals[ind - 1], betaVals[ind - 1]]
-            # lowerbound = [gammaVals[ind - 1], 0]
-            lowerbound = [0, 0]
-            upperbound = [np.inf, np.inf]
-        popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=p0, bounds=(lowerbound, upperbound))
-        gopt, bopt = popt
-        y0Vals[ind] = y0; gammaVals[ind] = gopt; betaVals[ind] = bopt
-        gVals[ind], phiVals[ind] = gphiVals(gopt, bopt, omega_Imp_x, omega_BEC_osc, xB0)
+    #     else:
+    #         p0 = [gammaVals[ind - 1], betaVals[ind - 1]]
+    #         # lowerbound = [gammaVals[ind - 1], 0]
+    #         lowerbound = [0, 0]
+    #         upperbound = [np.inf, np.inf]
+    #     popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=p0, bounds=(lowerbound, upperbound))
+    #     gopt, bopt = popt
+    #     y0Vals[ind] = y0; gammaVals[ind] = gopt; betaVals[ind] = bopt
+    #     gVals[ind], phiVals[ind] = gphiVals(gopt, bopt, omega_Imp_x, omega_BEC_osc, xB0)
 
-        fitvals = yint(tVals, gammaVals[ind], betaVals[ind], y0Vals[ind])
-        xfit = fitvals[0:tVals.size]
-        vfit = fitvals[tVals.size:]
-        xI_DatArray[ind] = xVals
-        vI_DatArray[ind] = vVals
-        xI_FitArray[ind] = xfit
-        vI_FitArray[ind] = vfit
+    #     fitvals = yint(tVals, gammaVals[ind], betaVals[ind], y0Vals[ind])
+    #     xfit = fitvals[0:tVals.size]
+    #     vfit = fitvals[tVals.size:]
+    #     xI_DatArray[ind] = xVals
+    #     vI_DatArray[ind] = vVals
+    #     xI_FitArray[ind] = xfit
+    #     vI_FitArray[ind] = vfit
 
-        xI_DatArray_LAB[ind] = qds['XLab'].sel(aIBi=aIBi).values
-        xI_FitArray_LAB[ind] = xfit + xBEC
-        P = qds['P'].sel(aIBi=aIBi).isel(t=0).values
-        Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
-        msVals[ind] = mI * P / (P - Pph)
+    #     xI_DatArray_LAB[ind] = qds['XLab'].sel(aIBi=aIBi).values
+    #     xI_FitArray_LAB[ind] = xfit + xBEC
+    #     P = qds['P'].sel(aIBi=aIBi).isel(t=0).values
+    #     Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
+    #     msVals[ind] = mI * P / (P - Pph)
 
     # # ANALYTICAL SOLUTION FIT TO POSITION (TRAJECTORY)
 
@@ -800,56 +844,56 @@ if __name__ == "__main__":
     #     ax2.legend(loc=2)
     #     ax2.set_xlim([-40, 0])
 
-    # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
+    # # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
 
-    x_ds = qds['XLab']
-    FTDiff_array = np.empty(aIBiVals.size)
-    AveEnergy_array = np.empty(aIBiVals.size)
-    AvePhKinEn_array = np.empty(aIBiVals.size)
-    AveImpKinEn_array = np.empty(aIBiVals.size)
-    for ind, aIBi in enumerate(aIBiVals):
-        En = qds['Energy'].isel(aIBi=ind).values
-        Pph = qds['Pph'].isel(aIBi=ind).values
-        Ptot = qds['P'].isel(aIBi=ind).values
-        PImp = Ptot - Pph
-        AveEnergy_array[ind] = np.average(En)
-        AvePhKinEn_array[ind] = np.average((Pph**2) / (2 * mB))
-        AveImpKinEn_array[ind] = np.average((PImp**2) / (2 * mI))
-        xVals = x_ds.sel(aIBi=aIBi).values
-        x0 = xVals[0]
-        dt = tVals[1] - tVals[0]
-        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-        FTAmp_Vals = np.abs(FTVals)
-        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-        ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
-        ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
-        FTAmp_BEC = FTAmp_Vals[ind_fBEC]
-        FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
-        FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
-        # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
-        # print(FTAmp_BEC, FTAmp_ImpTrap)
+    # x_ds = qds['XLab']
+    # FTDiff_array = np.empty(aIBiVals.size)
+    # AveEnergy_array = np.empty(aIBiVals.size)
+    # AvePhKinEn_array = np.empty(aIBiVals.size)
+    # AveImpKinEn_array = np.empty(aIBiVals.size)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     En = qds['Energy'].isel(aIBi=ind).values
+    #     Pph = qds['Pph'].isel(aIBi=ind).values
+    #     Ptot = qds['P'].isel(aIBi=ind).values
+    #     PImp = Ptot - Pph
+    #     AveEnergy_array[ind] = np.average(En)
+    #     AvePhKinEn_array[ind] = np.average((Pph**2) / (2 * mB))
+    #     AveImpKinEn_array[ind] = np.average((PImp**2) / (2 * mI))
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     FTAmp_Vals = np.abs(FTVals)
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
+    #     ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
+    #     FTAmp_BEC = FTAmp_Vals[ind_fBEC]
+    #     FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
+    #     FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
+    #     # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
+    #     # print(FTAmp_BEC, FTAmp_ImpTrap)
 
-    fig7, ax7 = plt.subplots()
-    ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectra Weight Difference (Normalized to Max Difference)')
+    # fig7, ax7 = plt.subplots()
+    # ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectra Weight Difference (Normalized to Max Difference)')
 
-    ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Time Averaged Energy (' + r'$<H>=\frac{1}{T}\sum_{t=0}^{T}<\psi(t)|H|\psi(t)>\Delta t$' + ') Normalized to ' + r'$max(<H>)$')
-    ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), label='Time Averaged BEC Frame Phonon Kinetic Energy (' + r'$\frac{<P_{ph}>^{2}}{2m_{B}}$' + ') Normalized to ' + r'$max(<H>)$')
-    ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), label='Averaged BEC Frame Impurity Kinetic Energy (' + r'$\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
-    ax7.plot(aIBiVals, (AveEnergy_array - AvePhKinEn_array - AveImpKinEn_array) / np.max(AveEnergy_array), label='Time Averaged Potential Energy (' + r'$<H>-\frac{<P_{ph}>^{2}}{2m_{B}}-\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Time Averaged Energy (' + r'$<H>=\frac{1}{T}\sum_{t=0}^{T}<\psi(t)|H|\psi(t)>\Delta t$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), label='Time Averaged BEC Frame Phonon Kinetic Energy (' + r'$\frac{<P_{ph}>^{2}}{2m_{B}}$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), label='Averaged BEC Frame Impurity Kinetic Energy (' + r'$\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, (AveEnergy_array - AvePhKinEn_array - AveImpKinEn_array) / np.max(AveEnergy_array), label='Time Averaged Potential Energy (' + r'$<H>-\frac{<P_{ph}>^{2}}{2m_{B}}-\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
 
-    xiVals = msVals * gammaVals
-    rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
-    critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
-    ax7.plot(aIBiVals, xiVals, label='Oscillator Fit Decay Constant ' + r'$\xi$')
-    ax7.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * xiVals), aIBiVals.size), 'y--', label='Oscillator Fit Critical Damping Threshold')
+    # xiVals = msVals * gammaVals
+    # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
+    # ax7.plot(aIBiVals, xiVals, label='Oscillator Fit Decay Constant ' + r'$\xi$')
+    # ax7.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * xiVals), aIBiVals.size), 'y--', label='Oscillator Fit Critical Damping Threshold')
 
-    if toggleDict['PosScat'] == 'on':
-        ax7.legend(loc=1)
-    else:
-        ax7.legend(loc=2)
-    # ax7.legend()
-    ax7.set_xlabel(r'$a_{IB}^{-1}$')
-    ax7.set_title('Dissipation Characterization')
-    ax7.set_ylim([0, 1.05])
+    # if toggleDict['PosScat'] == 'on':
+    #     ax7.legend(loc=1)
+    # else:
+    #     ax7.legend(loc=2)
+    # # ax7.legend()
+    # ax7.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax7.set_title('Dissipation Characterization')
+    # ax7.set_ylim([0, 1.05])
 
     plt.show()

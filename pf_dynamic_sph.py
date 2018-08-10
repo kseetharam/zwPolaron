@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from scipy.integrate import quad
+import scipy.interpolate as spi
 import pf_static_sph
 from scipy import interpolate
 from timeit import default_timer as timer
@@ -296,6 +297,22 @@ def Zw_expParams():
     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
 
     return params
+
+
+def xinterp2D(xdataset, coord1, coord2, mult):
+    # xdataset is the desired xarray dataset with the desired plotting quantity already selected
+    # coord1 and coord2 are the two coordinates making the 2d plot
+    # mul is the multiplicative factor by which you wish to increase the resolution of the grid
+    # e.g. xdataset = qds['nPI_xz_slice'].sel(P=P,aIBi=aIBi).dropna('PI_z'), coord1 = 'PI_x', coord2 = 'PI_z'
+    # returns meshgrid values for C1_interp and C2_interp as well as the function value on this 2D grid -> these are ready to plot
+    C1 = xdataset.coords[coord1].values
+    C2 = xdataset.coords[coord2].values
+    C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
+    C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+    C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
+    C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
+    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+    return interp_vals, C1g_interp, C2g_interp
 
 # ---- DYNAMICS ----
 
