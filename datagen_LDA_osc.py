@@ -113,8 +113,8 @@ if __name__ == "__main__":
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}, Tosc: {1}'.format(x0, To))
 
-    # oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
-    oscParams_List = [{'X0': 0.75 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.5}]
+    oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+    # oscParams_List = [{'X0': 0.75 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.5}]
 
     # oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
     #                   {'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
