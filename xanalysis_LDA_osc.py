@@ -274,40 +274,40 @@ if __name__ == "__main__":
     #     anim_freq_filename = '/NoCSdyn_' + anim_freq_filename[1:]
     # # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
 
-    # OSCILLATION FREQUENCY 2D PLOT
+    # # OSCILLATION FREQUENCY 2D PLOT
 
-    dt = tVals[1] - tVals[0]
-    fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    aIBiVals = aIBiVals[5:]
-    freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    maxph = 0
-    for ind, aIBi in enumerate(aIBiVals):
-        if aIBi in aIBi_noPlotList:
-            continue
-        xVals = x_ds.sel(aIBi=aIBi).values
-        x0 = xVals[0]
-        dt = tVals[1] - tVals[0]
-        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-        absFTVals = np.abs(FTVals)
-        freq_da.sel(aIBi=aIBi)[:] = absFTVals
-        if np.max(absFTVals) > maxph:
-            maxph = np.max(absFTVals)
+    # dt = tVals[1] - tVals[0]
+    # fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    # aIBiVals = aIBiVals[5:]
+    # freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+    # maxph = 0
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     absFTVals = np.abs(FTVals)
+    #     freq_da.sel(aIBi=aIBi)[:] = absFTVals
+    #     if np.max(absFTVals) > maxph:
+    #         maxph = np.max(absFTVals)
 
-    absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 10)
-    fig7, ax7 = plt.subplots()
-    quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=60000)
-    ax7.set_xlabel('f (Hz)')
-    ax7.set_ylabel(r'$a_{IB}^{-1}$')
-    ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
-    ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    ax7.legend(loc=2)
-    ax7.set_xlim([0, 1250])
-    if toggleDict['PosScat'] != 'on':
-        ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
-    ax7.set_title('Impurity Trajectory Frequency Spectrum')
-    fig7.colorbar(quadF, ax=ax7, extend='max')
-    plt.show()
+    # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 10)
+    # fig7, ax7 = plt.subplots()
+    # quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=60000)
+    # ax7.set_xlabel('f (Hz)')
+    # ax7.set_ylabel(r'$a_{IB}^{-1}$')
+    # ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
+    # ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # ax7.legend(loc=2)
+    # ax7.set_xlim([0, 1250])
+    # if toggleDict['PosScat'] != 'on':
+    #     ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
+    # ax7.set_title('Impurity Trajectory Frequency Spectrum')
+    # fig7.colorbar(quadF, ax=ax7, extend='max')
+    # plt.show()
 
     # # VELOCITY VS TIME (LAB FRAME)
 
@@ -350,17 +350,15 @@ if __name__ == "__main__":
 
     # # VELOCITY VS TIME (BEC FRAME)
 
+    # aIBi = -0.25
     # # v_ds = (qds['X'].diff('t') / dt).rename('v')
     # # ts = v_ds['t'].values / tscale
     # cBEC = nu * np.ones(ts.size)
     # fig4, ax4 = plt.subplots()
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     if aIBi in aIBi_noPlotList:
-    #         continue
-    #     ax4.plot(ts, np.gradient(qds['X'].sel(aIBi=aIBi).values, tVals) * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
-    #     # ax4.plot(ts, v_ds.sel(aIBi=aIBi).values * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    # ax4.plot(ts, np.gradient(qds['X'].sel(aIBi=aIBi).values, tVals) * (1e3 * T_exp2th / L_exp2th), color=colors[ind % 7], linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
     # ax4.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
-    # ax4.legend()
+    # ax4.legend(loc=2)
+    # ax4.set_ylim([-450, 450])
     # ax4.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
     # ax4.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
     # ax4.set_title('Impurity Velocity (BEC Frame)')
