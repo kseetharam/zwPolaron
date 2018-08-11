@@ -85,9 +85,9 @@ class LDA_PolaronHamiltonian:
         else:
             n = n0
 
-        if np.abs(X) >= RTF_X:
-            F_pol_func = lambda X: 0
-            n = 0
+        # if np.abs(X) >= RTF_X:
+        #     F_pol_func = lambda X: 0
+        #     n = 0
 
         # Calculate updates
 
