@@ -609,70 +609,70 @@ if __name__ == "__main__":
     #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
-    # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
+    # # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
 
-    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 50
-    Nk = np.ceil(NGridPoints_desired / Ntheta)
-    theta_max = np.pi
-    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
-    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
-    k_min = 1e-5
-    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
-    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
-    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
-    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
-    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
-    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-                  'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
-    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
-    mB = expParams['mB'] * M_exp2th  # should = 1
-    mI = expParams['mI'] * M_exp2th
-    aBB = expParams['aBB'] * L_exp2th
-    gBB = (4 * np.pi / mB) * aBB
-    sParams = [mI, mB, n0, gBB]
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    # Ntheta = 50
+    # Nk = np.ceil(NGridPoints_desired / Ntheta)
+    # theta_max = np.pi
+    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    # k_min = 1e-5
+    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
+    # n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    # n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    # RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    # RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
+    # trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
+    #               'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
+    # n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
+    # mB = expParams['mB'] * M_exp2th  # should = 1
+    # mI = expParams['mI'] * M_exp2th
+    # aBB = expParams['aBB'] * L_exp2th
+    # gBB = (4 * np.pi / mB) * aBB
+    # sParams = [mI, mB, n0, gBB]
 
-    X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
-    # aIBiVals = aIBiVals[::10]
-    aVals_Est = np.empty(aIBiVals.size)
-    for ind, aIBi in enumerate(aIBiVals):
-        cParams = {'aIBi': aIBi}
-        E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-        aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=2)
+    # X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
+    # # aIBiVals = aIBiVals[::10]
+    # aVals_Est = np.empty(aIBiVals.size)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     cParams = {'aIBi': aIBi}
+    #     E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+    #     aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=2)
 
-    # PLOT PARAMETERS
-    rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
-    critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
-    fig2, ax2 = plt.subplots()
-    ax2.plot(aIBiVals, gammaVals, 'g-', label=r'$\gamma$')
-    ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
-    # ax2.plot(aIBiVals, rhoVals, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
-    ax2.plot(aIBiVals, betaVals, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$\beta$')
-    ax2.plot(aIBiVals, msVals * betaVals, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta$')
-    ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
-    ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
-    ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
-    # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
-    ax2.set_xlabel(r'$a_{IB}^{-1}$')
-    ax2.set_title('Oscillation Fit Parameters')
-    ax2.set_ylim([-2, 4])
-    if toggleDict['PosScat'] == 'on':
-        ax2.legend(loc=1)
-        ax2.set_xlim([0, 40])
-    else:
-        ax2.legend(loc=2)
-        ax2.set_xlim([-40, 0])
+    # # PLOT PARAMETERS
+    # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
+    # fig2, ax2 = plt.subplots()
+    # ax2.plot(aIBiVals, gammaVals, 'g-', label=r'$\gamma$')
+    # ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
+    # # ax2.plot(aIBiVals, rhoVals, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
+    # ax2.plot(aIBiVals, betaVals, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$\beta$')
+    # ax2.plot(aIBiVals, msVals * betaVals, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta$')
+    # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
+    # ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
+    # ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
+    # # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
+    # ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax2.set_title('Oscillation Fit Parameters')
+    # ax2.set_ylim([-2, 4])
+    # if toggleDict['PosScat'] == 'on':
+    #     ax2.legend(loc=1)
+    #     ax2.set_xlim([0, 40])
+    # else:
+    #     ax2.legend(loc=2)
+    #     ax2.set_xlim([-40, 0])
 
-    # # PLOT ERROR OF FIT
-    # fig1, ax1 = plt.subplots()
-    # ax1.plot(aIBiVals, R2_Array, color='r', linestyle='', marker='x', label=r'$R^{2}$')
-    # # ax1.plot(aIBiVals, MSErr_Array, color='k', linestyle='', marker='x', label='Mean Squared Error')
-    # # ax1.legend()
-    # ax1.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax1.set_title(r'$R^{2}$' + ' Error')
+    # PLOT ERROR OF FIT
+    fig1, ax1 = plt.subplots()
+    ax1.plot(aIBiVals, R2_Array, color='r', linestyle='', marker='x', label=r'$R^{2}$')
+    # ax1.plot(aIBiVals, MSErr_Array, color='k', linestyle='', marker='x', label='Mean Squared Error')
+    # ax1.legend()
+    ax1.set_xlabel(r'$a_{IB}^{-1}$')
+    ax1.set_title(r'$R^{2}$' + ' Error')
 
     # # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
 
