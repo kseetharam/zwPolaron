@@ -209,8 +209,9 @@ if __name__ == "__main__":
     # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
     aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
 
-    aIBi_exp = ((1 / aIBi_Vals) / L_exp2th) / 5.29e-11
-    print(1 / aIBi_exp)
+    # aIBi_exp = ((1 / aIBi_Vals) / L_exp2th) / 5.29e-11
+    # print(1 / aIBi_exp)
+
     # aIBi_Vals = -1 * np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199)))
     # aIBi_Vals = np.array([aIBi_Vals[180]]); print(aIBi_Vals)
     metaList = []
@@ -240,7 +241,6 @@ if __name__ == "__main__":
     # ---- COMPUTE DATA ON CLUSTER ----
 
     runstart = timer()
-
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
@@ -257,7 +257,8 @@ if __name__ == "__main__":
     if aIBi == 0.1:
         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    ds.to_netcdf(filepath)
 
     end = timer()
     print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
