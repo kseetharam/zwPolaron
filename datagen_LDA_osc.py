@@ -76,16 +76,6 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
-    # # Basic parameters
-
-    # mI = 1
-    # mB = 1
-    # n0 = 1
-    # aBB = 0.05
-    # gBB = (4 * np.pi / mB) * aBB
-
-    # sParams = [mI, mB, n0, gBB]
-
     # Trap parameters
 
     n0_TF = expParams['n0_TF'] / (L_exp2th**3)
