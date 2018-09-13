@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'true'}
+    toggleDict = {'Location': 'home', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'true'}
     dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 358.6, 'P0': 0.6}]
 
@@ -742,60 +742,60 @@ if __name__ == "__main__":
     # ax2.set_title('Quadratic Fit to Dissipation Constant (Attractive Interactions)')
     # plt.show()
 
-    # # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
+    # AVERAGE ENERGY, FREQUENCY WINDOW + FIT PARAMETRS
 
-    # x_ds = qds['XLab']
-    # FTDiff_array = np.empty(aIBiVals.size)
-    # AveEnergy_array = np.empty(aIBiVals.size)
-    # AvePhKinEn_array = np.empty(aIBiVals.size)
-    # AveImpKinEn_array = np.empty(aIBiVals.size)
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     En = qds['Energy'].isel(aIBi=ind).values
-    #     Pph = qds['Pph'].isel(aIBi=ind).values
-    #     Ptot = qds['P'].isel(aIBi=ind).values
-    #     PImp = Ptot - Pph
-    #     AveEnergy_array[ind] = np.average(En)
-    #     AvePhKinEn_array[ind] = np.average((Pph**2) / (2 * mB))
-    #     AveImpKinEn_array[ind] = np.average((PImp**2) / (2 * mI))
-    #     xVals = x_ds.sel(aIBi=aIBi).values
-    #     x0 = xVals[0]
-    #     dt = tVals[1] - tVals[0]
-    #     FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-    #     FTAmp_Vals = np.abs(FTVals)
-    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-    #     ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
-    #     ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
-    #     FTAmp_BEC = FTAmp_Vals[ind_fBEC]
-    #     FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
-    #     FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
-    #     # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
-    #     # print(FTAmp_BEC, FTAmp_ImpTrap)
+    x_ds = qds['XLab']
+    FTDiff_array = np.empty(aIBiVals.size)
+    AveEnergy_array = np.empty(aIBiVals.size)
+    AvePhKinEn_array = np.empty(aIBiVals.size)
+    AveImpKinEn_array = np.empty(aIBiVals.size)
+    for ind, aIBi in enumerate(aIBiVals):
+        En = qds['Energy'].isel(aIBi=ind).values
+        Pph = qds['Pph'].isel(aIBi=ind).values
+        Ptot = qds['P'].isel(aIBi=ind).values
+        PImp = Ptot - Pph
+        AveEnergy_array[ind] = np.average(En)
+        AvePhKinEn_array[ind] = np.average((Pph**2) / (2 * mB))
+        AveImpKinEn_array[ind] = np.average((PImp**2) / (2 * mI))
+        xVals = x_ds.sel(aIBi=aIBi).values
+        x0 = xVals[0]
+        dt = tVals[1] - tVals[0]
+        FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+        FTAmp_Vals = np.abs(FTVals)
+        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+        ind_fBEC = (np.abs(2 * np.pi * fVals - omega_BEC_osc)).argmin()
+        ind_fImpTrap = (np.abs(2 * np.pi * fVals - omega_Imp_x)).argmin()
+        FTAmp_BEC = FTAmp_Vals[ind_fBEC]
+        FTAmp_ImpTrap = FTAmp_Vals[ind_fImpTrap]
+        FTDiff_array[ind] = np.abs(FTAmp_BEC - FTAmp_ImpTrap)
+        # print(fVals[ind_fBEC] * T_exp2th, fVals[ind_fImpTrap] * T_exp2th)
+        # print(FTAmp_BEC, FTAmp_ImpTrap)
 
-    # fig7, ax7 = plt.subplots()
-    # ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), label='Spectral Max Difference (Normalized)')
+    fig7, ax7 = plt.subplots()
+    ax7.plot(aIBiVals, FTDiff_array / np.max(FTDiff_array), color='orange', linestyle='-', label='Spectral Max Difference (Normalized)')
 
-    # # ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Time Averaged Energy (' + r'$<H>=\frac{1}{T}\sum_{t=0}^{T}<\psi(t)|H|\psi(t)>\Delta t$' + ') Normalized to ' + r'$max(<H>)$')
-    # # ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), label='Time Averaged BEC Frame Phonon Kinetic Energy (' + r'$\frac{<P_{ph}>^{2}}{2m_{B}}$' + ') Normalized to ' + r'$max(<H>)$')
-    # # ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), label='Averaged BEC Frame Impurity Kinetic Energy (' + r'$\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
-    # # ax7.plot(aIBiVals, (AveEnergy_array - AvePhKinEn_array - AveImpKinEn_array) / np.max(AveEnergy_array), label='Time Averaged Potential Energy (' + r'$<H>-\frac{<P_{ph}>^{2}}{2m_{B}}-\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
-    # ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), label='Phonon Kinetic Energy (Normalized, Time-Averaged)')
-    # ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), label='Impurity Kinetic Energy (Normalized, Time-Averaged)')
+    # ax7.plot(aIBiVals, AveEnergy_array / np.max(AveEnergy_array), label='Time Averaged Energy (' + r'$<H>=\frac{1}{T}\sum_{t=0}^{T}<\psi(t)|H|\psi(t)>\Delta t$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), label='Time Averaged BEC Frame Phonon Kinetic Energy (' + r'$\frac{<P_{ph}>^{2}}{2m_{B}}$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), label='Averaged BEC Frame Impurity Kinetic Energy (' + r'$\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
+    # ax7.plot(aIBiVals, (AveEnergy_array - AvePhKinEn_array - AveImpKinEn_array) / np.max(AveEnergy_array), label='Time Averaged Potential Energy (' + r'$<H>-\frac{<P_{ph}>^{2}}{2m_{B}}-\frac{<P_{I}>^{2}}{2m_{I}}$' + ') Normalized to ' + r'$max(<H>)$')
+    ax7.plot(aIBiVals, AvePhKinEn_array / np.max(AveEnergy_array), 'm-', label='Phonon Kinetic Energy (Normalized, Time-Averaged)')
+    ax7.plot(aIBiVals, AveImpKinEn_array / np.max(AveEnergy_array), 'y-', label='Impurity Kinetic Energy (Normalized, Time-Averaged)')
 
-    # xiVals = msVals * gammaVals
-    # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
-    # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
-    # ax7.plot(aIBiVals, xiVals, label='Decay Constant ' + r'$\xi$')
-    # ax7.plot(aIBiVals, gammaVals, label='Mass Renormalized Decay Constant ' + r'$\gamma$')
-    # # ax7.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * xiVals), aIBiVals.size), 'y--', label='Oscillator Fit Critical Damping Threshold')
+    xiVals = msVals * gammaVals
+    rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
+    ax7.plot(aIBiVals, xiVals, 'g:', label='Decay Constant ' + r'$\xi$')
+    ax7.plot(aIBiVals, gammaVals, 'g-', label='Mass Renormalized Decay Constant ' + r'$\gamma$')
+    # ax7.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * xiVals), aIBiVals.size), 'y--', label='Oscillator Fit Critical Damping Threshold')
 
-    # if toggleDict['PosScat'] == 'on':
-    #     ax7.legend(loc=1)
-    # else:
-    #     ax7.legend(loc=2)
-    # # ax7.legend()
-    # ax7.set_xlabel(r'$a_{IB}^{-1}$')
-    # # ax7.set_title('Dissipation Characterization')
-    # ax7.set_title('Average Kinetic Energy Characterization')
-    # ax7.set_ylim([0, 1.05])
+    if toggleDict['PosScat'] == 'on':
+        ax7.legend(loc=1)
+    else:
+        ax7.legend(loc=2)
+    # ax7.legend()
+    ax7.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax7.set_title('Dissipation Characterization')
+    ax7.set_title('Average Kinetic Energy Characterization')
+    ax7.set_ylim([0, 1.05])
 
-    # plt.show()
+    plt.show()
