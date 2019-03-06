@@ -99,6 +99,9 @@ if __name__ == "__main__":
     print(0.75 * RTF_BEC_X / xi, omega_BEC_osc * tscale)
     print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
+    print(RTF_BEC_X * (omega_BEC_osc / 2) / nu)
+    print(nu * T_exp2th / L_exp2th)
+
     # ---- SET OSC PARAMS ----
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}, Tosc: {1}'.format(x0, To))
