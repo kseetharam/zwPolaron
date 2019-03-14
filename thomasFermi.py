@@ -164,6 +164,15 @@ if __name__ == "__main__":
     RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
     trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z}
 
+    # cBEC = pfs.nu(mB, n0, gBB)
+    # cBEC_exp = cBEC * T_exp2th / L_exp2th
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # xi_exp = xi / L_exp2th
+    # tscale_exp = xi_exp / cBEC_exp
+    # print(cBEC_exp, pfs.nu(expParams['mB'], expParams['n0_BEC'], (4 * np.pi / expParams['mB']) * expParams['aBB']))
+    # print(xi_exp)
+    # print(tscale_exp)
+
     # Calculation
 
     X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 1e3)
