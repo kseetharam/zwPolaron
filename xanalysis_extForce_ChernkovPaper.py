@@ -87,147 +87,149 @@ if __name__ == "__main__":
     v0 = (P0 - qds_subsonic_homog['Pph'].isel(F=0, t=0).sel(aIBi=aIBi).values) / mI
     print('mI*c: {0}'.format(mI * nu))
 
-    # EFFECTIVE MASS CALCULATION AND COMPARISON
+    print(0.1 / (mI * nu), mI / mB, attrs['k_mag_cutoff'] * xi, 1 / (aIBi * xi))
 
-    def effMass(qds):
-        dP = qds.attrs['Delta_P']
-        mI = qds.attrs['mI']
-        aIBi_Vals = qds['aIBi'].values
-        vf_AVals = np.zeros(aIBi_Vals.size)
-        mE_AVals = np.zeros(aIBi_Vals.size)
-        for aind, aIBi in enumerate(aIBi_Vals):
-            qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
-            FVals = qds_aIBi['F'].values
-            tVals = qds_aIBi['t'].values
-            x_ds = qds_aIBi['X']
-            v_ds = (qds_aIBi['X'].diff('t') / dt).rename('v')
-            v0 = (P0 - qds_aIBi['Pph'].isel(F=0, t=0).values) / mI
-            FM_Vals = []; vf_Vals = []; ms_Vals = []
-            for Find, F in enumerate(FVals):
-                if(F / Fscale < 1):  # why skipping the first force value?
-                    continue
-                FM_Vals.append(F)
-                TF = dP / F
-                # XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
-                XTail = x_ds.sel(F=F).sel(t=slice(TF + 2 * tscale, TF + 6 * tscale))
-                tTail = XTail.coords['t']
+    # # EFFECTIVE MASS CALCULATION AND COMPARISON
 
-                # fig, ax = plt.subplots()
-                # ax.plot(v_ds.coords['t'].values, v_ds.sel(F=F).values)
-                # plt.show()
+    # def effMass(qds):
+    #     dP = qds.attrs['Delta_P']
+    #     mI = qds.attrs['mI']
+    #     aIBi_Vals = qds['aIBi'].values
+    #     vf_AVals = np.zeros(aIBi_Vals.size)
+    #     mE_AVals = np.zeros(aIBi_Vals.size)
+    #     for aind, aIBi in enumerate(aIBi_Vals):
+    #         qds_aIBi = qds.sel(aIBi=aIBi).dropna('F')
+    #         FVals = qds_aIBi['F'].values
+    #         tVals = qds_aIBi['t'].values
+    #         x_ds = qds_aIBi['X']
+    #         v_ds = (qds_aIBi['X'].diff('t') / dt).rename('v')
+    #         v0 = (P0 - qds_aIBi['Pph'].isel(F=0, t=0).values) / mI
+    #         FM_Vals = []; vf_Vals = []; ms_Vals = []
+    #         for Find, F in enumerate(FVals):
+    #             if(F / Fscale < 1):  # why skipping the first force value?
+    #                 continue
+    #             FM_Vals.append(F)
+    #             TF = dP / F
+    #             # XTail = x_ds.sel(F=F).sel(t=slice(TF + 1 * tscale, TF + 2 * tscale))
+    #             XTail = x_ds.sel(F=F).sel(t=slice(TF + 2 * tscale, TF + 6 * tscale))
+    #             tTail = XTail.coords['t']
 
-                [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
-                vf_direct = v_ds.sel(F=F).sel(t=TF + dt, method='nearest').values
-                # vf = vf_direct
-                vf_Vals.append(vf)
-                ms_Vals.append(dP / (vf - v0))
-                # ms_Vals.append(Ptot / vf)
+    #             # fig, ax = plt.subplots()
+    #             # ax.plot(v_ds.coords['t'].values, v_ds.sel(F=F).values)
+    #             # plt.show()
 
-            vf_AVals[aind] = np.average(np.array(vf_Vals))
-            mE_AVals[aind] = np.average(np.array(ms_Vals)) / mI
-        return mE_AVals, aIBi_Vals
+    #             [vf, const] = np.polyfit(tTail.values, XTail.values, deg=1)
+    #             vf_direct = v_ds.sel(F=F).sel(t=TF + dt, method='nearest').values
+    #             # vf = vf_direct
+    #             vf_Vals.append(vf)
+    #             ms_Vals.append(dP / (vf - v0))
+    #             # ms_Vals.append(Ptot / vf)
 
-    mE_subsonic_homog, aIBi_subsonic_homog = effMass(qds_subsonic_homog)
-    mE_subsonic_den, aIBi_subsonic_den = effMass(qds_subsonic_den)
-    mE_supersonic_homog, aIBi_supersonic_homog = effMass(qds_supersonic_homog)
-    mE_supersonic_den, aIBi_supersonic_den = effMass(qds_supersonic_den)
+    #         vf_AVals[aind] = np.average(np.array(vf_Vals))
+    #         mE_AVals[aind] = np.average(np.array(ms_Vals)) / mI
+    #     return mE_AVals, aIBi_Vals
 
-    dP_subsonic = qds_subsonic_homog.attrs['Delta_P']
-    dP_supersonic = qds_supersonic_homog.attrs['Delta_P']
+    # mE_subsonic_homog, aIBi_subsonic_homog = effMass(qds_subsonic_homog)
+    # mE_subsonic_den, aIBi_subsonic_den = effMass(qds_subsonic_den)
+    # mE_supersonic_homog, aIBi_supersonic_homog = effMass(qds_supersonic_homog)
+    # mE_supersonic_den, aIBi_supersonic_den = effMass(qds_supersonic_den)
 
-    # Steady state calc
+    # dP_subsonic = qds_subsonic_homog.attrs['Delta_P']
+    # dP_supersonic = qds_supersonic_homog.attrs['Delta_P']
 
-    aIBi_Vals = aIBi_subsonic_homog
-    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 50
-    Nk = np.ceil(NGridPoints_desired / Ntheta)
+    # # Steady state calc
 
-    theta_max = np.pi
-    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    # aIBi_Vals = aIBi_subsonic_homog
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    # Ntheta = 50
+    # Nk = np.ceil(NGridPoints_desired / Ntheta)
 
-    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    # theta_max = np.pi
+    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
-    k_min = 1e-5
-    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    if dk < k_min:
-        print('k ARRAY GENERATION ERROR')
+    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
 
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
+    # k_min = 1e-5
+    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    # if dk < k_min:
+    #     print('k ARRAY GENERATION ERROR')
 
-    Nsteps = 1e2
-    aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-    SS_ms_Avals = np.zeros(aIBi_Vals.size)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
 
-    for Aind, aIBi in enumerate(aIBi_Vals):
-        DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
-        aSi = pfs.aSi_interp(DP, aSi_tck)
-        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
+    # Nsteps = 1e2
+    # aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # SS_ms_Avals = np.zeros(aIBi_Vals.size)
 
-    mE_steadystate = SS_ms_Avals / mI
-    print('Percentage Error (Sub Homog): {0}'.format(100 * np.abs(mE_subsonic_homog - mE_steadystate) / mE_steadystate))
-    print('Percentage Error (Sub BECden): {0}'.format(100 * np.abs(mE_subsonic_den - mE_steadystate) / mE_steadystate))
-    print('Percentage Error (Sup Homog): {0}'.format(100 * np.abs(mE_supersonic_homog - mE_steadystate) / mE_steadystate))
-    print('Percentage Error (Sup BECden): {0}'.format(100 * np.abs(mE_supersonic_den - mE_steadystate) / mE_steadystate))
+    # for Aind, aIBi in enumerate(aIBi_Vals):
+    #     DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pfs.aSi_interp(DP, aSi_tck)
+    #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    #     SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
 
-    # VELOCITY VS TIME
+    # mE_steadystate = SS_ms_Avals / mI
+    # print('Percentage Error (Sub Homog): {0}'.format(100 * np.abs(mE_subsonic_homog - mE_steadystate) / mE_steadystate))
+    # print('Percentage Error (Sub BECden): {0}'.format(100 * np.abs(mE_subsonic_den - mE_steadystate) / mE_steadystate))
+    # print('Percentage Error (Sup Homog): {0}'.format(100 * np.abs(mE_supersonic_homog - mE_steadystate) / mE_steadystate))
+    # print('Percentage Error (Sup BECden): {0}'.format(100 * np.abs(mE_supersonic_den - mE_steadystate) / mE_steadystate))
 
-    aIBi = -5
-    v_ds_subsonic_homog = (qds_subsonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
-    FVals_sub = v_ds_subsonic_homog.coords['F'].values
-    # Find_subsonic_homog = np.argwhere(FVals_sub > Fscale)[0][0]
-    Find_subsonic_homog = 0
-    F_sub = FVals_sub[Find_subsonic_homog]
-    vs_subsonic_homog = (v_ds_subsonic_homog.isel(F=Find_subsonic_homog).values / dt - v0) / nu
-    ts_subsonic_homog = v_ds_subsonic_homog.coords['t'].values / tscale
+    # # VELOCITY VS TIME
 
-    v_ds_supersonic_homog = (qds_supersonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
-    Find_supersonic_homog = np.argwhere(v_ds_supersonic_homog.coords['F'].values > Fscale)[0][0]
-    FVals_super = v_ds_supersonic_homog.coords['F'].values
-    # Find_supersonic_homog = np.argwhere(FVals_super > Fscale)[0][0]
-    Find_supersonic_homog = 0
-    F_super = FVals_super[Find_supersonic_homog]
-    vs_supersonic_homog = (v_ds_supersonic_homog.isel(F=Find_supersonic_homog).values / dt - v0) / nu
-    ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
+    # aIBi = -5
+    # v_ds_subsonic_homog = (qds_subsonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
+    # FVals_sub = v_ds_subsonic_homog.coords['F'].values
+    # # Find_subsonic_homog = np.argwhere(FVals_sub > Fscale)[0][0]
+    # Find_subsonic_homog = 0
+    # F_sub = FVals_sub[Find_subsonic_homog]
+    # vs_subsonic_homog = (v_ds_subsonic_homog.isel(F=Find_subsonic_homog).values / dt - v0) / nu
+    # ts_subsonic_homog = v_ds_subsonic_homog.coords['t'].values / tscale
 
-    fig1, axes1 = plt.subplots(nrows=1, ncols=2)
-    axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, label='')
-    axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_subsonic_homog), ts.size), 'g--', label=r'$T_{F}$')
-    # axes1[0].plot(ts_subsonic_homog, np.ones(ts_subsonic_homog.size), 'r--', label=r'$c_{BEC}$')
-    axes1[0].legend()
-    axes1[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
-    axes1[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    axes1[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_sub / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    # v_ds_supersonic_homog = (qds_supersonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
+    # Find_supersonic_homog = np.argwhere(v_ds_supersonic_homog.coords['F'].values > Fscale)[0][0]
+    # FVals_super = v_ds_supersonic_homog.coords['F'].values
+    # # Find_supersonic_homog = np.argwhere(FVals_super > Fscale)[0][0]
+    # Find_supersonic_homog = 0
+    # F_super = FVals_super[Find_supersonic_homog]
+    # vs_supersonic_homog = (v_ds_supersonic_homog.isel(F=Find_supersonic_homog).values / dt - v0) / nu
+    # ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
 
-    axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'rx', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'go', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
-    axes1[1].plot(aIBi_Vals, mE_steadystate, 'bs', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
-    axes1[1].legend()
-    axes1[1].set_ylim([0, 19.5])
-    axes1[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    axes1[1].set_xlabel(r'$a_{IB}^{-1}$')
-    axes1[1].set_title('Polaron Mass Enhancement (Subsonic Case)')
+    # fig1, axes1 = plt.subplots(nrows=1, ncols=2)
+    # axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, label='')
+    # axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_subsonic_homog), ts.size), 'g--', label=r'$T_{F}$')
+    # # axes1[0].plot(ts_subsonic_homog, np.ones(ts_subsonic_homog.size), 'r--', label=r'$c_{BEC}$')
+    # axes1[0].legend()
+    # axes1[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
+    # axes1[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes1[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_sub / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
 
-    fig2, axes2 = plt.subplots(nrows=1, ncols=2)
-    axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, label='')
-    axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_supersonic_homog), ts.size), 'g--', label=r'$T_{F}$')
-    axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r--', label=r'$c_{BEC}$')
-    axes2[0].legend()
-    axes2[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
-    axes2[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'rx', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'go', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
+    # axes1[1].plot(aIBi_Vals, mE_steadystate, 'bs', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
+    # axes1[1].legend()
+    # axes1[1].set_ylim([0, 19.5])
+    # axes1[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
+    # axes1[1].set_xlabel(r'$a_{IB}^{-1}$')
+    # axes1[1].set_title('Polaron Mass Enhancement (Subsonic Case)')
 
-    axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'rx', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'go', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
-    axes2[1].plot(aIBi_Vals, mE_steadystate, 'bs', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
-    axes2[1].legend()
-    axes2[1].set_ylim([0, 19.5])
-    axes2[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    axes2[1].set_xlabel(r'$a_{IB}^{-1}$')
-    axes2[1].set_title('Polaron Mass Enhancement (Supersonic Case)')
+    # fig2, axes2 = plt.subplots(nrows=1, ncols=2)
+    # axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, label='')
+    # axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_supersonic_homog), ts.size), 'g--', label=r'$T_{F}$')
+    # axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r--', label=r'$c_{BEC}$')
+    # axes2[0].legend()
+    # axes2[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
+    # axes2[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
 
-    plt.show()
+    # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'rx', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'go', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
+    # axes2[1].plot(aIBi_Vals, mE_steadystate, 'bs', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
+    # axes2[1].legend()
+    # axes2[1].set_ylim([0, 19.5])
+    # axes2[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
+    # axes2[1].set_xlabel(r'$a_{IB}^{-1}$')
+    # axes2[1].set_title('Polaron Mass Enhancement (Supersonic Case)')
 
-    # Note: initial P_tot = 0.1 for all force protocols above (and P=0.1 for analytical steady state)
+    # plt.show()
+
+    # # Note: initial P_tot = 0.1 for all force protocols above (and P=0.1 for analytical steady state)
