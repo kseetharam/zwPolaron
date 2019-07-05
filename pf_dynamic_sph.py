@@ -271,6 +271,35 @@ def unitConv_exp2th(n0_exp_scale, mB_exp):
     return L_exp2th, M_exp2th, T_exp2th
 
 
+# def Zw_expParams():
+#     # Constants (SI units)
+#     a0 = 5.29e-11  # Bohr radius (m)
+#     u = 1.661e-27  # atomic mass unit (kg)
+#     params = {}
+
+#     # Experimental parameters (SI units)
+#     params['aIB'] = -3000 * a0
+#     params['aBB'] = 52 * a0
+#     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
+#     params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
+#     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
+#     params['nI'] = 1.4e11 * 1e6  # impurity peak density
+#     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
+#     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
+#     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
+#     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+#     params['mI'] = 39.96 * u
+#     params['mB'] = 22.99 * u
+#     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
+#     # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
+#     params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
+#     params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
+#     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+#     params['a_osc'] = 0.5
+
+#     return params
+
+
 def Zw_expParams():
     # Constants (SI units)
     a0 = 5.29e-11  # Bohr radius (m)
@@ -278,23 +307,22 @@ def Zw_expParams():
     params = {}
 
     # Experimental parameters (SI units)
-    params['aIB'] = -3000 * a0
+    params['aIB'] = -2600 * a0
     params['aBB'] = 52 * a0
     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
     params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
     params['nI'] = 1.4e11 * 1e6  # impurity peak density
     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
-    params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
-    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
+    params['omega_BEC_x'] = 2 * np.pi * 80; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
+    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m)
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-    # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
-    params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
-    # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+    params['omega_Imp_x'] = 2 * np.pi * 150  # Impurity trapping frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 75  # BEC oscillation frequency in rad*Hz
+    params['a_osc'] = 10e-6 / params['RTF_BEC_X']  # Initial displacement of BEC (m) divided by TF radius in the direction of displacement (x-direction)
 
     return params
 
@@ -315,104 +343,6 @@ def xinterp2D(xdataset, coord1, coord2, mult):
     return interp_vals, C1g_interp, C2g_interp
 
 # ---- DYNAMICS ----
-
-
-def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
-    #
-    # do not run this inside CoherentState or PolaronHamiltonian
-    import CoherentState
-    import PolaronHamiltonian
-    # takes parameters, performs dynamics, and outputs desired observables
-    [P, aIBi] = cParams
-    [xgrid, kgrid, tgrid] = gParams
-    [mI, mB, n0, gBB] = sParams
-
-    NGridPoints = kgrid.size()
-    k_max = kgrid.getArray('k')[-1]
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-
-    # calculate some parameters
-    nu_const = nu(mB, n0, gBB)
-    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
-
-    # Initialization CoherentState
-    cs = CoherentState.CoherentState(kgrid, xgrid)
-
-    # Initialization PolaronHamiltonian
-    Params = [P, aIBi, mI, mB, n0, gBB]
-    ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params, toggleDict)
-
-    # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
-    if toggleDict['InitCS'] == 'file':
-        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
-        cs.amplitude_phase[0:-1] = CSAmp.reshape(CSAmp.size)  # this is the initial condition for quenching the impurity from the interacting state to the non-interacting state
-        cs.amplitude_phase[-1] = ds['Phase'].values
-
-    if toggleDict['Interaction'] == 'off':
-        ham.gnum = 0
-
-    # Time evolution
-
-    # Initialize observable Data Arrays
-    PB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    NB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ReDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ImDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ReDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ImDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-
-    start = timer()
-    for ind, t in enumerate(tgrid):
-        if ind == 0:
-            dt = t
-            cs.evolve(dt, ham)
-        else:
-            dt = t - tgrid[ind - 1]
-            cs.evolve(dt, ham)
-
-        PB_da[ind] = cs.get_PhononMomentum()
-        NB_da[ind] = cs.get_PhononNumber()
-        DynOv = np.exp(1j * P**2 / (2 * mI)) * cs.get_DynOverlap()
-        ReDynOv_da[ind] = np.real(DynOv)
-        ImDynOv_da[ind] = np.imag(DynOv)
-        Phase_da[ind] = cs.get_Phase()
-        Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
-        ReAmp_da[ind] = np.real(Amp)
-        ImAmp_da[ind] = np.imag(Amp)
-
-        amplitude = cs.get_Amplitude()
-        PB = np.dot(ham.kz * np.abs(amplitude)**2, cs.dVk)
-        betaSum = amplitude + np.conjugate(amplitude)
-        xp = 0.5 * np.dot(ham.Wk_grid, betaSum * cs.dVk)
-        betaDiff = amplitude - np.conjugate(amplitude)
-        xm = 0.5 * np.dot(ham.Wki_grid, betaDiff * cs.dVk)
-
-        damp = -1j * (ham.gnum * np.sqrt(n0) * ham.Wk_grid +
-                      amplitude * (ham.Omega0_grid - ham.kz * (P - PB) / mI) +
-                      ham.gnum * (ham.Wk_grid * xp + ham.Wki_grid * xm))
-
-        DeltaAmp = damp.reshape(len(kVec), len(thVec))
-        ReDeltaAmp_da[ind] = np.real(DeltaAmp)
-        ImDeltaAmp_da[ind] = np.imag(DeltaAmp)
-
-        end = timer()
-        print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
-        start = timer()
-
-    # Create Data Set
-
-    data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
-    coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
-
-    dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-
-    return dynsph_ds
 
 
 def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict):
@@ -550,3 +480,100 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
     return dynsph_ds
+
+# def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
+#     #
+#     # do not run this inside CoherentState or PolaronHamiltonian
+#     import CoherentState
+#     import PolaronHamiltonian
+#     # takes parameters, performs dynamics, and outputs desired observables
+#     [P, aIBi] = cParams
+#     [xgrid, kgrid, tgrid] = gParams
+#     [mI, mB, n0, gBB] = sParams
+
+#     NGridPoints = kgrid.size()
+#     k_max = kgrid.getArray('k')[-1]
+#     kVec = kgrid.getArray('k')
+#     thVec = kgrid.getArray('th')
+
+#     # calculate some parameters
+#     nu_const = nu(mB, n0, gBB)
+#     gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+
+#     # Initialization CoherentState
+#     cs = CoherentState.CoherentState(kgrid, xgrid)
+
+#     # Initialization PolaronHamiltonian
+#     Params = [P, aIBi, mI, mB, n0, gBB]
+#     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params, toggleDict)
+
+#     # Change initialization of CoherentState and PolaronHamiltonian for Direct RF Real-time evolution in the non-interacting state
+#     if toggleDict['InitCS'] == 'file':
+#         ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+#         CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+#         cs.amplitude_phase[0:-1] = CSAmp.reshape(CSAmp.size)  # this is the initial condition for quenching the impurity from the interacting state to the non-interacting state
+#         cs.amplitude_phase[-1] = ds['Phase'].values
+
+#     if toggleDict['Interaction'] == 'off':
+#         ham.gnum = 0
+
+#     # Time evolution
+
+#     # Initialize observable Data Arrays
+#     PB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+#     NB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+#     ReDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+#     ImDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+#     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+#     ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+#     ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+#     ReDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+#     ImDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+
+#     start = timer()
+#     for ind, t in enumerate(tgrid):
+#         if ind == 0:
+#             dt = t
+#             cs.evolve(dt, ham)
+#         else:
+#             dt = t - tgrid[ind - 1]
+#             cs.evolve(dt, ham)
+
+#         PB_da[ind] = cs.get_PhononMomentum()
+#         NB_da[ind] = cs.get_PhononNumber()
+#         DynOv = np.exp(1j * P**2 / (2 * mI)) * cs.get_DynOverlap()
+#         ReDynOv_da[ind] = np.real(DynOv)
+#         ImDynOv_da[ind] = np.imag(DynOv)
+#         Phase_da[ind] = cs.get_Phase()
+#         Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
+#         ReAmp_da[ind] = np.real(Amp)
+#         ImAmp_da[ind] = np.imag(Amp)
+
+#         amplitude = cs.get_Amplitude()
+#         PB = np.dot(ham.kz * np.abs(amplitude)**2, cs.dVk)
+#         betaSum = amplitude + np.conjugate(amplitude)
+#         xp = 0.5 * np.dot(ham.Wk_grid, betaSum * cs.dVk)
+#         betaDiff = amplitude - np.conjugate(amplitude)
+#         xm = 0.5 * np.dot(ham.Wki_grid, betaDiff * cs.dVk)
+
+#         damp = -1j * (ham.gnum * np.sqrt(n0) * ham.Wk_grid +
+#                       amplitude * (ham.Omega0_grid - ham.kz * (P - PB) / mI) +
+#                       ham.gnum * (ham.Wk_grid * xp + ham.Wki_grid * xm))
+
+#         DeltaAmp = damp.reshape(len(kVec), len(thVec))
+#         ReDeltaAmp_da[ind] = np.real(DeltaAmp)
+#         ImDeltaAmp_da[ind] = np.imag(DeltaAmp)
+
+#         end = timer()
+#         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
+#         start = timer()
+
+#     # Create Data Set
+
+#     data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
+#     coords_dict = {'t': tgrid}
+#     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
+
+#     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+
+#     return dynsph_ds

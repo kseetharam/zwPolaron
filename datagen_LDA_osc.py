@@ -100,13 +100,14 @@ if __name__ == "__main__":
     print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
     print(RTF_BEC_X * (omega_BEC_osc / 2) / nu)
-    print(nu * T_exp2th / L_exp2th)
+    print('c_BEC: {:.2E}'.format(nu * T_exp2th / L_exp2th))
 
     # ---- SET OSC PARAMS ----
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}, Tosc: {1}'.format(x0, To))
 
-    oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': 0.5}]
+    oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': expParams['a_osc']}]
+
     # oscParams_List = [{'X0': 0.75 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.5}]
 
     # oscParams_List = [{'X0': 0.0, 'P0': 0.1, 'a_osc': 0.5},
@@ -145,7 +146,8 @@ if __name__ == "__main__":
         elif toggleDict['Location'] == 'work':
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
-            datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+            datapath = '/n/scratchlfs/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+
         if toggleDict['PosScat'] == 'on':
             innerdatapath = datapath + '/BEC_osc/PosScat'
         else:
@@ -198,15 +200,18 @@ if __name__ == "__main__":
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
 
-    # aIBi_Vals = np.array([-1000.0, -20.0, -5.0, -1.3, -0.05])
+    a0_exp = 5.29e-11  # Bohr radius (m)
+
     # aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
-    aIBi_Vals = np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199))); aIBi_Vals = np.concatenate((aIBi_Vals, np.array([-0.25])))
 
-    # aIBi_exp = ((1 / aIBi_Vals) / L_exp2th) / 5.29e-11
-    # print(1 / aIBi_exp)
+    # aIB_exp = ((1 / aIBi_Vals) / L_exp2th) / a0_exp
+    # print(aIB_exp)
 
-    # aIBi_Vals = -1 * np.concatenate((np.array([-150, -140, -130, -120, -110]), np.linspace(-100, -1, 199)))
-    # aIBi_Vals = np.array([aIBi_Vals[180]]); print(aIBi_Vals)
+    aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 20, endpoint=False), np.linspace(-2000, -70, 175, endpoint=False), np.linspace(-70, -20, 5))) * a0_exp
+    aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
+
+    # print(aIBi_Vals)
+
     metaList = []
     for tup in TTList:
         (toggleDict, trapParams, innerdatapath) = tup
@@ -232,6 +237,8 @@ if __name__ == "__main__":
     # print('Total Time: {:.2f}'.format(end - runstart))
 
     # ---- COMPUTE DATA ON CLUSTER ----
+
+    print(innerdatapath)
 
     runstart = timer()
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
