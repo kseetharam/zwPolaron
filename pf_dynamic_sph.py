@@ -271,42 +271,48 @@ def unitConv_exp2th(n0_exp_scale, mB_exp):
     return L_exp2th, M_exp2th, T_exp2th
 
 
-# def Zw_expParams():
-#     # Constants (SI units)
-#     a0 = 5.29e-11  # Bohr radius (m)
-#     u = 1.661e-27  # atomic mass unit (kg)
-#     params = {}
-
-#     # Experimental parameters (SI units)
-#     params['aIB'] = -3000 * a0
-#     params['aBB'] = 52 * a0
-#     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
-#     params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
-#     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
-#     params['nI'] = 1.4e11 * 1e6  # impurity peak density
-#     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
-#     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
-#     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
-#     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
-#     params['mI'] = 39.96 * u
-#     params['mB'] = 22.99 * u
-#     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-#     # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
-#     params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
-#     params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
-#     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
-#     params['a_osc'] = 0.5
-
-#     return params
-
-
-def Zw_expParams():
+def Zw_expParams_old():
     # Constants (SI units)
     a0 = 5.29e-11  # Bohr radius (m)
     u = 1.661e-27  # atomic mass unit (kg)
     params = {}
 
     # Experimental parameters (SI units)
+    params['aIB'] = -3000 * a0
+    params['aBB'] = 52 * a0
+    params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
+    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
+    params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
+    params['nI'] = 1.4e11 * 1e6  # impurity peak density
+    params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
+    params['mu_div_hbar'] = 1.4 * 1e3  # chemical potential divided by hbar (in Hz)
+    params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
+    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
+    params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+    params['mI'] = 39.96 * u
+    params['mB'] = 22.99 * u
+    params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
+    # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
+    params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
+    params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
+    # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+    params['a_osc'] = 0.5
+
+    return params
+
+
+def Zw_expParams():
+    # Constants (SI units)
+    a0 = 5.29e-11  # Bohr radius (m)
+    u = 1.661e-27  # atomic mass unit (kg)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+    params = {}
+
+    # Note: x-direction is the direciton of oscillation (displacement of the BEC)
+
+    # Experimental parameters (SI units)
+    params['mI'] = 39.96 * u
+    params['mB'] = 22.99 * u
     params['aIB'] = -2600 * a0
     params['aBB'] = 52 * a0
     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
@@ -314,14 +320,21 @@ def Zw_expParams():
     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
     params['nI'] = 1.4e11 * 1e6  # impurity peak density
     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
+    params['mu_div_hbar'] = 1.5 * 1e3  # chemical potential divided by hbar (in Hz)
     params['omega_BEC_x'] = 2 * np.pi * 80; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
-    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m)
+
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
-    params['mI'] = 39.96 * u
-    params['mB'] = 22.99 * u
+
+    # # # Use measured TF Radii of BEC
+    # params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m)
+
+    # Calculate TF Radii of BEC from Bose gas harmonic trap frequencies (but used explicitly measured thermal values above)
+    params['gBB_Born'] = (4 * np.pi * (hbar**2) / params['mB']) * params['aBB']
+    params['RTF_BEC_X'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_x']**2))); params['RTF_BEC_Y'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_y']**2))); params['RTF_BEC_Z'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_z']**2)))  # BEC density Thomas-Fermi radii in each direction (m)
+
     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
     params['omega_Imp_x'] = 2 * np.pi * 150  # Impurity trapping frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 75  # BEC oscillation frequency in rad*Hz
+    params['omega_BEC_osc'] = params['omega_BEC_x']  # BEC oscillation frequency in rad*Hz
     params['a_osc'] = 10e-6 / params['RTF_BEC_X']  # Initial displacement of BEC (m) divided by TF radius in the direction of displacement (x-direction)
 
     return params
