@@ -63,6 +63,8 @@ if __name__ == "__main__":
     a0_exp = 5.29e-11  # Bohr radius (m)
 
     aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 20, endpoint=False), np.linspace(-2000, -70, 175, endpoint=False), np.linspace(-70, -20, 5))) * a0_exp
+    # aIBexp_Vals = np.concatenate((aIBexp_Vals, -1 * np.flip(aIBexp_Vals)))
+    aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 100) * a0_exp))
     aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
 
     mR = pf_dynamic_sph.ur(mI, mB)
@@ -80,6 +82,8 @@ if __name__ == "__main__":
     trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_Imp_x': omega_Imp_x}
     mu_div_hbar = expParams['mu_div_hbar'] / T_exp2th
     mu = 1 * mu_div_hbar  # hbar in theory units is just 1
+    # mu_th = 4 * np.pi * (hbar**2) * expParams['aBB'] * expParams['n0_TF'] / expParams['mB']
+    # print(mu_th / hbar)
 
     cBEC = pfs.nu(mB, n0, gBB)
     cBEC_exp = cBEC * T_exp2th / L_exp2th
@@ -88,21 +92,22 @@ if __name__ == "__main__":
     tscale_exp = xi_exp / cBEC_exp
     print('c_BEC (um/ms): {:.2f}, xi (um): {:.2f}, xi/c_BEC (ms): {:.2f}'.format(cBEC_exp * 1e3, xi_exp * 1e6, tscale_exp * 1e3))
 
-    # RTF (Calculating from trap frequencies doesn't match explicit measurements)
+    # # RTF (Calculating from trap frequencies doesn't match explicit measurements)
 
-    n0_TF_pred = n0_TF
-    RTF_BEC_X_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_z**2)))
+    # n0_TF_pred = n0_TF
+    # # RTF_BEC_X_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_z**2)))
     # RTF_BEC_X_pred = np.sqrt(2 * mu / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * mu / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * mu / (mB * (omega_BEC_z**2)))
-    RTF_BEC_X_pred_exp = RTF_BEC_X_pred / L_exp2th; RTF_BEC_Y_pred_exp = RTF_BEC_Y_pred / L_exp2th; RTF_BEC_Z_pred_exp = RTF_BEC_Z_pred / L_exp2th
+    # RTF_BEC_X_pred_exp = RTF_BEC_X_pred / L_exp2th; RTF_BEC_Y_pred_exp = RTF_BEC_Y_pred / L_exp2th; RTF_BEC_Z_pred_exp = RTF_BEC_Z_pred / L_exp2th
 
-    print(expParams['RTF_BEC_X'] * 1e6, RTF_BEC_X_pred_exp * 1e6)
-    print(expParams['RTF_BEC_Y'] * 1e6, RTF_BEC_Y_pred_exp * 1e6)
-    print(expParams['RTF_BEC_Z'] * 1e6, RTF_BEC_Z_pred_exp * 1e6)
+    # print(expParams['RTF_BEC_X'] * 1e6, RTF_BEC_X_pred_exp * 1e6)
+    # print(expParams['RTF_BEC_Y'] * 1e6, RTF_BEC_Y_pred_exp * 1e6)
+    # print(expParams['RTF_BEC_Z'] * 1e6, RTF_BEC_Z_pred_exp * 1e6)
 
-    print(gBB * n0_TF_pred / mu)
+    # print(gBB * n0_TF_pred / mu)
 
-    # RTF_X = np.sqrt(expParams['aBB'] * 8 * np.pi * (hbar**2) * expParams['n0_TF'] / ((expParams['mB']**2) * (expParams['omega_BEC_x']**2)))
-    # print(RTF_X * 1e6)
+    # # RTF_X = np.sqrt(expParams['aBB'] * 8 * np.pi * (hbar**2) * expParams['n0_TF'] / ((expParams['mB']**2) * (expParams['omega_BEC_x']**2)))
+    # # RTF_X = np.sqrt(2 * hbar * expParams['mu_div_hbar'] / (expParams['mB'] * (expParams['omega_BEC_x']**2)))
+    # # print(RTF_X * 1e6)
 
     # MF Impurity Potential
 
@@ -162,9 +167,13 @@ if __name__ == "__main__":
     # ax1.set_xlim([-50, 50])
     # ax1.set_ylim([-100, 3000])
 
-    ax2.plot(aIBexp_Vals / a0_exp, MF_freqIncreasePercentage, 'b-')
+    # ax2.plot(aIBexp_Vals / a0_exp, MF_freqIncreasePercentage, 'b-')
+    ax2.plot(aIBexp_Vals / a0_exp, f_Imp_eff, 'r-', label='')
+    ax2.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
     ax2.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
-    ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
+    # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
+    ax2.set_ylabel('Effective Impurity Trap Frequency (Hz)')
     ax2.set_title('Impurity Frequency Shift from MF Potential')
+    ax2.legend()
 
     plt.show()
