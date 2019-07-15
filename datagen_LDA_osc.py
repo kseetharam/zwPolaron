@@ -50,8 +50,8 @@ if __name__ == "__main__":
 
     # tMax = 400; dt = 1
     # tMax = 480; dt = 0.1
-    # tMax = 5000; dt = 1
-    tMax = 100; dt = 1
+    tMax = 5000; dt = 1
+    # tMax = 100; dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     TTList = []
     for oscParams in oscParams_List:
 
-        toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+        toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                       'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'off'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
@@ -220,6 +220,7 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
+    metaList = metaList[0:2]
     print(len(metaList))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
@@ -246,10 +247,10 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    taskCount = len(metaList); taskID = 72
+    # taskCount = len(metaList); taskID = 72
 
     if(taskCount > len(metaList)):
         print('ERROR: TASK COUNT MISMATCH')
