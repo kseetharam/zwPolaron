@@ -271,34 +271,34 @@ def unitConv_exp2th(n0_exp_scale, mB_exp):
     return L_exp2th, M_exp2th, T_exp2th
 
 
-def Zw_expParams_old():
-    # Constants (SI units)
-    a0 = 5.29e-11  # Bohr radius (m)
-    u = 1.661e-27  # atomic mass unit (kg)
-    params = {}
+# def Zw_expParams_old():
+#     # Constants (SI units)
+#     a0 = 5.29e-11  # Bohr radius (m)
+#     u = 1.661e-27  # atomic mass unit (kg)
+#     params = {}
 
-    # Experimental parameters (SI units)
-    params['aIB'] = -3000 * a0
-    params['aBB'] = 52 * a0
-    params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
-    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
-    params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
-    params['nI'] = 1.4e11 * 1e6  # impurity peak density
-    params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
-    params['mu_div_hbar'] = 2 * np.pi * 1.4 * 1e3  # chemical potential divided by hbar (in rad*Hz)
-    params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
-    params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
-    params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
-    params['mI'] = 39.96 * u
-    params['mB'] = 22.99 * u
-    params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-    # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
-    params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
-    params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
-    # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
-    params['a_osc'] = 0.5
+#     # Experimental parameters (SI units)
+#     params['aIB'] = -3000 * a0
+#     params['aBB'] = 52 * a0
+#     params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
+#     params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
+#     params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
+#     params['nI'] = 1.4e11 * 1e6  # impurity peak density
+#     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
+#     params['mu_div_hbar'] = 2 * np.pi * 1.4 * 1e3  # chemical potential divided by hbar (in rad*Hz)
+#     params['omega_BEC_x'] = 2 * np.pi * 101; params['omega_BEC_y'] = 2 * np.pi * 41; params['omega_BEC_z'] = 2 * np.pi * 13  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
+#     params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m) assuming shallowest trap is direction of propagation X and second shallowest direction is Y
+#     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+#     params['mI'] = 39.96 * u
+#     params['mB'] = 22.99 * u
+#     params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
+#     # params['omega_Imp_x'] = 2 * np.pi * 500  # Impurity trapping frequency in rad*Hz
+#     params['omega_Imp_x'] = 2 * np.pi * 1000  # Impurity trapping frequency in rad*Hz
+#     params['omega_BEC_osc'] = 2 * np.pi * 500  # BEC oscillation frequency in rad*Hz
+#     # params['omega_BEC_osc'] = 2 * np.pi * 1.25e3  # BEC oscillation frequency in rad*Hz
+#     params['a_osc'] = 0.5
 
-    return params
+#     return params
 
 
 def Zw_expParams():
@@ -321,7 +321,7 @@ def Zw_expParams():
     params['nI'] = 2.0e11 * 1e6  # impurity peak density
     params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
     params['mu_div_hbar'] = 2 * np.pi * 1.5 * 1e3  # chemical potential divided by hbar (in rad*Hz)
-    params['omega_BEC_x'] = 2 * np.pi * 80; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz ***THESE DON'T MATCH UP TO THE TF RADII...
+    params['omega_BEC_x'] = 2 * np.pi * 80; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz
 
     params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
 
@@ -329,7 +329,7 @@ def Zw_expParams():
     # params['RTF_BEC_X'] = 103e-6; params['RTF_BEC_Y'] = 32e-6; params['RTF_BEC_Z'] = 13e-6  # BEC density Thomas-Fermi radii in each direction (m)
 
     # Calculate TF Radii of BEC from Bose gas harmonic trap frequencies (but used explicitly measured thermal values above)
-    params['gBB_Born'] = (4 * np.pi * (hbar**2) / params['mB']) * params['aBB']
+    # params['gBB_Born'] = (4 * np.pi * (hbar**2) / params['mB']) * params['aBB']
     # params['RTF_BEC_X'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_x']**2))); params['RTF_BEC_Y'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_y']**2))); params['RTF_BEC_Z'] = np.sqrt(2 * params['gBB_Born'] * params['n0_TF'] / (params['mB'] * (params['omega_BEC_z']**2)))  # BEC density Thomas-Fermi radii in each direction (m)
     params['RTF_BEC_X'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_x']**2))); params['RTF_BEC_Y'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_y']**2))); params['RTF_BEC_Z'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_z']**2)))  # BEC density Thomas-Fermi radii in each direction (m)
 
@@ -448,8 +448,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     Pph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     Nph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    # ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    # ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
     Energy_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
@@ -469,8 +469,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         Nph_da[ind] = cs.get_PhononNumber()
         Phase_da[ind] = cs.get_Phase()
         Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
-        ReAmp_da[ind] = np.real(Amp)
-        ImAmp_da[ind] = np.imag(Amp)
+        # ReAmp_da[ind] = np.real(Amp)
+        # ImAmp_da[ind] = np.imag(Amp)
         P_da[ind] = cs.get_totMom()
         X_da[ind] = cs.get_impPos()
         XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
@@ -487,7 +487,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
 
     # Create Data Set
 
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
+    # data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
 

@@ -49,9 +49,9 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # tMax = 400; dt = 1
-    # tMax = 240; dt = 0.1
-    tMax = 480; dt = 0.1
-    # tMax = 1; dt = 0.2
+    # tMax = 480; dt = 0.1
+    # tMax = 5000; dt = 1
+    tMax = 100; dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -95,18 +95,20 @@ if __name__ == "__main__":
     tscale = xi / nu
     To = 2 * np.pi / omega_BEC_osc
     print(To, To / tscale)
+    print(80 * 1e-3 * T_exp2th, 1e3 * 5000 / T_exp2th)
     print(1 / L_exp2th, expParams['RTF_BEC_X'], RTF_BEC_X / L_exp2th)
     print(0.75 * RTF_BEC_X / xi, omega_BEC_osc * tscale)
     print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
 
     print(RTF_BEC_X * (omega_BEC_osc / 2) / nu)
     print('c_BEC: {:.2E}'.format(nu * T_exp2th / L_exp2th))
+    print(mI * nu)
 
     # ---- SET OSC PARAMS ----
     x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
     print('X0: {0}, Tosc: {1}'.format(x0, To))
 
-    oscParams_List = [{'X0': 0.0, 'P0': 0.6, 'a_osc': expParams['a_osc']}]
+    oscParams_List = [{'X0': 0.0, 'P0': 0.4, 'a_osc': expParams['a_osc']}]
 
     # oscParams_List = [{'X0': 0.75 * RTF_BEC_X, 'P0': 0.6, 'a_osc': 0.5}]
 
@@ -121,7 +123,7 @@ if __name__ == "__main__":
     TTList = []
     for oscParams in oscParams_List:
 
-        toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+        toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                       'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'off'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
@@ -218,6 +220,8 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
+    print(len(metaList))
+
     # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
@@ -241,8 +245,11 @@ if __name__ == "__main__":
     print(innerdatapath)
 
     runstart = timer()
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    taskCount = len(metaList); taskID = 72
 
     if(taskCount > len(metaList)):
         print('ERROR: TASK COUNT MISMATCH')
