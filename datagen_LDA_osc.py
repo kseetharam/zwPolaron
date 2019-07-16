@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # tMax = 400; dt = 1
     # tMax = 480; dt = 0.1
-    tMax = 5000; dt = 1
+    tMax = 5000; dt = 0.5
     # tMax = 100; dt = 1
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    metaList = metaList[0:2]
+    # metaList = metaList[0:2]
     print(len(metaList))
 
     # # ---- COMPUTE DATA ON COMPUTER ----

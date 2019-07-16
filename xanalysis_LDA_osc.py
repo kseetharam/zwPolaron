@@ -38,8 +38,9 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'true'}
-    dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
+    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'false'}
+    dParams_List = [{'f_BEC_osc': 80, 'f_Imp_x': 150, 'a_osc': 0.7, 'X0': 0.0, 'P0': 0.4}]
+    # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 358.6, 'P0': 0.6}]
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     if toggleDict['PosScat'] == 'on':
         animpath = animpath + '/PosScat'
 
-    # # Concatenate Individual Datasets
+    # # # Concatenate Individual Datasets
 
     # for innerdatapath in datapath_List:
     #     ds_list = []; aIBi_list = []
@@ -118,7 +119,8 @@ if __name__ == "__main__":
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
     omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
 
-    f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 0.0; P0 = 0.6
+    f_BEC_osc = 80; f_Imp_x = 150; a_osc = 0.7; X0 = 0.0; P0 = 0.4
+    # f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 0.0; P0 = 0.6
     # f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 358.6; P0 = 0.6
     qds = ds_Dict[(f_BEC_osc, f_Imp_x, a_osc, X0, P0)]
     # qds_nosc = ds_Dict[(X0, P0, 0.0)]
@@ -147,18 +149,18 @@ if __name__ == "__main__":
     # aIBi_noPlotList = [-1000.0]
     aIBi_noPlotList = []
 
-    # # POSITION VS TIME
+    # POSITION VS TIME
 
-    # aIBi = -0.25
-    # xDat = qds['XLab'].sel(aIBi=aIBi).values
-    # fig1, ax1 = plt.subplots()
-    # ax1.plot(ts, 1e6 * xDat / L_exp2th, color='g', linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
-    # ax1.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    # ax1.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    # ax1.legend(loc=2)
-    # ax1.set_ylabel(r'$<X> (\mu m)$')
-    # ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
-    # ax1.set_title('Impurity Trajectory (Lab Frame)')
+    aIBi = -0.34
+    xDat = qds['XLab'].sel(aIBi=aIBi, method='nearest').values
+    fig1, ax1 = plt.subplots()
+    ax1.plot(ts, 1e6 * xDat / L_exp2th, color='g', linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    ax1.plot(ts, xBEC, 'k:', label='BEC Peak Position')
+    ax1.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    ax1.legend(loc=2)
+    ax1.set_ylabel(r'$<X> (\mu m)$')
+    ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    ax1.set_title('Impurity Trajectory (Lab Frame)')
 
     # # POSITION VS TIME ANIMATION
 
@@ -451,85 +453,85 @@ if __name__ == "__main__":
     # # FIT IN THE BEC FRAME
     ###############################################################################################################################
 
-    # ODE FIT TO POSITION (TRAJECTORY)
+    # # ODE FIT TO POSITION (TRAJECTORY) (***USE THIS)
 
-    def EqMotion(y, t, gamma, beta):
-        # y1 = x, y2 = dx/dt
-        y1, y2 = y
-        dy1dt = y2
-        dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 + beta) * y1 + (omega_BEC_osc**2 - omega_Imp_x**2) * xB0 * np.cos(omega_BEC_osc * t)
-        return [dy1dt, dy2dt]
+    # def EqMotion(y, t, gamma, beta):
+    #     # y1 = x, y2 = dx/dt
+    #     y1, y2 = y
+    #     dy1dt = y2
+    #     dy2dt = -2 * gamma * y2 - (omega_Imp_x**2 + beta) * y1 + (omega_BEC_osc**2 - omega_Imp_x**2) * xB0 * np.cos(omega_BEC_osc * t)
+    #     return [dy1dt, dy2dt]
 
-    def yint(t, gamma, beta, y0):
-        y = odeint(EqMotion, y0, t, args=(gamma, beta))
-        return y.ravel(order='F')
+    # def yint(t, gamma, beta, y0):
+    #     y = odeint(EqMotion, y0, t, args=(gamma, beta))
+    #     return y.ravel(order='F')
 
-    def gphiVals(gamma, beta, omega_Imp_x, omega_BEC_osc, xB0):
-        kappa = omega_Imp_x**2 + beta
-        zeta = omega_BEC_osc**2 - omega_Imp_x**2
-        d = zeta * xB0 / np.sqrt((kappa - omega_BEC_osc**2)**2 + 4 * gamma**2 * omega_BEC_osc**2)
-        delta = np.arctan(2 * gamma * omega_BEC_osc / (omega_BEC_osc**2 - kappa))
-        g = np.sqrt(d**2 + xB0**2 + d * xB0 * np.cos(delta))
-        phi = np.arctan(np.sin(delta) / (np.cos(delta) + xB0 / d))
-        return g, phi
+    # def gphiVals(gamma, beta, omega_Imp_x, omega_BEC_osc, xB0):
+    #     kappa = omega_Imp_x**2 + beta
+    #     zeta = omega_BEC_osc**2 - omega_Imp_x**2
+    #     d = zeta * xB0 / np.sqrt((kappa - omega_BEC_osc**2)**2 + 4 * gamma**2 * omega_BEC_osc**2)
+    #     delta = np.arctan(2 * gamma * omega_BEC_osc / (omega_BEC_osc**2 - kappa))
+    #     g = np.sqrt(d**2 + xB0**2 + d * xB0 * np.cos(delta))
+    #     phi = np.arctan(np.sin(delta) / (np.cos(delta) + xB0 / d))
+    #     return g, phi
 
-    x_ds = qds['X']
-    xI_DatArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
-    xI_FitArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
+    # x_ds = qds['X']
+    # xI_DatArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_FitArray_LAB = np.empty(aIBiVals.size, dtype=np.object)
 
-    xI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
-    vI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
-    xI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
-    vI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
-    R2_Array = np.empty(aIBiVals.size, dtype=np.object)
-    MSErr_Array = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    # vI_DatArray = np.empty(aIBiVals.size, dtype=np.object)
+    # xI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+    # vI_FitArray = np.empty(aIBiVals.size, dtype=np.object)
+    # R2_Array = np.empty(aIBiVals.size, dtype=np.object)
+    # MSErr_Array = np.empty(aIBiVals.size, dtype=np.object)
 
-    y0Vals = np.empty(aIBiVals.size, dtype=np.object)
-    gammaVals = np.empty(aIBiVals.size)
-    betaVals = np.empty(aIBiVals.size)
-    gVals = np.empty(aIBiVals.size)
-    phiVals = np.empty(aIBiVals.size)
-    msVals = np.empty(aIBiVals.size)
-    for ind, aIBi in enumerate(aIBiVals):
-        # if ind != 10:
-        #     continue
-        xVals = x_ds.sel(aIBi=aIBi).values
-        vVals = np.gradient(xVals, tVals)
-        x0 = xVals[0]
-        v0 = vVals[0]
-        # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
-        y0 = [x0, v0]
-        data = np.concatenate((xVals, vVals))
-        if ind == 0:
-            p0 = [1e-3, 1e-3]
-            lowerbound = [0, 0]
-            upperbound = [np.inf, np.inf]
+    # y0Vals = np.empty(aIBiVals.size, dtype=np.object)
+    # gammaVals = np.empty(aIBiVals.size)
+    # betaVals = np.empty(aIBiVals.size)
+    # gVals = np.empty(aIBiVals.size)
+    # phiVals = np.empty(aIBiVals.size)
+    # msVals = np.empty(aIBiVals.size)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     # if ind != 10:
+    #     #     continue
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     vVals = np.gradient(xVals, tVals)
+    #     x0 = xVals[0]
+    #     v0 = vVals[0]
+    #     # v0 = (qds['P'].sel(aIBi=aIBi).isel(t=0).values - qds['Pph'].sel(aIBi=aIBi).isel(t=0).values) / mI
+    #     y0 = [x0, v0]
+    #     data = np.concatenate((xVals, vVals))
+    #     if ind == 0:
+    #         p0 = [1e-3, 1e-3]
+    #         lowerbound = [0, 0]
+    #         upperbound = [np.inf, np.inf]
 
-        else:
-            p0 = [gammaVals[ind - 1], betaVals[ind - 1]]
-            # lowerbound = [gammaVals[ind - 1], 0]
-            lowerbound = [0, 0]
-            upperbound = [np.inf, np.inf]
-        popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=p0, bounds=(lowerbound, upperbound))
-        gopt, bopt = popt
-        y0Vals[ind] = y0; gammaVals[ind] = gopt; betaVals[ind] = bopt
-        gVals[ind], phiVals[ind] = gphiVals(gopt, bopt, omega_Imp_x, omega_BEC_osc, xB0)
+    #     else:
+    #         p0 = [gammaVals[ind - 1], betaVals[ind - 1]]
+    #         # lowerbound = [gammaVals[ind - 1], 0]
+    #         lowerbound = [0, 0]
+    #         upperbound = [np.inf, np.inf]
+    #     popt, cov = curve_fit(lambda t, gamma, beta: yint(t, gamma, beta, y0), tVals, data, p0=p0, bounds=(lowerbound, upperbound))
+    #     gopt, bopt = popt
+    #     y0Vals[ind] = y0; gammaVals[ind] = gopt; betaVals[ind] = bopt
+    #     gVals[ind], phiVals[ind] = gphiVals(gopt, bopt, omega_Imp_x, omega_BEC_osc, xB0)
 
-        fitvals = yint(tVals, gammaVals[ind], betaVals[ind], y0Vals[ind])
-        xfit = fitvals[0:tVals.size]
-        vfit = fitvals[tVals.size:]
-        xI_DatArray[ind] = xVals
-        vI_DatArray[ind] = vVals
-        xI_FitArray[ind] = xfit
-        vI_FitArray[ind] = vfit
-        R2_Array[ind] = r2_score(xVals, xfit)
-        MSErr_Array[ind] = mean_squared_error(xVals, xfit)
+    #     fitvals = yint(tVals, gammaVals[ind], betaVals[ind], y0Vals[ind])
+    #     xfit = fitvals[0:tVals.size]
+    #     vfit = fitvals[tVals.size:]
+    #     xI_DatArray[ind] = xVals
+    #     vI_DatArray[ind] = vVals
+    #     xI_FitArray[ind] = xfit
+    #     vI_FitArray[ind] = vfit
+    #     R2_Array[ind] = r2_score(xVals, xfit)
+    #     MSErr_Array[ind] = mean_squared_error(xVals, xfit)
 
-        xI_DatArray_LAB[ind] = qds['XLab'].sel(aIBi=aIBi).values
-        xI_FitArray_LAB[ind] = xfit + xBEC
-        P = qds['P'].sel(aIBi=aIBi).isel(t=0).values
-        Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
-        msVals[ind] = mI * P / (P - Pph)
+    #     xI_DatArray_LAB[ind] = qds['XLab'].sel(aIBi=aIBi).values
+    #     xI_FitArray_LAB[ind] = xfit + xBEC
+    #     P = qds['P'].sel(aIBi=aIBi).isel(t=0).values
+    #     Pph = qds['Pph'].sel(aIBi=aIBi).isel(t=0).values
+    #     msVals[ind] = mI * P / (P - Pph)
 
     # # ANALYTICAL SOLUTION FIT TO POSITION (TRAJECTORY)
 
@@ -644,39 +646,39 @@ if __name__ == "__main__":
     #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
     # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
-    # PARAMETER CURVES (& ESTIMATE alpha = m*Beta)
+    # # PARAMETER CURVES (& ESTIMATE alpha = m*Beta) (***PLOT THIS)
 
-    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 50
-    Nk = np.ceil(NGridPoints_desired / Ntheta)
-    theta_max = np.pi
-    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
-    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
-    k_min = 1e-5
-    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
-    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
-    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
-    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
-    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
-    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-                  'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
-    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
-    mB = expParams['mB'] * M_exp2th  # should = 1
-    mI = expParams['mI'] * M_exp2th
-    aBB = expParams['aBB'] * L_exp2th
-    gBB = (4 * np.pi / mB) * aBB
-    sParams = [mI, mB, n0, gBB]
+    # NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    # Ntheta = 50
+    # Nk = np.ceil(NGridPoints_desired / Ntheta)
+    # theta_max = np.pi
+    # thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    # k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    # k_min = 1e-5
+    # kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
+    # n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    # n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    # RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    # RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
+    # trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
+    #               'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc}
+    # n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
+    # mB = expParams['mB'] * M_exp2th  # should = 1
+    # mI = expParams['mI'] * M_exp2th
+    # aBB = expParams['aBB'] * L_exp2th
+    # gBB = (4 * np.pi / mB) * aBB
+    # sParams = [mI, mB, n0, gBB]
 
-    # X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
-    # # aIBiVals = aIBiVals[::10]
-    # aVals_Est = np.empty(aIBiVals.size)
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     cParams = {'aIBi': aIBi}
-    #     E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-    #     aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=2)
+    # # X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 100)
+    # # # aIBiVals = aIBiVals[::10]
+    # # aVals_Est = np.empty(aIBiVals.size)
+    # # for ind, aIBi in enumerate(aIBiVals):
+    # #     cParams = {'aIBi': aIBi}
+    # #     E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+    # #     aVals_Est[ind] = interpolate.splev(0, E_Pol_tck, der=2)
 
     # # PLOT PARAMETERS
     # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
@@ -709,28 +711,28 @@ if __name__ == "__main__":
     # ax1.set_xlabel(r'$a_{IB}^{-1}$')
     # ax1.set_title(r'$R^{2}$' + ' Error')
 
-    # PLOT PARAMETERS FIXED
-    rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
-    critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
-    fig2, ax2 = plt.subplots()
-    ax2.plot(aIBiVals, mI * gammaVals, 'g-', label=r'$m_{I} \gamma$')
-    ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
-    # ax2.plot(aIBiVals, rhoVals, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
-    ax2.plot(aIBiVals, mI * betaVals * omega_Imp_x, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$m_{I} \beta \omega_{0}$')
-    ax2.plot(aIBiVals, msVals * betaVals * omega_Imp_x, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta \omega_{0}$')
-    # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
-    ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
-    ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
-    # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
-    ax2.set_xlabel(r'$a_{IB}^{-1}$')
-    ax2.set_title('Oscillation Fit Parameters')
-    ax2.set_ylim([-2, 4])
-    if toggleDict['PosScat'] == 'on':
-        ax2.legend(loc=1)
-        ax2.set_xlim([0, 40])
-    else:
-        ax2.legend(loc=2)
-        ax2.set_xlim([-40, 0])
+    # # PLOT PARAMETERS FIXED (***PLOT THIS)
+    # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
+    # fig2, ax2 = plt.subplots()
+    # ax2.plot(aIBiVals, mI * gammaVals, 'g-', label=r'$m_{I} \gamma$')
+    # ax2.plot(aIBiVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
+    # # ax2.plot(aIBiVals, rhoVals, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
+    # ax2.plot(aIBiVals, mI * betaVals * omega_Imp_x, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$m_{I} \beta \omega_{0}$')
+    # ax2.plot(aIBiVals, msVals * betaVals * omega_Imp_x, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta \omega_{0}$')
+    # # ax2.plot(aIBiVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
+    # ax2.plot(aIBiVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
+    # ax2.plot(aIBiVals[critdamp_ind] * np.ones(aIBiVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBiVals.size), 'y--', label='Critical Damping')
+    # # ax2.plot(aIBiVals, msVals, 'y-', label=r'$m^{*}$')
+    # ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax2.set_title('Oscillation Fit Parameters')
+    # ax2.set_ylim([-2, 4])
+    # if toggleDict['PosScat'] == 'on':
+    #     ax2.legend(loc=1)
+    #     ax2.set_xlim([0, 40])
+    # else:
+    #     ax2.legend(loc=2)
+    #     ax2.set_xlim([-40, 0])
 
     # # PLOT ERROR OF FIT
     # fig1, ax1 = plt.subplots()
