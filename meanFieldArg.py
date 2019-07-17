@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # ax1.set_ylim([-100, 3000])
 
     # ax2.plot(aIBexp_Vals / a0_exp, MF_freqIncreasePercentage, 'b-')
-    ax2.plot(aIBexp_Vals / a0_exp, f_Imp_eff, 'r-', label='')
+    ax2.plot(aIBexp_Vals / a0_exp, f_Imp_eff, 'r-', label='Effective Trap Frequency')
     ax2.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
     ax2.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
     # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')

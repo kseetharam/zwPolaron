@@ -353,7 +353,7 @@ def xinterp2D(xdataset, coord1, coord2, mult):
     C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
     C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
     C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
-    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='linear')
     return interp_vals, C1g_interp, C2g_interp
 
 # ---- DYNAMICS ----
