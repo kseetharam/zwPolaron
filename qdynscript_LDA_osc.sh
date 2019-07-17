@@ -2,9 +2,9 @@
 #SBATCH -J quenchLDAosc
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 1-00:00
+#SBATCH -t 2-00:00
 #SBATCH -p shared
-#SBATCH --mem=14000
+#SBATCH --mem=12000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
