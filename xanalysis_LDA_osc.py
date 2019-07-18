@@ -291,71 +291,71 @@ if __name__ == "__main__":
     #     anim_freq_filename = '/NoCSdyn_' + anim_freq_filename[1:]
     # # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
 
-    # OSCILLATION FREQUENCY 2D PLOT
+    # # OSCILLATION FREQUENCY 2D PLOT
 
-    inverseScat = False
-    a0ylim = 1000
+    # inverseScat = False
+    # a0ylim = 1000
 
-    dt = tVals[1] - tVals[0]
-    fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    # aIBiVals = aIBiVals[2:]
-    aIBVals = (1 / aIBiVals) / a0_th
-    freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    maxph = 0
-    for ind, aIBi in enumerate(aIBiVals):
-        if aIBi in aIBi_noPlotList:
-            continue
-        xVals = x_ds.sel(aIBi=aIBi).values
-        x0 = xVals[0]
-        dt = tVals[1] - tVals[0]
-        # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-        FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-        absFTVals = np.abs(FTVals)
-        freq_da.sel(aIBi=aIBi)[:] = absFTVals
-        if (inverseScat is True) and (np.abs(1 / aIBi / a0_th) > a0ylim):
-            continue
-        if np.max(absFTVals) > maxph:
-            maxph = np.max(absFTVals)
+    # dt = tVals[1] - tVals[0]
+    # fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    # # aIBiVals = aIBiVals[2:]
+    # aIBVals = (1 / aIBiVals) / a0_th
+    # freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+    # maxph = 0
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     if aIBi in aIBi_noPlotList:
+    #         continue
+    #     xVals = x_ds.sel(aIBi=aIBi).values
+    #     x0 = xVals[0]
+    #     dt = tVals[1] - tVals[0]
+    #     # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #     FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #     absFTVals = np.abs(FTVals)
+    #     freq_da.sel(aIBi=aIBi)[:] = absFTVals
+    #     if (inverseScat is True) and (np.abs(1 / aIBi / a0_th) > a0ylim):
+    #         continue
+    #     if np.max(absFTVals) > maxph:
+    #         maxph = np.max(absFTVals)
 
-    print(maxph)
-    # vmax = 60000
-    vmax = maxph
+    # print(maxph)
+    # # vmax = 60000
+    # vmax = maxph
 
-    absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+    # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
 
-    # absFT_interp = freq_da.values
-    # f_interp, aIBi_interp = np.meshgrid(freq_da['f'].values, freq_da['aIBi'].values, indexing='ij')
+    # # absFT_interp = freq_da.values
+    # # f_interp, aIBi_interp = np.meshgrid(freq_da['f'].values, freq_da['aIBi'].values, indexing='ij')
 
-    fig7, ax7 = plt.subplots()
-    if inverseScat is True:
-        aIBi_interp = a0_th * aIBi_interp
-        aIBiVals = a0_th * aIBiVals
+    # fig7, ax7 = plt.subplots()
+    # if inverseScat is True:
+    #     aIBi_interp = a0_th * aIBi_interp
+    #     aIBiVals = a0_th * aIBiVals
 
-        quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=vmax)
-        ax7.set_ylabel(r'$(\frac{a_{IB}}{a_{0}})^{-1}$')
-        ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
-        ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-        if toggleDict['PosScat'] != 'on':
-            ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
-        ax7.legend(loc=2)
+    #     quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=vmax)
+    #     ax7.set_ylabel(r'$(\frac{a_{IB}}{a_{0}})^{-1}$')
+    #     ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
+    #     ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    #     if toggleDict['PosScat'] != 'on':
+    #         ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
+    #     ax7.legend(loc=2)
 
-    else:
-        quadF = ax7.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-        ax7.set_ylabel(r'$a_{IB}$ [$a_{0}$]')
-        ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', label='BEC Oscillation Frequency')
-        ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-        if toggleDict['PosScat'] != 'on':
-            # ax7.set_ylim([aIBVals[-7], aIBVals[0]])
-            ax7.set_ylim([-1 * a0ylim, np.max(aIBVals)])
-        ax7.legend(loc=4)
+    # else:
+    #     quadF = ax7.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+    #     ax7.set_ylabel(r'$a_{IB}$ [$a_{0}$]')
+    #     ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', label='BEC Oscillation Frequency')
+    #     ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    #     if toggleDict['PosScat'] != 'on':
+    #         # ax7.set_ylim([aIBVals[-7], aIBVals[0]])
+    #         ax7.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+    #     ax7.legend(loc=4)
 
-    ax7.set_xlabel('f (Hz)')
-    # ax7.set_xlim([0, 1250])
-    ax7.set_xlim([0, 300])
-    ax7.set_title('Impurity Trajectory Frequency Spectrum')
-    fig7.colorbar(quadF, ax=ax7, extend='max')
-    plt.show()
+    # ax7.set_xlabel('f (Hz)')
+    # # ax7.set_xlim([0, 1250])
+    # ax7.set_xlim([0, 300])
+    # ax7.set_title('Impurity Trajectory Frequency Spectrum')
+    # fig7.colorbar(quadF, ax=ax7, extend='max')
+    # plt.show()
 
     # # VELOCITY VS TIME (LAB FRAME)
 
@@ -669,12 +669,20 @@ if __name__ == "__main__":
 
     # # POSITION (LAB) ANIMATION
 
+    # inverseScat = False
+
     # fig, ax = plt.subplots()
     # curve_Dat = ax.plot(ts[::20], xI_DatArray_LAB[0][::20] * 1e6 / L_exp2th, color='k', linestyle='', marker='o', label='Simulation Data')[0]
     # curve_Fit = ax.plot(ts, xI_FitArray_LAB[0] * 1e6 / L_exp2th, color='orange', lw=2, label='ODE Fit')[0]
-    # aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
     # Gamma_text = ax.text(0.8, 0.85, r'$\gamma=$' + '{:.2E}'.format(gammaVals[0]), transform=ax.transAxes, color='g')
     # Beta_text = ax.text(0.8, 0.8, r'$\beta=$' + '{:.2E}'.format(betaVals[0]), transform=ax.transAxes, color='b')
+    # rhoVals = gammaVals / np.sqrt(betaVals + omega_Imp_x**2)
+    # Rho_text = ax.text(0.74, 0.74, r'$\frac{\gamma}{\sqrt{\omega_{0}^{2}+\beta}}=$' + '{:.2E}'.format(rhoVals[0]), transform=ax.transAxes, color='m')
+
+    # if inverseScat is True:
+    #     aIBi_text = ax.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax.transAxes, color='r')
+    # else:
+    #     aIB_text = ax.text(0.75, 0.9, r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[0]) / a0_th).astype(int)) + r' [$a_{0}$]', transform=ax.transAxes, color='r')
 
     # ax.legend(loc=2)
     # ax.set_ylabel(r'$<X> (\mu m)$')
@@ -686,17 +694,21 @@ if __name__ == "__main__":
     #         return
     #     curve_Dat.set_ydata(xI_DatArray_LAB[i][::20] * 1e6 / L_exp2th)
     #     curve_Fit.set_ydata(xI_FitArray_LAB[i] * 1e6 / L_exp2th)
-    #     aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
     #     Gamma_text.set_text(r'$\gamma=$' + '{:.2E}'.format(gammaVals[i]))
     #     Beta_text.set_text(r'$\beta=$' + '{:.2E}'.format(betaVals[i]))
+    #     Rho_text.set_text(r'$\frac{\gamma}{\sqrt{\omega_{0}^{2}+\beta}}=$' + '{:.2E}'.format(rhoVals[i]))
+    #     if inverseScat is True:
+    #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     else:
+    #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
 
-    # anim_fit = FuncAnimation(fig, animate_fit, interval=75, frames=range(ts.size))
+    # anim_fit = FuncAnimation(fig, animate_fit, interval=50, frames=range(aIBiVals.size), repeat=False)
     # # # # anim_fit_filename = '/TrajFitAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # # # anim_fit.save(animpath + anim_fit_filename, writer='imagemagick')
     # anim_fit_filename = '/TrajFitAnim_BECFit_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_fit_filename = '/NoCSdyn_' + anim_fit_filename[1:]
-    # # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
+    # anim_fit.save(animpath + anim_fit_filename, writer=mpegWriter)
 
     # # PARAMETER CURVES (& ESTIMATE alpha = m*Beta) (***PLOT THIS)
 
@@ -765,6 +777,8 @@ if __name__ == "__main__":
 
     # # PLOT PARAMETERS FIXED (***PLOT THIS)
     # inverseScat = False
+    # a0xlim = 1000
+
     # if inverseScat is True:
     #     rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
     #     # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
@@ -790,16 +804,19 @@ if __name__ == "__main__":
 
     # else:
     #     aIBVals = 1 / aIBiVals / a0_th
-    #     rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    #     # rhoVals = gammaVals**2 - betaVals - omega_Imp_x**2
+    #     rhoVals = gammaVals / np.sqrt(betaVals + omega_Imp_x**2)
     #     # critdamp_ind = np.argwhere(np.sign(rhoVals) >= 0)[0][0]
     #     fig2, ax2 = plt.subplots()
     #     ax2.plot(aIBVals, mI * gammaVals, 'g-', label=r'$m_{I} \gamma$')
     #     ax2.plot(aIBVals, msVals * gammaVals, 'g:', label=r'$\xi=m^{*}\gamma$')
-    #     # ax2.plot(aIBVals, rhoVals, 'm--', label=r'$\gamma^{2}-\beta-\omega_{0}^{2}$')
-    #     ax2.plot(aIBVals, mI * betaVals * omega_Imp_x, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$m_{I} \beta \omega_{0}$')
-    #     ax2.plot(aIBVals, msVals * betaVals * omega_Imp_x, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta \omega_{0}$')
+    #     # ax2.plot(aIBVals, mI * betaVals * omega_Imp_x, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$m_{I} \beta \omega_{0}$')
+    #     # ax2.plot(aIBVals, msVals * betaVals * omega_Imp_x, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta \omega_{0}$')
+    #     ax2.plot(aIBVals, mI * betaVals, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$m_{I} \beta$')
+    #     ax2.plot(aIBVals, msVals * betaVals, color='b', linestyle='', marker='x', label=r'$\alpha=m^{*}\beta$')
+
     #     # ax2.plot(aIBVals, aVals_Est, 'r-', label=r'$\alpha_{est}=\frac{d^{2}E_{pol}}{dx^{2}}|_{x_{peak}}$')
-    #     ax2.plot(aIBVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
+    #     # ax2.plot(aIBVals, phiVals, color='orange', linestyle=':', label=r'$\varphi$')
     #     # ax2.plot(aIBVals[critdamp_ind] * np.ones(aIBVals.size), np.linspace(0, np.max(msVals * gammaVals), aIBVals.size), 'y--', label='Critical Damping')
     #     # ax2.plot(aIBVals, msVals, 'y-', label=r'$m^{*}$')
     #     ax2.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
@@ -809,8 +826,25 @@ if __name__ == "__main__":
     #         ax2.legend(loc=1)
     #         # ax2.set_xlim([0, 30])
     #     else:
-    #         ax2.legend(loc=2)
-    #         ax2.set_xlim([-6000, np.max(aIBVals)])
+    #         ax2.legend(loc=1)
+    #         # ax2.set_xlim([-1 * a0xlim, np.max(aIBVals)])
+    #         # xmask = aIBVals > -1 * a0xlim
+    #         # ymax = np.max(np.array([np.max(gammaVals[xmask]), np.max(betaVals[xmask])]))
+    #         # ymin = np.min(np.array([np.min(gammaVals[xmask]), np.min(betaVals[xmask])]))
+    #         # ax2.set_ylim([ymin, ymax])
+
+    #     fig3, ax3 = plt.subplots()
+    #     ax3.plot(aIBVals, rhoVals, 'm--')
+    #     ax3.set_title('Oscillation Fit Damping Ratio')
+    #     ax3.set_ylabel(r'$\frac{\gamma}{\sqrt{\omega_{0}^{2}+\beta}}$')
+    #     ax3.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    #     # ax3.set_xlim([-1 * a0xlim, np.max(aIBVals)])
+
+    #     print(aIBVals)
+    #     print(gammaVals)
+    #     print(betaVals)
+    #     print(rhoVals)
+    #     print(omega_Imp_x, omega_BEC_osc)
 
     # # PLOT ERROR OF FIT
     # fig1, ax1 = plt.subplots()
