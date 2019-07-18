@@ -174,6 +174,7 @@ if __name__ == "__main__":
     # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
     ax2.set_ylabel('Effective Impurity Trap Frequency (Hz)')
     ax2.set_title('Impurity Frequency Shift from MF Potential')
+    ax2.set_xlim([-1000, 0]); ax2.set_ylim([100, 300])
     ax2.legend()
 
     plt.show()

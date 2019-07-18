@@ -291,68 +291,71 @@ if __name__ == "__main__":
     #     anim_freq_filename = '/NoCSdyn_' + anim_freq_filename[1:]
     # # anim_freq.save(animpath + anim_freq_filename, writer=mpegWriter)
 
-    # # OSCILLATION FREQUENCY 2D PLOT
+    # OSCILLATION FREQUENCY 2D PLOT
 
-    # inverseScat = False
+    inverseScat = False
+    a0ylim = 1000
 
-    # dt = tVals[1] - tVals[0]
-    # fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    # # aIBiVals = aIBiVals[2:]
-    # aIBVals = (1 / aIBiVals) / a0_th
-    # freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    # maxph = 0
-    # for ind, aIBi in enumerate(aIBiVals):
-    #     if aIBi in aIBi_noPlotList:
-    #         continue
-    #     xVals = x_ds.sel(aIBi=aIBi).values
-    #     x0 = xVals[0]
-    #     dt = tVals[1] - tVals[0]
-    #     # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-    #     FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-    #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-    #     absFTVals = np.abs(FTVals)
-    #     freq_da.sel(aIBi=aIBi)[:] = absFTVals
-    #     if np.max(absFTVals) > maxph:
-    #         maxph = np.max(absFTVals)
+    dt = tVals[1] - tVals[0]
+    fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    # aIBiVals = aIBiVals[2:]
+    aIBVals = (1 / aIBiVals) / a0_th
+    freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+    maxph = 0
+    for ind, aIBi in enumerate(aIBiVals):
+        if aIBi in aIBi_noPlotList:
+            continue
+        xVals = x_ds.sel(aIBi=aIBi).values
+        x0 = xVals[0]
+        dt = tVals[1] - tVals[0]
+        # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+        FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+        fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+        absFTVals = np.abs(FTVals)
+        freq_da.sel(aIBi=aIBi)[:] = absFTVals
+        if (inverseScat is True) and (np.abs(1 / aIBi / a0_th) > a0ylim):
+            continue
+        if np.max(absFTVals) > maxph:
+            maxph = np.max(absFTVals)
 
-    # print(maxph)
-    # # vmax = 60000
-    # vmax = maxph
+    print(maxph)
+    # vmax = 60000
+    vmax = maxph
 
-    # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+    absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
 
-    # # absFT_interp = freq_da.values
-    # # f_interp, aIBi_interp = np.meshgrid(freq_da['f'].values, freq_da['aIBi'].values, indexing='ij')
+    # absFT_interp = freq_da.values
+    # f_interp, aIBi_interp = np.meshgrid(freq_da['f'].values, freq_da['aIBi'].values, indexing='ij')
 
-    # fig7, ax7 = plt.subplots()
-    # if inverseScat is True:
-    #     aIBi_interp = a0_th * aIBi_interp
-    #     aIBiVals = a0_th * aIBiVals
+    fig7, ax7 = plt.subplots()
+    if inverseScat is True:
+        aIBi_interp = a0_th * aIBi_interp
+        aIBiVals = a0_th * aIBiVals
 
-    #     quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=vmax)
-    #     ax7.set_ylabel(r'$(\frac{a_{IB}}{a_{0}})^{-1}$')
-    #     ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
-    #     ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    #     if toggleDict['PosScat'] != 'on':
-    #         ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
-    #     ax7.legend(loc=2)
+        quadF = ax7.pcolormesh(f_interp * T_exp2th, aIBi_interp, absFT_interp, vmin=0, vmax=vmax)
+        ax7.set_ylabel(r'$(\frac{a_{IB}}{a_{0}})^{-1}$')
+        ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, 'k:', label='BEC Oscillation Frequency')
+        ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBiVals.size), aIBiVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+        if toggleDict['PosScat'] != 'on':
+            ax7.set_ylim([aIBiVals[-1], aIBiVals[0]])
+        ax7.legend(loc=2)
 
-    # else:
-    #     quadF = ax7.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax7.set_ylabel(r'$a_{IB}$ [$a_{0}$]')
-    #     ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', label='BEC Oscillation Frequency')
-    #     ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
-    #     if toggleDict['PosScat'] != 'on':
-    #         # ax7.set_ylim([aIBVals[-7], aIBVals[0]])
-    #         ax7.set_ylim([-1000, np.max(aIBVals)])
-    #     ax7.legend(loc=4)
+    else:
+        quadF = ax7.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+        ax7.set_ylabel(r'$a_{IB}$ [$a_{0}$]')
+        ax7.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', label='BEC Oscillation Frequency')
+        ax7.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+        if toggleDict['PosScat'] != 'on':
+            # ax7.set_ylim([aIBVals[-7], aIBVals[0]])
+            ax7.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+        ax7.legend(loc=4)
 
-    # ax7.set_xlabel('f (Hz)')
-    # # ax7.set_xlim([0, 1250])
-    # ax7.set_xlim([0, 300])
-    # ax7.set_title('Impurity Trajectory Frequency Spectrum')
-    # fig7.colorbar(quadF, ax=ax7, extend='max')
-    # plt.show()
+    ax7.set_xlabel('f (Hz)')
+    # ax7.set_xlim([0, 1250])
+    ax7.set_xlim([0, 300])
+    ax7.set_title('Impurity Trajectory Frequency Spectrum')
+    fig7.colorbar(quadF, ax=ax7, extend='max')
+    plt.show()
 
     # # VELOCITY VS TIME (LAB FRAME)
 
