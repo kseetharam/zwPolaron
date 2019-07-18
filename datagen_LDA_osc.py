@@ -124,7 +124,7 @@ if __name__ == "__main__":
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'off'}
+                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
@@ -212,6 +212,9 @@ if __name__ == "__main__":
     aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 20, endpoint=False), np.linspace(-2000, -70, 175, endpoint=False), np.linspace(-70, -20, 5))) * a0_exp
     aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
 
+    if toggleDict['PosScat'] == 'on':
+        aIBi_Vals = -1 * aIBi_Vals
+
     # print(aIBi_Vals)
 
     metaList = []
@@ -220,15 +223,14 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    missInds = [180, 183, 184, 185]
-    missList = []
+    # missInds = [180, 183, 184, 185]
+    # missList = []
+    # for mind in missInds:
+    #     missList.append(metaList[mind])
+    #     # (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
+    #     # print(aIBi)
+    # metaList = missList
 
-    for mind in missInds:
-        missList.append(metaList[mind])
-        # (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
-        # print(aIBi)
-
-    metaList = missList
     # metaList = metaList[0:2]
     print(len(metaList))
 
