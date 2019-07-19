@@ -298,6 +298,7 @@ if __name__ == "__main__":
 
     # dt = tVals[1] - tVals[0]
     # fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    # print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
     # # aIBiVals = aIBiVals[2:]
     # aIBVals = (1 / aIBiVals) / a0_th
     # freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
