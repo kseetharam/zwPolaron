@@ -144,8 +144,9 @@ if __name__ == "__main__":
     VMF_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_Mat / E_exp2th
     VMF_HarmApprox_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_HarmApprox_Mat / E_exp2th
 
-    shiftPot = True
-    indf = 20
+    shiftPot = False
+    # indf = 20
+    indf = -1
 
     if shiftPot is True:
         shift = -1 * np.min(VMF_Mat_Hz[indf])
@@ -174,7 +175,7 @@ if __name__ == "__main__":
     # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
     ax2.set_ylabel('Effective Impurity Trap Frequency (Hz)')
     ax2.set_title('Impurity Frequency Shift from MF Potential')
-    ax2.set_xlim([-1000, 0]); ax2.set_ylim([100, 300])
+    # ax2.set_xlim([-1000, 0]); ax2.set_ylim([100, 300])
     ax2.legend()
 
     plt.show()

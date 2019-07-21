@@ -151,6 +151,8 @@ if __name__ == "__main__":
     # aIBi_noPlotList = [-1000.0]
     aIBi_noPlotList = []
 
+    # print(1 / aIBiVals / a0_th)
+
     # # POSITION VS TIME
 
     # aIBi_des = -0.3
@@ -295,9 +297,19 @@ if __name__ == "__main__":
 
     # inverseScat = False
     # a0ylim = 1000
+    # delayedStart = False
+    # deleteDC = False
+
+    # if delayedStart is True:
+    #     TBEC = 2 * np.pi / omega_BEC_osc
+    #     tVals = tVals[tVals > TBEC]
+    #     x_ds = x_ds.sel(t=tVals)
 
     # dt = tVals[1] - tVals[0]
     # fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    # Nf = fVals.size
+    # if deleteDC is True:
+    #     fVals = np.delete(fVals, Nf // 2)
     # print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
     # # aIBiVals = aIBiVals[2:]
     # aIBVals = (1 / aIBiVals) / a0_th
@@ -313,6 +325,10 @@ if __name__ == "__main__":
     #     FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
     #     fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
     #     absFTVals = np.abs(FTVals)
+
+    #     if deleteDC is True:
+    #         absFTVals = np.delete(absFTVals, Nf // 2)
+
     #     freq_da.sel(aIBi=aIBi)[:] = absFTVals
     #     if (inverseScat is True) and (np.abs(1 / aIBi / a0_th) > a0ylim):
     #         continue
@@ -320,8 +336,8 @@ if __name__ == "__main__":
     #         maxph = np.max(absFTVals)
 
     # print(maxph)
-    # # vmax = 60000
-    # vmax = maxph
+    # # vmax = maxph
+    # vmax = 100000
 
     # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
 
@@ -349,6 +365,8 @@ if __name__ == "__main__":
     #     if toggleDict['PosScat'] != 'on':
     #         # ax7.set_ylim([aIBVals[-7], aIBVals[0]])
     #         ax7.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+    #     elif toggleDict['PosScat'] == 'on':
+    #         ax7.set_ylim([a0ylim, np.min(aIBVals)])
     #     ax7.legend(loc=4)
 
     # ax7.set_xlabel('f (Hz)')
@@ -502,9 +520,9 @@ if __name__ == "__main__":
     # anim_e_filename = '/EnergyAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # # anim_e.save(animpath + anim_e_filename, writer=mpegWriter)
 
-    ###############################################################################################################################
-    # # FIT IN THE BEC FRAME
-    ###############################################################################################################################
+    ##############################################################################################################################
+    # FIT IN THE BEC FRAME
+    ##############################################################################################################################
 
     # # ODE FIT TO POSITION (TRAJECTORY) (***USE THIS)
 

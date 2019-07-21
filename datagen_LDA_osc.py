@@ -223,12 +223,12 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    # missInds = [180, 183, 184, 185]
+    # missInds = [0, 1, 2, 3, 174, 175, 176, 177, 178, 179, 180]
     # missList = []
     # for mind in missInds:
     #     missList.append(metaList[mind])
-    #     # (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
-    #     # print(aIBi)
+    #     (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
+    #     print(aIBi)
     # metaList = missList
 
     # metaList = metaList[0:2]
