@@ -155,15 +155,17 @@ if __name__ == "__main__":
 
     # # POSITION VS TIME
 
-    # aIBi_des = -0.3
+    # aIBdiva0_des = 400
+    # aIBi_des = 1 / (aIBdiva0_des * a0_exp * L_exp2th)
     # xds = qds['XLab'].sel(aIBi=aIBi_des, method='nearest')
     # xDat = xds.values
     # aIBi = xds['aIBi'].values
 
     # fig1, ax1 = plt.subplots()
-    # ax1.plot(ts, 1e6 * xDat / L_exp2th, color='g', linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
-    # ax1.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    # ax1.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # # ax1.plot(ts, 1e6 * xDat / L_exp2th, color='g', linestyle='-', label=r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBi))
+    # ax1.plot(ts, 1e6 * xDat / L_exp2th, color='g', linestyle='-', label=r'$a_{IB}=$' + '{:.2f}'.format(1 / aIBi / a0_th) + r'[$a_{0}$]')
+    # ax1.plot(ts, 1e6 * xBEC / L_exp2th, 'k:', label='BEC Peak Position')
+    # ax1.plot(ts, 1e6 * xBEC[0] * np.cos(omega_Imp_x * tVals) / L_exp2th, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
     # ax1.legend(loc=2)
     # ax1.set_ylabel(r'$<X> (\mu m)$')
     # ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
@@ -175,12 +177,25 @@ if __name__ == "__main__":
 
     # x_ds = qds['XLab']
     # xI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # xmin = 1e20; xmax = -1e20
     # for ind, aIBi in enumerate(aIBiVals):
     #     xI_array[ind] = x_ds.isel(aIBi=ind).values
+    #     xImax = np.max(xI_array[ind])
+    #     xImin = np.min(xI_array[ind])
+    #     if xmax < xImax:
+    #         xmax = xImax
+    #     if xmin > xImin:
+    #         xmin = xImin
 
     # fig6, ax6 = plt.subplots()
-    # ax6.plot(ts, xBEC, 'k:', label='BEC Peak Position')
-    # ax6.plot(ts, xBEC[0] * np.cos(omega_Imp_x * tVals), color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # if toggleDict['PosScat'] == 'on':
+    #     # ax6.set_ylim([xmin, xmax])
+    #     ax6.set_ylim([-50, 50])
+    # else:
+    #     edge = 1.5 * 1e6 * np.max(xBEC) / L_exp2th
+    #     ax6.set_ylim([-1 * edge, edge])
+    # ax6.plot(ts, 1e6 * xBEC / L_exp2th, 'k:', label='BEC Peak Position')
+    # ax6.plot(ts, 1e6 * xBEC[0] * np.cos(omega_Imp_x * tVals) / L_exp2th, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
     # curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
     # if inverseScat is True:
     #     aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
