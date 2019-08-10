@@ -253,6 +253,13 @@ if __name__ == "__main__":
     axes3.set_ylabel(r'$<X>$')
     axes3.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
+    fig4, axes4 = plt.subplots()
+    mu = 1.5; sig = 0.3
+    gaussian = np.exp(-0.5 * (ts_subsonic_homog - mu)**2 / (2 * sig**2))
+    axes4.plot(ts_subsonic_homog, gaussian)
+    axes4.set_ylabel(r'$F$')
+    axes4.set_xlabel(r'$t$')
+
     plt.show()
 
     # Note: initial P_tot = 0.1 for all force protocols above (and P=0.1 for analytical steady state)
