@@ -256,6 +256,13 @@ if __name__ == "__main__":
     fig4, axes4 = plt.subplots()
     mu = 1.5; sig = 0.3
     gaussian = np.exp(-0.5 * (ts_subsonic_homog - mu)**2 / (2 * sig**2))
+    wide_mask = (ts_subsonic_homog >= 0.75) * (ts_subsonic_homog <= 2.25)
+    wind = np.abs(ts_subsonic_homog - 0.75).argmin().astype(int)
+    gw = gaussian[wind]
+    twide = ts_subsonic_homog[wide_mask]
+    gaussian_wide = np.exp(-0.5 * (twide - mu)**2 / (2 * (10 * sig)**2))
+    gaussian[wide_mask] = gaussian_wide - np.min(gaussian_wide) + gw
+
     axes4.plot(ts_subsonic_homog, gaussian)
     axes4.set_ylabel(r'$F$')
     axes4.set_xlabel(r'$t$')
