@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'false'}
+    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'on', 'ObsONLY': 'false'}
     dParams_List = [{'f_BEC_osc': 80, 'f_Imp_x': 150, 'a_osc': 0.7, 'X0': 0.0, 'P0': 0.4}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 358.6, 'P0': 0.6}]
@@ -224,6 +224,61 @@ if __name__ == "__main__":
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
     # # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
+
+    # # POSITION VS TIME ANIMATION (BEC FRAME)
+
+    # inverseScat = False
+
+    # x_ds = qds['X']
+    # xI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # xmin = 1e20; xmax = -1e20
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     xI_array[ind] = x_ds.isel(aIBi=ind).values
+    #     xImax = np.max(xI_array[ind])
+    #     xImin = np.min(xI_array[ind])
+    #     if xmax < xImax:
+    #         xmax = xImax
+    #     if xmin > xImin:
+    #         xmin = xImin
+
+    # fig6, ax6 = plt.subplots()
+    # if toggleDict['PosScat'] == 'on':
+    #     # ax6.set_ylim([xmin, xmax])
+    #     ax6.set_ylim([-50, 50])
+    # else:
+    #     edge = 2.5 * 1e6 * np.max(xBEC) / L_exp2th
+    #     ax6.set_ylim([-1 * edge, edge])
+    # ax6.plot(ts, 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:', label='BEC TF Radius')
+    # ax6.plot(ts, -1 * 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:')
+    # ax6.plot(ts, 1e6 * (xBEC[0] * np.cos(omega_Imp_x * tVals) - xBEC) / L_exp2th, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
+    # if inverseScat is True:
+    #     aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
+    # else:
+    #     aIB_text = ax6.text(0.75, 0.9, r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[0]) / a0_th).astype(int)) + r' [$a_{0}$]', transform=ax6.transAxes, color='r')
+
+    # ax6.legend(loc=2)
+    # ax6.set_ylabel(r'$<X> (\mu m)$')
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_title('Impurity Trajectory (BEC Frame)')
+
+    # def animate_pos(i):
+    #     # if i >= aIBiVals.size:
+    #     #     return
+    #     curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
+    #     if inverseScat is True:
+    #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     else:
+    #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
+    # anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(aIBiVals.size), repeat=False)
+
+    # # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.gif'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # # anim_p.save(animpath + anim_p_filename, writer='imagemagick')
+
+    # anim_p_filename = '/TrajAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # if toggleDict['CS_Dyn'] == 'off':
+    #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
+    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
     # # POSITION 2D PLOT
 
