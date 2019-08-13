@@ -92,22 +92,22 @@ if __name__ == "__main__":
     tscale_exp = xi_exp / cBEC_exp
     print('c_BEC (um/ms): {:.2f}, xi (um): {:.2f}, xi/c_BEC (ms): {:.2f}'.format(cBEC_exp * 1e3, xi_exp * 1e6, tscale_exp * 1e3))
 
-    # # RTF (Calculating from trap frequencies doesn't match explicit measurements)
+    # RTF (Calculating from trap frequencies doesn't match explicit measurements)
 
-    # n0_TF_pred = n0_TF
-    # # RTF_BEC_X_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_z**2)))
-    # RTF_BEC_X_pred = np.sqrt(2 * mu / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * mu / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * mu / (mB * (omega_BEC_z**2)))
-    # RTF_BEC_X_pred_exp = RTF_BEC_X_pred / L_exp2th; RTF_BEC_Y_pred_exp = RTF_BEC_Y_pred / L_exp2th; RTF_BEC_Z_pred_exp = RTF_BEC_Z_pred / L_exp2th
+    n0_TF_pred = n0_TF
+    # RTF_BEC_X_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * gBB * n0_TF_pred / (mB * (omega_BEC_z**2)))
+    RTF_BEC_X_pred = np.sqrt(2 * mu / (mB * (omega_BEC_x**2))); RTF_BEC_Y_pred = np.sqrt(2 * mu / (mB * (omega_BEC_y**2))); RTF_BEC_Z_pred = np.sqrt(2 * mu / (mB * (omega_BEC_z**2)))
+    RTF_BEC_X_pred_exp = RTF_BEC_X_pred / L_exp2th; RTF_BEC_Y_pred_exp = RTF_BEC_Y_pred / L_exp2th; RTF_BEC_Z_pred_exp = RTF_BEC_Z_pred / L_exp2th
 
-    # print(expParams['RTF_BEC_X'] * 1e6, RTF_BEC_X_pred_exp * 1e6)
-    # print(expParams['RTF_BEC_Y'] * 1e6, RTF_BEC_Y_pred_exp * 1e6)
-    # print(expParams['RTF_BEC_Z'] * 1e6, RTF_BEC_Z_pred_exp * 1e6)
+    print(expParams['RTF_BEC_X'] * 1e6, RTF_BEC_X_pred_exp * 1e6)
+    print(expParams['RTF_BEC_Y'] * 1e6, RTF_BEC_Y_pred_exp * 1e6)
+    print(expParams['RTF_BEC_Z'] * 1e6, RTF_BEC_Z_pred_exp * 1e6)
 
-    # print(gBB * n0_TF_pred / mu)
+    print(gBB * n0_TF_pred / mu)
 
-    # # RTF_X = np.sqrt(expParams['aBB'] * 8 * np.pi * (hbar**2) * expParams['n0_TF'] / ((expParams['mB']**2) * (expParams['omega_BEC_x']**2)))
-    # # RTF_X = np.sqrt(2 * hbar * expParams['mu_div_hbar'] / (expParams['mB'] * (expParams['omega_BEC_x']**2)))
-    # # print(RTF_X * 1e6)
+    # RTF_X = np.sqrt(expParams['aBB'] * 8 * np.pi * (hbar**2) * expParams['n0_TF'] / ((expParams['mB']**2) * (expParams['omega_BEC_x']**2)))
+    # RTF_X = np.sqrt(2 * hbar * expParams['mu_div_hbar'] / (expParams['mB'] * (expParams['omega_BEC_x']**2)))
+    # print(RTF_X * 1e6)
 
     # # MF IMPURITY POTENTIAL
 
@@ -198,3 +198,19 @@ if __name__ == "__main__":
     # ax3.set_title('BEC Density Profile')
 
     # plt.show()
+
+    # MF ENERGY POTENTIAL (CURRENT CODE JUST EXTENDS THE MF POTENTAL FROM BEC DENSITY PAST THE TF RADIUS)
+
+    cParams = {}; cParams['aIBi'] = aIBi_Vals[100]
+    print(aIBexp_Vals[100] / a0_exp)
+    X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
+    E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+
+    def F_pol_func(X): return pf_dynamic_sph.F_pol(X, E_Pol_tck)
+
+    fig, ax = plt.subplots()
+    ax.plot(X_Vals, 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0), 'b-')
+    X_Vals_extend = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 400)
+    ax.plot(X_Vals_extend, 1 * interpolate.splev(X_Vals_extend, E_Pol_tck, der=0), 'g--')
+
+    plt.show()
