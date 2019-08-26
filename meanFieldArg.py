@@ -104,6 +104,8 @@ if __name__ == "__main__":
     print(expParams['RTF_BEC_Z'] * 1e6, RTF_BEC_Z_pred_exp * 1e6)
 
     print(gBB * n0_TF_pred / mu)
+    n0_BEC = expParams['n0_BEC'] / (L_exp2th**3)
+    print(gBB * n0_BEC / E_exp2th / hbar)
 
     # RTF_X = np.sqrt(expParams['aBB'] * 8 * np.pi * (hbar**2) * expParams['n0_TF'] / ((expParams['mB']**2) * (expParams['omega_BEC_x']**2)))
     # RTF_X = np.sqrt(2 * hbar * expParams['mu_div_hbar'] / (expParams['mB'] * (expParams['omega_BEC_x']**2)))
@@ -202,7 +204,7 @@ if __name__ == "__main__":
     # MF ENERGY POTENTIAL (CURRENT CODE JUST EXTENDS THE MF POTENTAL FROM BEC DENSITY PAST THE TF RADIUS)
 
     cParams = {}; cParams['aIBi'] = aIBi_Vals[100]
-    print(aIBexp_Vals[100] / a0_exp)
+    # print(aIBexp_Vals[100] / a0_exp)
     X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
     E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
 
