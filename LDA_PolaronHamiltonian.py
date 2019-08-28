@@ -119,8 +119,8 @@ class LDA_PolaronHamiltonian:
         P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
         if np.abs(X) >= RTF_X:
-            amplitude_new_temp = amplitude
-            phase_new_temp = phase
+            amplitude_new_temp = 0 * amplitude_new_temp
+            phase_new_temp = 0 * phase_new_temp
             P_new_temp = F_ext_func(t, F, dP) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
             X_new_temp = (P - PB) / mI
 
