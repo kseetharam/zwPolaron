@@ -278,7 +278,7 @@ if __name__ == "__main__":
     # anim_p_filename = '/TrajAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
-    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
+    # # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
     # # POSITION 2D PLOT
 
@@ -366,7 +366,7 @@ if __name__ == "__main__":
     # # OSCILLATION FREQUENCY 2D PLOT
 
     # inverseScat = False
-    # a0ylim = 1000
+    # a0ylim = 4000
     # delayedStart = False
     # deleteDC = False
 
@@ -406,8 +406,8 @@ if __name__ == "__main__":
     #         maxph = np.max(absFTVals)
 
     # print(maxph)
-    # # vmax = maxph
-    # vmax = 100000
+    # vmax = maxph
+    # # vmax = 100000
 
     # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
 
