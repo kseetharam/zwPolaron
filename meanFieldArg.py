@@ -211,8 +211,22 @@ if __name__ == "__main__":
     def F_pol_func(X): return pf_dynamic_sph.F_pol(X, E_Pol_tck)
 
     fig, ax = plt.subplots()
-    ax.plot(X_Vals, 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0), 'b-')
+    ax.plot(1e6 * X_Vals / L_exp2th, 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0), 'b-')
     X_Vals_extend = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 400)
-    ax.plot(X_Vals_extend, 1 * interpolate.splev(X_Vals_extend, E_Pol_tck, der=0), 'g--')
+    ax.plot(1e6 * X_Vals_extend / L_exp2th, 1 * interpolate.splev(X_Vals_extend, E_Pol_tck, der=0), 'g--')
+
+    n0_TF = trapParams['n0_TF_BEC']; RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']
+    n0_thermal = trapParams['n0_thermal_BEC']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']
+
+    # Find a_star^{-1} values for different densities
+    aSiVals = np.zeros(X_Vals.size)
+    for ind, X in enumerate(X_Vals):
+        n = pf_dynamic_sph.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
+        aSiVals[ind] = pfs.aSi_grid(kgrid, 0, mI, mB, n, gBB)
+    aSVals = 1 / (aSiVals * L_exp2th) / a0_exp
+
+    fig2, ax2 = plt.subplots()
+    # ax2.plot(1e6 * X_Vals / L_exp2th, aSVals)
+    ax2.plot(1e6 * X_Vals / L_exp2th, -1 / aSVals)
 
     plt.show()

@@ -151,8 +151,16 @@ if __name__ == "__main__":
     gBB = (4 * np.pi / mB) * aBB
 
     sParams = [mI, mB, n0, gBB]
+    a0_exp = 5.29e-11  # Bohr radius (m)
 
-    aIBi = (expParams['aIB'] * L_exp2th)**(-1)
+    # aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 20, endpoint=False), np.linspace(-2000, -70, 175, endpoint=False), np.linspace(-70, -20, 5))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 100) * a0_exp))
+    # aIBexp_Vals = np.concatenate((np.linspace(-4000, -2000, 5, endpoint=False), np.linspace(-2000, -70, 5, endpoint=False), np.linspace(-70, -20, 3))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 5) * a0_exp))
+    aIBexp_Vals = np.linspace(20, 650, 5) * a0_exp
+    aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
+    # aIBi = (expParams['aIB'] * L_exp2th)**(-1)
+    aIBi = aIBi_Vals[2]
+    print(aIBi, 1 / (aIBi * L_exp2th) / a0_exp)
+
     cParams = {'aIBi': aIBi}
     hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
 
@@ -201,36 +209,36 @@ if __name__ == "__main__":
 
     n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
 
-    fig, ax = plt.subplots(nrows=2, ncols=2)
+    # fig, ax = plt.subplots(nrows=2, ncols=2)
 
-    ax[1, 0].plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'k-')
-    ax[1, 0].set_xlabel('$X$ ($\mu$m)')
-    ax[1, 0].set_ylabel('$n(X)$ ($cm^{-3}$)')
-    ax[1, 0].set_title('BEC Density Profile')
+    # ax[1, 0].plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'k-')
+    # ax[1, 0].set_xlabel('$X$ ($\mu$m)')
+    # ax[1, 0].set_ylabel('$n(X)$ ($cm^{-3}$)')
+    # ax[1, 0].set_title('BEC Density Profile')
 
-    ax[0, 0].plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
-    ax[0, 0].plot(X_Vals_m * 1e6, EpVals_harm_Hz * 1e-3, 'b-', label='Harmonic Fit ({:.0f} Hz)'.format(freq_p_Hz))
-    ax[0, 0].plot(X_Vals_m * 1e6, VtB_Hz * 1e-3 + np.min(EpVals_Hz * 1e-3), 'g-', label='Shifted BEC Trap ({:.0f} Hz)'.format(freq_tB_Hz))
-    ax[0, 0].legend()
-    ax[0, 0].set_xlabel('X ($\mu$m)')
-    ax[0, 0].set_ylabel('Frequency (kHz)')
-    ax[0, 0].set_title('Traps')
+    # ax[0, 0].plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
+    # ax[0, 0].plot(X_Vals_m * 1e6, EpVals_harm_Hz * 1e-3, 'b-', label='Harmonic Fit ({:.0f} Hz)'.format(freq_p_Hz))
+    # ax[0, 0].plot(X_Vals_m * 1e6, VtB_Hz * 1e-3 + np.min(EpVals_Hz * 1e-3), 'g-', label='Shifted BEC Trap ({:.0f} Hz)'.format(freq_tB_Hz))
+    # ax[0, 0].legend()
+    # ax[0, 0].set_xlabel('X ($\mu$m)')
+    # ax[0, 0].set_ylabel('Frequency (kHz)')
+    # ax[0, 0].set_title('Traps')
 
-    ax[0, 1].plot(X_Vals_m * 1e6, FpVals_interp * 1e24 / F_exp2th, 'r-', label=r'$F_{pol}(n(X))$')
-    ax[0, 1].plot(X_Vals_m * 1e6, (-mI * omegap**2 * X_Vals) * 1e24 / F_exp2th, 'b-', label='Harmonic Fit')
-    ax[0, 1].legend()
-    ax[0, 1].set_xlabel('X ($\mu$m)')
-    ax[0, 1].set_ylabel('Force (yN)')
-    ax[0, 1].set_title(r'$F_{pol}(n(X))$')
+    # ax[0, 1].plot(X_Vals_m * 1e6, FpVals_interp * 1e24 / F_exp2th, 'r-', label=r'$F_{pol}(n(X))$')
+    # ax[0, 1].plot(X_Vals_m * 1e6, (-mI * omegap**2 * X_Vals) * 1e24 / F_exp2th, 'b-', label='Harmonic Fit')
+    # ax[0, 1].legend()
+    # ax[0, 1].set_xlabel('X ($\mu$m)')
+    # ax[0, 1].set_ylabel('Force (yN)')
+    # ax[0, 1].set_title(r'$F_{pol}(n(X))$')
 
-    fig.delaxes(ax[1, 1])
-    fig.tight_layout()
+    # fig.delaxes(ax[1, 1])
+    # fig.tight_layout()
 
-    fig2, ax2 = plt.subplots()
-    ax2.plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'k-')
-    ax2.set_xlabel('$X$ ($\mu$m)')
-    ax2.set_ylabel('$n(X)$ ($cm^{-3}$)')
-    ax2.set_title('BEC Density Profile')
+    # fig2, ax2 = plt.subplots()
+    # ax2.plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'k-')
+    # ax2.set_xlabel('$X$ ($\mu$m)')
+    # ax2.set_ylabel('$n(X)$ ($cm^{-3}$)')
+    # ax2.set_title('BEC Density Profile')
 
     fig3, ax3 = plt.subplots()
     ax3.plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
@@ -240,5 +248,27 @@ if __name__ == "__main__":
     ax3.set_xlabel('X ($\mu$m)')
     ax3.set_ylabel('Frequency (kHz)')
     ax3.set_title('Traps')
+
+    freqVals = np.zeros(aIBi_Vals.size)
+    for inda, aIBi in enumerate(aIBi_Vals):
+        cParams = {'aIBi': aIBi}
+        E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        EpVals_interp = 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0)
+
+        X_Vals_poly = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.5, trapParams['RTF_BEC_X'] * 0.5, 50)
+        EpVals_poly = 1 * interpolate.splev(X_Vals_poly, E_Pol_tck, der=0)
+        [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
+        omegap = np.sqrt(2 * p2 / mI)
+        freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+        freqVals[inda] = freq_p_Hz
+
+    fig4, ax4 = plt.subplots()
+    ax4.plot(aIBexp_Vals / a0_exp, freqVals)
+    ax4.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    ax4.set_ylabel('Frequency (Hz)')
+    ax4.set_title('Polaron Energy Potential Harmonic Fit')
+
+    print(aIBexp_Vals / a0_exp)
+    print(freqVals)
 
     plt.show()
