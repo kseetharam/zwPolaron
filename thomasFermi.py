@@ -154,8 +154,8 @@ if __name__ == "__main__":
     a0_exp = 5.29e-11  # Bohr radius (m)
 
     # aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 20, endpoint=False), np.linspace(-2000, -70, 175, endpoint=False), np.linspace(-70, -20, 5))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 100) * a0_exp))
-    # aIBexp_Vals = np.concatenate((np.linspace(-4000, -2000, 5, endpoint=False), np.linspace(-2000, -70, 5, endpoint=False), np.linspace(-70, -20, 3))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 5) * a0_exp))
-    aIBexp_Vals = np.linspace(20, 650, 5) * a0_exp
+    aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 5, endpoint=False), np.linspace(-2000, -70, 5, endpoint=False), np.linspace(-70, -20, 3))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 10,) * a0_exp))
+    # aIBexp_Vals = np.linspace(20, 650, 5) * a0_exp
     aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
     # aIBi = (expParams['aIB'] * L_exp2th)**(-1)
     aIBi = aIBi_Vals[2]
@@ -170,7 +170,8 @@ if __name__ == "__main__":
     n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
     RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
-    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z}
+    omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_Imp_x': omega_Imp_x}
 
     # cBEC = pfs.nu(mB, n0, gBB)
     # cBEC_exp = cBEC * T_exp2th / L_exp2th
@@ -240,6 +241,9 @@ if __name__ == "__main__":
     # ax2.set_ylabel('$n(X)$ ($cm^{-3}$)')
     # ax2.set_title('BEC Density Profile')
 
+    def V_Imp_trap(X, omega_Imp_x, mI):
+        return 0.5 * mI * (omega_Imp_x**2) * (X**2)
+
     fig3, ax3 = plt.subplots()
     ax3.plot(X_Vals_m * 1e6, EpVals_Hz * 1e-3, 'r-', label=r'$E_{pol}(n(X))$')
     ax3.plot(X_Vals_m * 1e6, EpVals_harm_Hz * 1e-3, 'b-', label='Harmonic Fit ({:.0f} Hz)'.format(freq_p_Hz))
@@ -249,7 +253,8 @@ if __name__ == "__main__":
     ax3.set_ylabel('Frequency (kHz)')
     ax3.set_title('Traps')
 
-    freqVals = np.zeros(aIBi_Vals.size)
+    freqVals_Ep = np.zeros(aIBi_Vals.size)
+    freqVals_MF = np.zeros(aIBi_Vals.size)
     for inda, aIBi in enumerate(aIBi_Vals):
         cParams = {'aIBi': aIBi}
         E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
@@ -257,18 +262,51 @@ if __name__ == "__main__":
 
         X_Vals_poly = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.5, trapParams['RTF_BEC_X'] * 0.5, 50)
         EpVals_poly = 1 * interpolate.splev(X_Vals_poly, E_Pol_tck, der=0)
+
         [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
         omegap = np.sqrt(2 * p2 / mI)
         freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
-        freqVals[inda] = freq_p_Hz
+        freqVals_Ep[inda] = freq_p_Hz
+
+        V_Imp_Vals = V_Imp_trap(X_Vals_poly, trapParams['omega_Imp_x'], mI)
+        MF_pot = V_Imp_Vals + EpVals_poly
+        [p2, p1, p0] = np.polyfit(X_Vals_poly, MF_pot, deg=2)
+        omegap = np.sqrt(2 * p2 / mI)
+        freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+        freqVals_MF[inda] = freq_p_Hz
+
+        # fig, ax = plt.subplots()
+        # ax.plot(X_Vals_poly, MF_pot)
+        # ax.set_title('{0}'.format(1 / (aIBi * L_exp2th) / a0_exp))
+
+    # Find a_star^{-1} values for different densities
+    aSiVals = np.zeros(X_Vals.size)
+    for ind, X in enumerate(X_Vals):
+        n = pf_dynamic_sph.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+        aSiVals[ind] = pfs.aSi_grid(kgrid, 0, mI, mB, n, gBB)
+    aSVals = 1 / (aSiVals * L_exp2th) / a0_exp
 
     fig4, ax4 = plt.subplots()
-    ax4.plot(aIBexp_Vals / a0_exp, freqVals)
+    ax4.plot(aIBexp_Vals / a0_exp, freqVals_Ep)
     ax4.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
     ax4.set_ylabel('Frequency (Hz)')
     ax4.set_title('Polaron Energy Potential Harmonic Fit')
 
+    fig5, ax5 = plt.subplots()
+    ax5.plot(aIBexp_Vals / a0_exp, freqVals_MF, 'r-', label='Effective Trap Frequency')
+    ax5.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
+    ax5.plot(-1 * np.min(aSVals) * np.ones(aIBexp_Vals.size), np.linspace(np.nanmin(freqVals_MF), np.nanmax(freqVals_MF), aIBexp_Vals.size), 'k--', label=r'$-a^{*}(x_{min},\vec{P}=0)$')
+    ax5.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    ax5.set_ylabel('Frequency (Hz)')
+    ax5.set_title('Total Impurity Potential (Bare Trap + Polaron Energy)')
+    ax5.legend(loc=1)
+
+    # fig6, ax6 = plt.subplots()
+    # ax6.plot(1e6 * X_Vals / L_exp2th, aSVals)
+
     print(aIBexp_Vals / a0_exp)
-    print(freqVals)
+    print(freqVals_Ep)
+    print(freqVals_MF)
+    print(np.min(aSVals))
 
     plt.show()
