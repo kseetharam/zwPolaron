@@ -253,14 +253,19 @@ if __name__ == "__main__":
     ax3.set_ylabel('Frequency (kHz)')
     ax3.set_title('Traps')
 
+    mR = pf_dynamic_sph.ur(mI, mB)
+    gIB_Vals_Born = (2 * np.pi / mR) * 1 / aIBi_Vals
+    X_Vals_poly = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.5, trapParams['RTF_BEC_X'] * 0.5, 50)
+    n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals_poly, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+
     freqVals_Ep = np.zeros(aIBi_Vals.size)
     freqVals_MF = np.zeros(aIBi_Vals.size)
+    freqVals_naiveMF = np.zeros(aIBi_Vals.size)
     for inda, aIBi in enumerate(aIBi_Vals):
         cParams = {'aIBi': aIBi}
         E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
         EpVals_interp = 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0)
 
-        X_Vals_poly = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.5, trapParams['RTF_BEC_X'] * 0.5, 50)
         EpVals_poly = 1 * interpolate.splev(X_Vals_poly, E_Pol_tck, der=0)
 
         [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
@@ -274,6 +279,11 @@ if __name__ == "__main__":
         omegap = np.sqrt(2 * p2 / mI)
         freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
         freqVals_MF[inda] = freq_p_Hz
+
+        [p2, p1, p0] = np.polyfit(X_Vals_poly, V_Imp_Vals + gIB_Vals_Born[inda] * n_BEC_Vals, deg=2)
+        omegap = np.sqrt(2 * p2 / mI)
+        freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+        freqVals_naiveMF[inda] = freq_p_Hz
 
         # fig, ax = plt.subplots()
         # ax.plot(X_Vals_poly, MF_pot)
@@ -293,20 +303,32 @@ if __name__ == "__main__":
     ax4.set_title('Polaron Energy Potential Harmonic Fit')
 
     fig5, ax5 = plt.subplots()
-    ax5.plot(aIBexp_Vals / a0_exp, freqVals_MF, 'r-', label='Effective Trap Frequency')
-    ax5.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
-    ax5.plot(-1 * np.min(aSVals) * np.ones(aIBexp_Vals.size), np.linspace(np.nanmin(freqVals_MF), np.nanmax(freqVals_MF), aIBexp_Vals.size), 'k--', label=r'$-a^{*}(x_{min},\vec{P}=0)$')
+    ax5.plot(aIBexp_Vals / a0_exp, freqVals_MF, 'r-', label='Bare Trap + Polaron Energy')
+    ax5.plot(aIBexp_Vals / a0_exp, freqVals_naiveMF, 'g-', label=r'Bare Trap + $g_{IB}n_{BEC}$')
+    ax5.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap')
+    ax5.plot(-1 * np.min(aSVals) * np.ones(aIBexp_Vals.size), np.linspace(np.nanmin(freqVals_MF), np.nanmax(freqVals_naiveMF), aIBexp_Vals.size), 'k--', label=r'$-a_{*}(x_{min},\vec{P}=0)$')
     ax5.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
     ax5.set_ylabel('Frequency (Hz)')
-    ax5.set_title('Total Impurity Potential (Bare Trap + Polaron Energy)')
+    ax5.set_title('Effective Impurity Potential Harmonic Fit')
     ax5.legend(loc=1)
 
-    # fig6, ax6 = plt.subplots()
-    # ax6.plot(1e6 * X_Vals / L_exp2th, aSVals)
+    fig6, ax6 = plt.subplots()
+    ax6.plot(1 / (aIBexp_Vals / a0_exp), freqVals_MF, 'r-', label='Bare Trap + Polaron Energy')
+    ax6.plot(1 / (aIBexp_Vals / a0_exp), freqVals_naiveMF, 'gx', label=r'Bare Trap + $g_{IB}n_{BEC}$')
+    ax6.plot(1 / (aIBexp_Vals / a0_exp), (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap')
+    ax6.plot((1 / np.min(aSVals)) * np.ones(aIBexp_Vals.size), np.linspace(np.nanmin(freqVals_MF), np.nanmax(freqVals_naiveMF), aIBexp_Vals.size), 'k--', label=r'$a_{*}^{-1}(x_{min},\vec{P}=0)$')
+    ax6.set_xlabel(r'$a_{IB}^{-1}$ [$a_{0}^{-1}$]')
+    ax6.set_ylabel('Frequency (Hz)')
+    ax6.set_title('Effective Impurity Potential Harmonic Fit')
+    ax6.legend(loc=1)
+
+    # fig7, ax7 = plt.subplots()
+    # ax7.plot(1e6 * X_Vals / L_exp2th, aSVals)
 
     print(aIBexp_Vals / a0_exp)
     print(freqVals_Ep)
     print(freqVals_MF)
     print(np.min(aSVals))
+    print(1 / np.min(aSVals))
 
     plt.show()

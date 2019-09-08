@@ -182,51 +182,57 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # BEC DENSITY PROFILE (TF + THERMAL CLOUD)
+    # BEC DENSITY PROFILE (TF + THERMAL CLOUD)
 
-    # X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 1e3)
-    # X_Vals_m = X_Vals / L_exp2th
+    X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 1e3)
+    X_Vals_m = X_Vals / L_exp2th
 
-    # n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
-    # n_BEC_TF = pf_dynamic_sph.n_thomasFermi(X_Vals, 0, 0, n0_TF, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z)
-    # n_BEC_thermal = pf_dynamic_sph.n_thermal(X_Vals, 0, 0, n0_thermal, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
-    # fig3, ax3 = plt.subplots()
-    # ax3.plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'b-', label='Total')
-    # ax3.plot(X_Vals_m * 1e6, n_BEC_TF * (L_exp2th**3) * 1e-6, 'g-', label='TF')
-    # ax3.plot(X_Vals_m * 1e6, n_BEC_thermal * (L_exp2th**3) * 1e-6, 'r-', label='Thermal')
-    # ax3.legend()
-    # ax3.set_xlabel('$X$ ($\mu$m)')
-    # ax3.set_ylabel('$n(X)$ ($cm^{-3}$)')
-    # ax3.set_title('BEC Density Profile')
+    n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+    n_BEC_TF = pf_dynamic_sph.n_thomasFermi(X_Vals, 0, 0, n0_TF, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z)
+    n_BEC_thermal = pf_dynamic_sph.n_thermal(X_Vals, 0, 0, n0_thermal, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+    fig3, ax3 = plt.subplots()
+    ax3.plot(X_Vals_m * 1e6, n_BEC_Vals * (L_exp2th**3) * 1e-6, 'b-', label='Total')
+    ax3.plot(X_Vals_m * 1e6, n_BEC_TF * (L_exp2th**3) * 1e-6, 'g-', label='TF')
+    ax3.plot(X_Vals_m * 1e6, n_BEC_thermal * (L_exp2th**3) * 1e-6, 'r-', label='Thermal')
+    ax3.legend()
+    ax3.set_xlabel('$X$ ($\mu$m)')
+    ax3.set_ylabel('$n(X)$ ($cm^{-3}$)')
+    ax3.set_title('BEC Density Profile')
 
-    # plt.show()
-
-    # MF ENERGY POTENTIAL (CURRENT CODE JUST EXTENDS THE MF POTENTAL FROM BEC DENSITY PAST THE TF RADIUS)
-
-    cParams = {}; cParams['aIBi'] = aIBi_Vals[100]
-    # print(aIBexp_Vals[100] / a0_exp)
-    X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
-    E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-
-    def F_pol_func(X): return pf_dynamic_sph.F_pol(X, E_Pol_tck)
-
-    fig, ax = plt.subplots()
-    ax.plot(1e6 * X_Vals / L_exp2th, 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0), 'b-')
-    X_Vals_extend = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 400)
-    ax.plot(1e6 * X_Vals_extend / L_exp2th, 1 * interpolate.splev(X_Vals_extend, E_Pol_tck, der=0), 'g--')
-
-    n0_TF = trapParams['n0_TF_BEC']; RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']
-    n0_thermal = trapParams['n0_thermal_BEC']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']
-
-    # Find a_star^{-1} values for different densities
-    aSiVals = np.zeros(X_Vals.size)
-    for ind, X in enumerate(X_Vals):
-        n = pf_dynamic_sph.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
-        aSiVals[ind] = pfs.aSi_grid(kgrid, 0, mI, mB, n, gBB)
-    aSVals = 1 / (aSiVals * L_exp2th) / a0_exp
-
-    fig2, ax2 = plt.subplots()
-    # ax2.plot(1e6 * X_Vals / L_exp2th, aSVals)
-    ax2.plot(1e6 * X_Vals / L_exp2th, -1 / aSVals)
+    X_Vals_poly = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.5, trapParams['RTF_BEC_X'] * 0.5, 50)
+    [p2, p1, p0] = np.polyfit(X_Vals_poly, -1 * pf_dynamic_sph.n_BEC(X_Vals_poly, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z), deg=2)
+    omegap = np.sqrt(2 * p2 / mI)
+    freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+    print(freq_p_Hz)
 
     plt.show()
+
+    # # MF ENERGY POTENTIAL (CURRENT CODE JUST EXTENDS THE MF POTENTAL FROM BEC DENSITY PAST THE TF RADIUS)
+
+    # cParams = {}; cParams['aIBi'] = aIBi_Vals[100]
+    # # print(aIBexp_Vals[100] / a0_exp)
+    # X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
+    # E_Pol_tck = pf_dynamic_sph.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+
+    # def F_pol_func(X): return pf_dynamic_sph.F_pol(X, E_Pol_tck)
+
+    # fig, ax = plt.subplots()
+    # ax.plot(1e6 * X_Vals / L_exp2th, 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0), 'b-')
+    # X_Vals_extend = np.linspace(-1 * trapParams['RTF_BEC_X'] * 2, trapParams['RTF_BEC_X'] * 2, 400)
+    # ax.plot(1e6 * X_Vals_extend / L_exp2th, 1 * interpolate.splev(X_Vals_extend, E_Pol_tck, der=0), 'g--')
+
+    # n0_TF = trapParams['n0_TF_BEC']; RTF_X = trapParams['RTF_BEC_X']; RTF_Y = trapParams['RTF_BEC_Y']; RTF_Z = trapParams['RTF_BEC_Z']
+    # n0_thermal = trapParams['n0_thermal_BEC']; RG_X = trapParams['RG_BEC_X']; RG_Y = trapParams['RG_BEC_Y']; RG_Z = trapParams['RG_BEC_Z']
+
+    # # Find a_star^{-1} values for different densities
+    # aSiVals = np.zeros(X_Vals.size)
+    # for ind, X in enumerate(X_Vals):
+    #     n = pf_dynamic_sph.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)
+    #     aSiVals[ind] = pfs.aSi_grid(kgrid, 0, mI, mB, n, gBB)
+    # aSVals = 1 / (aSiVals * L_exp2th) / a0_exp
+
+    # fig2, ax2 = plt.subplots()
+    # # ax2.plot(1e6 * X_Vals / L_exp2th, aSVals)
+    # ax2.plot(1e6 * X_Vals / L_exp2th, -1 / aSVals)
+
+    # plt.show()
