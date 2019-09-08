@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'on', 'ObsONLY': 'false'}
+    toggleDict = {'Location': 'work', 'CS_Dyn': 'on', 'PosScat': 'off', 'ObsONLY': 'false'}
     dParams_List = [{'f_BEC_osc': 80, 'f_Imp_x': 150, 'a_osc': 0.7, 'X0': 0.0, 'P0': 0.4}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 358.6, 'P0': 0.6}]
@@ -929,11 +929,21 @@ if __name__ == "__main__":
     #     ax3.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
     #     # ax3.set_xlim([-1 * a0xlim, np.max(aIBVals)])
 
+    #     fig4, ax4 = plt.subplots()
+    #     freq_beta_Hz = (np.sqrt(betaVals) / (2 * np.pi)) * T_exp2th
+    #     freq_MF_Hz = (np.sqrt(betaVals + omega_Imp_x**2) / (2 * np.pi)) * T_exp2th
+    #     ax4.plot(aIBVals, freq_MF_Hz, color='m', linestyle='', marker='x')
+    #     # ax4.plot(aIBVals, freq_beta_Hz, color='b', linestyle='', marker='o', markerfacecolor='none', label=r'$\sqrt(\beta)$')
+    #     ax4.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    #     ax4.set_ylabel('Frequency (Hz)')
+    #     ax4.set_title('Effective Impurity Potential Parameter ' + r'($\sqrt{\beta+\omega_{0}^2}$)')
+
     #     print(aIBVals)
     #     print(gammaVals)
     #     print(betaVals)
     #     print(rhoVals)
     #     print(omega_Imp_x, omega_BEC_osc)
+    #     print(freq_MF_Hz)
 
     # # PLOT ERROR OF FIT
     # fig1, ax1 = plt.subplots()
