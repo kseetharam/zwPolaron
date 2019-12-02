@@ -382,9 +382,15 @@ if __name__ == "__main__":
     #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
     # anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(aIBiVals.size), repeat=False)
 
-    # # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_ / tscale
-    # # v_BEC_osc = np.diff(xBEC) / dt
-    # # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
+    # anim_p_filename = '/TrajAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # if toggleDict['CS_Dyn'] == 'off':
+    #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
+    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
+
+    # # # VELOCITY VS TIME (LAB FRAME)
+
+    # v_BEC_osc = np.diff(xBEC) / dt
+    # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * v_ds['t'].values)
 
     # v_BEC_osc = np.gradient(xBEC, tVals)
     # v_ImpTrap = -1 * xBEC[0] * omega_Imp_x * np.sin(omega_Imp_x * tVals)
@@ -505,6 +511,7 @@ if __name__ == "__main__":
 
     # inverseScat = False
     # a0ylim = 12000
+    # # a0ylim = 1000
     # delayedStart = False
     # deleteDC = False
 
@@ -546,7 +553,7 @@ if __name__ == "__main__":
     # print(maxph)
     # # vmax = maxph
     # vmax = 100000
-    # # vmax = 20000
+    # # vmax = 200000
 
     # absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
 
