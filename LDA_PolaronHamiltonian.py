@@ -27,6 +27,7 @@ class LDA_PolaronHamiltonian:
         self.BEC_density_var = toggleDict['BEC_density']
         self.BEC_density_osc = toggleDict['BEC_density_osc']
         self.CS_Dyn = toggleDict['CS_Dyn']
+        self.Pol_Potential = toggleDict['Polaron_Potential']
         self.a_osc = trapParams['a_osc']
 
         if self.couplingType == 'frohlich':
@@ -116,8 +117,13 @@ class LDA_PolaronHamiltonian:
                                     amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
-        P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+
+        if self.Pol_Potential == 'off':
+            P_new_temp = F_ext_func(t, F, dP) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        else:
+            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
+
         if np.abs(X) >= RTF_X:
             amplitude_new_temp = 0 * amplitude_new_temp
             phase_new_temp = 0 * phase_new_temp
