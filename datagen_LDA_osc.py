@@ -227,7 +227,8 @@ if __name__ == "__main__":
         for aIBi in aIBi_Vals:
             metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
 
-    # missInds = [5, 23, 28, 42, 128]
+    # missInds = [5, 23, 28, 42, 128] # negative scattering length (no pol pot, CS dyn on)
+    # missInds = [1, 2, 174, 175, 176, 177, 178, 179, 180] # positive scattering length (no pol pot, CS dyn on)
     # missList = []
     # for mind in missInds:
     #     missList.append(metaList[mind])
