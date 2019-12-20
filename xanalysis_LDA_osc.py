@@ -19,8 +19,8 @@ if __name__ == "__main__":
     # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
-    # mpegWriter = writers['ffmpeg'](fps=1, bitrate=1800)
-    mpegWriter = writers['ffmpeg'](bitrate=1800)
+    # # mpegWriter = writers['ffmpeg'](fps=1, bitrate=1800)
+    # mpegWriter = writers['ffmpeg'](bitrate=1800)
 
     # gParams
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'CS_Dyn': 'off', 'PosScat': 'on', 'ObsONLY': 'false'}
+    toggleDict = {'CS_Dyn': 'off', 'PosScat': 'on', 'ObsONLY': 'false'}
     dParams_List = [{'f_BEC_osc': 80, 'f_Imp_x': 150, 'a_osc': 0.7, 'X0': 0.0, 'P0': 0.4}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 0.0, 'P0': 0.6}]
     # dParams_List = [{'f_BEC_osc': 500, 'f_Imp_x': 1000, 'a_osc': 0.5, 'X0': 358.6, 'P0': 0.6}]
@@ -49,12 +49,10 @@ if __name__ == "__main__":
     datapath_List = []
     datapath_noscList = []
     for dParams in dParams_List:
-        if toggleDict['Location'] == 'home':
-            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-            animpath = '/home/kis/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
-        elif toggleDict['Location'] == 'work':
-            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-            animpath = '/media/kis/Storage/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
+        datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+        animpath = '/Users/kis/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
+        # datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+        # animpath = '/media/kis/Storage/Dropbox/ZwierleinExp/figures/aBB={:.3f}/BEC_osc'.format(aBB)
         if toggleDict['PosScat'] == 'on':
             innerdatapath = datapath + '/BEC_osc/PosScat'
         else:
@@ -119,9 +117,14 @@ if __name__ == "__main__":
     L_exp2th, M_exp2th, T_exp2th = pfs.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
     RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th
     omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
-    a0_exp = 5.29e-11; a0_th = a0_exp * L_exp2th
+    a0_exp = 5.29e-11
+    a0_th = a0_exp * L_exp2th
 
-    f_BEC_osc = 80; f_Imp_x = 150; a_osc = 0.7; X0 = 0.0; P0 = 0.4
+    f_BEC_osc = 80
+    f_Imp_x = 150
+    a_osc = 0.7
+    X0 = 0.0
+    P0 = 0.4
     # f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 0.0; P0 = 0.6
     # f_BEC_osc = 500; f_Imp_x = 1000; a_osc = 0.5; X0 = 358.6; P0 = 0.6
     qds = ds_Dict[(f_BEC_osc, f_Imp_x, a_osc, X0, P0)]
@@ -341,7 +344,8 @@ if __name__ == "__main__":
 
     x_ds = qds['X']
     xI_array = np.empty(aIBiVals.size, dtype=np.object)
-    xmin = 1e20; xmax = -1e20
+    xmin = 1e20
+    xmax = -1e20
     for ind, aIBi in enumerate(aIBiVals):
         xI_array[ind] = x_ds.isel(aIBi=ind).values
         xImax = np.max(xI_array[ind])
