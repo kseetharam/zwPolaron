@@ -308,7 +308,7 @@ if __name__ == "__main__":
     # anim_p_filename = '/TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_p_filename = '/NoCSdyn_' + anim_p_filename[1:]
-    # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
+    # # anim_p.save(animpath + anim_p_filename, writer=mpegWriter)
 
     # # POSITION VS TIME ANIMATION (BEC FRAME)
 
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # anim_pB_filename = '/TrajAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_pB_filename = '/NoCSdyn_' + anim_pB_filename[1:]
-    # anim_pB.save(animpath + anim_pB_filename, writer=mpegWriter)
+    # # anim_pB.save(animpath + anim_pB_filename, writer=mpegWriter)
 
     # # VELOCITY VS TIME ANIMATION (BEC FRAME)
 
@@ -402,7 +402,7 @@ if __name__ == "__main__":
     # anim_v_filename = '/VelAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_v_filename = '/NoCSdyn_' + anim_v_filename[1:]
-    # anim_v.save(animpath + anim_v_filename, writer=mpegWriter)
+    # # anim_v.save(animpath + anim_v_filename, writer=mpegWriter)
 
     # # ACCELERATION VS TIME ANIMATION (LAB FRAME)
 
@@ -426,7 +426,8 @@ if __name__ == "__main__":
 
     # ax6.plot(ts, aL_bareImp * (T_exp2th * T_exp2th / L_exp2th), color='orange', linestyle=':', marker='', label='Bare Impurity')
     # FIT_curve = ax6.plot(ts, (1 / mI) * pfs.F_Imp_trap(xI_array[0], omega_Imp_x, mI) * (T_exp2th * T_exp2th / L_exp2th), color='magenta', linestyle='dashed', marker='', label='Impurity Trap Force')[0]
-    # # bImod = ax6.plot(ts, np.gradient(np.gradient((xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + ((P0 - Pph0_array[0]) / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals), tVals), tVals) * (T_exp2th * T_exp2th / L_exp2th), color='orange', linestyle=':', marker='', label='Bare Impurity')[0]
+    # # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + ((P0 - Pph0_array[0]) / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
+    # # bImod = ax6.plot(ts, (-(omega_Imp_x**2) * (xL_bareImp - (1 / mI) * Pph0_array[0] * tVals)**2) * (T_exp2th * T_exp2th / L_exp2th), color='orange', linestyle=':', marker='', label='BI Mod')[0]
 
     # ax6.legend(loc=2)
     # ax6.set_ylabel(r'$a=\frac{d^{2}<X>}{dt^{2}} (\frac{\mu m}{ms^{2}})$')
@@ -440,7 +441,8 @@ if __name__ == "__main__":
     #         return
     #     curve.set_ydata(aI_array[i] * (T_exp2th * T_exp2th / L_exp2th))
     #     FIT_curve.set_ydata((1 / mI) * pfs.F_Imp_trap(xI_array[i], omega_Imp_x, mI) * (T_exp2th * T_exp2th / L_exp2th))
-    #     # bImod.set_ydata(np.gradient(np.gradient((xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + ((P0 - Pph0_array[i]) / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals), tVals), tVals) * (T_exp2th * T_exp2th / L_exp2th))
+    #     # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + ((P0 - Pph0_array[i]) / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
+    #     # bImod.set_ydata((-(omega_Imp_x**2) * (xL_bareImp - (1 / mI) * Pph0_array[i] * tVals)**2) * (T_exp2th * T_exp2th / L_exp2th))
 
     #     if inverseScat is True:
     #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
@@ -451,7 +453,7 @@ if __name__ == "__main__":
     # anim_a_filename = '/AccelAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
     # if toggleDict['CS_Dyn'] == 'off':
     #     anim_a_filename = '/NoCSdyn_' + anim_a_filename[1:]
-    # anim_a.save(animpath + anim_a_filename, writer=mpegWriter)
+    # # anim_a.save(animpath + anim_a_filename, writer=mpegWriter)
 
     # # OSCILLATION FREQUENCY 2D PLOT
 
