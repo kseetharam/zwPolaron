@@ -34,12 +34,7 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/LDA'.format(aBB, NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -104,7 +99,9 @@ if __name__ == "__main__":
             x_ds = qds_aIBi['X']
             v_ds = (qds_aIBi['X'].diff('t') / dt).rename('v')
             v0 = (P0 - qds_aIBi['Pph'].isel(F=0, t=0).values) / mI
-            FM_Vals = []; vf_Vals = []; ms_Vals = []
+            FM_Vals = []
+            vf_Vals = []
+            ms_Vals = []
             for Find, F in enumerate(FVals):
                 if(F / Fscale < 1):  # why skipping the first force value?
                     continue
@@ -219,6 +216,7 @@ if __name__ == "__main__":
     axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
     axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
     axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$\frac{m^{*}}{m_{I}}=1$')
     axes1[1].legend()
     axes1[1].set_ylim([0, 19.5])
     axes1[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
@@ -238,6 +236,7 @@ if __name__ == "__main__":
     axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
     axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
     axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$\frac{m^{*}}{m_{I}}=1$')
     axes2[1].legend()
     axes2[1].set_ylim([0, 19.5])
     axes2[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
@@ -254,7 +253,8 @@ if __name__ == "__main__":
     axes3.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
     fig4, axes4 = plt.subplots()
-    mu = 1.5; sig = 0.3
+    mu = 1.5
+    sig = 0.3
     gaussian = np.exp(-0.5 * (ts_subsonic_homog - mu)**2 / (2 * sig**2))
     wide_mask = (ts_subsonic_homog >= 0.75) * (ts_subsonic_homog <= 2.25)
     wind = np.abs(ts_subsonic_homog - 0.75).argmin().astype(int)
