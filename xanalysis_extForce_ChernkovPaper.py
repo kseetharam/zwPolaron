@@ -190,117 +190,129 @@ if __name__ == "__main__":
     print('Percentage Error (Sup Homog): {0}'.format(100 * np.abs(mE_supersonic_homog - mE_steadystate_data) / mE_steadystate_data))
     print('Percentage Error (Sup BECden): {0}'.format(100 * np.abs(mE_supersonic_den - mE_steadystate_data) / mE_steadystate_data))
 
-    # VELOCITY VS TIME
+    # # TIME SLICE + EFFECTIVE MASS PLOTS
 
-    aIBi = -5
-    v_ds_subsonic_homog = (qds_subsonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
-    FVals_sub = v_ds_subsonic_homog.coords['F'].values
-    # Find_subsonic_homog = np.argwhere(FVals_sub > Fscale)[0][0]
-    Find_subsonic_homog = 0
-    F_sub = FVals_sub[Find_subsonic_homog]
-    vs_subsonic_homog = (v_ds_subsonic_homog.isel(F=Find_subsonic_homog).values / dt - v0) / nu
-    ts_subsonic_homog = v_ds_subsonic_homog.coords['t'].values / tscale
+    # aIBi = -5
+    # v_ds_subsonic_homog = (qds_subsonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
+    # FVals_sub = v_ds_subsonic_homog.coords['F'].values
+    # # Find_subsonic_homog = np.argwhere(FVals_sub > Fscale)[0][0]
+    # Find_subsonic_homog = 0
+    # F_sub = FVals_sub[Find_subsonic_homog]
+    # vs_subsonic_homog = (v_ds_subsonic_homog.isel(F=Find_subsonic_homog).values / dt - v0) / nu
+    # ts_subsonic_homog = v_ds_subsonic_homog.coords['t'].values / tscale
 
-    v_ds_supersonic_homog = (qds_supersonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
-    Find_supersonic_homog = np.argwhere(v_ds_supersonic_homog.coords['F'].values > Fscale)[0][0]
-    FVals_super = v_ds_supersonic_homog.coords['F'].values
-    # Find_supersonic_homog = np.argwhere(FVals_super > Fscale)[0][0]
-    Find_supersonic_homog = 0
-    F_super = FVals_super[Find_supersonic_homog]
-    vs_supersonic_homog = (v_ds_supersonic_homog.isel(F=Find_supersonic_homog).values / dt - v0) / nu
-    ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
+    # v_ds_supersonic_homog = (qds_supersonic_homog.sel(aIBi=aIBi)['X'].diff('t')).rename('v')
+    # Find_supersonic_homog = np.argwhere(v_ds_supersonic_homog.coords['F'].values > Fscale)[0][0]
+    # FVals_super = v_ds_supersonic_homog.coords['F'].values
+    # # Find_supersonic_homog = np.argwhere(FVals_super > Fscale)[0][0]
+    # Find_supersonic_homog = 0
+    # F_super = FVals_super[Find_supersonic_homog]
+    # vs_supersonic_homog = (v_ds_supersonic_homog.isel(F=Find_supersonic_homog).values / dt - v0) / nu
+    # ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
 
-    fig1, axes1 = plt.subplots(nrows=1, ncols=2)
-    axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, linewidth=2, label='')
-    axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_subsonic_homog), ts.size), 'g:', label=r'Force turned off')
-    print(((dP_subsonic / F_sub) / tscale))
-    # axes1[0].plot(ts_subsonic_homog, np.ones(ts_subsonic_homog.size), 'r--', label=r'$c_{BEC}$')
-    axes1[0].legend()
-    axes1[0].set_ylim([0, 0.6])
-    axes1[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
-    axes1[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
+    # fig1, axes1 = plt.subplots(nrows=1, ncols=2)
+    # axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, linewidth=2, label='')
+    # axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_subsonic_homog), ts.size), 'g:', label=r'Force turned off')
+    # print(((dP_subsonic / F_sub) / tscale))
+    # # axes1[0].plot(ts_subsonic_homog, np.ones(ts_subsonic_homog.size), 'r--', label=r'$c_{BEC}$')
+    # axes1[0].legend()
+    # axes1[0].set_ylim([0, 0.6])
+    # axes1[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
+    # axes1[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
 
-    # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
-    axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
-    axes1[1].legend()
-    axes1[1].set_ylim([0, 19.5])
-    axes1[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
-    axes1[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
-    fig1.text(0.05, 0.95, '(a)')
-    fig1.text(0.51, 0.95, '(b)')
-    fig1.subplots_adjust(wspace=0.5)
-    # fig1.set_size_inches(14, 7.5)
-    fig1.set_size_inches(16.9, 9)
-    # fig1.savefig(figdatapath + '/Fig9.pdf')
+    # # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    # axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
+    # axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    # axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
+    # axes1[1].legend()
+    # axes1[1].set_ylim([0, 19.5])
+    # axes1[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    # axes1[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # fig1.text(0.05, 0.95, '(a)')
+    # fig1.text(0.51, 0.95, '(b)')
+    # fig1.subplots_adjust(wspace=0.5)
+    # # fig1.set_size_inches(14, 7.5)
+    # fig1.set_size_inches(16.9, 9)
+    # # fig1.savefig(figdatapath + '/Fig9.pdf')
 
-    fig2, axes2 = plt.subplots(nrows=1, ncols=2)
-    axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, linewidth=2, label='')
-    axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_supersonic_homog), ts.size), 'g:', label=r'Force turned off')
-    print(((dP_supersonic / F_sub) / tscale))
-    axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r:', label=r'$\langle v_{I} \rangle=c$')
-    axes2[0].legend(loc=2)
-    axes2[0].set_ylim([0, 2.8])
-    axes2[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
-    axes2[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
-    # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    # fig2, axes2 = plt.subplots(nrows=1, ncols=2)
+    # axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, linewidth=2, label='')
+    # axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_supersonic_homog), ts.size), 'g:', label=r'Force turned off')
+    # print(((dP_supersonic / F_sub) / tscale))
+    # axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r:', label=r'$\langle v_{I} \rangle=c$')
+    # axes2[0].legend(loc=2)
+    # axes2[0].set_ylim([0, 2.8])
+    # axes2[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
+    # axes2[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
+    # # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
 
-    # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
-    axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
-    axes2[1].legend()
-    axes2[1].set_ylim([0, 19.5])
-    axes2[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
-    axes2[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
-    fig2.text(0.05, 0.95, '(a)')
-    fig2.text(0.51, 0.95, '(b)')
-    fig2.subplots_adjust(wspace=0.5)
-    fig2.set_size_inches(16.9, 9)
-    # fig2.savefig(figdatapath + '/Fig10.pdf')
+    # # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    # axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
+    # axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    # axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
+    # axes2[1].legend()
+    # axes2[1].set_ylim([0, 19.5])
+    # axes2[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    # axes2[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # fig2.text(0.05, 0.95, '(a)')
+    # fig2.text(0.51, 0.95, '(b)')
+    # fig2.subplots_adjust(wspace=0.5)
+    # fig2.set_size_inches(16.9, 9)
+    # # fig2.savefig(figdatapath + '/Fig10.pdf')
 
-    fig3, axes3 = plt.subplots()
-    x_ds_subsonic_homog = qds_subsonic_homog.sel(aIBi=aIBi).isel(F=Find_subsonic_homog)['X']
-    x_subsonic_homog = x_ds_subsonic_homog.values
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values / tscale, x_subsonic_homog, linewidth=5)
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values[0] / tscale, x_subsonic_homog[0], color='#5ca904', marker='x', mew=4, ms=15, markerfacecolor='none',)
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values[-1] / tscale, x_subsonic_homog[-1], color='#8f1402', marker='x', mew=4, ms=15, markerfacecolor='none',)
-    # axes3.set_ylabel(r'$<\langle X \rangle$', fontsize=20)
-    axes3.set_xlabel(r'$t$', fontsize=40)
-    axes3.get_xaxis().set_ticks([])
-    axes3.get_yaxis().set_ticks([])
+    # fig3, axes3 = plt.subplots()
+    # x_ds_subsonic_homog = qds_subsonic_homog.sel(aIBi=aIBi).isel(F=Find_subsonic_homog)['X']
+    # x_subsonic_homog = x_ds_subsonic_homog.values
+    # axes3.plot(x_ds_subsonic_homog.coords['t'].values / tscale, x_subsonic_homog, linewidth=5)
+    # axes3.plot(x_ds_subsonic_homog.coords['t'].values[0] / tscale, x_subsonic_homog[0], color='#5ca904', marker='x', mew=4, ms=15, markerfacecolor='none',)
+    # axes3.plot(x_ds_subsonic_homog.coords['t'].values[-1] / tscale, x_subsonic_homog[-1], color='#8f1402', marker='x', mew=4, ms=15, markerfacecolor='none',)
+    # # axes3.set_ylabel(r'$<\langle X \rangle$', fontsize=20)
+    # axes3.set_xlabel(r'$t$', fontsize=40)
+    # axes3.get_xaxis().set_ticks([])
+    # axes3.get_yaxis().set_ticks([])
 
-    fig4, axes4 = plt.subplots()
-    mu = 1.5
-    sig = 0.3
-    gaussian = np.exp(-0.5 * (ts_subsonic_homog - mu)**2 / (2 * sig**2))
-    wide_mask = (ts_subsonic_homog >= 0.75) * (ts_subsonic_homog <= 2.25)
-    wind = np.abs(ts_subsonic_homog - 0.75).argmin().astype(int)
-    gw = gaussian[wind]
-    twide = ts_subsonic_homog[wide_mask]
-    gaussian_wide = np.exp(-0.5 * (twide - mu)**2 / (2 * (10 * sig)**2))
-    gaussian[wide_mask] = gaussian_wide - np.min(gaussian_wide) + gw
+    # fig4, axes4 = plt.subplots()
+    # mu = 1.5
+    # sig = 0.3
+    # gaussian = np.exp(-0.5 * (ts_subsonic_homog - mu)**2 / (2 * sig**2))
+    # wide_mask = (ts_subsonic_homog >= 0.75) * (ts_subsonic_homog <= 2.25)
+    # wind = np.abs(ts_subsonic_homog - 0.75).argmin().astype(int)
+    # gw = gaussian[wind]
+    # twide = ts_subsonic_homog[wide_mask]
+    # gaussian_wide = np.exp(-0.5 * (twide - mu)**2 / (2 * (10 * sig)**2))
+    # gaussian[wide_mask] = gaussian_wide - np.min(gaussian_wide) + gw
 
-    axes4.plot(ts_subsonic_homog, gaussian, linewidth=5)
-    # axes4.set_ylabel(r'$F$')
-    axes4.set_xlabel(r'$t$', fontsize=40)
-    axes4.get_xaxis().set_ticks([])
-    axes4.get_yaxis().set_ticks([])
+    # axes4.plot(ts_subsonic_homog, gaussian, linewidth=5)
+    # # axes4.set_ylabel(r'$F$')
+    # axes4.set_xlabel(r'$t$', fontsize=40)
+    # axes4.get_xaxis().set_ticks([])
+    # axes4.get_yaxis().set_ticks([])
 
-    # STEADY STATE EFFECTIVE MASS PLOT (APPENDIX)
+    # # STEADY STATE EFFECTIVE MASS PLOT (APPENDIX)
 
-    aIBi_Vals_steadystate = np.linspace(-10, 10, 50)
-    SS_ms_Avals = np.zeros(aIBi_Vals_steadystate.size)
+    # aIBi_Vals_steadystate = np.linspace(-10, 10, 100)
+    # SS_ms_Avals = np.zeros(aIBi_Vals_steadystate.size)
 
-    for Aind, aIBi in enumerate(aIBi_Vals_steadystate):
-        DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
-        aSi = pfs.aSi_interp(DP, aSi_tck)
-        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
-        SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
+    # for Aind, aIBi in enumerate(aIBi_Vals_steadystate):
+    #     DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pfs.aSi_interp(DP, aSi_tck)
+    #     PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+    #     SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
 
-    plt.show()
+    # mE_steadystate = SS_ms_Avals / mI
+    # mE_steadystate[mE_steadystate < 0] = np.nan
+
+    # fig5, ax5 = plt.subplots()
+    # ax5.plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', linewidth=2)
+    # ax5.set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # ax5.set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    # ax5.set_ylim([0, 25])
+
+    # fig5.set_size_inches(10.7, 8)
+    # # fig5.savefig(figdatapath + '/FigSPApp.pdf')
+
+    # plt.show()
 
     # Note: initial P_tot = 0.1 for all force protocols above (and P=0.1 for analytical steady state)
