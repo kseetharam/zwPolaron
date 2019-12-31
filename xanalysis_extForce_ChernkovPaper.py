@@ -14,6 +14,7 @@ if __name__ == "__main__":
     # # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
+    matplotlib.rcParams.update({'font.size': 20})
 
     # gParams
 
@@ -81,6 +82,9 @@ if __name__ == "__main__":
     ts = tVals / tscale
     v0 = (P0 - qds_subsonic_homog['Pph'].isel(F=0, t=0).sel(aIBi=aIBi).values) / mI
     print('mI*c: {0}'.format(mI * nu))
+    print(P0 / (mI * nu))
+    print(dP_sub / (mI * nu))
+    print(dP_sup / (mI * nu))
 
     print(0.1 / (mI * nu), mI / mB, attrs['k_mag_cutoff'] * xi, 1 / (aIBi * xi))
 
@@ -204,53 +208,61 @@ if __name__ == "__main__":
     ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
 
     fig1, axes1 = plt.subplots(nrows=1, ncols=2)
-    axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, label='')
-    axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_subsonic_homog), ts.size), 'g--', label=r'$T_{F}$')
+    axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, linewidth=2, label='')
+    axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_subsonic_homog), ts.size), 'g:', label=r'Force turned off')
+    print(((dP_subsonic / F_sub) / tscale))
     # axes1[0].plot(ts_subsonic_homog, np.ones(ts_subsonic_homog.size), 'r--', label=r'$c_{BEC}$')
     axes1[0].legend()
-    axes1[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
-    axes1[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    axes1[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_sub / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    axes1[0].set_ylim([0, 0.6])
+    axes1[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
+    axes1[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
+    # axes1[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_sub / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    # axes1[0].set_title('Average Impurity Velocity')
 
     # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
-    axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
+    axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Analytical Steady State')
     axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$\frac{m^{*}}{m_{I}}=1$')
+    axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
     axes1[1].legend()
     axes1[1].set_ylim([0, 19.5])
-    axes1[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    axes1[1].set_xlabel(r'$a_{IB}^{-1}$')
-    axes1[1].set_title('Polaron Mass Enhancement (Subsonic Case)')
+    axes1[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    axes1[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # axes1[1].set_title('Polaron Mass Enhancement (Subsonic Case)')
 
     fig2, axes2 = plt.subplots(nrows=1, ncols=2)
-    axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, label='')
-    axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, np.max(vs_supersonic_homog), ts.size), 'g--', label=r'$T_{F}$')
-    axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r--', label=r'$c_{BEC}$')
-    axes2[0].legend()
-    axes2[0].set_ylabel(r'$\frac{1}{c_{BEC}}\frac{d<X>}{dt}$')
-    axes2[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, linewidth=2, label='')
+    axes2[0].plot(((dP_supersonic / F_super) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_supersonic_homog), ts.size), 'g:', label=r'Force turned off')
+    print(((dP_supersonic / F_sub) / tscale))
+    axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r:', label=r'$\langle v_{I} \rangle=c$')
+    axes2[0].legend(loc=2)
+    axes2[0].set_ylim([0, 2.5])
+    axes2[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
+    axes2[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
+    # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
+    # axes2[0].set_title('Average Impurity Velocity')
 
     # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol (Homogenous BEC)')
-    axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', label='Analytical Steady State')
+    axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Analytical Steady State')
     axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$\frac{m^{*}}{m_{I}}=1$')
+    axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
     axes2[1].legend()
     axes2[1].set_ylim([0, 19.5])
-    axes2[1].set_ylabel(r'$\frac{m^{*}}{m_{I}}$')
-    axes2[1].set_xlabel(r'$a_{IB}^{-1}$')
-    axes2[1].set_title('Polaron Mass Enhancement (Supersonic Case)')
+    axes2[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    axes2[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # axes2[1].set_title('Polaron Mass Enhancement (Supersonic Case)')
 
     fig3, axes3 = plt.subplots()
     x_ds_subsonic_homog = qds_subsonic_homog.sel(aIBi=aIBi).isel(F=Find_subsonic_homog)['X']
     x_subsonic_homog = x_ds_subsonic_homog.values
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values / tscale, x_subsonic_homog)
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values[0] / tscale, x_subsonic_homog[0], color='#5ca904', marker='x', mew=1, ms=15, markerfacecolor='none',)
-    axes3.plot(x_ds_subsonic_homog.coords['t'].values[-1] / tscale, x_subsonic_homog[-1], color='#8f1402', marker='x', mew=1, ms=15, markerfacecolor='none',)
-    axes3.set_ylabel(r'$<X>$')
-    axes3.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    axes3.plot(x_ds_subsonic_homog.coords['t'].values / tscale, x_subsonic_homog, linewidth=5)
+    axes3.plot(x_ds_subsonic_homog.coords['t'].values[0] / tscale, x_subsonic_homog[0], color='#5ca904', marker='x', mew=4, ms=15, markerfacecolor='none',)
+    axes3.plot(x_ds_subsonic_homog.coords['t'].values[-1] / tscale, x_subsonic_homog[-1], color='#8f1402', marker='x', mew=4, ms=15, markerfacecolor='none',)
+    # axes3.set_ylabel(r'$<\langle X \rangle$', fontsize=20)
+    axes3.set_xlabel(r'$t$', fontsize=40)
+    axes3.get_xaxis().set_ticks([])
+    axes3.get_yaxis().set_ticks([])
 
     fig4, axes4 = plt.subplots()
     mu = 1.5
@@ -263,9 +275,11 @@ if __name__ == "__main__":
     gaussian_wide = np.exp(-0.5 * (twide - mu)**2 / (2 * (10 * sig)**2))
     gaussian[wide_mask] = gaussian_wide - np.min(gaussian_wide) + gw
 
-    axes4.plot(ts_subsonic_homog, gaussian)
-    axes4.set_ylabel(r'$F$')
-    axes4.set_xlabel(r'$t$')
+    axes4.plot(ts_subsonic_homog, gaussian, linewidth=5)
+    # axes4.set_ylabel(r'$F$')
+    axes4.set_xlabel(r'$t$', fontsize=40)
+    axes4.get_xaxis().set_ticks([])
+    axes4.get_yaxis().set_ticks([])
 
     plt.show()
 
