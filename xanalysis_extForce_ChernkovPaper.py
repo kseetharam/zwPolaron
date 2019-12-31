@@ -54,6 +54,8 @@ if __name__ == "__main__":
         homogdatapath = innerdatapath + '_SteadyStart_P_{:.1f}'.format(P0)
         dendatapath = innerdatapath + '_BECden_SteadyStart_P_{:.1f}'.format(P0)
 
+    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+
     # # # Analysis of Total Dataset
 
     aIBi = -1.77
@@ -81,6 +83,7 @@ if __name__ == "__main__":
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     v0 = (P0 - qds_subsonic_homog['Pph'].isel(F=0, t=0).sel(aIBi=aIBi).values) / mI
+    print(mI, mB, gBB)
     print('mI*c: {0}'.format(mI * nu))
     print(P0 / (mI * nu))
     print(dP_sub / (mI * nu))
@@ -216,19 +219,22 @@ if __name__ == "__main__":
     axes1[0].set_ylim([0, 0.6])
     axes1[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
     axes1[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
-    # axes1[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_sub / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
-    # axes1[0].set_title('Average Impurity Velocity')
 
     # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
     axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Analytical Steady State')
+    axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
     axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
     axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
     axes1[1].legend()
     axes1[1].set_ylim([0, 19.5])
     axes1[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
     axes1[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
-    # axes1[1].set_title('Polaron Mass Enhancement (Subsonic Case)')
+    fig1.text(0.05, 0.95, '(a)')
+    fig1.text(0.51, 0.95, '(b)')
+    fig1.subplots_adjust(wspace=0.5)
+    # fig1.set_size_inches(14, 7.5)
+    fig1.set_size_inches(16.9, 9)
+    # fig1.savefig(figdatapath + '/Fig9.pdf')
 
     fig2, axes2 = plt.subplots(nrows=1, ncols=2)
     axes2[0].plot(ts_supersonic_homog, vs_supersonic_homog, linewidth=2, label='')
@@ -236,22 +242,25 @@ if __name__ == "__main__":
     print(((dP_supersonic / F_sub) / tscale))
     axes2[0].plot(ts_supersonic_homog, np.ones(ts_supersonic_homog.size), 'r:', label=r'$\langle v_{I} \rangle=c$')
     axes2[0].legend(loc=2)
-    axes2[0].set_ylim([0, 2.5])
+    axes2[0].set_ylim([0, 2.8])
     axes2[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
     axes2[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
     # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
-    # axes2[0].set_title('Average Impurity Velocity')
 
     # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
     axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Analytical Steady State')
+    axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
     axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
     axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
     axes2[1].legend()
     axes2[1].set_ylim([0, 19.5])
     axes2[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
     axes2[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
-    # axes2[1].set_title('Polaron Mass Enhancement (Supersonic Case)')
+    fig2.text(0.05, 0.95, '(a)')
+    fig2.text(0.51, 0.95, '(b)')
+    fig2.subplots_adjust(wspace=0.5)
+    fig2.set_size_inches(16.9, 9)
+    # fig2.savefig(figdatapath + '/Fig10.pdf')
 
     fig3, axes3 = plt.subplots()
     x_ds_subsonic_homog = qds_subsonic_homog.sel(aIBi=aIBi).isel(F=Find_subsonic_homog)['X']
@@ -280,6 +289,17 @@ if __name__ == "__main__":
     axes4.set_xlabel(r'$t$', fontsize=40)
     axes4.get_xaxis().set_ticks([])
     axes4.get_yaxis().set_ticks([])
+
+    # STEADY STATE EFFECTIVE MASS PLOT (APPENDIX)
+
+    aIBi_Vals_steadystate = np.linspace(-10, 10, 50)
+    SS_ms_Avals = np.zeros(aIBi_Vals_steadystate.size)
+
+    for Aind, aIBi in enumerate(aIBi_Vals_steadystate):
+        DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+        aSi = pfs.aSi_interp(DP, aSi_tck)
+        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
 
     plt.show()
 
