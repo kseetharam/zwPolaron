@@ -83,7 +83,7 @@ if __name__ == "__main__":
     dt = tVals[1] - tVals[0]
     ts = tVals / tscale
     v0 = (P0 - qds_subsonic_homog['Pph'].isel(F=0, t=0).sel(aIBi=aIBi).values) / mI
-    print(mI, mB, gBB)
+    print(mI, mB, gBB, xi)
     print('mI*c: {0}'.format(mI * nu))
     print(P0 / (mI * nu))
     print(dP_sub / (mI * nu))
@@ -165,7 +165,6 @@ if __name__ == "__main__":
     Nsteps = 1e2
     aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
     aIBi_Vals_steadystate = np.linspace(np.min(aIBi_Vals), 0.25, 30)
-    print(aIBi_Vals)
     SS_ms_Avals = np.zeros(aIBi_Vals_steadystate.size)
 
     for Aind, aIBi in enumerate(aIBi_Vals_steadystate):
@@ -210,6 +209,8 @@ if __name__ == "__main__":
     # vs_supersonic_homog = (v_ds_supersonic_homog.isel(F=Find_supersonic_homog).values / dt - v0) / nu
     # ts_supersonic_homog = v_ds_supersonic_homog.coords['t'].values / tscale
 
+    # aIBi_Vals_scaled = aIBi_Vals / xi
+
     # fig1, axes1 = plt.subplots(nrows=1, ncols=2)
     # axes1[0].plot(ts_subsonic_homog, vs_subsonic_homog, linewidth=2, label='')
     # axes1[0].plot(((dP_subsonic / F_sub) / tscale) * np.ones(ts.size), np.linspace(0, 1.25 * np.max(vs_subsonic_homog), ts.size), 'g:', label=r'Force turned off')
@@ -220,15 +221,15 @@ if __name__ == "__main__":
     # axes1[0].set_ylabel(r'$\langle v_{I} \rangle/c$', fontsize=26)
     # axes1[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
 
-    # # axes1[1].plot(aIBi_Vals, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    # axes1[1].plot(aIBi_Vals, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    # axes1[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
-    # axes1[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    # axes1[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
+    # # axes1[1].plot(aIBi_Vals_scaled, mE_subsonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes1[1].plot(aIBi_Vals_scaled, mE_subsonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    # axes1[1].plot(aIBi_Vals_steadystate / xi, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
+    # axes1[1].plot(aIBi_Vals_scaled, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    # axes1[1].plot(aIBi_Vals_scaled, np.ones(aIBi_Vals_scaled.size), 'k:', label=r'$m^{*}=m_{I}$')
     # axes1[1].legend()
     # axes1[1].set_ylim([0, 19.5])
     # axes1[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
-    # axes1[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # axes1[1].set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=26)
     # fig1.text(0.05, 0.95, '(a)')
     # fig1.text(0.51, 0.95, '(b)')
     # fig1.subplots_adjust(wspace=0.5)
@@ -247,15 +248,15 @@ if __name__ == "__main__":
     # axes2[0].set_xlabel(r'$t$ [$\xi/c$]', fontsize=26)
     # # axes2[0].set_title('Average Impurity Velocity (' + r'$F$' + '={:.2f} '.format(F_super / Fscale) + r'[$\frac{2 \pi c}{\xi^{2}}$]' + ')')
 
-    # # axes2[1].plot(aIBi_Vals, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
-    # axes2[1].plot(aIBi_Vals, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
-    # axes2[1].plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
-    # axes2[1].plot(aIBi_Vals, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
-    # axes2[1].plot(aIBi_Vals, np.ones(aIBi_Vals.size), 'k:', label=r'$m^{*}=m_{I}$')
+    # # axes2[1].plot(aIBi_Vals_scaled, mE_supersonic_den, 'go', mew=1, ms=10, label='Force Protocol (Harmonic BEC Trap)')
+    # axes2[1].plot(aIBi_Vals_scaled, mE_supersonic_homog, 'rx', mew=1, ms=10, markerfacecolor='none', label='Force Protocol')
+    # axes2[1].plot(aIBi_Vals_steadystate / xi, mE_steadystate, 'b-', mew=1, ms=10, markerfacecolor='none', linewidth=2, label='Saddle Point')
+    # axes2[1].plot(aIBi_Vals_scaled, mE_steadystate_data, 'bs', mew=1, ms=10, markerfacecolor='none', label='')
+    # axes2[1].plot(aIBi_Vals_scaled, np.ones(aIBi_Vals_scaled.size), 'k:', label=r'$m^{*}=m_{I}$')
     # axes2[1].legend()
     # axes2[1].set_ylim([0, 19.5])
     # axes2[1].set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
-    # axes2[1].set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # axes2[1].set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=26)
     # fig2.text(0.05, 0.95, '(a)')
     # fig2.text(0.51, 0.95, '(b)')
     # fig2.subplots_adjust(wspace=0.5)
@@ -305,8 +306,8 @@ if __name__ == "__main__":
     # mE_steadystate[mE_steadystate < 0] = np.nan
 
     # fig5, ax5 = plt.subplots()
-    # ax5.plot(aIBi_Vals_steadystate, mE_steadystate, 'b-', linewidth=2)
-    # ax5.set_xlabel(r'$a_{IB}^{-1}$', fontsize=26)
+    # ax5.plot(aIBi_Vals_steadystate / xi, mE_steadystate, 'b-', linewidth=2)
+    # ax5.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=26)
     # ax5.set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
     # ax5.set_ylim([0, 25])
 
