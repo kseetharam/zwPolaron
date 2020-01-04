@@ -293,6 +293,8 @@ if __name__ == "__main__":
 
     # # STEADY STATE EFFECTIVE MASS PLOT (APPENDIX)
 
+    # matplotlib.rcParams.update({'font.size': 16})
+
     # aIBi_Vals_steadystate = np.linspace(-10, 10, 100)
     # SS_ms_Avals = np.zeros(aIBi_Vals_steadystate.size)
 
@@ -307,13 +309,15 @@ if __name__ == "__main__":
 
     # fig5, ax5 = plt.subplots()
     # ax5.plot(aIBi_Vals_steadystate / xi, mE_steadystate, 'b-', linewidth=2)
-    # ax5.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=26)
-    # ax5.set_ylabel(r'$m^{*}/m_{I}$', fontsize=26)
+    # ax5.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=20)
+    # ax5.set_ylabel(r'$m^{*}/m_{I}$', fontsize=20)
     # ax5.set_ylim([0, 25])
 
-    # fig5.set_size_inches(10.7, 8)
+    # # fig5.set_size_inches(10.7, 8)
+    # fig5.set_size_inches(6, 4.5)
+    # fig5.subplots_adjust(bottom=0.17, top=0.97, left=0.15, right=0.97)
     # # fig5.savefig(figdatapath + '/FigSPApp.pdf')
 
-    # plt.show()
+    plt.show()
 
     # Note: initial P_tot = 0.1 for all force protocols above (and P=0.1 for analytical steady state)
