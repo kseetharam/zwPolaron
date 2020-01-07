@@ -148,7 +148,7 @@ if __name__ == "__main__":
         elif toggleDict['Location'] == 'work':
             datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
-            datapath = '/n/scratchlfs/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+            datapath = '/n/scratchlfs02/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
 
         if toggleDict['PosScat'] == 'on':
             innerdatapath = datapath + '/BEC_osc/PosScat'
