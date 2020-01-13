@@ -7,6 +7,8 @@ from scipy import interpolate
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
+import matplotlib.ticker as ticker
 from matplotlib.animation import FuncAnimation
 from matplotlib.animation import writers
 import os
@@ -25,16 +27,13 @@ if __name__ == "__main__":
     labelsize = 13
     legendsize = 12
 
-    # gParams
-
-    # (Lx, Ly, Lz) = (30, 30, 30)
-    # (dx, dy, dz) = (0.2, 0.2, 0.2)
+    def fmt(x, pos):
+        a, b = '{:.2e}'.format(x).split('e')
+        b = int(b)
+        return r'${} \times 10^{{{}}}$'.format(a, b)
 
     (Lx, Ly, Lz) = (20, 20, 20)
     (dx, dy, dz) = (0.2, 0.2, 0.2)
-
-    # (Lx, Ly, Lz) = (30, 30, 30)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     aBB = 0.013
@@ -112,11 +111,11 @@ if __name__ == "__main__":
 
     # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
 
-    a0ylim = 12000
-    # a0ylim = 1000
+    a0ylim = 4000
 
     qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
     freqda_List = []
+    aIBVals_List = []
 
     for qds in qds_List:
         aIBiVals = qds['aIBi'].values
@@ -144,34 +143,49 @@ if __name__ == "__main__":
                 maxph = np.max(absFTVals)
         print(maxph)
         freqda_List.append(freq_da)
+        aIBVals_List.append(aIBVals)
 
     # vmax = maxph
     vmax = 100000
     # vmax = 200000
 
     fig5, axes = plt.subplots(nrows=2, ncols=2)
+    axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
     for ind, freq_da in enumerate(freqda_List):
-
-        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
-        quadF = axes[ind].pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-        axes[ind].set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
-        axes[ind].plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', label='BEC Oscillation Frequency')
-        axes[ind].plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+        ax = axList[ind]
+        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 1)
+        # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
+        aIBVals = aIBVals_List[ind]
+        quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+        ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+        ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
+        ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
         if signList[ind] == 'Neg':
-            axes[ind].set_ylim([-1 * a0ylim, np.max(aIBVals)])
+            ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
         elif signList[ind] == 'Pos':
-            axes[ind].set_ylim([a0ylim, np.min(aIBVals)])
-        axes[ind].set_xlabel('f (Hz)', fontsize=labelsize)
-        axes[ind].set_xlim([0, 400])
+            ax.set_ylim([a0ylim, np.min(aIBVals)])
+        ax.set_xlabel('f (Hz)', fontsize=labelsize)
+        ax.set_xlim([0, 400])
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
-    fig5.colorbar(quadF, cax=cbar_ax, extend='both')
-    handles, labels = axes[0].get_legend_handles_labels()
+    fig5.colorbar(quadF, cax=cbar_ax, extend='max')
+    cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
+    handles, labels = axList[0].get_legend_handles_labels()
     fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
-    fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.6, wspace=0.4)
-    fig5.set_size_inches(7.8, 5.0)
+    fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
+    fig5.set_size_inches(7.8, 6.0)
+
+    fig5.text(0.05, 0.97, '(a)', fontsize=labelsize)
+    fig5.text(0.05, 0.55, '(b)', fontsize=labelsize)
+    fig5.text(0.47, 0.97, '(c)', fontsize=labelsize)
+    fig5.text(0.47, 0.55, '(d)', fontsize=labelsize)
+
     # fig5.savefig(figdatapath + '/Fig4.pdf')
+    fig5.savefig(figdatapath + '/Fig4.jpg', quality=20)
 
     # # POSITION VS TIME (LAB FRAME)
 
@@ -1027,4 +1041,4 @@ if __name__ == "__main__":
     # ax1.set_xlabel(r'$a_{IB}^{-1}$')
     # ax1.set_title(r'$R^{2}$' + ' Error')
 
-    plt.show()
+    # plt.show()
