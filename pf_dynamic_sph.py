@@ -399,8 +399,8 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
     else:
         LDA_funcs['F_pol'] = lambda X: 0
-        omega_BEC_osc = 0
-        a_osc = 0
+        # omega_BEC_osc = 0
+        # a_osc = 0
     if toggleDict['BEC_density_osc'] == 'on':
         omega_BEC_osc = trapParams['omega_BEC_osc']
         a_osc = trapParams['a_osc']

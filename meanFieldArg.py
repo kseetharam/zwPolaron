@@ -85,6 +85,8 @@ if __name__ == "__main__":
     # mu_th = 4 * np.pi * (hbar**2) * expParams['aBB'] * expParams['n0_TF'] / expParams['mB']
     # print(mu_th / hbar)
 
+    # RTF_BEC_X = 1e2 * RTF_BEC_X; RG_BEC_X = 1e2 * RG_BEC_X
+
     cBEC = pfs.nu(mB, n0, gBB)
     cBEC_exp = cBEC * T_exp2th / L_exp2th
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
@@ -111,76 +113,76 @@ if __name__ == "__main__":
     # RTF_X = np.sqrt(2 * hbar * expParams['mu_div_hbar'] / (expParams['mB'] * (expParams['omega_BEC_x']**2)))
     # print(RTF_X * 1e6)
 
-    # # MF IMPURITY POTENTIAL
+    # MF IMPURITY POTENTIAL
 
-    # gIB_Vals = gIB_Vals_Born
-    # # gIB_Vals = gIB_Vals_LS
+    gIB_Vals = gIB_Vals_Born
+    # gIB_Vals = gIB_Vals_LS
 
-    # X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 1e3)
-    # X_Vals_m = X_Vals / L_exp2th
+    X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 1e3)
+    X_Vals_m = X_Vals / L_exp2th
 
-    # def V_Imp_trap(X, omega_Imp_x, mI):
-    #     return 0.5 * mI * (omega_Imp_x**2) * (X**2)
+    def V_Imp_trap(X, omega_Imp_x, mI):
+        return 0.5 * mI * (omega_Imp_x**2) * (X**2)
 
-    # n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
-    # V_Imp_Vals = V_Imp_trap(X_Vals, trapParams['omega_Imp_x'], mI)
+    n_BEC_Vals = pf_dynamic_sph.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+    V_Imp_Vals = V_Imp_trap(X_Vals, trapParams['omega_Imp_x'], mI)
 
-    # Xlim_fit = 0.9 * trapParams['RTF_BEC_X']
-    # Xfit_mask = np.abs(X_Vals) <= Xlim_fit
-    # X_Vals_fit = X_Vals[Xfit_mask]
-    # omega_Imp_eff = np.zeros(gIB_Vals.size)
-    # VMF_Mat = np.zeros((gIB_Vals.size, X_Vals.size))
-    # VMF_HarmApprox_Mat = np.zeros((gIB_Vals.size, X_Vals.size))
+    Xlim_fit = 0.9 * trapParams['RTF_BEC_X']
+    Xfit_mask = np.abs(X_Vals) <= Xlim_fit
+    X_Vals_fit = X_Vals[Xfit_mask]
+    omega_Imp_eff = np.zeros(gIB_Vals.size)
+    VMF_Mat = np.zeros((gIB_Vals.size, X_Vals.size))
+    VMF_HarmApprox_Mat = np.zeros((gIB_Vals.size, X_Vals.size))
 
-    # for indg, gIB in enumerate(gIB_Vals):
-    #     VMF_Mat[indg, :] = V_Imp_Vals + gIB * n_BEC_Vals
-    #     [p2, p1, p0] = np.polyfit(X_Vals_fit, VMF_Mat[indg][Xfit_mask], deg=2)
-    #     omega_Imp_eff[indg] = np.sqrt(2 * p2 / mI)
-    #     VMF_HarmApprox_Mat[indg, :] = V_Imp_trap(X_Vals, omega_Imp_eff[indg], mI) + p0
+    for indg, gIB in enumerate(gIB_Vals):
+        VMF_Mat[indg, :] = V_Imp_Vals + gIB * n_BEC_Vals
+        [p2, p1, p0] = np.polyfit(X_Vals_fit, VMF_Mat[indg][Xfit_mask], deg=2)
+        omega_Imp_eff[indg] = np.sqrt(2 * p2 / mI)
+        VMF_HarmApprox_Mat[indg, :] = V_Imp_trap(X_Vals, omega_Imp_eff[indg], mI) + p0
 
-    # f_Imp_eff = (omega_Imp_eff / (2 * np.pi)) * T_exp2th
+    f_Imp_eff = (omega_Imp_eff / (2 * np.pi)) * T_exp2th
 
-    # MF_freqIncreasePercentage = 100 * (omega_Imp_eff - omega_Imp_x) / omega_Imp_x
+    MF_freqIncreasePercentage = 100 * (omega_Imp_eff - omega_Imp_x) / omega_Imp_x
 
-    # V_Imp_Hz = (2 * np.pi * hbar)**(-1) * V_Imp_Vals / E_exp2th
-    # VMF_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_Mat / E_exp2th
-    # VMF_HarmApprox_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_HarmApprox_Mat / E_exp2th
+    V_Imp_Hz = (2 * np.pi * hbar)**(-1) * V_Imp_Vals / E_exp2th
+    VMF_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_Mat / E_exp2th
+    VMF_HarmApprox_Mat_Hz = (2 * np.pi * hbar)**(-1) * VMF_HarmApprox_Mat / E_exp2th
 
-    # shiftPot = False
-    # # indf = 20
-    # indf = -1
+    shiftPot = False
+    # indf = 20
+    indf = -1
 
-    # if shiftPot is True:
-    #     shift = -1 * np.min(VMF_Mat_Hz[indf])
-    #     shiftLabel = ' (Shifted)'
-    # else:
-    #     shift = 0
-    #     shiftLabel = ''
+    if shiftPot is True:
+        shift = -1 * np.min(VMF_Mat_Hz[indf])
+        shiftLabel = ' (Shifted)'
+    else:
+        shift = 0
+        shiftLabel = ''
 
-    # fig = plt.figure(figsize=plt.figaspect(0.25))
-    # ax1 = fig.add_subplot(121)
-    # ax2 = fig.add_subplot(122)
-    # ax1.plot(X_Vals_m * 1e6, V_Imp_Hz * 1e-3, 'b-', label=r'$V_{imp}(X)$' + ' ({:.2f} Hz)'.format(expParams['omega_Imp_x'] / (2 * np.pi)))
-    # ax1.plot(X_Vals_m * 1e6, (VMF_Mat_Hz[indf] + shift) * 1e-3, 'g-', label=r'$V_{eff,MF}(X)=V_{imp}(X)+g_{IB}n_{BEC}(X)$' + shiftLabel)
-    # ax1.plot(X_Vals_m * 1e6, (VMF_HarmApprox_Mat_Hz[indf] + shift) * 1e-3, 'r--', label=r'$V_{eff,MF}$' + ' Harmonic Fit ({:.2f} Hz)'.format(f_Imp_eff[indf]) + shiftLabel)
-    # ax1.legend()
-    # ax1.set_xlabel('X ($\mu$m)')
-    # ax1.set_ylabel('Frequency (kHz)')
-    # ax1.set_title('MF Potential for Impurity ' + r'($a_{IB}=$' + '{:.0f}'.format(aIBexp_Vals[indf] / a0_exp) + r'$a_{0}$)')
-    # # ax1.set_xlim([-50, 50])
-    # # ax1.set_ylim([-100, 3000])
+    fig = plt.figure(figsize=plt.figaspect(0.25))
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    ax1.plot(X_Vals_m * 1e6, V_Imp_Hz * 1e-3, 'b-', label=r'$V_{imp}(X)$' + ' ({:.2f} Hz)'.format(expParams['omega_Imp_x'] / (2 * np.pi)))
+    ax1.plot(X_Vals_m * 1e6, (VMF_Mat_Hz[indf] + shift) * 1e-3, 'g-', label=r'$V_{eff,MF}(X)=V_{imp}(X)+g_{IB}n_{BEC}(X)$' + shiftLabel)
+    ax1.plot(X_Vals_m * 1e6, (VMF_HarmApprox_Mat_Hz[indf] + shift) * 1e-3, 'r--', label=r'$V_{eff,MF}$' + ' Harmonic Fit ({:.2f} Hz)'.format(f_Imp_eff[indf]) + shiftLabel)
+    ax1.legend()
+    ax1.set_xlabel('X ($\mu$m)')
+    ax1.set_ylabel('Frequency (kHz)')
+    ax1.set_title('MF Potential for Impurity ' + r'($a_{IB}=$' + '{:.0f}'.format(aIBexp_Vals[indf] / a0_exp) + r'$a_{0}$)')
+    # ax1.set_xlim([-50, 50])
+    # ax1.set_ylim([-100, 3000])
 
-    # # ax2.plot(aIBexp_Vals / a0_exp, MF_freqIncreasePercentage, 'b-')
-    # ax2.plot(aIBexp_Vals / a0_exp, f_Imp_eff, 'r-', label='Effective Trap Frequency')
-    # ax2.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
-    # ax2.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
-    # # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
-    # ax2.set_ylabel('Effective Impurity Trap Frequency (Hz)')
-    # ax2.set_title('Impurity Frequency Shift from MF Potential')
-    # # ax2.set_xlim([-1000, 0]); ax2.set_ylim([100, 300])
-    # ax2.legend()
+    # ax2.plot(aIBexp_Vals / a0_exp, MF_freqIncreasePercentage, 'b-')
+    ax2.plot(aIBexp_Vals / a0_exp, f_Imp_eff, 'r-', label='Effective Trap Frequency')
+    ax2.plot(aIBexp_Vals / a0_exp, (T_exp2th * omega_Imp_x / (2 * np.pi)) * np.ones(aIBexp_Vals.size), 'b-', label='Bare Trap Frequency')
+    ax2.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    # ax2.set_ylabel('Frequency Increase from Bare Impurity Trap (%)')
+    ax2.set_ylabel('Effective Impurity Trap Frequency (Hz)')
+    ax2.set_title('Impurity Frequency Shift from MF Potential')
+    # ax2.set_xlim([-1000, 0]); ax2.set_ylim([100, 300])
+    ax2.legend()
 
-    # plt.show()
+    plt.show()
 
     # BEC DENSITY PROFILE (TF + THERMAL CLOUD)
 

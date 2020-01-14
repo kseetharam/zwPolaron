@@ -124,7 +124,7 @@ if __name__ == "__main__":
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'PosScat': 'on', 'Polaron_Potential': 'off'}
+                      'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'off', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
@@ -143,31 +143,46 @@ if __name__ == "__main__":
 
         # ---- SET OUTPUT DATA FOLDER ----
 
-        if toggleDict['Location'] == 'home':
-            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
-        elif toggleDict['Location'] == 'work':
-            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+        if toggleDict['Location'] == 'personal':
+            datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc'.format(aBB, NGridPoints_cart)
         elif toggleDict['Location'] == 'cluster':
-            datapath = '/n/scratchlfs02/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}'.format(aBB, NGridPoints_cart)
+            datapath = '/n/scratchlfs02/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc'.format(aBB, NGridPoints_cart)
 
         if toggleDict['PosScat'] == 'on':
-            innerdatapath = datapath + '/BEC_osc/PosScat'
+            innerdatapath = datapath + '/PosScat'
         else:
-            innerdatapath = datapath + '/BEC_osc'
+            innerdatapath = datapath + '/NegScat'
+
+        if toggleDict['BEC_density'] == 'off':
+            innerdatapath = innerdatapath + '/HomogBEC'
+            toggleDict['Polaron_Potential'] = 'off'
+
         if toggleDict['Polaron_Potential'] == 'off':
             innerdatapath = innerdatapath + '/NoPolPot'
         else:
-            innerdatapath = innerdatapath
+            innerdatapath = innerdatapath + '/PolPot'
+
         if toggleDict['CS_Dyn'] == 'off':
-            innerdatapath = innerdatapath + '/NoCSdyn_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+            innerdatapath = innerdatapath + '_NoCSDyn'
         else:
-            innerdatapath = innerdatapath + '/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+            innerdatapath = innerdatapath + '_CSDyn'
+
+        innerdatapath = innerdatapath + '/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
+
         if toggleDict['InitCS'] == 'file':
             toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
         else:
             toggleDict['InitCS_datapath'] = 'InitCS ERROR'
 
         TTList.append((toggleDict, trapParams, innerdatapath))
+
+        # # Test of density for homogeneous case (n0), center of inhomogenous BEC with experimental params (n_center), and the density away from the center of the BEC for an inhomogeneous BEC with very wide harmonic trap in the direction of motion
+        # n_center = pf_dynamic_sph.n_BEC(oscParams['X0'], 0, 0, n0_TF, n0_thermal, trapParams['RTF_BEC_X'], trapParams['RTF_BEC_Y'], trapParams['RTF_BEC_Z'], trapParams['RG_BEC_X'], trapParams['RG_BEC_Y'], trapParams['RG_BEC_Z'])  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        # wideRTF = 1e4 * trapParams['RTF_BEC_X']
+        # wideRG = 1e4 * trapParams['RG_BEC_X']
+        # widePos = oscParams['X0'] + 1e2 * trapParams['RTF_BEC_X']
+        # n_center_wide = pf_dynamic_sph.n_BEC(widePos, 0, 0, n0_TF, n0_thermal, wideRTF, trapParams['RTF_BEC_Y'], trapParams['RTF_BEC_Z'], wideRG, trapParams['RG_BEC_Y'], trapParams['RG_BEC_Z'])  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        # print(n0, n_center, n_center_wide)  # turns out that a homogeneous BEC is a good approx if the furthest position our impurity gets away from the center of the BEC is 1-2 orders of magnitude smaller than the radius of the TF profile (set by RTF & RG)
 
     # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
 
