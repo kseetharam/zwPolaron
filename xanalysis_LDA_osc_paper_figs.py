@@ -107,6 +107,7 @@ if __name__ == "__main__":
     xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
     vL_bareImp = np.gradient(xL_bareImp, tVals)
     aL_bareImp = np.gradient(np.gradient(xL_bareImp, tVals), tVals)
+    print(expParams['RTF_BEC_X'] * 1e6, expParams['RTF_BEC_Y'] * 1e6, expParams['RTF_BEC_Z'] * 1e6)
 
     # print(1 / aIBiVals / a0_th)
 
