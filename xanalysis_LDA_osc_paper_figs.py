@@ -305,8 +305,8 @@ if __name__ == "__main__":
     # fig6.set_size_inches(7.8, 6.0)
 
     # fig6.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    # fig6.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    # fig6.text(0.53, 0.96, '(c)', fontsize=labelsize)
+    # fig6.text(0.05, 0.51, '(c)', fontsize=labelsize)
+    # fig6.text(0.53, 0.96, '(b)', fontsize=labelsize)
     # fig6.text(0.53, 0.51, '(d)', fontsize=labelsize)
 
     # fig6.savefig(figdatapath + '/Fig6.pdf')
@@ -353,8 +353,8 @@ if __name__ == "__main__":
     # fig9.set_size_inches(7.8, 6.0)
 
     # fig9.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    # fig9.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    # fig9.text(0.53, 0.96, '(c)', fontsize=labelsize)
+    # fig9.text(0.05, 0.51, '(c)', fontsize=labelsize)
+    # fig9.text(0.53, 0.96, '(b)', fontsize=labelsize)
     # fig9.text(0.53, 0.51, '(d)', fontsize=labelsize)
 
     # fig9.savefig(figdatapath + '/Fig9.pdf')
