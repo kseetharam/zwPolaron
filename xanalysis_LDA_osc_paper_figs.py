@@ -613,11 +613,11 @@ if __name__ == "__main__":
     # ax7.plot(aIBVals_Pos[0:10], gammaVals_Pos[0:10], color='r', marker='x', mew=2, linestyle='None')
 
     # # ax7.plot(-1 * aIBVals_Neg, p2FitVals_Neg, color='b', linestyle=':', lw=2, label=r'$\gamma_{fit}^{Neg}=($' + '{:.1e}'.format(p2param) + r'$)a_{IB}^{2}$')
-    # ax7.plot(-1 * aIBVals_Neg, p2FitVals_Neg, color='b', linestyle=':', lw=2, label=r'$\gamma_{fit}^{Neg}$')
+    # ax7.plot(-1 * aIBVals_Neg, p2FitVals_Neg, color='b', linestyle=':', lw=2, label=r'$\gamma_{\mathrm{quad Fit}}^{Neg}$')
     # ax7.plot(-1 * aIBVals_Neg[0:10], p2FitVals_Neg[0:10], color='b', marker='s', mew=2, markerfacecolor='None', linestyle='None')
 
     # # ax7.plot(aIBVals_Pos, p2FitVals_Pos, color='#650021', linestyle=':', lw=2, label=r'$\gamma_{fit}^{Pos}=($' + '{:.1e}'.format(p2param) + r'$)a_{IB}^{2}$')
-    # ax7.plot(aIBVals_Pos, p2FitVals_Pos, color='#650021', linestyle=':', lw=2, label=r'$\gamma_{fit}^{Pos}$')
+    # ax7.plot(aIBVals_Pos, p2FitVals_Pos, color='#650021', linestyle=':', lw=2, label=r'$\gamma_{\mathrm{quad Fit}}^{Pos}$')
     # ax7.plot(aIBVals_Pos[0:10], p2FitVals_Pos[0:10], color='#650021', marker='x', mew=2, linestyle='None')
 
     # # ax7.plot(-1 * aIBVals_NegWeak[0] * np.ones(aIBVals_Neg.size), np.linspace(np.min(p2FitVals_Neg), np.max(p2FitVals_Neg), p2FitVals_Neg.size), 'y:', label=r'$a_{IB}=$' + '{:.1f}'.format(aIBVals_NegWeak[0]) + r' [$a_{0}$]')
