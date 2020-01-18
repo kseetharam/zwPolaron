@@ -55,8 +55,55 @@ if __name__ == "__main__":
     datapath_Pos_PP_NoCS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/PosScat/PolPot_NoCSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
     datapath_Pos_PP_CS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/PosScat/PolPot_CSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
 
+    datapath_Neg_Homog_NoCS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/NegScat/HomogBEC/NoPolPot_NoCSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+    datapath_Neg_Homog_CS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/NegScat/HomogBEC/NoPolPot_CSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+    datapath_Pos_Homog_NoCS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/PosScat/HomogBEC/NoPolPot_NoCSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+    datapath_Pos_Homog_CS = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc/PosScat/HomogBEC/NoPolPot_CSDyn/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(aBB, NGridPoints_cart, dParams['f_BEC_osc'], dParams['f_Imp_x'], dParams['a_osc'], dParams['X0'], dParams['P0'])
+
     figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Cherenkov Polaron Paper pt2/figures/figdump'
     datafilepath = 'tempData/'
+
+    # # # Concatenate Individual Datasets
+
+    # innerdatapath = datapath_Neg_Homog_CS
+    # ds_list = []
+    # aIBi_list = []
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename[0:3] == 'LDA':
+    #         continue
+    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
+
+    #     print(filename)
+    #     # ds = ds.sel(t=slice(0, tfin))
+    #     ds_list.append(ds)
+    #     aIBi_list.append(ds.attrs['aIBi'])
+
+    # s = sorted(zip(aIBi_list, ds_list))
+    # g = itertools.groupby(s, key=lambda x: x[0])
+
+    # aIBi_keys = []
+    # aIBi_groups = []
+    # aIBi_ds_list = []
+    # for key, group in g:
+    #     aIBi_keys.append(key)
+    #     aIBi_groups.append(list(group))
+
+    # for ind, group in enumerate(aIBi_groups):
+    #     aIBi = aIBi_keys[ind]
+    #     _, ds_temp = zip(*group)
+    #     aIBi_ds_list.append(ds_temp[0])
+
+    # if toggleDict['PosScat'] == 'on':
+    #     aIBi_keys = aIBi_keys[::-1]
+    #     aIBi_ds_list = aIBi_ds_list[::-1]
+
+    # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
+    # del(ds_tot.attrs['Fext_mag'])
+    # del(ds_tot.attrs['aIBi'])
+    # del(ds_tot.attrs['gIB'])
+    # del(ds_tot.attrs['TF'])
+    # del(ds_tot.attrs['Delta_P'])
+    # ds_tot.to_netcdf(innerdatapath + '/LDA_Dataset.nc')
 
     # # # Analysis of Total Dataset
 
@@ -81,6 +128,11 @@ if __name__ == "__main__":
     qds_Pos_NoPP_CS = xr.open_dataset(datapath_Pos_NoPP_CS + '/LDA_Dataset.nc')
     qds_Pos_PP_NoCS = xr.open_dataset(datapath_Pos_PP_NoCS + '/LDA_Dataset.nc')
     qds_Pos_PP_CS = xr.open_dataset(datapath_Pos_PP_CS + '/LDA_Dataset.nc')
+
+    # qds_Neg_Homog_NoCS = xr.open_dataset(datapath_Neg_Homog_NoCS + '/LDA_Dataset.nc')
+    qds_Neg_Homog_CS = xr.open_dataset(datapath_Neg_Homog_CS + '/LDA_Dataset.nc')
+    # qds_Pos_Homog_NoCS = xr.open_dataset(datapath_Pos_Homog_NoCS + '/LDA_Dataset.nc')
+    # qds_Pos_Homog_CS = xr.open_dataset(datapath_Pos_Homog_CS + '/LDA_Dataset.nc')
 
     oscParams = {'X0': X0, 'P0': P0, 'a_osc': a_osc}
 
@@ -111,82 +163,83 @@ if __name__ == "__main__":
 
     # print(1 / aIBiVals / a0_th)
 
-    # # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
+    # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
 
-    # a0ylim = 6000
+    a0ylim = 6000
 
     # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    # freqda_List = []
-    # aIBVals_List = []
+    qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_Homog_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    freqda_List = []
+    aIBVals_List = []
 
-    # for qds in qds_List:
-    #     aIBiVals = qds['aIBi'].values
-    #     x_ds = qds['XLab']
-    #     tVals = qds['t'].values
-    #     dt = tVals[1] - tVals[0]
-    #     fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    #     Nf = fVals.size
-    #     print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
-    #     # aIBiVals = aIBiVals[2:]
-    #     aIBVals = (1 / aIBiVals) / a0_th
-    #     freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    #     maxph = 0
-    #     for ind, aIBi in enumerate(aIBiVals):
-    #         xVals = x_ds.sel(aIBi=aIBi).values
-    #         x0 = xVals[0]
-    #         dt = tVals[1] - tVals[0]
-    #         # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-    #         FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-    #         fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-    #         absFTVals = np.abs(FTVals)
+    for qds in qds_List:
+        aIBiVals = qds['aIBi'].values
+        x_ds = qds['XLab']
+        tVals = qds['t'].values
+        dt = tVals[1] - tVals[0]
+        fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+        Nf = fVals.size
+        print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
+        # aIBiVals = aIBiVals[2:]
+        aIBVals = (1 / aIBiVals) / a0_th
+        freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+        maxph = 0
+        for ind, aIBi in enumerate(aIBiVals):
+            xVals = x_ds.sel(aIBi=aIBi).values
+            x0 = xVals[0]
+            dt = tVals[1] - tVals[0]
+            # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+            FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+            fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+            absFTVals = np.abs(FTVals)
 
-    #         freq_da.sel(aIBi=aIBi)[:] = absFTVals
-    #         if np.max(absFTVals) > maxph:
-    #             maxph = np.max(absFTVals)
-    #     print(maxph)
-    #     freqda_List.append(freq_da)
-    #     aIBVals_List.append(aIBVals)
+            freq_da.sel(aIBi=aIBi)[:] = absFTVals
+            if np.max(absFTVals) > maxph:
+                maxph = np.max(absFTVals)
+        print(maxph)
+        freqda_List.append(freq_da)
+        aIBVals_List.append(aIBVals)
 
-    # # vmax = maxph
-    # vmax = 100000
-    # # vmax = 200000
+    # vmax = maxph
+    vmax = 100000
+    # vmax = 200000
 
-    # fig5, axes = plt.subplots(nrows=2, ncols=2)
-    # axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
+    fig5, axes = plt.subplots(nrows=2, ncols=2)
+    axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
-    # for ind, freq_da in enumerate(freqda_List):
-    #     ax = axList[ind]
-    #     absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
-    #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
-    #     aIBVals = aIBVals_List[ind]
-    #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
-    #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
-    #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
-    #     if signList[ind] == 'Neg':
-    #         ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
-    #     elif signList[ind] == 'Pos':
-    #         ax.set_ylim([a0ylim, np.min(aIBVals)])
-    #     ax.set_xlabel('f (Hz)', fontsize=labelsize)
-    #     ax.set_xlim([0, 400])
-    #     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    for ind, freq_da in enumerate(freqda_List):
+        ax = axList[ind]
+        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+        # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
+        aIBVals = aIBVals_List[ind]
+        quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+        ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+        ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
+        ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
+        if signList[ind] == 'Neg':
+            ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+        elif signList[ind] == 'Pos':
+            ax.set_ylim([a0ylim, np.min(aIBVals)])
+        ax.set_xlabel('f (Hz)', fontsize=labelsize)
+        ax.set_xlim([0, 400])
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-    # cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
-    # fig5.colorbar(quadF, cax=cbar_ax, extend='max')
-    # cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
-    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
-    # handles, labels = axList[0].get_legend_handles_labels()
-    # fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
-    # fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
-    # fig5.set_size_inches(7.8, 6.0)
+    cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
+    fig5.colorbar(quadF, cax=cbar_ax, extend='max')
+    cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
+    handles, labels = axList[0].get_legend_handles_labels()
+    fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
+    fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
+    fig5.set_size_inches(7.8, 6.0)
 
-    # fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    # fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    # fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
-    # fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
+    fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
+    fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
+    fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
+    fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
 
-    # # fig5.savefig(figdatapath + '/Fig5.pdf')
+    # fig5.savefig(figdatapath + '/Fig5.pdf')
     # fig5.savefig(figdatapath + '/Fig5.jpg', quality=20)
 
     # # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
