@@ -124,7 +124,7 @@ if __name__ == "__main__":
     for oscParams in oscParams_List:
 
         toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                      'F_ext': 'off', 'PosScat': 'on', 'BEC_density': 'off', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'off', 'Polaron_Potential': 'off'}
+                      'F_ext': 'off', 'PosScat': 'on', 'BEC_density': 'off', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'on'}
 
         trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
                       'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
@@ -245,15 +245,14 @@ if __name__ == "__main__":
     # missInds = [5, 23, 28, 42, 128] # negative scattering length (no pol pot, CS dyn on)
     # missInds = [1, 2, 174, 175, 176, 177, 178, 179, 180] # positive scattering length (no pol pot, CS dyn on)
     # missInds = [98, 99, 100, 101, 102, 103, 104] # negative scattering length (homog, no pol pot, CS dyn on)
-    # missInds = [0, 1, 2, 3, 174, 175, 176, 177, 178, 179] # positive scattering length (homog, no pol pot, CS dyn on)
-    # missList = []
-    # for mind in missInds:
-    #     missList.append(metaList[mind])
-    #     (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
-    #     print(aIBi, 1 / (aIBi * L_exp2th) / a0_exp)
-    # metaList = missList
+    missInds = [0, 1, 2, 3, 174, 175, 176, 177, 178, 179]  # positive scattering length (homog, no pol pot, CS dyn on)
+    missList = []
+    for mind in missInds:
+        missList.append(metaList[mind])
+        (toggleDict, trapParams, innerdatapath, aIBi) = metaList[mind]
+        print(aIBi, 1 / (aIBi * L_exp2th) / a0_exp)
+    metaList = missList
 
-    # metaList = metaList[0:2]
     print(len(metaList))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
