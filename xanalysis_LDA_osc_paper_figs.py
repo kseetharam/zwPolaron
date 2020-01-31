@@ -323,84 +323,84 @@ if __name__ == "__main__":
     # # PAPER FIGURES
     # #############################################################################################################################
 
-    # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
+    # # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
 
-    a0ylim = 4000
+    # a0ylim = 4000
 
-    # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_Homog_CS, qds_Pos_Homog_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    freqda_List = []
-    aIBVals_List = []
+    # # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_Homog_CS, qds_Pos_Homog_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    # freqda_List = []
+    # aIBVals_List = []
 
-    for qds in qds_List:
-        aIBiVals = qds['aIBi'].values
-        x_ds = qds['XLab']
-        tVals = qds['t'].values
-        dt = tVals[1] - tVals[0]
-        fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-        Nf = fVals.size
-        print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
-        # aIBiVals = aIBiVals[2:]
-        aIBVals = (1 / aIBiVals) / a0_th
-        freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-        maxph = 0
-        for ind, aIBi in enumerate(aIBiVals):
-            xVals = x_ds.sel(aIBi=aIBi).values
-            x0 = xVals[0]
-            dt = tVals[1] - tVals[0]
-            # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-            FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-            fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-            absFTVals = np.abs(FTVals)
+    # for qds in qds_List:
+    #     aIBiVals = qds['aIBi'].values
+    #     x_ds = qds['XLab']
+    #     tVals = qds['t'].values
+    #     dt = tVals[1] - tVals[0]
+    #     fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+    #     Nf = fVals.size
+    #     print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
+    #     # aIBiVals = aIBiVals[2:]
+    #     aIBVals = (1 / aIBiVals) / a0_th
+    #     freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+    #     maxph = 0
+    #     for ind, aIBi in enumerate(aIBiVals):
+    #         xVals = x_ds.sel(aIBi=aIBi).values
+    #         x0 = xVals[0]
+    #         dt = tVals[1] - tVals[0]
+    #         # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+    #         FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+    #         fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+    #         absFTVals = np.abs(FTVals)
 
-            freq_da.sel(aIBi=aIBi)[:] = absFTVals
-            if np.max(absFTVals) > maxph:
-                maxph = np.max(absFTVals)
-        print(maxph)
-        freqda_List.append(freq_da)
-        aIBVals_List.append(aIBVals)
+    #         freq_da.sel(aIBi=aIBi)[:] = absFTVals
+    #         if np.max(absFTVals) > maxph:
+    #             maxph = np.max(absFTVals)
+    #     print(maxph)
+    #     freqda_List.append(freq_da)
+    #     aIBVals_List.append(aIBVals)
 
-    # vmax = maxph
-    vmax = 100000
-    # vmax = 200000
+    # # vmax = maxph
+    # vmax = 100000
+    # # vmax = 200000
 
-    fig5, axes = plt.subplots(nrows=2, ncols=2)
-    axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
+    # fig5, axes = plt.subplots(nrows=2, ncols=2)
+    # axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
-    for ind, freq_da in enumerate(freqda_List):
-        ax = axList[ind]
-        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
-        # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
-        aIBVals = aIBVals_List[ind]
-        quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-        ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
-        ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
-        ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
-        if signList[ind] == 'Neg':
-            ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
-        elif signList[ind] == 'Pos':
-            ax.set_ylim([a0ylim, np.min(aIBVals)])
-        ax.set_xlabel('f (Hz)', fontsize=labelsize)
-        ax.set_xlim([0, 400])
-        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # for ind, freq_da in enumerate(freqda_List):
+    #     ax = axList[ind]
+    #     absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+    #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
+    #     aIBVals = aIBVals_List[ind]
+    #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+    #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
+    #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
+    #     if signList[ind] == 'Neg':
+    #         ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+    #     elif signList[ind] == 'Pos':
+    #         ax.set_ylim([a0ylim, np.min(aIBVals)])
+    #     ax.set_xlabel('f (Hz)', fontsize=labelsize)
+    #     ax.set_xlim([0, 400])
+    #     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-    cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
-    fig5.colorbar(quadF, cax=cbar_ax, extend='max')
-    cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
-    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
-    handles, labels = axList[0].get_legend_handles_labels()
-    fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
-    fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
-    fig5.set_size_inches(7.8, 6.0)
+    # cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max')
+    # cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
+    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
+    # handles, labels = axList[0].get_legend_handles_labels()
+    # fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
+    # fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
+    # fig5.set_size_inches(7.8, 6.0)
 
-    fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
-    fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
+    # fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
+    # fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
+    # fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
+    # fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
 
-    # fig5.savefig(figdatapath + '/Fig5.pdf')
-    fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
+    # # fig5.savefig(figdatapath + '/Fig5.pdf')
+    # fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
 
     # # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
 
@@ -478,7 +478,7 @@ if __name__ == "__main__":
     # fig8.text(0.47, 0.51, '(d)', fontsize=labelsize)
 
     # # fig8.savefig(figdatapath + '/Fig8.pdf')
-    # fig8.savefig(figdatapath + '/Fig8.jpg', quality=20)
+    # fig8.savefig(figdatapath + '/Fig8.jpg', quality=100)
 
     # # # # # FIG 6 - VELOCITY PLOTS (BEC FRAME) - NEGSCAT
 
