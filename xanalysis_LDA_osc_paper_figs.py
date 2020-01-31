@@ -163,84 +163,244 @@ if __name__ == "__main__":
 
     # print(1 / aIBiVals / a0_th)
 
-    # # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
+    # #############################################################################################################################
+    # # ANIMATIONS
+    # #############################################################################################################################
 
-    # a0ylim = 6000
+    # # POSITION VS TIME ANIMATION (LAB FRAME)
 
-    # # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_Homog_CS, qds_Pos_Homog_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    # freqda_List = []
-    # aIBVals_List = []
+    # inverseScat = False
 
-    # for qds in qds_List:
-    #     aIBiVals = qds['aIBi'].values
-    #     x_ds = qds['XLab']
-    #     tVals = qds['t'].values
-    #     dt = tVals[1] - tVals[0]
-    #     fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    #     Nf = fVals.size
-    #     print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
-    #     # aIBiVals = aIBiVals[2:]
-    #     aIBVals = (1 / aIBiVals) / a0_th
-    #     freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    #     maxph = 0
-    #     for ind, aIBi in enumerate(aIBiVals):
-    #         xVals = x_ds.sel(aIBi=aIBi).values
-    #         x0 = xVals[0]
-    #         dt = tVals[1] - tVals[0]
-    #         # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-    #         FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-    #         fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-    #         absFTVals = np.abs(FTVals)
+    # qds = qds_Pos_Homog_CS
+    # aIBiVals = qds['aIBi'].values
+    # aIBiVals = aIBiVals[::-1]
+    # x_ds = qds['XLab']
+    # xI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # xmin = 1e20
+    # xmax = -1e20
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     xI_array[ind] = x_ds.sel(aIBi=aIBi).values
+    #     xImax = np.max(xI_array[ind])
+    #     xImin = np.min(xI_array[ind])
+    #     if xmax < xImax:
+    #         xmax = xImax
+    #     if xmin > xImin:
+    #         xmin = xImin
 
-    #         freq_da.sel(aIBi=aIBi)[:] = absFTVals
-    #         if np.max(absFTVals) > maxph:
-    #             maxph = np.max(absFTVals)
-    #     print(maxph)
-    #     freqda_List.append(freq_da)
-    #     aIBVals_List.append(aIBVals)
+    # fig6, ax6 = plt.subplots()
+    # if toggleDict['PosScat'] == 'on':
+    #     # ax6.set_ylim([xmin, xmax])
+    #     ax6.set_ylim([-50, 50])
+    # else:
+    #     edge = 1.5 * 1e6 * np.max(xBEC) / L_exp2th
+    #     ax6.set_ylim([-1 * edge, edge])
+    # ax6.plot(ts, 1e6 * xBEC / L_exp2th, 'k:', label='BEC Peak Position')
+    # # ax6.plot(ts, 1e6 * xBEC[0] * np.cos(omega_Imp_x * tVals) / L_exp2th, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # ax6.plot(ts, 1e6 * xL_bareImp / L_exp2th, color='orange', linestyle=':', marker='', label='Bare Impurity')
 
-    # # vmax = maxph
-    # vmax = 100000
-    # # vmax = 200000
+    # # xL_bareImp_mod = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)
+    # curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
+    # if inverseScat is True:
+    #     aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
+    # else:
+    #     aIB_text = ax6.text(0.75, 0.9, r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[0]) / a0_th).astype(int)) + r' [$a_{0}$]', transform=ax6.transAxes, color='r')
 
-    # fig5, axes = plt.subplots(nrows=2, ncols=2)
-    # axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
+    # ax6.legend(loc=2)
+    # ax6.set_ylabel(r'$<X> (\mu m)$')
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_title('Impurity Trajectory (Lab Frame)')
 
-    # for ind, freq_da in enumerate(freqda_List):
-    #     ax = axList[ind]
-    #     absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
-    #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
-    #     aIBVals = aIBVals_List[ind]
-    #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
-    #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
-    #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
-    #     if signList[ind] == 'Neg':
-    #         ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
-    #     elif signList[ind] == 'Pos':
-    #         ax.set_ylim([a0ylim, np.min(aIBVals)])
-    #     ax.set_xlabel('f (Hz)', fontsize=labelsize)
-    #     ax.set_xlim([0, 400])
-    #     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # def animate_pos(i):
+    #     # if i >= aIBiVals.size:
+    #     #     return
+    #     curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
+    #     if inverseScat is True:
+    #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     else:
+    #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
+    # anim_p = FuncAnimation(fig6, animate_pos, interval=50, frames=range(aIBiVals.size), repeat=False)
 
-    # cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
-    # fig5.colorbar(quadF, cax=cbar_ax, extend='max')
-    # cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
-    # # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
-    # handles, labels = axList[0].get_legend_handles_labels()
-    # fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
-    # fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
-    # fig5.set_size_inches(7.8, 6.0)
+    # anim_p_filename = '/PosHomogCS_TrajAnim_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_p.save(figdatapath + anim_p_filename, writer=mpegWriter)
 
-    # fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    # fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    # fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
-    # fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
+    # # POSITION VS TIME ANIMATION (BEC FRAME)
 
-    # # fig5.savefig(figdatapath + '/Fig5.pdf')
-    # fig5.savefig(figdatapath + '/Fig5.jpg', quality=20)
+    # inverseScat = False
+
+    # qds = qds_Pos_Homog_CS
+    # aIBiVals = qds['aIBi'].values
+    # aIBiVals = aIBiVals[::-1]
+    # x_ds = qds['X']
+    # xI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # xmin = 1e20
+    # xmax = -1e20
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     xI_array[ind] = x_ds.sel(aIBi=aIBi).values
+    #     xImax = np.max(xI_array[ind])
+    #     xImin = np.min(xI_array[ind])
+    #     if xmax < xImax:
+    #         xmax = xImax
+    #     if xmin > xImin:
+    #         xmin = xImin
+
+    # fig6, ax6 = plt.subplots()
+    # if toggleDict['PosScat'] == 'on':
+    #     # ax6.set_ylim([xmin, xmax])
+    #     ax6.set_ylim([-50, 50])
+    # else:
+    #     edge = 2.5 * 1e6 * np.max(xBEC) / L_exp2th
+    #     ax6.set_ylim([-1 * edge, edge])
+    # ax6.plot(ts, 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:', label='BEC TF Radius')
+    # ax6.plot(ts, -1 * 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:')
+    # # ax6.plot(ts, 1e6 * (xBEC[0] * np.cos(omega_Imp_x * tVals) - xBEC) / L_exp2th, color='orange', linestyle=':', marker='', label='Impurity Trap Frequency')
+    # ax6.plot(ts, 1e6 * (xL_bareImp - xBEC) / L_exp2th, color='orange', linestyle=':', marker='', label='Bare Impurity')
+    # curve = ax6.plot(ts, 1e6 * xI_array[0] / L_exp2th, color='g', lw=2, label='')[0]
+    # if inverseScat is True:
+    #     aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
+    # else:
+    #     aIB_text = ax6.text(0.75, 0.9, r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[0]) / a0_th).astype(int)) + r' [$a_{0}$]', transform=ax6.transAxes, color='r')
+
+    # ax6.legend(loc=2)
+    # ax6.set_ylabel(r'$<X> (\mu m)$')
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_title('Impurity Trajectory (BEC Frame)')
+
+    # def animate_pos(i):
+    #     curve.set_ydata(1e6 * xI_array[i] / L_exp2th)
+    #     if inverseScat is True:
+    #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     else:
+    #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
+    # anim_pB = FuncAnimation(fig6, animate_pos, interval=50, frames=range(aIBiVals.size), repeat=False)
+
+    # anim_pB_filename = '/PosHomogCS_TrajAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_pB.save(figdatapath + anim_pB_filename, writer=mpegWriter)
+
+    # # VELOCITY VS TIME ANIMATION (BEC FRAME)
+
+    # inverseScat = False
+
+    # qds = qds_Pos_Homog_CS
+    # aIBiVals = qds['aIBi'].values
+    # aIBiVals = aIBiVals[::-1]
+
+    # cBEC = nu * np.ones(ts.size)
+    # vI_array = np.empty(aIBiVals.size, dtype=np.object)
+    # for ind, aIBi in enumerate(aIBiVals):
+    #     vI_array[ind] = np.gradient(qds['X'].sel(aIBi=aIBi).values, tVals)
+
+    # fig6, ax6 = plt.subplots()
+    # curve = ax6.plot(ts, vI_array[0] * (1e3 * T_exp2th / L_exp2th), color='b', linestyle='-', lw=2, label='')[0]
+    # if inverseScat is True:
+    #     aIBi_text = ax6.text(0.8, 0.9, r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[0]), transform=ax6.transAxes, color='r')
+    # else:
+    #     aIB_text = ax6.text(0.75, 0.9, r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[0]) / a0_th).astype(int)) + r' [$a_{0}$]', transform=ax6.transAxes, color='r')
+    # ax6.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label='Subsonic Region ($|v|<c_{BEC}$)')
+
+    # ax6.plot(ts, (vL_bareImp - np.gradient(xBEC, tVals)) * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle=':', marker='', label='Bare Impurity')
+    # ax6.legend(loc=2)
+    # ax6.set_ylabel(r'$v=\frac{d<X>}{dt} (\frac{\mu m}{ms})$')
+    # ax6.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp))
+    # ax6.set_title('Impurity Velocity (BEC Frame)')
+    # # ax6.set_ylim([-450, 450])
+    # ax6.set_ylim([-25, 25])
+
+    # def animate_pos(i):
+    #     if i >= aIBiVals.size:
+    #         return
+    #     curve.set_ydata(vI_array[i] * (1e3 * T_exp2th / L_exp2th))
+    #     if inverseScat is True:
+    #         aIBi_text.set_text(r'$a_{IB}^{-1}=$' + '{:.2f}'.format(aIBiVals[i]))
+    #     else:
+    #         aIB_text.set_text(r'$a_{IB}=$' + '{:d}'.format(((1 / aIBiVals[i]) / a0_th).astype(int)) + r' [$a_{0}$]')
+
+    # anim_v = FuncAnimation(fig6, animate_pos, interval=50, frames=range(aIBiVals.size), repeat=False)
+
+    # anim_v_filename = '/PosHomogCS_VelAnim_BECframe_fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}.mp4'.format(f_BEC_osc, f_Imp_x, a_osc, X0, P0)
+    # anim_v.save(figdatapath + anim_v_filename, writer=mpegWriter)
+
+    # #############################################################################################################################
+    # # PAPER FIGURES
+    # #############################################################################################################################
+
+    # # # FIG 5 - 2D OSCILLATION FREQUENCY (HOMOGENEOUS BEC)
+
+    a0ylim = 4000
+
+    # qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_NoPP_CS, qds_Pos_NoPP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    qds_List = [qds_Neg_NoPP_NoCS, qds_Pos_NoPP_NoCS, qds_Neg_Homog_CS, qds_Pos_Homog_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    freqda_List = []
+    aIBVals_List = []
+
+    for qds in qds_List:
+        aIBiVals = qds['aIBi'].values
+        x_ds = qds['XLab']
+        tVals = qds['t'].values
+        dt = tVals[1] - tVals[0]
+        fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+        Nf = fVals.size
+        print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
+        # aIBiVals = aIBiVals[2:]
+        aIBVals = (1 / aIBiVals) / a0_th
+        freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+        maxph = 0
+        for ind, aIBi in enumerate(aIBiVals):
+            xVals = x_ds.sel(aIBi=aIBi).values
+            x0 = xVals[0]
+            dt = tVals[1] - tVals[0]
+            # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+            FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+            fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+            absFTVals = np.abs(FTVals)
+
+            freq_da.sel(aIBi=aIBi)[:] = absFTVals
+            if np.max(absFTVals) > maxph:
+                maxph = np.max(absFTVals)
+        print(maxph)
+        freqda_List.append(freq_da)
+        aIBVals_List.append(aIBVals)
+
+    # vmax = maxph
+    vmax = 100000
+    # vmax = 200000
+
+    fig5, axes = plt.subplots(nrows=2, ncols=2)
+    axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
+
+    for ind, freq_da in enumerate(freqda_List):
+        ax = axList[ind]
+        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+        # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
+        aIBVals = aIBVals_List[ind]
+        quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+        ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+        ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
+        ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
+        if signList[ind] == 'Neg':
+            ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+        elif signList[ind] == 'Pos':
+            ax.set_ylim([a0ylim, np.min(aIBVals)])
+        ax.set_xlabel('f (Hz)', fontsize=labelsize)
+        ax.set_xlim([0, 400])
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+    cbar_ax = fig5.add_axes([0.9, 0.2, 0.02, 0.7])
+    fig5.colorbar(quadF, cax=cbar_ax, extend='max')
+    cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
+    # fig5.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
+    handles, labels = axList[0].get_legend_handles_labels()
+    fig5.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
+    fig5.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
+    fig5.set_size_inches(7.8, 6.0)
+
+    fig5.text(0.05, 0.96, '(a)', fontsize=labelsize)
+    fig5.text(0.05, 0.51, '(b)', fontsize=labelsize)
+    fig5.text(0.47, 0.96, '(c)', fontsize=labelsize)
+    fig5.text(0.47, 0.51, '(d)', fontsize=labelsize)
+
+    # fig5.savefig(figdatapath + '/Fig5.pdf')
+    fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
 
     # # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
 
