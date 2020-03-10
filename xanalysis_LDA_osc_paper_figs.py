@@ -15,6 +15,8 @@ import os
 import itertools
 import Grid
 import pf_dynamic_sph as pfs
+import pf_static_sph as pfstat
+
 
 if __name__ == "__main__":
 
@@ -402,83 +404,219 @@ if __name__ == "__main__":
     # # fig5.savefig(figdatapath + '/Fig5.pdf')
     # fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
 
-    # # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
+    # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
 
-    # a0ylim = 6000
+    a0ylim = 6000
 
-    # qds_List = [qds_Neg_PP_NoCS, qds_Pos_PP_NoCS, qds_Neg_PP_CS, qds_Pos_PP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
-    # freqda_List = []
-    # aIBVals_List = []
+    qds_List = [qds_Neg_PP_NoCS, qds_Pos_PP_NoCS, qds_Neg_PP_CS, qds_Pos_PP_CS]; signList = ['Neg', 'Pos', 'Neg', 'Pos']
+    freqda_List = []
+    aIBVals_List = []
 
-    # for qds in qds_List:
-    #     aIBiVals = qds['aIBi'].values
-    #     x_ds = qds['XLab']
-    #     tVals = qds['t'].values
-    #     dt = tVals[1] - tVals[0]
-    #     fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
-    #     Nf = fVals.size
-    #     print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
-    #     # aIBiVals = aIBiVals[2:]
-    #     aIBVals = (1 / aIBiVals) / a0_th
-    #     freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
-    #     maxph = 0
-    #     for ind, aIBi in enumerate(aIBiVals):
-    #         xVals = x_ds.sel(aIBi=aIBi).values
-    #         x0 = xVals[0]
-    #         dt = tVals[1] - tVals[0]
-    #         # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
-    #         FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
-    #         fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
-    #         absFTVals = np.abs(FTVals)
+    for qds in qds_List:
+        aIBiVals = qds['aIBi'].values
+        x_ds = qds['XLab']
+        tVals = qds['t'].values
+        dt = tVals[1] - tVals[0]
+        fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / dt)
+        Nf = fVals.size
+        print('df: {0}'.format((fVals[1] - fVals[0]) * T_exp2th))
+        # aIBiVals = aIBiVals[2:]
+        aIBVals = (1 / aIBiVals) / a0_th
+        freq_da = xr.DataArray(np.full((fVals.size, len(aIBiVals)), np.nan, dtype=float), coords=[fVals, aIBiVals], dims=['f', 'aIBi'])
+        maxph = 0
+        for ind, aIBi in enumerate(aIBiVals):
+            xVals = x_ds.sel(aIBi=aIBi).values
+            x0 = xVals[0]
+            dt = tVals[1] - tVals[0]
+            # FTVals = np.fft.fftshift(dt * np.fft.fft(xVals))
+            FTVals = np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(xVals)))
+            fVals = np.fft.fftshift(np.fft.fftfreq(xVals.size) / dt)
+            absFTVals = np.abs(FTVals)
 
-    #         freq_da.sel(aIBi=aIBi)[:] = absFTVals
-    #         if np.max(absFTVals) > maxph:
-    #             maxph = np.max(absFTVals)
-    #     print(maxph)
-    #     freqda_List.append(freq_da)
-    #     aIBVals_List.append(aIBVals)
+            freq_da.sel(aIBi=aIBi)[:] = absFTVals
+            if np.max(absFTVals) > maxph:
+                maxph = np.max(absFTVals)
+        print(maxph)
+        freqda_List.append(freq_da)
+        aIBVals_List.append(aIBVals)
 
-    # # vmax = maxph
-    # vmax = 100000
-    # # vmax = 200000
+    # vmax = maxph
+    vmax = 100000
+    # vmax = 200000
 
-    # fig8, axes = plt.subplots(nrows=2, ncols=2)
-    # axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
+    fig8, axes = plt.subplots(nrows=2, ncols=2)
+    axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
-    # for ind, freq_da in enumerate(freqda_List):
-    #     ax = axList[ind]
-    #     absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
-    #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
-    #     aIBVals = aIBVals_List[ind]
-    #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
-    #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
-    #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
-    #     if signList[ind] == 'Neg':
-    #         ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
-    #     elif signList[ind] == 'Pos':
-    #         ax.set_ylim([a0ylim, np.min(aIBVals)])
-    #     ax.set_xlabel('f (Hz)', fontsize=labelsize)
-    #     ax.set_xlim([0, 400])
-    #     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    for ind, freq_da in enumerate(freqda_List):
+        ax = axList[ind]
+        absFT_interp, f_interp, aIBi_interp = pfs.xinterp2D(freq_da, 'f', 'aIBi', 5)
+        # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
+        aIBVals = aIBVals_List[ind]
+        quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
+        ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+        ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
+        ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
+        if signList[ind] == 'Neg':
+            ax.set_ylim([-1 * a0ylim, np.max(aIBVals)])
+        elif signList[ind] == 'Pos':
+            ax.set_ylim([a0ylim, np.min(aIBVals)])
+        ax.set_xlabel('f (Hz)', fontsize=labelsize)
+        ax.set_xlim([0, 400])
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-    # cbar_ax = fig8.add_axes([0.9, 0.2, 0.02, 0.7])
-    # fig8.colorbar(quadF, cax=cbar_ax, extend='max')
-    # cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-    # # fig8.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
-    # # fig8.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
-    # handles, labels = axList[0].get_legend_handles_labels()
-    # fig8.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
-    # fig8.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
-    # fig8.set_size_inches(7.8, 6.0)
+    cbar_ax = fig8.add_axes([0.9, 0.2, 0.02, 0.7])
+    fig8.colorbar(quadF, cax=cbar_ax, extend='max')
+    cbar_ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    # fig8.colorbar(quadF, cax=cbar_ax, extend='max', format=FormatStrFormatter('%.f'))
+    # fig8.colorbar(quadF, cax=cbar_ax, extend='max', format='%.0e')
+    handles, labels = axList[0].get_legend_handles_labels()
+    fig8.legend(handles, labels, ncol=2, loc='lower center', fontsize=legendsize)
+    fig8.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.45, wspace=0.45)
+    fig8.set_size_inches(7.8, 6.0)
 
-    # fig8.text(0.05, 0.96, '(a)', fontsize=labelsize)
-    # fig8.text(0.05, 0.51, '(b)', fontsize=labelsize)
-    # fig8.text(0.47, 0.96, '(c)', fontsize=labelsize)
-    # fig8.text(0.47, 0.51, '(d)', fontsize=labelsize)
+    fig8.text(0.05, 0.96, '(a)', fontsize=labelsize)
+    fig8.text(0.05, 0.51, '(b)', fontsize=labelsize)
+    fig8.text(0.47, 0.96, '(c)', fontsize=labelsize)
+    fig8.text(0.47, 0.51, '(d)', fontsize=labelsize)
 
-    # # fig8.savefig(figdatapath + '/Fig8.pdf')
-    # fig8.savefig(figdatapath + '/Fig8.jpg', quality=100)
+    # Add MF potential (Vimp_bare + Epol) line
+
+    Ntheta = 50
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
+        print('k ARRAY GENERATION ERROR')
+
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+
+    aIBexp_Vals = np.concatenate((np.array([-12000, -8000, -7000, -6000, -5000]), np.linspace(-4000, -2000, 5, endpoint=False), np.linspace(-2000, -70, 5, endpoint=False), np.linspace(-70, -20, 3))) * a0_exp; aIBexp_Vals = np.concatenate((aIBexp_Vals, np.linspace(20, 650, 10,) * a0_exp))
+    aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
+    aIBi = aIBi_Vals[2]
+    cParams = {'aIBi': aIBi}
+    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should = 1
+    sParams = [mI, mB, n0, gBB]
+
+    expParams = pfs.Zw_expParams()
+    L_exp2th, M_exp2th, T_exp2th = pfs.unitConv_exp2th(expParams['n0_BEC'], expParams['mB'])
+    E_exp2th = M_exp2th * L_exp2th**2 / T_exp2th**2
+    F_exp2th = M_exp2th * L_exp2th / T_exp2th**2
+
+    a0_exp = 5.29e-11  # Bohr radius (m)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+
+    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
+    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
+    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
+    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
+    omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
+    trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z, 'omega_Imp_x': omega_Imp_x}
+
+    X_Vals = np.linspace(-1 * RTF_BEC_X * 0.99, RTF_BEC_X * 0.99, 1e3)
+    X_Vals_m = X_Vals / L_exp2th
+    E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+    EpVals_interp = 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0)
+    FpVals_interp = pfs.F_pol(X_Vals, E_Pol_tck)
+
+    X_Vals_poly = np.linspace(-1 * RTF_BEC_X * 0.5, RTF_BEC_X * 0.5, 50)
+    EpVals_poly = 1 * interpolate.splev(X_Vals_poly, E_Pol_tck, der=0)
+    [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
+    omegap = np.sqrt(2 * p2 / mI)
+    EpVals_harm = p2 * X_Vals**2 + p0
+
+    # EpVals_Hz = (2 * np.pi * hbar)**(-1) * EpVals / E_exp2th
+    EpVals_Hz = (2 * np.pi * hbar)**(-1) * EpVals_interp / E_exp2th
+    FpVals_N = FpVals_interp / F_exp2th
+    EpVals_harm_Hz = (2 * np.pi * hbar)**(-1) * EpVals_harm / E_exp2th
+    freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+
+    VtB = (gBB * n0 / RTF_BEC_X**2) * X_Vals**2
+    VtB_Hz = (2 * np.pi * hbar)**(-1) * VtB / E_exp2th
+    omega_tB = np.sqrt((2 / mB) * (gBB * n0 / RTF_BEC_X**2))
+    freq_tB_Hz = (omega_tB / (2 * np.pi)) * T_exp2th
+
+    n_BEC_Vals = pfs.n_BEC(X_Vals, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+
+    def V_Imp_trap(X, omega_Imp_x, mI):
+        return 0.5 * mI * (omega_Imp_x**2) * (X**2)
+
+    mR = pfs.ur(mI, mB)
+    gIB_Vals_Born = (2 * np.pi / mR) * 1 / aIBi_Vals
+    X_Vals_poly = np.linspace(-1 * RTF_BEC_X * 0.5, RTF_BEC_X * 0.5, 50)
+    n_BEC_Vals = pfs.n_BEC(X_Vals_poly, 0, 0, n0_TF, n0_thermal, RTF_BEC_X, RTF_BEC_Y, RTF_BEC_Z, RG_BEC_X, RG_BEC_Y, RG_BEC_Z)
+
+    freqVals_Ep = np.zeros(aIBi_Vals.size)
+    freqVals_MF = np.zeros(aIBi_Vals.size)
+    for inda, aIBi in enumerate(aIBi_Vals):
+        cParams = {'aIBi': aIBi}
+        E_Pol_tck = pfs.V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        EpVals_interp = 1 * interpolate.splev(X_Vals, E_Pol_tck, der=0)
+
+        EpVals_poly = 1 * interpolate.splev(X_Vals_poly, E_Pol_tck, der=0)
+
+        # [p2, p1, p0] = np.polyfit(X_Vals_poly, EpVals_poly, deg=2)
+        # omegap = np.sqrt(2 * p2 / mI)
+        # freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+        # freqVals_Ep[inda] = freq_p_Hz
+
+        V_Imp_Vals = V_Imp_trap(X_Vals_poly, trapParams['omega_Imp_x'], mI)
+        MF_pot = V_Imp_Vals + EpVals_poly
+        [p2, p1, p0] = np.polyfit(X_Vals_poly, MF_pot, deg=2)
+        omegap = np.sqrt(2 * p2 / mI)
+        freq_p_Hz = (omegap / (2 * np.pi)) * T_exp2th
+        freqVals_MF[inda] = freq_p_Hz
+
+    axes[0, 0].plot(freqVals_MF, aIBexp_Vals / a0_exp, 'w:')
+
+    # add mass renormalized MF line
+
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
+        print('k ARRAY GENERATION ERROR')
+
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+
+    Nsteps = 1e2
+    aSi_tck, PBint_tck = pfstat.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+
+    SS_ms_Avals = np.zeros(aIBi_Vals.size)
+
+    for Aind, aIBi in enumerate(aIBi_Vals):
+        DP = pfstat.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+        aSi = pfstat.aSi_interp(DP, aSi_tck)
+        PB_Val = pfstat.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        SS_ms_Avals[Aind] = pfstat.effMass(P0, PB_Val, mI)
+
+    mE_steadystate = SS_ms_Avals / mI
+    mE_steadystate[mE_steadystate < 0] = np.nan
+
+    freqVals_MF_massRenorm = freqVals_MF * np.sqrt(1 / mE_steadystate)
+
+    axes[1, 0].plot(freqVals_MF_massRenorm, aIBexp_Vals / a0_exp, 'w:')
+
+    # fig8.savefig(figdatapath + '/Fig8.pdf')
+    fig8.savefig(figdatapath + '/Fig8t.jpg', quality=100)
 
     # # # # # FIG 6 - VELOCITY PLOTS (BEC FRAME) - NEGSCAT
 

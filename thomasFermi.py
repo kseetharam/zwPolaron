@@ -331,4 +331,48 @@ if __name__ == "__main__":
     print(np.min(aSVals))
     print(1 / np.min(aSVals))
 
+    P0 = 0.4
+
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta)
+
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    if dk < k_min:
+        print('k ARRAY GENERATION ERROR')
+
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+
+    Nsteps = 1e2
+    aSi_tck, PBint_tck = pfs.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+
+    SS_ms_Avals = np.zeros(aIBi_Vals.size)
+
+    for Aind, aIBi in enumerate(aIBi_Vals):
+        DP = pfs.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+        aSi = pfs.aSi_interp(DP, aSi_tck)
+        PB_Val = pfs.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
+        SS_ms_Avals[Aind] = pfs.effMass(P0, PB_Val, mI)
+
+    mE_steadystate = SS_ms_Avals / mI
+    mE_steadystate[mE_steadystate < 0] = np.nan
+
+    freqVals_MF_massRenorm = freqVals_MF * np.sqrt(1 / mE_steadystate)
+
+    fig8, ax8 = plt.subplots()
+    ax8.plot(aIBexp_Vals / a0_exp, freqVals_MF, 'r-', label='Bare Trap + Polaron Energy')
+    ax8.plot(aIBexp_Vals / a0_exp, freqVals_MF_massRenorm, 'g-', label='Bare Trap + Polaron Energy (Mass Renormalized)')
+    ax8.set_xlabel(r'$a_{IB}$ [$a_{0}$]')
+    ax8.set_ylabel('Frequency (Hz)')
+    ax8.set_title('Effective Impurity Potential Harmonic Fit')
+    ax8.legend(loc=1)
+
     plt.show()
