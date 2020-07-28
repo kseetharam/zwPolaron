@@ -378,7 +378,7 @@ if __name__ == "__main__":
     #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
     #     aIBVals = aIBVals_List[ind]
     #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+    #     ax.set_ylabel(r'$a_{\rm IB}/a_{0}$', fontsize=labelsize)
     #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
     #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
     #     if signList[ind] == 'Neg':
@@ -410,7 +410,7 @@ if __name__ == "__main__":
 
     # fig5.text(0.42, 0.11, 'No Phonons', color='tab:brown', fontsize=labelsize)
 
-    # fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
+    # # fig5.savefig(figdatapath + '/Fig5.jpg', quality=100)
 
     # # # # FIG 8 - 2D OSCILLATION FREQUENCY (INHOMOGENEOUS BEC)
 
@@ -461,7 +461,7 @@ if __name__ == "__main__":
     #     # absFT_interp = freq_da.values; f_interp = freq_da.coords['f'].values; aIBi_interp = freq_da.coords['aIBi'].values
     #     aIBVals = aIBVals_List[ind]
     #     quadF = ax.pcolormesh(f_interp * T_exp2th, (1 / aIBi_interp) / a0_th, absFT_interp, vmin=0, vmax=vmax)
-    #     ax.set_ylabel(r'$a_{IB}$ [$a_{0}$]', fontsize=labelsize)
+    #     ax.set_ylabel(r'$a_{\rm IB}/a_{0}$', fontsize=labelsize)
     #     ax.plot(omega_BEC_osc * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, 'k:', lw=3, label='BEC Oscillation Frequency')
     #     ax.plot(omega_Imp_x * T_exp2th / (2 * np.pi) * np.ones(aIBVals.size), aIBVals, color='orange', linestyle=':', marker='', lw=3, label='Impurity Trap Frequency')
     #     if signList[ind] == 'Neg':
@@ -634,15 +634,21 @@ if __name__ == "__main__":
 
     # axes[0, 0].plot(freqVals_MF_massRenorm, aIBexp_Vals / a0_exp, 'w:')
 
-    # # fig8.savefig(figdatapath + '/Fig8.pdf')
     # fig8.savefig(figdatapath + '/Fig8.jpg', quality=100)
+
+    # # axes[0, 0].set_ylim([-300, -1])
+    # # axes[1, 0].set_ylim([-300, -1])
+    # # fig8.savefig(figdatapath + '/Fig8_zoom.jpg', quality=100)
 
     # # # # # FIG 6 - VELOCITY PLOTS (BEC FRAME) - NEGSCAT
 
     # fig6, axes = plt.subplots(nrows=2, ncols=2)
     # axList = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
-    # x_ds = qds_Neg_NoPP_CS['X']
+    # x_ds = qds_Neg_Homog_CS['X']
+    # # x_ds = qds_Neg_PP_CS['X']
+    # # x_ds = qds_Neg_PP_NoCS['X']
+
     # aIBiVals = x_ds['aIBi'].values
     # aIBVals = (1 / aIBiVals) / a0_th
 
@@ -664,9 +670,9 @@ if __name__ == "__main__":
     #     curve = ax.plot(ts, vI_array[ind] * (1e3 * T_exp2th / L_exp2th), color='b', linestyle='-', lw=2, label='Interacting Impurity')[0]
     #     ax.fill_between(ts, -cBEC * (1e3 * T_exp2th / L_exp2th), cBEC * (1e3 * T_exp2th / L_exp2th), facecolor='yellow', alpha=0.5, label=r'Subsonic Region ($|\langle v\rangle|<c$)')
     #     ax.plot(ts, (vL_bareImp - np.gradient(xBEC, tVals)) * (1e3 * T_exp2th / L_exp2th), color='orange', linestyle=':', marker='', lw=1.5, label='Free Impurity')
-    #     ax.set_ylabel(r'$\langle v \rangle$ ($\frac{\mu m}{ms}$)', fontsize=labelsize)
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp), fontsize=labelsize)
-    #     ax.set_title(r'$a_{IB}=$' + '{:d}'.format((aIBVals[aIBind]).astype(int)) + r' [$a_{0}$]')
+    #     ax.set_ylabel(r'$v_{\rm imp}$ ($\frac{\mu m}{ms}$)', fontsize=labelsize)
+    #     ax.set_xlabel(r'$t/(\xi c^{-1})$', fontsize=labelsize)
+    #     ax.set_title(r'$a_{\rm IB}=$' + '{:d}'.format((aIBVals[aIBind]).astype(int)) + r'$/a_{0}$')
     #     ax.set_ylim([-25, 25])
 
     # handles, labels = axList[0].get_legend_handles_labels()
@@ -680,6 +686,8 @@ if __name__ == "__main__":
     # fig6.text(0.53, 0.51, '(d)', fontsize=labelsize)
 
     # fig6.savefig(figdatapath + '/Fig6.pdf')
+    # # fig6.savefig(figdatapath + '/Fig6_Inhomg.pdf')
+    # # fig6.savefig(figdatapath + '/Fig6_Inhomg_noCS.pdf')
 
     # # # # FIG 9 - POSITION PLOTS (BEC FRAME) - POSSCAT
 
@@ -710,9 +718,9 @@ if __name__ == "__main__":
     #     ax.plot(ts, 1e6 * (xL_bareImp - xBEC) / L_exp2th, color='orange', linestyle=':', marker='', lw=1.5, label='Free Impurity')
     #     ax.plot(ts, 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:', lw=1.5, label='BEC TF Radius')
     #     ax.plot(ts, -1 * 1e6 * RTF_BEC_X * np.ones(ts.size) / L_exp2th, 'k:', lw=1.5)
-    #     ax.set_ylabel(r'$\langle x \rangle$ ($\mu m$)', fontsize=labelsize)
-    #     ax.set_xlabel(r'$t$ [$\frac{\xi}{c}=$' + '{:.2f} ms]'.format(1e3 * tscale_exp), fontsize=labelsize)
-    #     ax.set_title(r'$a_{IB}=$' + '{:d}'.format((aIBVals[aIBind]).astype(int)) + r' [$a_{0}$]')
+    #     ax.set_ylabel(r'$x_{\rm imp}$ ($\mu m$)', fontsize=labelsize)
+    #     ax.set_xlabel(r'$t/(\xi c^{-1})$', fontsize=labelsize)
+    #     ax.set_title(r'$a_{\rm IB}=$' + '{:d}'.format((aIBVals[aIBind]).astype(int)) + r'$/a_{0}$')
     #     ax.set_ylim([-25, 25])
     #     ax.set_ylim([-50, 50])  # For PosScat
     #     # edge = 2.5 * 1e6 * np.max(xBEC) / L_exp2th; ax.set_ylim([-1 * edge, edge])  # For NegScat
@@ -1002,8 +1010,8 @@ if __name__ == "__main__":
     # ax7.set_yscale('log')
     # ax7.set_xlim([0.9 * np.min(aIBVals_Pos), 1e3])
     # ax7.set_xlim([0.9 * np.min(aIBVals_Pos), 2e3])
-    # ax7.set_xlabel(r'$|a_{IB}|$ [$a_{0}$]', fontsize=labelsize)
-    # ax7.set_ylabel('Dissipation Constant $\gamma$')
+    # ax7.set_xlabel(r'$|a_{\rm IB}|/a_{0}$', fontsize=labelsize)
+    # ax7.set_ylabel(r'Dissipation Constant $\gamma$')
 
     # ax7.legend(loc=2, ncol=2, fontsize=legendsize)
     # # handles, labels = ax7.get_legend_handles_labels()
@@ -1014,4 +1022,4 @@ if __name__ == "__main__":
     # fig7.set_size_inches(3.9, 3.1)
     # fig7.savefig(figdatapath + '/Fig7.pdf')
 
-    # # plt.show()
+    # plt.show()
