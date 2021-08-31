@@ -341,7 +341,7 @@ def Zw_expParams():
     return params
 
 
-def Zw_expParams_updated():
+def Zw_expParams_2021():
     # Constants (SI units)
     a0 = 5.29e-11  # Bohr radius (m)
     u = 1.661e-27  # atomic mass unit (kg)
@@ -353,24 +353,20 @@ def Zw_expParams_updated():
     # Experimental parameters (SI units)
     params['mI'] = 39.96 * u
     params['mB'] = 22.99 * u
-    params['aIB'] = -2600 * a0
     params['aBB'] = 52 * a0
-    params['n0_TF'] = 6e13 * 1e6  # BEC TF peak density in m^(-3)
-    params['n0_thermal'] = 0.9e13 * 1e6  # BEC thermal Gaussian peak density in m^(-3)
-    params['n0_BEC'] = params['n0_TF'] + params['n0_thermal']  # Total BEC peak (central) density in m^(-3)
-    params['nI'] = 2.0e11 * 1e6  # impurity peak density
-    params['n0_BEC_scale'] = 1e14 * 1e6  # order of magnitude scale of peak BEC density in m^(-3)
-    params['mu_div_hbar'] = 2 * np.pi * 1.5 * 1e3  # chemical potential divided by hbar (in rad*Hz)
-    params['omega_BEC_x'] = 2 * np.pi * 78; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz
+    params['n0_BEC_scale'] = 1e20  # order of magnitude scale of peak BEC density in m^(-3). Average of the peak BEC densities across all experimentally measured interaction strengths is ~6e19 m^(-3)
 
-    params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+    # params['aIB'] = -2600 * a0
+    # params['nI'] = 2.0e11 * 1e6  # impurity peak density
+    # params['mu_div_hbar'] = 2 * np.pi * 1.5 * 1e3  # chemical potential divided by hbar (in rad*Hz)
+    # params['omega_BEC_x'] = 2 * np.pi * 78; params['omega_BEC_y'] = 2 * np.pi * 100; params['omega_BEC_z'] = 2 * np.pi * 12  # BEC trapping frequencies in rad*Hz
+    # params['RG_BEC_X'] = 95e-6; params['RG_BEC_Y'] = 29e-6; params['RG_BEC_Z'] = 12e-6  # BEC density thermal Gaussian waists in each direction (m)
+    # params['RTF_BEC_X'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_x']**2))); params['RTF_BEC_Y'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_y']**2))); params['RTF_BEC_Z'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_z']**2)))  # BEC density Thomas-Fermi radii in each direction (m)
+    # params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
+    # params['a_osc'] = 10e-6 / params['RTF_BEC_X']  # Initial displacement of BEC (m) divided by TF radius in the direction of displacement (x-direction)
 
-    params['RTF_BEC_X'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_x']**2))); params['RTF_BEC_Y'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_y']**2))); params['RTF_BEC_Z'] = np.sqrt(2 * hbar * params['mu_div_hbar'] / (params['mB'] * (params['omega_BEC_z']**2)))  # BEC density Thomas-Fermi radii in each direction (m)
-
-    params['vI_init'] = 7 * 1e-3  # average initial velocity of impurities (m/s)
-    params['omega_Imp_x'] = 2 * np.pi * 130  # Impurity trapping frequency in rad*Hz
-    params['omega_BEC_osc'] = params['omega_BEC_x']  # BEC oscillation frequency in rad*Hz
-    params['a_osc'] = 10e-6 / params['RTF_BEC_X']  # Initial displacement of BEC (m) divided by TF radius in the direction of displacement (x-direction)
+    # params['omega_Imp_x'] = 2 * np.pi * 130  # Impurity trapping frequency in rad*Hz
+    # params['omega_BEC_osc'] = 2 * np.pi * 75  # BEC oscillation frequency in rad*Hz
 
     return params
 
@@ -525,6 +521,138 @@ def LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapPa
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'Fext_mag': Fext_mag, 'TF': TF, 'Delta_P': dP, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
+
+    dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+
+    return dynsph_ds
+
+
+def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
+    #
+    # do not run this inside CoherentState or PolaronHamiltonian
+    import LDA_CoherentState
+    import LDA_PolaronHamiltonian
+    # takes parameters, performs dynamics, and outputs desired observables
+    aIBi = cParams['aIBi']
+    [xgrid, kgrid, tgrid] = gParams
+    [mI, mB, n0, gBB] = sParams
+    P0 = trapParams['P0']
+    X0 = trapParams['X0']
+
+    NGridPoints = kgrid.size()
+    k_max = kgrid.getArray('k')[-1]
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+
+    # calculate some parameters
+    nu_const = nu(mB, n0, gBB)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+
+    # LDA Force functions
+    LDA_funcs = {}
+    LDA_funcs['F_ext'] = lambda t, F, dP: 0
+
+    if toggleDict['BEC_density'] == 'on':
+        # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
+        X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
+        E_Pol_tck = V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
+        LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
+    else:
+        LDA_funcs['F_pol'] = lambda X: 0
+        # omega_BEC_osc = 0
+        # a_osc = 0
+    if toggleDict['BEC_density_osc'] == 'on':
+        omega_BEC_osc = trapParams['omega_BEC_osc']
+        a_osc = trapParams['a_osc']
+        LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc, mI)
+    else:
+        omega_BEC_osc = 0
+        a_osc = 0
+        LDA_funcs['F_BEC_osc'] = lambda t: 0
+
+    if toggleDict['Imp_trap'] == 'on':
+        omega_Imp_x = trapParams['omega_Imp_x']
+        LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
+    else:
+        omega_Imp_x = 0
+        LDA_funcs['F_Imp_trap'] = lambda X: 0
+
+    # Initialization CoherentState
+    cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
+
+    # Initialization PolaronHamiltonian
+    Params = [aIBi, mI, mB, n0, gBB]
+    ham = LDA_PolaronHamiltonian.zw2021_PolaronHamiltonian(cs, Params, LDA_funcs, trapParams, toggleDict)
+
+    # Change initialization of CoherentState and PolaronHamiltonian
+    if toggleDict['InitCS'] == 'file':
+        # ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
+        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P0, aIBi))
+        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
+        CSPhase = ds['Phase'].values
+        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=P0, X=X0)
+    elif toggleDict['InitCS'] == 'steadystate':
+        Nsteps = 1e2
+        aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+        DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+        CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+        cs.set_initState(amplitude=CSAmp, phase=0, P=P0, X=X0)
+
+    if toggleDict['Interaction'] == 'off':
+        ham.gnum = 0
+
+    # Time evolution
+
+    # Initialize observable Data Arrays
+    Pph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Nph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    # ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    # ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    Energy_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    XLab_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    start = timer()
+    for ind, t in enumerate(tgrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tgrid[ind - 1]
+            cs.evolve(dt, ham)
+
+        Pph_da[ind] = cs.get_PhononMomentum()
+        Nph_da[ind] = cs.get_PhononNumber()
+        Phase_da[ind] = cs.get_Phase()
+        Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
+        # ReAmp_da[ind] = np.real(Amp)
+        # ImAmp_da[ind] = np.imag(Amp)
+        P_da[ind] = cs.get_totMom()
+        X_da[ind] = cs.get_impPos()
+        XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
+
+        if toggleDict['BEC_density'] == 'on':
+            n = n_BEC(cs.get_impPos(), 0, 0, trapParams['n0_TF_BEC'], trapParams['n0_thermal_BEC'], trapParams['RTF_BEC_X'], trapParams['RTF_BEC_Y'], trapParams['RTF_BEC_Z'], trapParams['RG_BEC_X'], trapParams['RG_BEC_Y'], trapParams['RG_BEC_Z'])  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        else:
+            n = n0
+        Energy_da[ind] = Energy(Amp, kgrid, cs.get_totMom(), aIBi, mI, mB, n, gBB)
+
+        end = timer()
+        print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
+        start = timer()
+
+    # Create Data Set
+
+    # data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
+    coords_dict = {'t': tgrid}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 

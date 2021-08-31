@@ -3,6 +3,7 @@ import pandas as pd
 import xarray as xr
 import Grid
 import pf_dynamic_sph
+from scipy.io import savemat, loadmat
 import os
 from timeit import default_timer as timer
 import sys
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 5000; dt = 0.5
+    tMax = 6000; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -52,200 +53,147 @@ if __name__ == "__main__":
     print('dk: {0}'.format(dk))
     print('NGridPoints: {0}'.format(NGridPoints))
 
+    # Experimental params
+
+    aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
+
+    n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
+
+    Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])  # in um
+    K_displacement_raw = np.array([0.473502276902047, 0.395634326123081, 8.66936929134637, 11.1470221226478, 9.34778274195669, 16.4370036199872, 19.0938486958001, 18.2135041439547, 21.9211790347041, 20.6591098913628, 19.7281375591975, 17.5425503131171, 17.2460344933717, 11.7179407507981, 12.9845862662090, 9.18113956217101, 11.9396846941782, 4.72461841775226])   # in um
+    K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
+    K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
+    K_relPos = K_displacement - Na_displacement   # in um
+
+    omega_Na = np.array([465.418650581347, 445.155256942448, 461.691943131414, 480.899902898451, 448.655522184374, 465.195338759998, 460.143258369460, 464.565377197007, 465.206177963899, 471.262139163205, 471.260672147216, 473.122081065092, 454.649394420577, 449.679107889662, 466.770887179217, 470.530355145510, 486.615655444221, 454.601540658640])   # in rad*Hz
+    omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
+    omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
+    omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]  # in rad*Hz
+
+    K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])  # in um/ms
+
     # Basic parameters
 
-    expParams = pf_dynamic_sph.Zw_expParams_updated()
+    expParams = pf_dynamic_sph.Zw_expParams_2021()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
-    n0 = expParams['n0_BEC'] / (L_exp2th**3)  # should ~ 1
+    n0 = n0_BEC / (L_exp2th**3)  # converts peak BEC density (for each interaction strength) to theory units
     mB = expParams['mB'] * M_exp2th  # should = 1
     mI = expParams['mI'] * M_exp2th
     aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
 
-    sParams = [mI, mB, n0, gBB]
-
-    # Trap parameters
-
-    n0_TF = expParams['n0_TF'] / (L_exp2th**3)
-    n0_thermal = expParams['n0_thermal'] / (L_exp2th**3)
-    RTF_BEC_X = expParams['RTF_BEC_X'] * L_exp2th; RTF_BEC_Y = expParams['RTF_BEC_Y'] * L_exp2th; RTF_BEC_Z = expParams['RTF_BEC_Z'] * L_exp2th
-    RG_BEC_X = expParams['RG_BEC_X'] * L_exp2th; RG_BEC_Y = expParams['RG_BEC_Y'] * L_exp2th; RG_BEC_Z = expParams['RG_BEC_Z'] * L_exp2th
-    omega_BEC_osc = expParams['omega_BEC_osc'] / T_exp2th
-    omega_Imp_x = expParams['omega_Imp_x'] / T_exp2th
-
-    # Derived quantities
+    # # Derived quantities
 
     nu = pf_dynamic_sph.nu(mB, n0, gBB)
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    Fscale = 2 * np.pi * (nu / xi**2)
-    vI_init = expParams['vI_init'] * L_exp2th / T_exp2th
-    PI_init = mI * vI_init
-    tscale = xi / nu
-    To = 2 * np.pi / omega_BEC_osc
-    print(To, To / tscale)
-    print(80 * 1e-3 * T_exp2th, 1e3 * 5000 / T_exp2th)
-    print(1 / L_exp2th, expParams['RTF_BEC_X'], RTF_BEC_X / L_exp2th)
-    print(0.75 * RTF_BEC_X / xi, omega_BEC_osc * tscale)
-    print(RTF_BEC_X * (omega_BEC_osc / 8) / nu)
+    c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
+    print(1e3 * tgrid[-1] / T_exp2th)
+    # print(c_BEC_um_Per_ms)
 
-    print(RTF_BEC_X * (omega_BEC_osc / 2) / nu)
-    print('c_BEC: {:.2E}'.format(nu * T_exp2th / L_exp2th))
-    print(mI * nu)
+    # # Create density splines
 
-    # Experimental params
+    # from scipy import interpolate
 
-    aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
+    # yMat = loadmat('zwData/yMat_InMuM.mat')['yMat']  # grid of positions in the BEC oscillation direction ranging from -4*R_TF to +4*R_TF for each interaction strength (given in in um)
+    # densityMat = loadmat('zwData/densityMat_InM-3.mat')['densityMat']  # BEC density for each experimentally measured interaction strength evaluated at each position in yMat (given in in m^(-3))
+    # yMat_th = yMat * 1e-6 * L_exp2th  # converts grid positions from um to m and then converts to theory units
+    # densityMat_th = densityMat / (L_exp2th**3)  # converts BEC density arrays (for each interaction strength) to theory units
 
-    Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])
-    K_displacement_raw = np.array([0.473502276902047, 0.395634326123081, 8.66936929134637, 11.1470221226478, 9.34778274195669, 16.4370036199872, 19.0938486958001, 18.2135041439547, 21.9211790347041, 20.6591098913628, 19.7281375591975, 17.5425503131171, 17.2460344933717, 11.7179407507981, 12.9845862662090, 9.18113956217101, 11.9396846941782, 4.72461841775226])
-    K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
-    K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]
-    K_relPos = K_displacement - Na_displacement
+    # for ind, aIB_exp in enumerate(aIBexp_Vals):
+    #     den_tck = interpolate.splrep(yMat_th[ind, :], densityMat_th[ind, :], s=0)
+    #     np.save('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), den_tck)
 
-    omega_Na = np.array([465.418650581347, 445.155256942448, 461.691943131414, 480.899902898451, 448.655522184374, 465.195338759998, 460.143258369460, 464.565377197007, 465.206177963899, 471.262139163205, 471.260672147216, 473.122081065092, 454.649394420577, 449.679107889662, 466.770887179217, 470.530355145510, 486.615655444221, 454.601540658640])
-    omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])
-    omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
-    omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]
+    # import matplotlib
+    # import matplotlib.pyplot as plt
+    # yMat_th_interp = np.zeros((18, 1000))
+    # densityMat_th_interp = np.zeros((18, 1000))
+    # fig, ax = plt.subplots()
+    # for ind, aIB_exp in enumerate(aIBexp_Vals):
+    #     den_tck_load = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), allow_pickle=True)
+    #     yMat_th_interp[ind, :] = np.linspace(yMat_th[ind, 0], yMat_th[ind, -1], 1000)
+    #     densityMat_th_interp[ind, :] = interpolate.splev(yMat_th_interp[ind, :], den_tck_load)
+    #     ax.plot(1e6 * yMat_th_interp[ind, :] / L_exp2th, densityMat_th_interp[ind, :] * (L_exp2th**3), label='{0}'.format(aIB_exp))
+    # ax.legend()
+    # plt.show()
 
-    K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])
+    # Convert experimental parameters to theory parameters
 
-    # # ---- SET OSC PARAMS ----
-    # x0 = round(pf_dynamic_sph.x_BEC_osc(0, omega_BEC_osc, RTF_BEC_X, 0.5), 1)
-    # print('X0: {0}, Tosc: {1}'.format(x0, To))
+    x0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
+    v0_imp = K_relVel * (1e-6 / 1e-3) * (L_exp2th / T_exp2th)  # initial velocities of impurity in BEC frame (relative to BEC)
+    a_osc = Na_displacement * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
 
-    # oscParams_List = [{'X0': 0.0, 'P0': 0.4, 'a_osc': expParams['a_osc']}]
+    omega_BEC_osc = omega_Na / T_exp2th
+    omega_Imp_x = omega_K / T_exp2th
 
-    # TTList = []
-    # for oscParams in oscParams_List:
+    a0_exp = 5.29e-11  # Bohr radius (m)
+    aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
 
-    #     toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-    #                   'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'off'}
+    # Create dicts
 
-    #     trapParams = {'n0_TF_BEC': n0_TF, 'RTF_BEC_X': RTF_BEC_X, 'RTF_BEC_Y': RTF_BEC_Y, 'RTF_BEC_Z': RTF_BEC_Z, 'n0_thermal_BEC': n0_thermal, 'RG_BEC_X': RG_BEC_X, 'RG_BEC_Y': RG_BEC_Y, 'RG_BEC_Z': RG_BEC_Z,
-    #                   'omega_Imp_x': omega_Imp_x, 'omega_BEC_osc': omega_BEC_osc, 'X0': oscParams['X0'], 'P0': oscParams['P0'], 'a_osc': oscParams['a_osc']}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'off'}
 
-    #     if trapParams['P0'] >= 1.1 * mI * nu:
-    #         toggleDict['InitCS'] = 'file'
+    # ---- SET OUTPUT DATA FOLDER ----
 
-    #     if trapParams['a_osc'] == 0.0:
-    #         toggleDict['BEC_density_osc'] = 'off'
+    if toggleDict['Location'] == 'personal':
+        datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021'
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/scratchlfs02/demler_lab/kis/ZwierleinExp_data/2021'
 
-    #     if toggleDict['BEC_density_osc'] == 'off':
-    #         trapParams['a_osc'] = 0.0
+    # if toggleDict['BEC_density'] == 'off':
+    #     innerdatapath = innerdatapath + '/HomogBEC'
+    #     toggleDict['Polaron_Potential'] = 'off'
 
-    #     if toggleDict['Imp_trap'] == 'off':
-    #         trapParams['omega_Imp_x'] = 0.0
+    if toggleDict['Polaron_Potential'] == 'off':
+        toggleDict['Polaron_Potential'] = 'off'
+        innerdatapath = datapath + '/NoPolPot'
+    else:
+        innerdatapath = datapath + '/PolPot'
 
-    #     # ---- SET OUTPUT DATA FOLDER ----
+    jobList = []
+    for ind, aIBi in enumerate(aIBi_Vals):
+        sParams = [mI, mB, n0[ind], gBB]
+        den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
+        trapParams = {'nBEC_tck': den_tck, 'omega_Imp_x': omega_Imp_x[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'X0': x0_imp[ind], 'P0': mI * v0_imp[ind], 'a_osc': a_osc[ind]}
+        filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
+        jobList.append((aIBi, sParams, trapParams, filepath))
 
-    #     if toggleDict['Location'] == 'personal':
-    #         datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc'.format(aBB, NGridPoints_cart)
-    #     elif toggleDict['Location'] == 'cluster':
-    #         datapath = '/n/scratchlfs02/demler_lab/kis/ZwierleinExp_data/aBB_{:.3f}/NGridPoints_{:.2E}/BEC_osc'.format(aBB, NGridPoints_cart)
+    print(len(jobList))
 
-    #     if toggleDict['PosScat'] == 'on':
-    #         innerdatapath = datapath + '/PosScat'
-    #     else:
-    #         innerdatapath = datapath + '/NegScat'
+    # ---- COMPUTE DATA ON COMPUTER ----
 
-    #     if toggleDict['BEC_density'] == 'off':
-    #         innerdatapath = innerdatapath + '/HomogBEC'
-    #         toggleDict['Polaron_Potential'] = 'off'
-
-    #     if toggleDict['Polaron_Potential'] == 'off':
-    #         innerdatapath = innerdatapath + '/NoPolPot'
-    #     else:
-    #         innerdatapath = innerdatapath + '/PolPot'
-
-    #     if toggleDict['CS_Dyn'] == 'off':
-    #         innerdatapath = innerdatapath + '_NoCSDyn'
-    #     else:
-    #         innerdatapath = innerdatapath + '_CSDyn'
-
-    #     innerdatapath = innerdatapath + '/fBEC={:d}_fImp={:d}_aosc={:.1f}_X0={:.1f}_P0={:.1f}'.format(int(np.ceil(expParams['omega_BEC_osc'] / (2 * np.pi))), int(np.ceil(expParams['omega_Imp_x'] / (2 * np.pi))), trapParams['a_osc'], trapParams['X0'], trapParams['P0'])
-
-    #     if toggleDict['InitCS'] == 'file':
-    #         toggleDict['InitCS_datapath'] = datapath + '/PolGS_spherical'
-    #     else:
-    #         toggleDict['InitCS_datapath'] = 'InitCS ERROR'
-
-    #     TTList.append((toggleDict, trapParams, innerdatapath))
-
-    # # # # ---- CREATE EXTERNAL DATA FOLDERS  ----
-
-    # # if os.path.isdir(datapath) is False:
-    # #     os.mkdir(datapath)
-    # #     os.mkdir(datapath + '/BEC_osc')
-
-    # # # ---- CREATE OUTPUT DATA FOLDERS  ----
-
-    # # for tup in TTList:
-    # #     (toggleDict, trapParams, innerdatapath) = tup
-    # #     if os.path.isdir(innerdatapath) is False:
-    # #         os.mkdir(innerdatapath)
-
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi) ----
-
-    # a0_exp = 5.29e-11  # Bohr radius (m)
-
-    # aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]) * a0_exp
-    # # aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0]) * a0_exp
-
-    # aIBi_Vals = 1 / (aIBexp_Vals * L_exp2th)
-
-    # metaList = []
-    # for tup in TTList:
-    #     (toggleDict, trapParams, innerdatapath) = tup
-    #     for aIBi in aIBi_Vals:
-    #         metaList.append((toggleDict, trapParams, innerdatapath, aIBi))
-
-    # print(len(metaList))
-
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-    # for tup in metaList:
-    #     loopstart = timer()
-    #     (toggleDict, trapParams, innerdatapath, aIBi) = tup
-    #     cParams = {'aIBi': aIBi}
-    #     fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    #     if aIBi == 0.1:
-    #         filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    #     ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    #     # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
-    #     loopend = timer()
-    #     print('X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, loopend - loopstart))
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    runstart = timer()
+    for tup in jobList:
+        loopstart = timer()
+        (aIBi, sParams, trapParams, filepath) = tup
+        cParams = {'aIBi': aIBi}
+        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+        ds.to_netcdf(filepath)
+        loopend = timer()
+        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
-
-    # print(innerdatapath)
 
     # runstart = timer()
 
     # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # # taskCount = len(metaList); taskID = 72
+    # # taskCount = len(jobList); taskID = 3
 
-    # if(taskCount > len(metaList)):
+    # if(taskCount > len(jobList)):
     #     print('ERROR: TASK COUNT MISMATCH')
     #     sys.exit()
     # else:
-    #     tup = metaList[taskID]
-    #     (toggleDict, trapParams, innerdatapath, aIBi) = tup
+    #     tup = jobList[taskID]
+    #     (aIBi, sParams, trapParams, filepath) = tup
 
     # cParams = {'aIBi': aIBi}
-    # fParams = {'dP_ext': 0, 'Fext_mag': 0}
-    # filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(aIBi)
-    # if aIBi == 0.1:
-    #     filepath = innerdatapath + '/aIBi_{:.2f}.nc'.format(-0.1)
-    # ds = pf_dynamic_sph.LDA_quenchDynamics_DataGeneration(cParams, gParams, sParams, fParams, trapParams, toggleDict)
-    # # Obs_ds = ds[['Pph', 'Nph', 'P', 'X', 'XLab', 'Energy']]; Obs_ds.attrs = ds.attrs; Obs_ds.to_netcdf(filepath)
+    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
     # ds.to_netcdf(filepath)
 
     # end = timer()
-    # print('Task ID: {:d}, X0: {:.2f}, P0: {:.2f}, a_osc: {:.2f}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, trapParams['X0'], trapParams['P0'], trapParams['a_osc'], aIBi, end - runstart))
+    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
