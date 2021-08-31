@@ -103,12 +103,12 @@ class zw2021_PolaronHamiltonian:
         P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
 
-        if self.BEC_density_var == 'on':
-            if np.abs(X) >= RTF_BEC:
-                amplitude_new_temp = 0 * amplitude_new_temp
-                phase_new_temp = 0 * phase_new_temp
-                P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-                X_new_temp = (P - PB) / mI
+        # if self.BEC_density_var == 'on':
+        #     if np.abs(X) >= RTF_BEC:
+        #         amplitude_new_temp = 0 * amplitude_new_temp
+        #         phase_new_temp = 0 * phase_new_temp
+        #         P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        #         X_new_temp = (P - PB) / mI
 
         if self.dynamicsType == 'imaginary':
             # FOR IMAGINARY TIME DYNAMICS
