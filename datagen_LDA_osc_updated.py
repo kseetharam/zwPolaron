@@ -43,6 +43,7 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     tMax = 6000; dt = 0.5
+    # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -58,6 +59,7 @@ if __name__ == "__main__":
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
     n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
+    RTF_BEC_Y = np.array([11.4543973014280, 11.4485027292274, 12.0994087866866, 11.1987472415996, 12.6147755284164, 13.0408759297917, 12.8251948079726, 12.4963915490121, 11.6984708883771, 12.1884624646191, 11.7981246004719, 11.8796464214276, 12.4136593404667, 12.3220325703494, 12.0104329130883, 12.1756670927480, 10.9661042681457, 12.1803009563806])  # Thomas-Fermi radius of BEC in direction of oscillation (given in um)
 
     Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])  # in um
     K_displacement_raw = np.array([0.473502276902047, 0.395634326123081, 8.66936929134637, 11.1470221226478, 9.34778274195669, 16.4370036199872, 19.0938486958001, 18.2135041439547, 21.9211790347041, 20.6591098913628, 19.7281375591975, 17.5425503131171, 17.2460344933717, 11.7179407507981, 12.9845862662090, 9.18113956217101, 11.9396846941782, 4.72461841775226])   # in um
@@ -91,18 +93,17 @@ if __name__ == "__main__":
     print(1e3 * tgrid[-1] / T_exp2th)
     # print(c_BEC_um_Per_ms)
 
-    # # Create density splines
+    # # # Create density splines
 
     # from scipy import interpolate
-
     # yMat = loadmat('zwData/yMat_InMuM.mat')['yMat']  # grid of positions in the BEC oscillation direction ranging from -4*R_TF to +4*R_TF for each interaction strength (given in in um)
     # densityMat = loadmat('zwData/densityMat_InM-3.mat')['densityMat']  # BEC density for each experimentally measured interaction strength evaluated at each position in yMat (given in in m^(-3))
     # yMat_th = yMat * 1e-6 * L_exp2th  # converts grid positions from um to m and then converts to theory units
     # densityMat_th = densityMat / (L_exp2th**3)  # converts BEC density arrays (for each interaction strength) to theory units
 
-    # for ind, aIB_exp in enumerate(aIBexp_Vals):
-    #     den_tck = interpolate.splrep(yMat_th[ind, :], densityMat_th[ind, :], s=0)
-    #     np.save('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), den_tck)
+    # # for ind, aIB_exp in enumerate(aIBexp_Vals):
+    # #     den_tck = interpolate.splrep(yMat_th[ind, :], densityMat_th[ind, :], s=0)
+    # #     np.save('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), den_tck)
 
     # import matplotlib
     # import matplotlib.pyplot as plt
@@ -122,6 +123,7 @@ if __name__ == "__main__":
     x0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
     v0_imp = K_relVel * (1e-6 / 1e-3) * (L_exp2th / T_exp2th)  # initial velocities of impurity in BEC frame (relative to BEC)
     a_osc = Na_displacement * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
+    RTF_BEC = RTF_BEC_Y * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
 
     omega_BEC_osc = omega_Na / T_exp2th
     omega_Imp_x = omega_K / T_exp2th
@@ -129,9 +131,11 @@ if __name__ == "__main__":
     a0_exp = 5.29e-11  # Bohr radius (m)
     aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
 
+    P0_scaleFactor = np.array([1.2072257743801846, 1.1304777274446096, 1.53, 1.0693683091221053, 1.0349159867400886, 0.95, 2.0, 1.021253131703251, 0.9713134192266438, 0.9781007832739641, 1.0103135855263197, 1.0403095335853234, 0.910369833990368, 0.9794720983829749, 1.0747443076336567, 0.79, 1.0, 0.8127830658214898])  # scales the momentum of the initial polaron state (scaleFac * mI * v0) so that the initial impurity velocity matches the experiment. aIB= -125a0 and +750a0 have ~8% and ~20% error respectively
+
     # Create dicts
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'off'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -155,21 +159,28 @@ if __name__ == "__main__":
     for ind, aIBi in enumerate(aIBi_Vals):
         sParams = [mI, mB, n0[ind], gBB]
         den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
-        trapParams = {'nBEC_tck': den_tck, 'omega_Imp_x': omega_Imp_x[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'X0': x0_imp[ind], 'P0': mI * v0_imp[ind], 'a_osc': a_osc[ind]}
+        trapParams = {'nBEC_tck': den_tck, 'omega_Imp_x': omega_Imp_x[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'RTF_BEC': RTF_BEC[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind], 'a_osc': a_osc[ind]}
         filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 
-    print(len(jobList))
+    # print(len(jobList))
 
     # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
-    for tup in jobList:
+    for ind, tup in enumerate(jobList):
+        if ind != 4:
+            continue
+        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
         loopstart = timer()
         (aIBi, sParams, trapParams, filepath) = tup
         cParams = {'aIBi': aIBi}
         ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
         ds.to_netcdf(filepath)
+
+        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
+
         loopend = timer()
         print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     end = timer()

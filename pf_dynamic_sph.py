@@ -531,7 +531,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
     import LDA_CoherentState
-    import LDA_PolaronHamiltonian
+    import zw2021_PolaronHamiltonian
     # takes parameters, performs dynamics, and outputs desired observables
     aIBi = cParams['aIBi']
     [xgrid, kgrid, tgrid] = gParams
@@ -541,8 +541,8 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     NGridPoints = kgrid.size()
     k_max = kgrid.getArray('k')[-1]
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
 
     # calculate some parameters
     nu_const = nu(mB, n0, gBB)
@@ -552,57 +552,27 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     # LDA Force functions
     LDA_funcs = {}
-    LDA_funcs['F_ext'] = lambda t, F, dP: 0
 
-    if toggleDict['BEC_density'] == 'on':
-        # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
-        X_Vals = np.linspace(-1 * trapParams['RTF_BEC_X'] * 0.99, trapParams['RTF_BEC_X'] * 0.99, 100)
-        E_Pol_tck = V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams)
-        LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
-    else:
-        LDA_funcs['F_pol'] = lambda X: 0
-        # omega_BEC_osc = 0
-        # a_osc = 0
-    if toggleDict['BEC_density_osc'] == 'on':
-        omega_BEC_osc = trapParams['omega_BEC_osc']
-        a_osc = trapParams['a_osc']
-        LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc, mI)
-    else:
-        omega_BEC_osc = 0
-        a_osc = 0
-        LDA_funcs['F_BEC_osc'] = lambda t: 0
+    omega_BEC_osc = trapParams['omega_BEC_osc']
+    a_osc = trapParams['a_osc']
+    LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, 1, a_osc, mI)
 
-    if toggleDict['Imp_trap'] == 'on':
-        omega_Imp_x = trapParams['omega_Imp_x']
-        LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
-    else:
-        omega_Imp_x = 0
-        LDA_funcs['F_Imp_trap'] = lambda X: 0
+    omega_Imp_x = trapParams['omega_Imp_x']
+    LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
-    ham = LDA_PolaronHamiltonian.zw2021_PolaronHamiltonian(cs, Params, LDA_funcs, trapParams, toggleDict)
+    ham = zw2021_PolaronHamiltonian.zw2021_PolaronHamiltonian(cs, Params, LDA_funcs, trapParams, toggleDict)
 
-    # Change initialization of CoherentState and PolaronHamiltonian
-    if toggleDict['InitCS'] == 'file':
-        # ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/initPolState_aIBi_{:.2f}.nc'.format(aIBi))
-        ds = xr.open_dataset(toggleDict['InitCS_datapath'] + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P0, aIBi))
-        CSAmp = (ds['Real_CSAmp'] + 1j * ds['Imag_CSAmp']).values
-        CSPhase = ds['Phase'].values
-        cs.set_initState(amplitude=CSAmp.reshape(CSAmp.size), phase=CSPhase, P=P0, X=X0)
-    elif toggleDict['InitCS'] == 'steadystate':
-        Nsteps = 1e2
-        aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-        DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
-        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
-        CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        cs.set_initState(amplitude=CSAmp, phase=0, P=P0, X=X0)
-
-    if toggleDict['Interaction'] == 'off':
-        ham.gnum = 0
+    Nsteps = 1e2
+    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+    aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+    CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+    cs.set_initState(amplitude=CSAmp, phase=0, P=P0, X=X0)
 
     # Time evolution
 
@@ -610,9 +580,6 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     Pph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     Nph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
-    # ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    # ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    Energy_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     P_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
@@ -630,27 +597,19 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
         Pph_da[ind] = cs.get_PhononMomentum()
         Nph_da[ind] = cs.get_PhononNumber()
         Phase_da[ind] = cs.get_Phase()
-        Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
-        # ReAmp_da[ind] = np.real(Amp)
-        # ImAmp_da[ind] = np.imag(Amp)
         P_da[ind] = cs.get_totMom()
         X_da[ind] = cs.get_impPos()
-        XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, trapParams['RTF_BEC_X'], a_osc)
-
-        if toggleDict['BEC_density'] == 'on':
-            n = n_BEC(cs.get_impPos(), 0, 0, trapParams['n0_TF_BEC'], trapParams['n0_thermal_BEC'], trapParams['RTF_BEC_X'], trapParams['RTF_BEC_Y'], trapParams['RTF_BEC_Z'], trapParams['RG_BEC_X'], trapParams['RG_BEC_Y'], trapParams['RG_BEC_Z'])  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
-        else:
-            n = n0
-        Energy_da[ind] = Energy(Amp, kgrid, cs.get_totMom(), aIBi, mI, mB, n, gBB)
+        XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, 1, a_osc)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
         start = timer()
 
+    V_da = xr.DataArray(np.gradient(X_da.values, tgrid), coords=[tgrid], dims=['t'])
+
     # Create Data Set
 
-    # data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'Energy': Energy_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
 

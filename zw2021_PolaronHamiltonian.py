@@ -1,18 +1,18 @@
 import numpy as np
 import pf_dynamic_sph as pfs
 import pf_dynamic_cart as pfc
+from scipy import interpolate
 
 
-class LDA_PolaronHamiltonian:
+class zw2021_PolaronHamiltonian:
         # """ This is a class that stores information about the Hamiltonian"""
 
-    def __init__(self, coherent_state, Params, LDA_funcs, fParams, trapParams, toggleDict):
+    def __init__(self, coherent_state, Params, LDA_funcs, trapParams, toggleDict):
 
         # Params = [aIBi, mI, mB, n0, gBB]
         self.Params = Params
 
         self.LDA_funcs = LDA_funcs
-        self.fParams = fParams
         self.trapParams = trapParams
 
         self.grid = coherent_state.kgrid
@@ -25,9 +25,7 @@ class LDA_PolaronHamiltonian:
         self.dynamicsType = toggleDict['Dynamics']
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
-        self.BEC_density_osc = toggleDict['BEC_density_osc']
         self.CS_Dyn = toggleDict['CS_Dyn']
-        self.Pol_Potential = toggleDict['Polaron_Potential']
         self.a_osc = trapParams['a_osc']
 
         if self.couplingType == 'frohlich':
@@ -55,28 +53,16 @@ class LDA_PolaronHamiltonian:
         phase = system_vars[-3].real.astype(float)
         P = system_vars[-2].real.astype(float)
         X = system_vars[-1].real.astype(float)
-        XLab = X + pfs.x_BEC_osc(t, self.trapParams['omega_BEC_osc'], self.trapParams['RTF_BEC_X'], self.trapParams['a_osc'])
+        XLab = X + pfs.x_BEC_osc(t, self.trapParams['omega_BEC_osc'], 1, self.trapParams['a_osc'])
 
         [aIBi, mI, mB, n0, gBB] = self.Params
-        F_ext_func = self.LDA_funcs['F_ext']; F_pol_func = self.LDA_funcs['F_pol']; F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']
-        dP = self.fParams['dP_ext']; F = self.fParams['Fext_mag']
-
-        RTF_X = self.trapParams['RTF_BEC_X']; RTF_Y = self.trapParams['RTF_BEC_Y']; RTF_Z = self.trapParams['RTF_BEC_Z']; RG_X = self.trapParams['RG_BEC_X']; RG_Y = self.trapParams['RG_BEC_Y']; RG_Z = self.trapParams['RG_BEC_Z']
-        n0_TF = self.trapParams['n0_TF_BEC']; n0_thermal = self.trapParams['n0_thermal_BEC']
-
-        # omega_BEC_osc = self.trapParams['omega_BEC_osc']
-        # if self.BEC_density_osc == 'on':
-        #     Xeff = X + pfs.x_BEC_osc(t, omega_BEC_osc, RTF_X, self.a_osc)
-        # else:
-        #     Xeff = X
+        RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            # n = pfs.n_BEC(Xeff, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
-            n = pfs.n_BEC(X, 0, 0, n0_TF, n0_thermal, RTF_X, RTF_Y, RTF_Z, RG_X, RG_Y, RG_Z)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
-            if np.abs(X) >= RTF_X:
-                n = 0
+            n = interpolate.splev(X, nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)
@@ -114,17 +100,14 @@ class LDA_PolaronHamiltonian:
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
 
-        if self.Pol_Potential == 'off':
-            P_new_temp = F_ext_func(t, F, dP) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-        else:
-            P_new_temp = F_ext_func(t, F, dP) + F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
 
         if self.BEC_density_var == 'on':
-            if np.abs(X) >= RTF_X:
+            if np.abs(X) >= RTF_BEC:
                 amplitude_new_temp = 0 * amplitude_new_temp
                 phase_new_temp = 0 * phase_new_temp
-                P_new_temp = F_ext_func(t, F, dP) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+                P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
                 X_new_temp = (P - PB) / mI
 
         if self.dynamicsType == 'imaginary':
