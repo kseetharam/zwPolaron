@@ -219,6 +219,27 @@ def V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams):
     return E_Pol_tck
 
 
+def V_Pol_interp_dentck(kgrid, X_Vals, cParams, sParams, trapParams):
+    # returns an interpolation function for the polaron energy
+    [mI, mB, n0, gBB] = sParams
+    aIBi = cParams['aIBi']
+    nBEC_tck = trapParams['nBEC_tck']
+
+    # ASSUMING FIXED ABB, KIB, ASSUMING POTENTIAL IS FOR ZERO MOMENTUM, AND ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+    DP = 0
+    P = 0
+
+    EpVals = np.zeros(X_Vals.size)
+    for ind, X in enumerate(X_Vals):
+        n = interpolate.splev(X, nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
+        PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
+        EpVals[ind] = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
+
+    E_Pol_tck = interpolate.splrep(X_Vals, EpVals, s=0)
+    return E_Pol_tck
+
+
 def F_pol(X, E_Pol_tck):
     return -1 * interpolate.splev(X, E_Pol_tck, der=1)
 
@@ -559,6 +580,14 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     omega_Imp_x = trapParams['omega_Imp_x']
     LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
+
+    if toggleDict['Polaron_Potential'] == 'on':
+        # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
+        X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 0.99, trapParams['RTF_BEC'] * 0.99, 100)
+        E_Pol_tck = V_Pol_interp_dentck(kgrid, X_Vals, cParams, sParams, trapParams)
+        LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
+    else:
+        LDA_funcs['F_pol'] = lambda X: 0
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)

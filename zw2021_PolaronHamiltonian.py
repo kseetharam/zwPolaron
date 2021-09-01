@@ -25,6 +25,7 @@ class zw2021_PolaronHamiltonian:
         self.dynamicsType = toggleDict['Dynamics']
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
+        self.Pol_Potential = toggleDict['Polaron_Potential']
         self.CS_Dyn = toggleDict['CS_Dyn']
         self.a_osc = trapParams['a_osc']
 
@@ -57,7 +58,7 @@ class zw2021_PolaronHamiltonian:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
-        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']; F_pol_func = self.LDA_funcs['F_pol']
 
         # Update BEC density dependent quantities
 
@@ -100,15 +101,20 @@ class zw2021_PolaronHamiltonian:
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
 
-        P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        if self.Pol_Potential == 'off':
+            P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        else:
+            P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+
+        # P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
 
-        # if self.BEC_density_var == 'on':
-        #     if np.abs(X) >= RTF_BEC:
-        #         amplitude_new_temp = 0 * amplitude_new_temp
-        #         phase_new_temp = 0 * phase_new_temp
-        #         P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-        #         X_new_temp = (P - PB) / mI
+        if self.BEC_density_var == 'on':
+            if np.abs(X) >= RTF_BEC:
+                amplitude_new_temp = 0 * amplitude_new_temp
+                phase_new_temp = 0 * phase_new_temp
+                P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+                X_new_temp = (P - PB) / mI
 
         if self.dynamicsType == 'imaginary':
             # FOR IMAGINARY TIME DYNAMICS
