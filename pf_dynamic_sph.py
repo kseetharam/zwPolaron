@@ -262,6 +262,26 @@ def F_BEC_osc(t, omega_BEC_osc, RTF_X, a_osc, mI):
     return -1 * mI * (omega_BEC_osc**2) * x_BEC_osc(t, omega_BEC_osc, RTF_X, a_osc)
 
 
+def x_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc):
+    # returns function describing position of the BEC COM over time
+    return amp_BEC_osc * np.exp(-1 * gamma_BEC_osc * t) * np.cos(omega_BEC_osc * t + phi_BEC_osc)
+
+
+def v_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc):
+    # returns function describing the velocty of the BEC COM over time
+    return -1 * amp_BEC_osc * np.exp(-1 * gamma_BEC_osc * t) * (gamma_BEC_osc * np.cos(omega_BEC_osc * t + phi_BEC_osc) + omega_BEC_osc * np.sin(omega_BEC_osc * t + phi_BEC_osc))
+
+
+def a_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc):
+    # returns function describing the acceleration of the BEC COM over time
+    return amp_BEC_osc * np.exp(-1 * gamma_BEC_osc * t) * ((gamma_BEC_osc**2 - omega_BEC_osc**2) * np.cos(omega_BEC_osc * t + phi_BEC_osc) + 2 * gamma_BEC_osc * omega_BEC_osc * np.sin(omega_BEC_osc * t + phi_BEC_osc))
+
+
+def F_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc, mI):
+    # returns function describing fictional force on the impurity in the BECs accelerating frame of motion
+    return mI * a_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc)
+
+
 def F_Imp_trap(X, omega_Imp_x, mI):
     # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
     return -1 * mI * (omega_Imp_x**2) * X
@@ -574,9 +594,8 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     # LDA Force functions
     LDA_funcs = {}
 
-    omega_BEC_osc = trapParams['omega_BEC_osc']
-    a_osc = trapParams['a_osc']
-    LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc(t, omega_BEC_osc, 1, a_osc, mI)
+    omega_BEC_osc = trapParams['omega_BEC_osc']; gamma_BEC_osc = trapParams['gamma_BEC_osc']; phi_BEC_osc = trapParams['phi_BEC_osc']; amp_BEC_osc = trapParams['amp_BEC_osc']
+    LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc, mI)
 
     omega_Imp_x = trapParams['omega_Imp_x']
     LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
@@ -628,7 +647,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
         Phase_da[ind] = cs.get_Phase()
         P_da[ind] = cs.get_totMom()
         X_da[ind] = cs.get_impPos()
-        XLab_da[ind] = cs.get_impPos() + x_BEC_osc(t, omega_BEC_osc, 1, a_osc)
+        XLab_da[ind] = cs.get_impPos() + x_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
@@ -640,7 +659,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da}
     coords_dict = {'t': tgrid}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'X0': X0, 'P0': P0, 'a_osc': a_osc, 'omega_Imp_x': omega_Imp_x}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'gamma_BEC_osc': gamma_BEC_osc, 'phi_BEC_osc': phi_BEC_osc, 'amp_BEC_osc': amp_BEC_osc, 'X0': X0, 'P0': P0, 'omega_Imp_x': omega_Imp_x}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 

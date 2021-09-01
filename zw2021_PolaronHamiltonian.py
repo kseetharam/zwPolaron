@@ -27,7 +27,6 @@ class zw2021_PolaronHamiltonian:
         self.BEC_density_var = toggleDict['BEC_density']
         self.Pol_Potential = toggleDict['Polaron_Potential']
         self.CS_Dyn = toggleDict['CS_Dyn']
-        self.a_osc = trapParams['a_osc']
 
         if self.couplingType == 'frohlich':
             [aIBi, mI, mB, n0, gBB] = self.Params
@@ -54,7 +53,7 @@ class zw2021_PolaronHamiltonian:
         phase = system_vars[-3].real.astype(float)
         P = system_vars[-2].real.astype(float)
         X = system_vars[-1].real.astype(float)
-        XLab = X + pfs.x_BEC_osc(t, self.trapParams['omega_BEC_osc'], 1, self.trapParams['a_osc'])
+        XLab = X + pfs.x_BEC_osc_zw2021(t, self.trapParams['omega_BEC_osc'], self.trapParams['gamma_BEC_osc'], self.trapParams['phi_BEC_osc'], self.trapParams['amp_BEC_osc'])
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
@@ -101,12 +100,12 @@ class zw2021_PolaronHamiltonian:
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
 
-        # if self.Pol_Potential == 'off':
-        #     P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-        # else:
-        #     P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        if self.Pol_Potential == 'off':
+            P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        else:
+            P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
 
-        P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        # P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
 
         if self.BEC_density_var == 'on':
