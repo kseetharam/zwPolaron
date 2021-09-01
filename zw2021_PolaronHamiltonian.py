@@ -101,12 +101,12 @@ class zw2021_PolaronHamiltonian:
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
 
-        if self.Pol_Potential == 'off':
-            P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-        else:
-            P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        # if self.Pol_Potential == 'off':
+        #     P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        # else:
+        #     P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
 
-        # P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+        P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         X_new_temp = (P - PB) / mI
 
         if self.BEC_density_var == 'on':

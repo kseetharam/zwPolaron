@@ -32,7 +32,7 @@ if __name__ == "__main__":
     inda = 4
     aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
-    qds = xr.open_dataset(datapath + '/aIB_{0}a0_1.nc'.format(aIB))
+    qds = xr.open_dataset(datapath + '/aIB_{0}a0_2.nc'.format(aIB))
 
     expParams = pf_dynamic_sph.Zw_expParams_2021()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
@@ -58,5 +58,6 @@ if __name__ == "__main__":
     ax.plot(tVals_exp, V_exp[inda], 'kd', label='Experiment')
     ax.plot(tVals, V, label='Simulation')
     ax.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1)
+    ax.set_xlim([0, 12])
     ax.legend()
     plt.show()
