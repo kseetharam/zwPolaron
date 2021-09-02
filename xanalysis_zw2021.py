@@ -41,25 +41,25 @@ if __name__ == "__main__":
     inda = 4
     aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
-    qds = xr.open_dataset(datapath + '/aIB_{0}a0_long.nc'.format(aIB))
+    qds = xr.open_dataset(datapath + '/aIB_{0}a0.nc'.format(aIB))
 
     expParams = pf_dynamic_sph.Zw_expParams_2021()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
     attrs = qds.attrs
     mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu
-    omega_BEC_osc = attrs['omega_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; a_osc = attrs['a_osc']; X0 = attrs['X0']; P0 = attrs['P0']
+    omega_BEC_osc = attrs['omega_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
     c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
     # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
     tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
     V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-    xBEC = pf_dynamic_sph.x_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
-    vBEC = np.gradient(xBEC, qds['t'].values); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
-    FBEC = pf_dynamic_sph.F_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc, mI)
 
-    xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
-    vL_bareImp = np.gradient(xL_bareImp, tVals)
-    aL_bareImp = np.gradient(np.gradient(xL_bareImp, tVals), tVals)
+    # xBEC = pf_dynamic_sph.x_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
+    # vBEC = np.gradient(xBEC, qds['t'].values); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+    # FBEC = pf_dynamic_sph.F_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc, mI)
+    # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
+    # vL_bareImp = np.gradient(xL_bareImp, tVals)
+    # aL_bareImp = np.gradient(np.gradient(xL_bareImp, tVals), tVals)
 
     # # #############################################################################################################################
     # # # FIT BEC OSCILLATION
