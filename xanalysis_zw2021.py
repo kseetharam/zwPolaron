@@ -41,22 +41,23 @@ if __name__ == "__main__":
     inda = 4
     aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
-    qds = xr.open_dataset(datapath + '/aIB_{0}a0.nc'.format(aIB))
+    qds = xr.open_dataset(datapath + '/aIB_{0}a0_test.nc'.format(aIB))
 
     expParams = pf_dynamic_sph.Zw_expParams_2021()
     L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
     attrs = qds.attrs
     mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu
-    omega_BEC_osc = attrs['omega_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
+    omega_BEC_osc = attrs['omega_BEC_osc']; phi_BEC_osc = attrs['phi_BEC_osc']; gamma_BEC_osc = attrs['gamma_BEC_osc']; amp_BEC_osc = attrs['amp_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
     c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
     # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
     tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
     V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
 
-    # xBEC = pf_dynamic_sph.x_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
-    # vBEC = np.gradient(xBEC, qds['t'].values); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
-    # FBEC = pf_dynamic_sph.F_BEC_osc(qds['t'].values, omega_BEC_osc, 1, a_osc, mI)
+    xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
+    # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+    vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(np.linspace(0, 100, 1000) * 1e-3 * T_exp2th, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+
     # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
     # vL_bareImp = np.gradient(xL_bareImp, tVals)
     # aL_bareImp = np.gradient(np.gradient(xL_bareImp, tVals), tVals)
@@ -68,6 +69,8 @@ if __name__ == "__main__":
     # phiVals = []
     # gammaVals = []
     # for ind in np.arange(18):
+    #     if ind != 4:
+    #         continue
     #     print(aIBexp_Vals[ind])
     #     NaV = NaV_exp[ind]
     #     nanmask = np.isnan(NaV)
@@ -100,16 +103,20 @@ if __name__ == "__main__":
     #     ax2.plot(tVals_exp, NaV, 'kd-')
     #     # ax2.plot(tVals_interp, NaV_interp, 'r-')
     #     ax2.plot(tVals_interp, NaV_cf, 'g-')
-    #     ax2.plot(tVals_interp, aOsc_interp, 'b-')
-    #     ax2.plot(tVals_interp, a_cf, 'r-')
+    #     # ax2.plot(tVals_interp, NaV_cf, 'r-')
+    #     ax2.plot(np.linspace(0, 100, 1000), vBEC_conv, 'r-')
+
+    #     # ax2.plot(tVals_interp, aOsc_interp, 'b-')
+    #     # ax2.plot(tVals_interp, a_cf, 'r-')
 
     #     # ax2.plot(dt_BEC + tVals, vBEC_conv)
     #     # if ind == inda:
     #     #     ax2.plot(tVals, vBEC_conv)
     #     ax2.plot()
     #     plt.show()
-    # print(np.array(phiVals))
-    # print(np.array(gammaVals))
+
+    # # print(np.array(phiVals))
+    # # print(np.array(gammaVals))
 
     # #############################################################################################################################
     # # RELATIVE VELOCITY
@@ -118,6 +125,11 @@ if __name__ == "__main__":
     # dt_imp = tVals_exp[np.argmax(V_exp[inda][tVals_exp < 20])] - tVals[np.argmax(V[tVals < 20])]
     # dt_BEC = tVals_exp[np.argmax(NaV_exp[inda][tVals_exp < 20])] - tVals[np.argmax(vBEC_conv[tVals < 20])]
     # print(dt_imp, dt_BEC)
+
+    fig0, ax0 = plt.subplots()
+    ax0.plot(tVals_exp, NaV_exp[inda], 'kd-')
+    # ax0.plot(tVals, vBEC_conv, 'r-')
+    ax0.plot(np.linspace(0, 100, 1000), vBEC_conv, 'r-')
 
     fig, ax = plt.subplots()
     ax.plot(tVals_exp, V_exp[inda], 'kd', label='Experiment')

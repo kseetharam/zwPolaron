@@ -131,7 +131,7 @@ if __name__ == "__main__":
     omega_BEC_osc = omega_Na / T_exp2th
     gamma_BEC_osc = gamma_Na / T_exp2th
     phi_BEC_osc = phi_Na
-    amp_BEC_osc = (Na_displacement * 1e-6 * L_exp2th) * np.cos(phi_Na)  # BEC oscillation amplitude (carries units of position)
+    amp_BEC_osc = (Na_displacement * 1e-6 * L_exp2th) / np.cos(phi_Na)  # BEC oscillation amplitude (carries units of position)
 
     omega_Imp_x = omega_K / T_exp2th
 
