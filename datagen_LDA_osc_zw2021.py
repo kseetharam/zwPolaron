@@ -42,9 +42,9 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # tMax = 6000; dt = 0.5
+    tMax = 6000; dt = 0.5
     # tMax = 600; dt = 0.5
-    tMax = 0.5; dt = 0.5
+    # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -197,10 +197,10 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    taskCount = len(jobList); taskID = 4
+    # taskCount = len(jobList); taskID = 4
 
     if(taskCount > len(jobList)):
         print('ERROR: TASK COUNT MISMATCH')
