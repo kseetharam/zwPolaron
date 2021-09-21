@@ -15,8 +15,8 @@ if __name__ == "__main__":
     matplotlib.rcParams.update({'font.size': 12})
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
-    labelsize = 13
-    legendsize = 12
+    labelsize = 12
+    legendsize = 10
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/NoPolPot'
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
@@ -35,28 +35,55 @@ if __name__ == "__main__":
     Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])  # initial position of the BEC (in um)
     phi_Na = np.array([-0.2888761, -0.50232022, -0.43763589, -0.43656233, -0.67963017, -0.41053479, -0.3692152, -0.40826816, -0.46117853, -0.41393032, -0.53483635, -0.42800711, -0.3795508, -0.42279337, -0.53760432, -0.4939509, -0.47920687, -0.51809527])  # phase of the BEC oscillation in rad
     gamma_Na = np.array([4.97524294, 14.88208436, 4.66212187, 6.10297397, 7.77264927, 4.5456649, 4.31293083, 7.28569606, 8.59578888, 3.30558254, 8.289436, 4.14485229, 7.08158476, 4.84228082, 9.67577823, 11.5791718, 3.91855863, 10.78070655])  # decay rate of the BEC oscillation in Hz
+    RTF_BEC_Y = np.array([11.4543973014280, 11.4485027292274, 12.0994087866866, 11.1987472415996, 12.6147755284164, 13.0408759297917, 12.8251948079726, 12.4963915490121, 11.6984708883771, 12.1884624646191, 11.7981246004719, 11.8796464214276, 12.4136593404667, 12.3220325703494, 12.0104329130883, 12.1756670927480, 10.9661042681457, 12.1803009563806])  # Thomas-Fermi radius of BEC in direction of oscillation (given in um)
 
     # Load simulation data
 
-    inda = 4
-    aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
+    # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    # aIBList = [-1000, -750, -500]
+    # aIBList = [-375, -250, -125, -60, -20]
+    aIBList = [-500]
+    # aIBList = aIBexp_Vals
 
-    qds = xr.open_dataset(datapath + '/aIB_{0}a0_test.nc'.format(aIB))
+    qds_List = []
+    V_List = []
+    vBEC_List = []
+    xBEC_List = []
+    varname_List = []
+    for inda in np.arange(18):
+        if aIBexp_Vals[inda] not in aIBList:
+            qds_List.append(0)
+            V_List.append(0)
+            vBEC_List.append(0)
+            xBEC_List.append(0)
+            continue
+        aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
-    expParams = pf_dynamic_sph.Zw_expParams_2021()
-    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
+        # qds = xr.open_dataset(datapath + '/aIB_{0}a0.nc'.format(aIB))
+        qds = xr.open_dataset(datapath + '/aIB_{0}a0_-7.nc'.format(aIB))
 
-    attrs = qds.attrs
-    mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu
-    omega_BEC_osc = attrs['omega_BEC_osc']; phi_BEC_osc = attrs['phi_BEC_osc']; gamma_BEC_osc = attrs['gamma_BEC_osc']; amp_BEC_osc = attrs['amp_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
-    c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
-    # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
-    tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
-    V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        expParams = pf_dynamic_sph.Zw_expParams_2021()
+        L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
-    xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
-    # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
-    vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(np.linspace(0, 100, 1000) * 1e-3 * T_exp2th, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+        attrs = qds.attrs
+        mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu
+        omega_BEC_osc = attrs['omega_BEC_osc']; phi_BEC_osc = attrs['phi_BEC_osc']; gamma_BEC_osc = attrs['gamma_BEC_osc']; amp_BEC_osc = attrs['amp_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
+        c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
+        # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
+        tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
+        V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+
+        xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
+        vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+        # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(np.linspace(0, 100, 1000) * 1e-3 * T_exp2th, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
+
+        qds_List.append(qds)
+        V_List.append(V)
+        vBEC_List.append(vBEC_conv)
+        xBEC_List.append(xBEC_conv)
+
+    # velData = np.stack(V_List)
+    # savemat('/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/data/oscdata/data_Simulation.mat', {'RelVel_Sim': velData, 'Time_Sim': tVals, 'aBF_Sim': np.array(aIBList).astype(int)})
 
     # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
     # vL_bareImp = np.gradient(xL_bareImp, tVals)
@@ -122,22 +149,43 @@ if __name__ == "__main__":
     # # RELATIVE VELOCITY
     # #############################################################################################################################
 
-    # dt_imp = tVals_exp[np.argmax(V_exp[inda][tVals_exp < 20])] - tVals[np.argmax(V[tVals < 20])]
-    # dt_BEC = tVals_exp[np.argmax(NaV_exp[inda][tVals_exp < 20])] - tVals[np.argmax(vBEC_conv[tVals < 20])]
-    # print(dt_imp, dt_BEC)
+    for inda in np.arange(18):
+        if aIBexp_Vals[inda] not in aIBList:
+            continue
+        aIB = aIBexp_Vals[inda]
+        fig0, ax0 = plt.subplots()
+        ax0.plot(tVals_exp, NaV_exp[inda], 'kd-', label='Experiment')
+        ax0.plot(tVals, vBEC_List[inda], 'r-', label='Damped oscillator fit')
+        # ax0.plot(tVals, np.gradient(xBEC_List[inda], tVals), 'g-')
+        ax0.set_ylabel(r'BEC velocity ($\mu$m/ms)')
+        ax0.set_xlabel(r'Time (ms)')
+        ax0.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        ax0.legend()
 
-    fig0, ax0 = plt.subplots()
-    ax0.plot(tVals_exp, NaV_exp[inda], 'kd-')
-    # ax0.plot(tVals, vBEC_conv, 'r-')
-    ax0.plot(np.linspace(0, 100, 1000), vBEC_conv, 'r-')
+        fig1, ax1 = plt.subplots()
+        ax1.plot(tVals, xBEC_List[inda])
+        ax1.set_ylabel(r'BEC position ($\mu$m)')
+        ax1.set_xlabel(r'Time (ms)')
+        ax1.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
 
-    fig, ax = plt.subplots()
-    ax.plot(tVals_exp, V_exp[inda], 'kd', label='Experiment')
-    ax.plot(tVals, V, label='Simulation')
-    ax.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1)
-    ax.set_ylabel(r'velocity ($\mu$m/ms)')
-    ax.set_xlabel(r'time (ms)')
-    ax.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
-    ax.legend()
+        fig2, ax2 = plt.subplots()
+        ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
+        ax2.fill_between(tVals_exp, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
+        ax2.set_ylabel(r'Relative impurity position ($\mu$m)')
+        ax2.set_xlabel(r'Time (ms)')
+        ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        ax2.legend()
 
-    plt.show()
+        fig, ax = plt.subplots()
+        ax.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
+        ax.plot(tVals, V_List[inda], label='Simulation')
+        ax.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
+        ax.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
+        ax.set_xlabel(r'Time (ms)')
+        ax.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        ax.legend()
+        # ax.plot(tVals, qds_List[inda]['XLab'].values * 1e6 / L_exp2th, label='')
+        # ax.set_xlim([0, 16])
+        ax.set_ylim([-20, 20])
+
+        plt.show()

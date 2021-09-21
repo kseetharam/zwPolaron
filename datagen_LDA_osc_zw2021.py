@@ -43,7 +43,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     tMax = 6000; dt = 0.5
-    # tMax = 600; dt = 0.5
+    # tMax = 500; dt = 0.5
+    # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -67,6 +68,9 @@ if __name__ == "__main__":
     K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
     K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
     K_relPos = K_displacement - Na_displacement   # in um
+    K_relPos[0] = -15
+    K_relPos[1] = -15
+    K_relPos[2] = -7
 
     omega_Na = np.array([465.418650581347, 445.155256942448, 461.691943131414, 480.899902898451, 448.655522184374, 465.195338759998, 460.143258369460, 464.565377197007, 465.206177963899, 471.262139163205, 471.260672147216, 473.122081065092, 454.649394420577, 449.679107889662, 466.770887179217, 470.530355145510, 486.615655444221, 454.601540658640])   # in rad*Hz
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
@@ -142,7 +146,7 @@ if __name__ == "__main__":
 
     # Create dicts
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'off'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -167,51 +171,54 @@ if __name__ == "__main__":
         sParams = [mI, mB, n0[ind], gBB]
         den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
         trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
-        filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
+        filepath = innerdatapath + '/aIB_{0}a0_t.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 
     # print(len(jobList))
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-    # for ind, tup in enumerate(jobList):
-    #     if ind != 4:
-    #         continue
-    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-    #     loopstart = timer()
-    #     (aIBi, sParams, trapParams, filepath) = tup
-    #     cParams = {'aIBi': aIBi}
-    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    #     ds.to_netcdf(filepath)
-
-    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
-
-    #     loopend = timer()
-    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
-
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # taskCount = len(jobList); taskID = 4
-
-    if(taskCount > len(jobList)):
-        print('ERROR: TASK COUNT MISMATCH')
-        sys.exit()
-    else:
-        tup = jobList[taskID]
+    for ind, tup in enumerate(jobList):
+        if ind != 1:
+            continue
+        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+        loopstart = timer()
         (aIBi, sParams, trapParams, filepath) = tup
+        cParams = {'aIBi': aIBi}
+        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+        ds.to_netcdf(filepath)
 
-    cParams = {'aIBi': aIBi}
-    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    ds.to_netcdf(filepath)
+        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
+        x0 = ds['X'].values[0] * 1e6 / L_exp2th
+        print(K_relPos[ind], K_displacement[ind], x0)
+
+        loopend = timer()
+        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     end = timer()
-    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # # taskCount = len(jobList); taskID = 4
+
+    # if(taskCount > len(jobList)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     sys.exit()
+    # else:
+    #     tup = jobList[taskID]
+    #     (aIBi, sParams, trapParams, filepath) = tup
+
+    # cParams = {'aIBi': aIBi}
+    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    # ds.to_netcdf(filepath)
+
+    # end = timer()
+    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
