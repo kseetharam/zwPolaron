@@ -68,7 +68,9 @@ if __name__ == "__main__":
     K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
     K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
     K_relPos = K_displacement - Na_displacement   # in um
-    K_relPos[0] = -15
+    # K_relPos[0] = -15
+    # print('init ', K_relPos[0])
+    # K_relPos[0] = 0
     K_relPos[1] = -15
     K_relPos[2] = -7
 
@@ -136,6 +138,9 @@ if __name__ == "__main__":
     gamma_BEC_osc = gamma_Na / T_exp2th
     phi_BEC_osc = phi_Na
     amp_BEC_osc = (Na_displacement * 1e-6 * L_exp2th) / np.cos(phi_Na)  # BEC oscillation amplitude (carries units of position)
+    print(amp_BEC_osc[0])
+    amp_BEC_osc[0] = 0.15 * amp_BEC_osc[0]
+    print(amp_BEC_osc[0])
 
     omega_Imp_x = omega_K / T_exp2th
 
@@ -180,7 +185,7 @@ if __name__ == "__main__":
 
     runstart = timer()
     for ind, tup in enumerate(jobList):
-        if ind != 1:
+        if ind != 0:
             continue
         print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
         loopstart = timer()

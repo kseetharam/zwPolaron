@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-1000, -750, -500]
     # aIBList = [-375, -250, -125, -60, -20]
-    aIBList = [-500]
+    aIBList = [-1000]
     # aIBList = aIBexp_Vals
 
     qds_List = []
@@ -60,7 +60,9 @@ if __name__ == "__main__":
         aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
         # qds = xr.open_dataset(datapath + '/aIB_{0}a0.nc'.format(aIB))
-        qds = xr.open_dataset(datapath + '/aIB_{0}a0_-7.nc'.format(aIB))
+        # qds = xr.open_dataset(datapath + '/aIB_{0}a0_-15.nc'.format(aIB))
+        # qds = xr.open_dataset(datapath + '/aIB_{0}a0_1.3_0.2.nc'.format(aIB))
+        qds = xr.open_dataset(datapath + '/aIB_{0}a0_1.3_0.15.nc'.format(aIB))
 
         expParams = pf_dynamic_sph.Zw_expParams_2021()
         L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
