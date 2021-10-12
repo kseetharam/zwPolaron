@@ -68,11 +68,12 @@ if __name__ == "__main__":
     K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
     K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
     K_relPos = K_displacement - Na_displacement   # in um
-    # K_relPos[0] = -15
     # print('init ', K_relPos[0])
     # K_relPos[0] = 0
-    K_relPos[1] = -15
-    K_relPos[2] = -7
+
+    # K_relPos[0] = -15
+    # K_relPos[1] = -15
+    # K_relPos[2] = -7
 
     omega_Na = np.array([465.418650581347, 445.155256942448, 461.691943131414, 480.899902898451, 448.655522184374, 465.195338759998, 460.143258369460, 464.565377197007, 465.206177963899, 471.262139163205, 471.260672147216, 473.122081065092, 454.649394420577, 449.679107889662, 466.770887179217, 470.530355145510, 486.615655444221, 454.601540658640])   # in rad*Hz
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
@@ -152,7 +153,7 @@ if __name__ == "__main__":
     # Create dicts
 
     toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'off'}
+                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'on'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -185,7 +186,7 @@ if __name__ == "__main__":
 
     runstart = timer()
     for ind, tup in enumerate(jobList):
-        if ind != 0:
+        if ind != 3:
             continue
         print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
         loopstart = timer()
