@@ -177,54 +177,54 @@ if __name__ == "__main__":
         sParams = [mI, mB, n0[ind], gBB]
         den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
         trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
-        filepath = innerdatapath + '/aIB_{0}a0_t.nc'.format(aIBexp_Vals[ind])
+        filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 
     # print(len(jobList))
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-    for ind, tup in enumerate(jobList):
-        if ind != 3:
-            continue
-        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-        loopstart = timer()
-        (aIBi, sParams, trapParams, filepath) = tup
-        cParams = {'aIBi': aIBi}
-        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-        ds.to_netcdf(filepath)
-
-        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
-
-        x0 = ds['X'].values[0] * 1e6 / L_exp2th
-        print(K_relPos[ind], K_displacement[ind], x0)
-
-        loopend = timer()
-        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
-
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # # taskCount = len(jobList); taskID = 4
-
-    # if(taskCount > len(jobList)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     sys.exit()
-    # else:
-    #     tup = jobList[taskID]
+    # for ind, tup in enumerate(jobList):
+    #     if ind != 0:
+    #         continue
+    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+    #     loopstart = timer()
     #     (aIBi, sParams, trapParams, filepath) = tup
+    #     cParams = {'aIBi': aIBi}
+    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    #     ds.to_netcdf(filepath)
 
-    # cParams = {'aIBi': aIBi}
-    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    # ds.to_netcdf(filepath)
+    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
+    #     x0 = ds['X'].values[0] * 1e6 / L_exp2th
+    #     print(K_relPos[ind], K_displacement[ind], x0)
+
+    #     loopend = timer()
+    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     # end = timer()
-    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = len(jobList); taskID = 4
+
+    if(taskCount > len(jobList)):
+        print('ERROR: TASK COUNT MISMATCH')
+        sys.exit()
+    else:
+        tup = jobList[taskID]
+        (aIBi, sParams, trapParams, filepath) = tup
+
+    cParams = {'aIBi': aIBi}
+    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    ds.to_netcdf(filepath)
+
+    end = timer()
+    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
