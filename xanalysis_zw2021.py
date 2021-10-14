@@ -18,8 +18,8 @@ if __name__ == "__main__":
     labelsize = 12
     legendsize = 10
 
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/NoPolPot'
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/PolPot'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/NoPolPot'
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/PolPot'
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
 
     # Load experimental data
@@ -40,12 +40,12 @@ if __name__ == "__main__":
 
     # Load simulation data
 
-    # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-1000, -750, -500]
     # aIBList = [-375, -250, -125, -60, -20]
-    aIBList = [-375]
+    # aIBList = [-375]
     # aIBList = aIBexp_Vals
 
     qds_List = []
