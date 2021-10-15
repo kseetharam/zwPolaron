@@ -602,6 +602,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     if toggleDict['Polaron_Potential'] == 'on':
         # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
+        # X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 0.99, trapParams['RTF_BEC'] * 0.99, 100)
         X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 3.99, trapParams['RTF_BEC'] * 3.99, 100)
         E_Pol_tck = V_Pol_interp_dentck(kgrid, X_Vals, cParams, sParams, trapParams)
         LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
