@@ -10,6 +10,7 @@ import sys
 from copy import deepcopy
 # import matplotlib
 # import matplotlib.pyplot as plt
+from mpmath import polylog
 
 if __name__ == "__main__":
 
@@ -58,6 +59,9 @@ if __name__ == "__main__":
 
     # Experimental params
 
+    kB = 1.38064852e-23  # Boltzmann constant in J/K
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
     n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
@@ -79,11 +83,46 @@ if __name__ == "__main__":
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
     omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
     omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]  # in rad*Hz
+    # print(omega_K / (2 * np.pi))
 
     K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])  # in um/ms
 
     phi_Na = np.array([-0.2888761, -0.50232022, -0.43763589, -0.43656233, -0.67963017, -0.41053479, -0.3692152, -0.40826816, -0.46117853, -0.41393032, -0.53483635, -0.42800711, -0.3795508, -0.42279337, -0.53760432, -0.4939509, -0.47920687, -0.51809527])  # phase of the BEC oscillation in rad
     gamma_Na = np.array([4.97524294, 14.88208436, 4.66212187, 6.10297397, 7.77264927, 4.5456649, 4.31293083, 7.28569606, 8.59578888, 3.30558254, 8.289436, 4.14485229, 7.08158476, 4.84228082, 9.67577823, 11.5791718, 3.91855863, 10.78070655])  # decay rate of the BEC oscillation in Hz
+
+    N_K = np.array([2114.31716217314, 3040.54086059863, 3788.54290366850, 2687.53370686094, 2846.49206660163, 1692.49722769915, 1813.12703968803, 2386.60764443984, 2532.45824159990, 2361.26046445201, 2466.63648224567, 2206.34584323146, 2113.15620874362, 3755.19098529495, 2163.29615872937, 2042.58962172497, 4836.09854876457, 3044.93792941312])  # total number of fermions in K gas
+    TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
+    T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
+    T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
+    mu_div_hbar_K = np.array([22550.7270015707, 20108.834138320814, 16591.36071037686, 18954.73098391906, 20560.65213445464, 24923.756370641815, 24350.419617567153, 21143.95864383318, 20257.36406536937, 21340.92558450365, 20924.277164692707, 21575.503820432994, 23301.394076304874, 17532.68788999363, 22215.31768424473, 22569.231561533048, 12263.228126317548, 19422.37341183796])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
+    print(mu_div_hbar_K / (2 * np.pi))
+
+    # # Compute chemical potential of the K gas
+
+    # # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
+    # # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
+    # # print(mu_K / (2 * np.pi) * 1e-6)
+
+    # from scipy.optimize import root_scalar
+
+    # def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
+    #     mu = hbar * mu_div_hbar
+    #     beta = 1 / (kB * T)
+    #     prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
+    #     return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
+
+    # mu_div_hbar_List = []
+    # for indw, wy in enumerate(omega_K):
+    #     wscale_K = wy / (2 * np.pi * 114)
+    #     omega_x_K = 2 * np.pi * 125 * wscale_K; omega_y_K = 2 * np.pi * 114 * wscale_K; omega_z_K = 2 * np.pi * 12.2 * wscale_K
+    #     # muScale = hbar * 2 * np.pi * 1e3
+    #     muScale = 2 * np.pi * 1e3
+    #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
+    #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
+    #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
+    #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
+    #     mu_div_hbar_List.append(sol.root)
+    # print(mu_div_hbar_List)
 
     # Basic parameters
 
@@ -128,6 +167,34 @@ if __name__ == "__main__":
     #     ax.plot(1e6 * yMat_th_interp[ind, :] / L_exp2th, densityMat_th_interp[ind, :] * (L_exp2th**3), label='{0}'.format(aIB_exp))
     # ax.legend()
     # plt.show()
+
+    # # Create thermal distribution of initial conditions
+
+    from arspy.ars import adaptive_rejection_sampling as ars
+    import matplotlib.pyplot as plt
+
+    # gaussian_logpdf = lambda x, sigma=1: np.log(np.exp(-x ** 2 / sigma))
+    # a, b = -2, 2  # a < b must hold
+    # domain = (float("-inf"), float("inf"))
+    # n_samples = 10000
+    # samples = ars(logpdf=gaussian_logpdf, a=a, b=b, domain=domain, n_samples=n_samples)
+    # print(np.isclose(np.mean(samples), 0.0, atol=1e-02))
+    # print(np.min(samples), np.max(samples))
+
+    # plt.hist(samples, bins=1000)
+    # plt.show()
+
+    def Vho_3D(x, y, z, omega_x, omega_y, omega_z, mI):
+        return (mI / 2) * ((omega_x * x)**2 + (omega_y * y)**2 + (omega_z * z)**2)
+
+    def log_f_Fermi_3D(x, y, z, px, py, pz, mI, mu, Vpot, T):
+        return -1 * np.log(1 + np.exp(((px**2 + py**2 + pz**2) / (2 * mI) + Vpot(x, y, z) - mu) / (kB * T)))
+
+    def log_f_Fermi_1D_slice():
+        return
+
+    def log_f_Fermi_1D_int():
+        return
 
     # Convert experimental parameters to theory parameters
 
@@ -206,25 +273,25 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(jobList); taskID = 4
+    # # taskCount = len(jobList); taskID = 4
 
-    if(taskCount > len(jobList)):
-        print('ERROR: TASK COUNT MISMATCH')
-        sys.exit()
-    else:
-        tup = jobList[taskID]
-        (aIBi, sParams, trapParams, filepath) = tup
+    # if(taskCount > len(jobList)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     sys.exit()
+    # else:
+    #     tup = jobList[taskID]
+    #     (aIBi, sParams, trapParams, filepath) = tup
 
-    cParams = {'aIBi': aIBi}
-    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    ds.to_netcdf(filepath)
+    # cParams = {'aIBi': aIBi}
+    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    # ds.to_netcdf(filepath)
 
-    end = timer()
-    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    # end = timer()
+    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))

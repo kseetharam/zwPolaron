@@ -87,8 +87,8 @@ if __name__ == "__main__":
         vBEC_List.append(vBEC_conv)
         xBEC_List.append(xBEC_conv)
 
-    # velData = np.stack(V_List)
-    # savemat('/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/data/oscdata/data_Simulation.mat', {'RelVel_Sim': velData, 'Time_Sim': tVals, 'aBF_Sim': np.array(aIBList).astype(int)})
+    velData = np.stack(V_List)
+    savemat('/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/data/oscdata/data_Simulation.mat', {'RelVel_Sim': velData, 'Time_Sim': tVals, 'aBF_Sim': np.array(aIBList).astype(int)})
 
     # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
     # vL_bareImp = np.gradient(xL_bareImp, tVals)
