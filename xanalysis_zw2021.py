@@ -4,11 +4,29 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 import pf_dynamic_sph
+import pf_static_sph
 from scipy.io import savemat, loadmat
 from scipy import interpolate
 from scipy.optimize import curve_fit
 
 if __name__ == "__main__":
+
+    # Create kgrid
+
+    import Grid
+    (Lx, Ly, Lz) = (20, 20, 20)
+    (dx, dy, dz) = (0.2, 0.2, 0.2)
+    NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
+    Ntheta = 50
+    Nk = np.ceil(NGridPoints_desired / Ntheta).astype(int)
+    theta_max = np.pi
+    thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    k_min = 1e-5
+    kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
 
     # Initialization
 
@@ -18,8 +36,13 @@ if __name__ == "__main__":
     labelsize = 12
     legendsize = 10
 
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/NoPolPot'
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/PolPot'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/NoPolPot'
+
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/naivePP'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/naivePP'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP'
+
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
 
     # Load experimental data
@@ -40,12 +63,11 @@ if __name__ == "__main__":
 
     # Load simulation data
 
-    aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
-    # aIBList = [-1000, -750, -500]
-    # aIBList = [-375, -250, -125, -60, -20]
-    # aIBList = [-375]
+    # aIBList = [-500, -375]
+    aIBList = [-500]
     # aIBList = aIBexp_Vals
 
     qds_List = []
@@ -53,12 +75,11 @@ if __name__ == "__main__":
     vBEC_List = []
     xBEC_List = []
     varname_List = []
+    Tot_EnVals_List = []; Kin_EnVals_List = []; MF_EnVals_List = []; DA_Vals_List = []
     for inda in np.arange(18):
         if aIBexp_Vals[inda] not in aIBList:
-            qds_List.append(0)
-            V_List.append(0)
-            vBEC_List.append(0)
-            xBEC_List.append(0)
+            qds_List.append(0); V_List.append(np.zeros(12001)); vBEC_List.append(0); xBEC_List.append(0)
+            Tot_EnVals_List.append(0); Kin_EnVals_List.append(0); MF_EnVals_List.append(0); DA_Vals_List.append(0)
             continue
         aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
@@ -71,7 +92,7 @@ if __name__ == "__main__":
         L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
         attrs = qds.attrs
-        mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu
+        mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu; aIBi = attrs['aIBi']
         omega_BEC_osc = attrs['omega_BEC_osc']; phi_BEC_osc = attrs['phi_BEC_osc']; gamma_BEC_osc = attrs['gamma_BEC_osc']; amp_BEC_osc = attrs['amp_BEC_osc']; omega_Imp_x = attrs['omega_Imp_x']; X0 = attrs['X0']; P0 = attrs['P0']
         c_BEC_um_Per_ms = (nu * T_exp2th / L_exp2th) * (1e6 / 1e3)  # speed of sound in um/ms
         # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
@@ -87,8 +108,30 @@ if __name__ == "__main__":
         vBEC_List.append(vBEC_conv)
         xBEC_List.append(xBEC_conv)
 
-    velData = np.stack(V_List)
-    savemat('/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/data/oscdata/data_Simulation.mat', {'RelVel_Sim': velData, 'Time_Sim': tVals, 'aBF_Sim': np.array(aIBList).astype(int)})
+        # # Compute/compare polaron potential
+
+        # X = qds['X'].values; Pph = qds['Pph'].values; P = qds['P'].values
+        # den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB), allow_pickle=True)
+        # n = interpolate.splev(X, den_tck)
+        # DP_Vals = P - Pph
+        # Tot_EnVals = np.zeros(X.size)
+        # Kin_EnVals = np.zeros(X.size)
+        # MF_EnVals = np.zeros(X.size)
+        # DA_Vals = np.zeros(X.size)
+        # for indd, DP in enumerate(DP_Vals):
+        #     aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n[indd], gBB)
+        #     # PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
+        #     Tot_EnVals[indd] = pf_static_sph.Energy(P[indd], Pph[indd], aIBi, aSi, mI, mB, n[indd])
+        #     Kin_EnVals[indd] = (P[indd]**2 - Pph[indd]**2) / (2 * mI)
+        #     MF_EnVals[indd] = 2 * np.pi * n[indd] / (pf_static_sph.ur(mI, mB) * (aIBi - aSi))
+        #     DA_Vals[indd] = aIBi - aSi
+        # Tot_EnVals_List.append(Tot_EnVals)
+        # Kin_EnVals_List.append(Kin_EnVals)
+        # MF_EnVals_List.append(MF_EnVals)
+        # DA_Vals_List.append(DA_Vals)
+
+    # velData = np.stack(V_List)
+    # savemat('/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/data/oscdata/data_Simulation.mat', {'RelVel_Sim': velData, 'Time_Sim': tVals, 'aBF_Sim': np.array(aIBList).astype(int)})
 
     # xL_bareImp = (xBEC[0] + X0) * np.cos(omega_Imp_x * tVals) + (P0 / (omega_Imp_x * mI)) * np.sin(omega_Imp_x * tVals)  # gives the lab frame trajectory time trace of a bare impurity (only subject to the impurity trap) that starts at the same position w.r.t. the BEC as the polaron and has the same initial total momentum
     # vL_bareImp = np.gradient(xL_bareImp, tVals)
@@ -192,5 +235,12 @@ if __name__ == "__main__":
         # ax.plot(tVals, qds_List[inda]['XLab'].values * 1e6 / L_exp2th, label='')
         # ax.set_xlim([0, 16])
         ax.set_ylim([-20, 20])
+
+        # fig4, ax4 = plt.subplots()
+        # # ax4.plot(tVals, Tot_EnVals_List[inda], label='Total')
+        # # ax4.plot(tVals, Kin_EnVals_List[inda], label='Kinetic')
+        # # ax4.plot(tVals, MF_EnVals_List[inda], label='MF')
+        # ax4.plot(tVals, DA_Vals_List[inda])
+        # ax4.legend()
 
         plt.show()

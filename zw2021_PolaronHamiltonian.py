@@ -26,6 +26,7 @@ class zw2021_PolaronHamiltonian:
         self.couplingType = toggleDict['Coupling']
         self.BEC_density_var = toggleDict['BEC_density']
         self.Pol_Potential = toggleDict['Polaron_Potential']
+        self.PP_Type = toggleDict['PP_Type']
         self.CS_Dyn = toggleDict['CS_Dyn']
 
         if self.couplingType == 'frohlich':
@@ -57,7 +58,7 @@ class zw2021_PolaronHamiltonian:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
-        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']; F_pol_func = self.LDA_funcs['F_pol']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']; F_pol_naive_func = self.LDA_funcs['F_pol_naive']
 
         # Update BEC density dependent quantities
 
@@ -103,9 +104,19 @@ class zw2021_PolaronHamiltonian:
         if self.Pol_Potential == 'off':
             P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         else:
-            P_new_temp = F_pol_func(X) - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+            if self.PP_Type == 'naive':
+                F_pol = F_pol_naive_func(X)
+            else:
+                amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
+                Wk2_grid = self.Wk_grid**2; Wk3_grid = self.Wk_grid**3; omegak_grid = pfs.omegak_grid(self.grid, mB, n, gBB)
+                eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_grid) * amp_re, dVk); eta3 = np.dot((self.Wk_grid / omegak_grid) * amp_im, dVk)
+                xp_re = 0.5 * np.dot(self.Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(self.Wki_grid * amp_im, dVk)
+                A_PP = self.gnum * (1 + 2 * xp_re / n) + gBB * eta1 - self.gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
+                dndx = interpolate.splev(X, nBEC_tck, der=1)
+                F_pol = -1 * A_PP * dndx
 
-        # P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+            P_new_temp = F_pol - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+
         X_new_temp = (P - PB) / mI
 
         if self.BEC_density_var == 'on':

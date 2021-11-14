@@ -44,6 +44,12 @@ def omegak(k, mB, n0, gBB):
     return np.sqrt(ep * (ep + 2 * gBB * n0))
 
 
+def omegak_grid(kgrid, mB, n0, gBB):
+    names = list(kgrid.arrays.keys())
+    functions_Wk = [lambda k: omegak(k, mB, n0, gBB), lambda th: 0 * th + 1]
+    return kgrid.function_prod(names, functions_Wk)
+
+
 def Omega(kgrid, DP, mI, mB, n0, gBB):
     names = list(kgrid.arrays.keys())  # ***need to have arrays added as k, th when kgrid is created
     if names[0] != 'k':
@@ -285,6 +291,16 @@ def F_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc, 
 def F_Imp_trap(X, omega_Imp_x, mI):
     # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
     return -1 * mI * (omega_Imp_x**2) * X
+
+
+def F_Imp_trap_harmonic(X, omega_Imp_x, mI):
+    # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
+    return -1 * mI * (omega_Imp_x**2) * X
+
+
+def F_Imp_trap_gaussian(X, gaussian_amp, gaussian_width):
+    # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
+    return (gaussian_amp / (gaussian_width**2)) * X * np.exp(-1 * (X**2) / (2 * gaussian_width**2))
 
 
 # ---- OTHER FUNCTIONS ----
@@ -591,6 +607,8 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     aBB = (mB / (4 * np.pi)) * gBB
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
 
+    nBEC_tck = trapParams['nBEC_tck']
+
     # LDA Force functions
     LDA_funcs = {}
 
@@ -598,23 +616,29 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc, mI)
 
     omega_Imp_x = trapParams['omega_Imp_x']
-    LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap(X, omega_Imp_x, mI)
+    gaussian_amp = trapParams['gaussian_amp']
+    gaussian_width = trapParams['gaussian_width']
+
+    if toggleDict['ImpTrap_Type'] == 'harmonic':
+        LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap_harmonic(X, omega_Imp_x, mI)
+    else:
+        LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap_gaussian(X, gaussian_amp, gaussian_width)
 
     if toggleDict['Polaron_Potential'] == 'on':
         # assuming we only have a particle in the center of the trap that travels in the direction of largest Thomas Fermi radius (easy to generalize this)
         # X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 0.99, trapParams['RTF_BEC'] * 0.99, 100)
         X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 3.99, trapParams['RTF_BEC'] * 3.99, 100)
         E_Pol_tck = V_Pol_interp_dentck(kgrid, X_Vals, cParams, sParams, trapParams)
-        LDA_funcs['F_pol'] = lambda X: F_pol(X, E_Pol_tck)
-    else:
-        LDA_funcs['F_pol'] = lambda X: 0
+        LDA_funcs['F_pol_naive'] = lambda X: F_pol(X, E_Pol_tck)
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)
+    dVk = cs.dVk
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
     ham = zw2021_PolaronHamiltonian.zw2021_PolaronHamiltonian(cs, Params, LDA_funcs, trapParams, toggleDict)
+    gnum = ham.gnum
 
     Nsteps = 1e2
     aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
@@ -634,6 +658,8 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     XLab_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
+    A_PP_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
     start = timer()
     for ind, t in enumerate(tgrid):
         if ind == 0:
@@ -650,6 +676,17 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
         X_da[ind] = cs.get_impPos()
         XLab_da[ind] = cs.get_impPos() + x_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc)
 
+        # Compute time-varying amplitude of 'smarter' polaron potential
+        amplitude = cs.get_Amplitude()
+        amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
+        n = interpolate.splev(X_da[ind], nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        Wk_grid = Wk(kgrid, mB, n, gBB)
+        Wki_grid = 1 / Wk_grid
+        Wk2_grid = Wk_grid**2; Wk3_grid = Wk_grid**3; omegak_g = omegak_grid(kgrid, mB, n, gBB)
+        eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_g) * amp_re, dVk); eta3 = np.dot((Wk_grid / omegak_g) * amp_im, dVk)
+        xp_re = 0.5 * np.dot(Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(Wki_grid * amp_im, dVk)
+        A_PP_da[ind] = gnum * (1 + 2 * xp_re / n) + gBB * eta1 - gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
+
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
         start = timer()
@@ -658,7 +695,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     # Create Data Set
 
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da, 'A_PP': A_PP_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'gamma_BEC_osc': gamma_BEC_osc, 'phi_BEC_osc': phi_BEC_osc, 'amp_BEC_osc': amp_BEC_osc, 'X0': X0, 'P0': P0, 'omega_Imp_x': omega_Imp_x}
 

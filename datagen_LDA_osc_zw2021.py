@@ -43,8 +43,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 6000; dt = 0.5
-    # tMax = 500; dt = 0.5
+    # tMax = 6000; dt = 0.5
+    tMax = 500; dt = 0.5
     # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
     omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]  # in rad*Hz
     # print(omega_K / (2 * np.pi))
+    omega_x_K = 2 * np.pi * 141; omega_y_K = 2 * np.pi * 130; omega_z_K = 2 * np.pi * 15  # should get more accurate estimate for omega_x_K
 
     K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])  # in um/ms
 
@@ -94,34 +95,31 @@ if __name__ == "__main__":
     TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
     T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
     T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
-    mu_div_hbar_K = np.array([22550.7270015707, 20108.834138320814, 16591.36071037686, 18954.73098391906, 20560.65213445464, 24923.756370641815, 24350.419617567153, 21143.95864383318, 20257.36406536937, 21340.92558450365, 20924.277164692707, 21575.503820432994, 23301.394076304874, 17532.68788999363, 22215.31768424473, 22569.231561533048, 12263.228126317548, 19422.37341183796])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
-    print(mu_div_hbar_K / (2 * np.pi))
+    mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
+    # print(mu_div_hbar_K / (2 * np.pi))
 
-    # # Compute chemical potential of the K gas
+    # Compute chemical potential of the K gas
 
-    # # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
-    # # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
-    # # print(mu_K / (2 * np.pi) * 1e-6)
+    # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
+    # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
+    # print(mu_K / (2 * np.pi) * 1e-6)
 
-    # from scipy.optimize import root_scalar
+    from scipy.optimize import root_scalar
 
-    # def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
-    #     mu = hbar * mu_div_hbar
-    #     beta = 1 / (kB * T)
-    #     prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
-    #     return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
+    def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
+        mu = hbar * mu_div_hbar
+        beta = 1 / (kB * T)
+        prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
+        return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
 
-    # mu_div_hbar_List = []
-    # for indw, wy in enumerate(omega_K):
-    #     wscale_K = wy / (2 * np.pi * 114)
-    #     omega_x_K = 2 * np.pi * 125 * wscale_K; omega_y_K = 2 * np.pi * 114 * wscale_K; omega_z_K = 2 * np.pi * 12.2 * wscale_K
-    #     # muScale = hbar * 2 * np.pi * 1e3
-    #     muScale = 2 * np.pi * 1e3
-    #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
-    #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
-    #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
-    #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
-    #     mu_div_hbar_List.append(sol.root)
+    mu_div_hbar_List = []
+    for indw, wy in enumerate(omega_K):
+        muScale = 2 * np.pi * 1e3
+        # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
+        def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
+        sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
+        # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
+        mu_div_hbar_List.append(sol.root)
     # print(mu_div_hbar_List)
 
     # Basic parameters
@@ -168,33 +166,39 @@ if __name__ == "__main__":
     # ax.legend()
     # plt.show()
 
-    # # Create thermal distribution of initial conditions
+    # # # Create thermal distribution of initial conditions
 
-    from arspy.ars import adaptive_rejection_sampling as ars
-    import matplotlib.pyplot as plt
+    # from arspy.ars import adaptive_rejection_sampling as ars
+    # import matplotlib.pyplot as plt
 
-    # gaussian_logpdf = lambda x, sigma=1: np.log(np.exp(-x ** 2 / sigma))
-    # a, b = -2, 2  # a < b must hold
-    # domain = (float("-inf"), float("inf"))
-    # n_samples = 10000
-    # samples = ars(logpdf=gaussian_logpdf, a=a, b=b, domain=domain, n_samples=n_samples)
-    # print(np.isclose(np.mean(samples), 0.0, atol=1e-02))
-    # print(np.min(samples), np.max(samples))
+    # # gaussian_logpdf = lambda x, sigma=1: np.log(np.exp(-x ** 2 / sigma))
+    # # a, b = -2, 2  # a < b must hold
+    # # domain = (float("-inf"), float("inf"))
+    # # n_samples = 10000
+    # # samples = ars(logpdf=gaussian_logpdf, a=a, b=b, domain=domain, n_samples=n_samples)
+    # # print(np.isclose(np.mean(samples), 0.0, atol=1e-02))
+    # # print(np.min(samples), np.max(samples))
 
-    # plt.hist(samples, bins=1000)
-    # plt.show()
+    # # plt.hist(samples, bins=1000)
+    # # plt.show()
 
-    def Vho_3D(x, y, z, omega_x, omega_y, omega_z, mI):
-        return (mI / 2) * ((omega_x * x)**2 + (omega_y * y)**2 + (omega_z * z)**2)
+    # def Vho_3D(x, y, z, omega_x, omega_y, omega_z, mI):
+    #     return (mI / 2) * ((omega_x * x)**2 + (omega_y * y)**2 + (omega_z * z)**2)
 
-    def log_f_Fermi_3D(x, y, z, px, py, pz, mI, mu, Vpot, T):
-        return -1 * np.log(1 + np.exp(((px**2 + py**2 + pz**2) / (2 * mI) + Vpot(x, y, z) - mu) / (kB * T)))
+    # def log_f_3D(x, y, z, px, py, pz, mI, mu, Vpot, T):
+    #     return -1 * np.log(1 + np.exp(((px**2 + py**2 + pz**2) / (2 * mI) + Vpot(x, y, z) - mu) / (kB * T)))
 
-    def log_f_Fermi_1D_slice():
-        return
+    # def log_fxp_1D_slice(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
+    #     return
 
-    def log_f_Fermi_1D_int():
-        return
+    # def log_fx_1D_slice(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
+    #     return
+
+    # def log_fxp_1D_int(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
+    #     return
+
+    # def log_fx_1D_int(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
+    #     return
 
     # Convert experimental parameters to theory parameters
 
@@ -212,6 +216,9 @@ if __name__ == "__main__":
 
     omega_Imp_x = omega_K / T_exp2th
 
+    gaussian_amp = 1 * np.ones(aIBexp_Vals.size)
+    gaussian_width = 1 * np.ones(aIBexp_Vals.size)
+
     a0_exp = 5.29e-11  # Bohr radius (m)
     aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
 
@@ -219,8 +226,8 @@ if __name__ == "__main__":
 
     # Create dicts
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'CS_Dyn': 'on', 'Polaron_Potential': 'on'}
+    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'harmonic', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'smarter'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -233,45 +240,54 @@ if __name__ == "__main__":
     #     innerdatapath = innerdatapath + '/HomogBEC'
     #     toggleDict['Polaron_Potential'] = 'off'
 
+    if toggleDict['ImpTrap_Type'] == 'harmonic':
+        innerdatapath = datapath + '/harmonicTrap'
+    else:
+        innerdatapath = datapath + '/gaussianTrap'
+
     if toggleDict['Polaron_Potential'] == 'off':
         toggleDict['Polaron_Potential'] = 'off'
-        innerdatapath = datapath + '/NoPolPot'
+        innerdatapath += '/NoPolPot'
     else:
-        innerdatapath = datapath + '/PolPot'
+        innerdatapath += '/PolPot'
+        if toggleDict['PP_Type'] == 'naive':
+            innerdatapath += '/naivePP'
+        else:
+            innerdatapath += '/smarterPP'
 
     jobList = []
     for ind, aIBi in enumerate(aIBi_Vals):
         sParams = [mI, mB, n0[ind], gBB]
         den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
-        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
+        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
         filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 
     # print(len(jobList))
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
-    # runstart = timer()
-    # for ind, tup in enumerate(jobList):
-    #     if ind != 0:
-    #         continue
-    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-    #     loopstart = timer()
-    #     (aIBi, sParams, trapParams, filepath) = tup
-    #     cParams = {'aIBi': aIBi}
-    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    #     ds.to_netcdf(filepath)
+    runstart = timer()
+    for ind, tup in enumerate(jobList):
+        if ind != 2:
+            continue
+        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+        loopstart = timer()
+        (aIBi, sParams, trapParams, filepath) = tup
+        cParams = {'aIBi': aIBi}
+        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+        ds.to_netcdf(filepath)
 
-    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
+        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
-    #     x0 = ds['X'].values[0] * 1e6 / L_exp2th
-    #     print(K_relPos[ind], K_displacement[ind], x0)
+        x0 = ds['X'].values[0] * 1e6 / L_exp2th
+        print(K_relPos[ind], K_displacement[ind], x0)
 
-    #     loopend = timer()
-    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+        loopend = timer()
+        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
+    end = timer()
+    print('Total Time: {:.2f}'.format(end - runstart))
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 
