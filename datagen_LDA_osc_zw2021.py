@@ -43,8 +43,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # tMax = 6000; dt = 0.5
-    tMax = 500; dt = 0.5
+    tMax = 6000; dt = 0.5
+    # tMax = 500; dt = 0.5
     # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 
     # Create dicts
 
-    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
                   'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'harmonic', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'smarter'}
 
     # ---- SET OUTPUT DATA FOLDER ----
@@ -265,49 +265,49 @@ if __name__ == "__main__":
 
     # print(len(jobList))
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-    for ind, tup in enumerate(jobList):
-        if ind != 2:
-            continue
-        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-        loopstart = timer()
-        (aIBi, sParams, trapParams, filepath) = tup
-        cParams = {'aIBi': aIBi}
-        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-        ds.to_netcdf(filepath)
-
-        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
-
-        x0 = ds['X'].values[0] * 1e6 / L_exp2th
-        print(K_relPos[ind], K_displacement[ind], x0)
-
-        loopend = timer()
-        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
-
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # # taskCount = len(jobList); taskID = 4
-
-    # if(taskCount > len(jobList)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     sys.exit()
-    # else:
-    #     tup = jobList[taskID]
+    # for ind, tup in enumerate(jobList):
+    #     if ind != 2:
+    #         continue
+    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+    #     loopstart = timer()
     #     (aIBi, sParams, trapParams, filepath) = tup
+    #     cParams = {'aIBi': aIBi}
+    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    #     ds.to_netcdf(filepath)
 
-    # cParams = {'aIBi': aIBi}
-    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    # ds.to_netcdf(filepath)
+    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
+    #     x0 = ds['X'].values[0] * 1e6 / L_exp2th
+    #     print(K_relPos[ind], K_displacement[ind], x0)
+
+    #     loopend = timer()
+    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     # end = timer()
-    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = len(jobList); taskID = 4
+
+    if(taskCount > len(jobList)):
+        print('ERROR: TASK COUNT MISMATCH')
+        sys.exit()
+    else:
+        tup = jobList[taskID]
+        (aIBi, sParams, trapParams, filepath) = tup
+
+    cParams = {'aIBi': aIBi}
+    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    ds.to_netcdf(filepath)
+
+    end = timer()
+    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))

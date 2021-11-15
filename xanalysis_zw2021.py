@@ -38,9 +38,9 @@ if __name__ == "__main__":
 
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/NoPolPot'
 
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/naivePP'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/naivePP'
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/naivePP'
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP'
 
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
@@ -75,11 +75,11 @@ if __name__ == "__main__":
     vBEC_List = []
     xBEC_List = []
     varname_List = []
-    Tot_EnVals_List = []; Kin_EnVals_List = []; MF_EnVals_List = []; DA_Vals_List = []
+    Tot_EnVals_List = []; Kin_EnVals_List = []; MF_EnVals_List = []; DA_Vals_List = []; A_PP_List = []
     for inda in np.arange(18):
         if aIBexp_Vals[inda] not in aIBList:
             qds_List.append(0); V_List.append(np.zeros(12001)); vBEC_List.append(0); xBEC_List.append(0)
-            Tot_EnVals_List.append(0); Kin_EnVals_List.append(0); MF_EnVals_List.append(0); DA_Vals_List.append(0)
+            Tot_EnVals_List.append(0); Kin_EnVals_List.append(0); MF_EnVals_List.append(0); DA_Vals_List.append(0); A_PP_List.append(0)
             continue
         aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
@@ -107,6 +107,11 @@ if __name__ == "__main__":
         V_List.append(V)
         vBEC_List.append(vBEC_conv)
         xBEC_List.append(xBEC_conv)
+        if 'A_PP' in qds.data_vars:
+            A_PP_List.append(qds['A_PP'].values)
+        else:
+            A_PP_List.append(np.zeros(tVals.size))
+
 
         # # Compute/compare polaron potential
 
@@ -242,5 +247,9 @@ if __name__ == "__main__":
         # # ax4.plot(tVals, MF_EnVals_List[inda], label='MF')
         # ax4.plot(tVals, DA_Vals_List[inda])
         # ax4.legend()
+
+        fig5, ax5 = plt.subplots()
+        ax5.plot(tVals, A_PP_List[inda])
+        ax5.legend()
 
         plt.show()
