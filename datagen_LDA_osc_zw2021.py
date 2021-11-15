@@ -10,7 +10,7 @@ import sys
 from copy import deepcopy
 # import matplotlib
 # import matplotlib.pyplot as plt
-from mpmath import polylog
+# from mpmath import polylog
 
 if __name__ == "__main__":
 
@@ -98,29 +98,29 @@ if __name__ == "__main__":
     mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi))
 
-    # Compute chemical potential of the K gas
+    # # Compute chemical potential of the K gas
 
-    # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
-    # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
-    # print(mu_K / (2 * np.pi) * 1e-6)
+    # # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
+    # # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
+    # # print(mu_K / (2 * np.pi) * 1e-6)
 
-    from scipy.optimize import root_scalar
+    # from scipy.optimize import root_scalar
 
-    def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
-        mu = hbar * mu_div_hbar
-        beta = 1 / (kB * T)
-        prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
-        return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
+    # def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
+    #     mu = hbar * mu_div_hbar
+    #     beta = 1 / (kB * T)
+    #     prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
+    #     return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
 
-    mu_div_hbar_List = []
-    for indw, wy in enumerate(omega_K):
-        muScale = 2 * np.pi * 1e3
-        # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
-        def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
-        sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
-        # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
-        mu_div_hbar_List.append(sol.root)
-    # print(mu_div_hbar_List)
+    # mu_div_hbar_List = []
+    # for indw, wy in enumerate(omega_K):
+    #     muScale = 2 * np.pi * 1e3
+    #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
+    #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
+    #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
+    #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
+    #     mu_div_hbar_List.append(sol.root)
+    # # print(mu_div_hbar_List)
 
     # Basic parameters
 
