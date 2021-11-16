@@ -303,6 +303,22 @@ def F_Imp_trap_gaussian(X, gaussian_amp, gaussian_width):
     return (gaussian_amp / (gaussian_width**2)) * X * np.exp(-1 * (X**2) / (2 * gaussian_width**2))
 
 
+def U_ODT1(x, y, A_ODT1, wx_ODT1, wy_ODT1):
+    return A_ODT1 * np.exp(-1 * (x / (np.sqrt(2) * wx_ODT1))**2) * np.exp(-1 * (y / (np.sqrt(2) * wy_ODT1))**2)
+
+
+def U_ODT2(x, z, A_ODT2, wx_ODT2, wz_ODT2):
+    return A_ODT2 * np.exp(-1 * (x / (np.sqrt(2) * wx_ODT2))**2) * np.exp(-1 * (z / (np.sqrt(2) * wz_ODT2))**2)
+
+
+def U_TiSa(x, y, A_TiSa, wx_TiSa, wy_TiSa):
+    return A_TiSa * np.exp(-1 * (x / (np.sqrt(2) * wx_TiSa))**2) * np.exp(-1 * (y / (np.sqrt(2) * wy_TiSa))**2)
+
+
+def U_tot(x, y, z, A_ODT1, wx_ODT1, wy_ODT1, A_ODT2, wx_ODT2, wz_ODT2, A_TiSa, wx_TiSa, wy_TiSa):
+    return U_ODT1(x, y, A_ODT1, wx_ODT1, wy_ODT1) + U_ODT2(x, z, A_ODT2, wx_ODT2, wz_ODT2) + U_TiSa(x, y, A_TiSa, wx_TiSa, wy_TiSa)
+
+
 # ---- OTHER FUNCTIONS ----
 
 
@@ -618,6 +634,16 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     omega_Imp_x = trapParams['omega_Imp_x']
     gaussian_amp = trapParams['gaussian_amp']
     gaussian_width = trapParams['gaussian_width']
+
+    # import matplotlib
+    # import matplotlib.pyplot as plt
+    # print(-1 * mI * (omega_Imp_x**2), (gaussian_amp / (gaussian_width**2)))
+    # X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 1, trapParams['RTF_BEC'] * 1, 100)
+    # fig, ax = plt.subplots()
+    # ax.plot(X_Vals, F_Imp_trap_harmonic(X_Vals, omega_Imp_x, mI), label='Harmonic')
+    # ax.plot(X_Vals, F_Imp_trap_gaussian(X_Vals, gaussian_amp, gaussian_width), label='Gaussian')
+    # ax.legend()
+    # plt.show()
 
     if toggleDict['ImpTrap_Type'] == 'harmonic':
         LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap_harmonic(X, omega_Imp_x, mI)

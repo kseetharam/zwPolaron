@@ -43,8 +43,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 6000; dt = 0.5
-    # tMax = 500; dt = 0.5
+    # tMax = 6000; dt = 0.5
+    tMax = 500; dt = 0.5
     # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
@@ -58,6 +58,9 @@ if __name__ == "__main__":
     print('NGridPoints: {0}'.format(NGridPoints))
 
     # Experimental params
+
+    expParams = pf_dynamic_sph.Zw_expParams_2021()
+    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
     kB = 1.38064852e-23  # Boltzmann constant in J/K
     hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
@@ -83,7 +86,7 @@ if __name__ == "__main__":
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
     omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
     omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]  # in rad*Hz
-    # print(omega_K / (2 * np.pi))
+    print(omega_K / (2 * np.pi))
     omega_x_K = 2 * np.pi * 141; omega_y_K = 2 * np.pi * 130; omega_z_K = 2 * np.pi * 15  # should get more accurate estimate for omega_x_K
 
     K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])  # in um/ms
@@ -97,6 +100,20 @@ if __name__ == "__main__":
     T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
     mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi))
+
+    # Optical trap experimental parameters (for K gas)
+
+    A_ODT1_uK = -4.25; A_ODT2_uK = -3.44; A_TiSa_uK = -6.9  # Amplitude of each gaussian beam in uK
+    A_ODT1_Hz = kB * A_ODT1_uK * 1e-6 / hbar / (2 * np.pi); A_ODT2_Hz = kB * A_ODT2_uK * 1e-6 / hbar / (2 * np.pi); A_TiSa_Hz = kB * A_TiSa_uK * 1e-6 / hbar / (2 * np.pi)  # Amplitude of each gaussian beam in Hz
+    wx_ODT1 = 82; wy_ODT1 = 82  # beam waists of ODT1 in um
+    ep_ODT2 = 4  # ellipticity of ODT2 beam
+    wx_ODT2 = 144; wz_ODT2 = wx_ODT2 / ep_ODT2  # beam waists of ODT2 in um
+    wx_TiSa = 96 / 2.03; wy_TiSa = 96 / 2.03  # beam waists of TiSa in um
+
+    def omega_K_gaussian_approx(wy):
+        return np.sqrt((-1) * hbar * 2 * np.pi * A_TiSa_Hz / (expParams['mI'] * (wy * 1e-6)**2))
+
+    print(omega_K_gaussian_approx(wy_TiSa) / (2 * np.pi))
 
     # # Compute chemical potential of the K gas
 
@@ -123,9 +140,6 @@ if __name__ == "__main__":
     # # print(mu_div_hbar_List)
 
     # Basic parameters
-
-    expParams = pf_dynamic_sph.Zw_expParams_2021()
-    L_exp2th, M_exp2th, T_exp2th = pf_dynamic_sph.unitConv_exp2th(expParams['n0_BEC_scale'], expParams['mB'])
 
     n0 = n0_BEC / (L_exp2th**3)  # converts peak BEC density (for each interaction strength) to theory units
     mB = expParams['mB'] * M_exp2th  # should = 1
@@ -216,8 +230,8 @@ if __name__ == "__main__":
 
     omega_Imp_x = omega_K / T_exp2th
 
-    gaussian_amp = 1 * np.ones(aIBexp_Vals.size)
-    gaussian_width = 1 * np.ones(aIBexp_Vals.size)
+    gaussian_amp = 2 * np.pi * A_TiSa_Hz / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
+    gaussian_width = wy_TiSa * 1e-6 * L_exp2th
 
     a0_exp = 5.29e-11  # Bohr radius (m)
     aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
@@ -226,8 +240,8 @@ if __name__ == "__main__":
 
     # Create dicts
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'harmonic', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'smarter'}
+    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'gaussian', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'naive'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -259,55 +273,55 @@ if __name__ == "__main__":
     for ind, aIBi in enumerate(aIBi_Vals):
         sParams = [mI, mB, n0[ind], gBB]
         den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
-        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width[ind], 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
+        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp, 'gaussian_width': gaussian_width, 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
         filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 
     # print(len(jobList))
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-    # for ind, tup in enumerate(jobList):
-    #     if ind != 2:
-    #         continue
-    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-    #     loopstart = timer()
-    #     (aIBi, sParams, trapParams, filepath) = tup
-    #     cParams = {'aIBi': aIBi}
-    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    #     ds.to_netcdf(filepath)
-
-    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
-
-    #     x0 = ds['X'].values[0] * 1e6 / L_exp2th
-    #     print(K_relPos[ind], K_displacement[ind], x0)
-
-    #     loopend = timer()
-    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
-
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # taskCount = len(jobList); taskID = 4
-
-    if(taskCount > len(jobList)):
-        print('ERROR: TASK COUNT MISMATCH')
-        sys.exit()
-    else:
-        tup = jobList[taskID]
+    for ind, tup in enumerate(jobList):
+        if ind != 2:
+            continue
+        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+        loopstart = timer()
         (aIBi, sParams, trapParams, filepath) = tup
+        cParams = {'aIBi': aIBi}
+        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+        ds.to_netcdf(filepath)
 
-    cParams = {'aIBi': aIBi}
-    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    ds.to_netcdf(filepath)
+        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
+        x0 = ds['X'].values[0] * 1e6 / L_exp2th
+        print(K_relPos[ind], K_displacement[ind], x0)
+
+        loopend = timer()
+        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     end = timer()
-    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # # taskCount = len(jobList); taskID = 4
+
+    # if(taskCount > len(jobList)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     sys.exit()
+    # else:
+    #     tup = jobList[taskID]
+    #     (aIBi, sParams, trapParams, filepath) = tup
+
+    # cParams = {'aIBi': aIBi}
+    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    # ds.to_netcdf(filepath)
+
+    # end = timer()
+    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
