@@ -300,19 +300,19 @@ def F_Imp_trap_harmonic(X, omega_Imp_x, mI):
 
 def F_Imp_trap_gaussian(X, gaussian_amp, gaussian_width):
     # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
-    return (gaussian_amp / (gaussian_width**2)) * X * np.exp(-1 * (X**2) / (2 * gaussian_width**2))
+    return 4 * (gaussian_amp / (gaussian_width**2)) * X * np.exp(-2 * (X / gaussian_width)**2)
 
 
 def U_ODT1(x, y, A_ODT1, wx_ODT1, wy_ODT1):
-    return A_ODT1 * np.exp(-1 * (x / (np.sqrt(2) * wx_ODT1))**2) * np.exp(-1 * (y / (np.sqrt(2) * wy_ODT1))**2)
+    return A_ODT1 * np.exp(-2 * (x / wx_ODT1)**2) * np.exp(-2 * (y / wy_ODT1)**2)
 
 
 def U_ODT2(x, z, A_ODT2, wx_ODT2, wz_ODT2):
-    return A_ODT2 * np.exp(-1 * (x / (np.sqrt(2) * wx_ODT2))**2) * np.exp(-1 * (z / (np.sqrt(2) * wz_ODT2))**2)
+    return A_ODT2 * np.exp(-2 * (x / wx_ODT2)**2) * np.exp(-2 * (z / wz_ODT2)**2)
 
 
 def U_TiSa(x, y, A_TiSa, wx_TiSa, wy_TiSa):
-    return A_TiSa * np.exp(-1 * (x / (np.sqrt(2) * wx_TiSa))**2) * np.exp(-1 * (y / (np.sqrt(2) * wy_TiSa))**2)
+    return A_TiSa * np.exp(-2 * (x / wx_TiSa)**2) * np.exp(-2 * (y / wy_TiSa)**2)
 
 
 def U_tot(x, y, z, A_ODT1, wx_ODT1, wy_ODT1, A_ODT2, wx_ODT2, wz_ODT2, A_TiSa, wx_TiSa, wy_TiSa):
@@ -685,6 +685,8 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     XLab_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     A_PP_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    F_PP_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    F_impTrap_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -702,7 +704,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
         X_da[ind] = cs.get_impPos()
         XLab_da[ind] = cs.get_impPos() + x_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc)
 
-        # Compute time-varying amplitude of 'smarter' polaron potential
+        # Compute time-varying amplitude of 'smarter' polaron potential. Also compute force from smarter polaron potential and bare impurity trap potential at each step
         amplitude = cs.get_Amplitude()
         amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
         n = interpolate.splev(X_da[ind], nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
@@ -712,6 +714,9 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
         eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_g) * amp_re, dVk); eta3 = np.dot((Wk_grid / omegak_g) * amp_im, dVk)
         xp_re = 0.5 * np.dot(Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(Wki_grid * amp_im, dVk)
         A_PP_da[ind] = gnum * (1 + 2 * xp_re / n) + gBB * eta1 - gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
+        dndx = interpolate.splev(X_da[ind], nBEC_tck, der=1)
+        F_PP_da[ind] = -1 * A_PP_da[ind] * dndx
+        F_impTrap_da[ind] = LDA_funcs['F_Imp_trap'](XLab_da[ind])
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
@@ -721,7 +726,7 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
 
     # Create Data Set
 
-    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da, 'A_PP': A_PP_da}
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'P': P_da, 'X': X_da, 'XLab': XLab_da, 'V': V_da, 'A_PP': A_PP_da, 'F_PP': F_PP_da, 'F_impTrap': F_impTrap_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'gamma_BEC_osc': gamma_BEC_osc, 'phi_BEC_osc': phi_BEC_osc, 'amp_BEC_osc': amp_BEC_osc, 'X0': X0, 'P0': P0, 'omega_Imp_x': omega_Imp_x}
 

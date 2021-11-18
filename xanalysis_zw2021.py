@@ -67,7 +67,9 @@ if __name__ == "__main__":
     # aIBList = [-375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-500, -375]
-    aIBList = [-500]
+    # aIBList = [-500]
+    # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0]
+    aIBList = [20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = aIBexp_Vals
 
     qds_List = []
@@ -111,7 +113,6 @@ if __name__ == "__main__":
             A_PP_List.append(qds['A_PP'].values)
         else:
             A_PP_List.append(np.zeros(tVals.size))
-
 
         # # Compute/compare polaron potential
 
@@ -229,6 +230,10 @@ if __name__ == "__main__":
         ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
         ax2.legend()
 
+        fig5, ax5 = plt.subplots()
+        ax5.plot(tVals, A_PP_List[inda])
+        ax5.legend()
+
         fig, ax = plt.subplots()
         ax.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
         ax.plot(tVals, V_List[inda], label='Simulation')
@@ -247,9 +252,5 @@ if __name__ == "__main__":
         # # ax4.plot(tVals, MF_EnVals_List[inda], label='MF')
         # ax4.plot(tVals, DA_Vals_List[inda])
         # ax4.legend()
-
-        fig5, ax5 = plt.subplots()
-        ax5.plot(tVals, A_PP_List[inda])
-        ax5.legend()
 
         plt.show()

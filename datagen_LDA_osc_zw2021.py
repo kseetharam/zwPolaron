@@ -43,8 +43,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # tMax = 6000; dt = 0.5
-    tMax = 500; dt = 0.5
+    tMax = 6000; dt = 0.5
+    # tMax = 500; dt = 0.5
     # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
@@ -86,7 +86,6 @@ if __name__ == "__main__":
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
     omega_K_scale = np.mean(omega_K_raw[6:11] / omega_Na[6:11])
     omega_K = deepcopy(omega_K_raw); omega_K[0:6] = omega_K_scale * omega_Na[0:6]; omega_K[11::] = omega_K_scale * omega_Na[11::]  # in rad*Hz
-    print(omega_K / (2 * np.pi))
     omega_x_K = 2 * np.pi * 141; omega_y_K = 2 * np.pi * 130; omega_z_K = 2 * np.pi * 15  # should get more accurate estimate for omega_x_K
 
     K_relVel = np.array([1.56564660488838, 1.31601642026105, 0.0733613860991014, 1.07036861258786, 1.22929932184982, -13.6137940945403, 0.0369377794311800, 1.61258456681232, -1.50457700049200, -1.72583008593939, 4.11884512615162, 1.04853747806043, -0.352830359266360, -4.00683426531578, 0.846101589896479, -0.233660196108278, 4.82122627459411, -1.04341939663180])  # in um/ms
@@ -103,17 +102,36 @@ if __name__ == "__main__":
 
     # Optical trap experimental parameters (for K gas)
 
-    A_ODT1_uK = -4.25; A_ODT2_uK = -3.44; A_TiSa_uK = -6.9  # Amplitude of each gaussian beam in uK
+    A_ODT1_uK = -4.25; A_ODT2_uK = -3.44
+    # A_TiSa_uK = -6.9  # Amplitude of each gaussian beam in uK
+    A_TiSa_uK = -6.97  # Amplitude of each gaussian beam in uK
     A_ODT1_Hz = kB * A_ODT1_uK * 1e-6 / hbar / (2 * np.pi); A_ODT2_Hz = kB * A_ODT2_uK * 1e-6 / hbar / (2 * np.pi); A_TiSa_Hz = kB * A_TiSa_uK * 1e-6 / hbar / (2 * np.pi)  # Amplitude of each gaussian beam in Hz
     wx_ODT1 = 82; wy_ODT1 = 82  # beam waists of ODT1 in um
     ep_ODT2 = 4  # ellipticity of ODT2 beam
     wx_ODT2 = 144; wz_ODT2 = wx_ODT2 / ep_ODT2  # beam waists of ODT2 in um
-    wx_TiSa = 96 / 2.03; wy_TiSa = 96 / 2.03  # beam waists of TiSa in um
+    wx_TiSa = 95; wy_TiSa = 95  # beam waists of TiSa in um
 
-    def omega_K_gaussian_approx(wy):
-        return np.sqrt((-1) * hbar * 2 * np.pi * A_TiSa_Hz / (expParams['mI'] * (wy * 1e-6)**2))
+    # def omega_gaussian_approx(A, m):
+    #     return np.sqrt((-4) * hbar * 2 * np.pi * A / (m * (wy_TiSa * 1e-6)**2))
 
-    print(omega_K_gaussian_approx(wy_TiSa) / (2 * np.pi))
+    # A_TiSa_uK_Na = -1.39; A_TiSa_Hz_Na = kB * A_TiSa_uK_Na * 1e-6 / hbar / (2 * np.pi)
+    # # scale_fac = np.array([0.9724906988829373, 0.8896535250404035, 0.9569791653444897, 1.0382627423131257, 0.903699258873818, 0.971557704172668, 0.9505698121511785, 0.9689281438661883, 0.9716029799261697, 0.9970638982528262, 0.9970576906401939, 1.00494970248614, 0.9280067282060056, 0.9078274542675744, 0.9781498957395225, 0.9939697862098377, 1.0630900294469736, 0.9278113852604492])
+    # # A_TiSa_Hz = A_TiSa_Hz * scale_fac
+    # # A_TiSa_Hz_Na = A_TiSa_Hz_Na * scale_fac
+    # print(omega_K / (2 * np.pi))
+    # print(omega_gaussian_approx(A_TiSa_Hz, expParams['mI']) / (2 * np.pi))
+    # print(omega_Na / (2 * np.pi))
+    # print(omega_gaussian_approx(A_TiSa_Hz_Na, expParams['mB']) / (2 * np.pi))
+
+    # # from scipy.optimize import root_scalar
+    # # sf_List = []
+    # # for indw, wy in enumerate(omega_Na):
+    # #     muScale = 2 * np.pi * 1e3
+    # #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
+    # #     def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Hz_Na, expParams['mB']) - wy)
+    # #     sol = root_scalar(f, bracket=[0.5, 1.5], method='brentq')
+    # #     sf_List.append(sol.root)
+    # # print(sf_List)
 
     # # Compute chemical potential of the K gas
 
@@ -240,8 +258,8 @@ if __name__ == "__main__":
 
     # Create dicts
 
-    toggleDict = {'Location': 'personal', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
-                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'gaussian', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'naive'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Interaction': 'on', 'InitCS': 'steadystate', 'InitCS_datapath': '', 'Coupling': 'twophonon', 'Grid': 'spherical',
+                  'F_ext': 'off', 'PosScat': 'off', 'BEC_density': 'on', 'BEC_density_osc': 'on', 'Imp_trap': 'on', 'ImpTrap_Type': 'gaussian', 'CS_Dyn': 'on', 'Polaron_Potential': 'on', 'PP_Type': 'smarter'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -279,49 +297,49 @@ if __name__ == "__main__":
 
     # print(len(jobList))
 
-    # ---- COMPUTE DATA ON COMPUTER ----
-
-    runstart = timer()
-    for ind, tup in enumerate(jobList):
-        if ind != 2:
-            continue
-        print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
-        loopstart = timer()
-        (aIBi, sParams, trapParams, filepath) = tup
-        cParams = {'aIBi': aIBi}
-        ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-        ds.to_netcdf(filepath)
-
-        # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
-        # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
-
-        x0 = ds['X'].values[0] * 1e6 / L_exp2th
-        print(K_relPos[ind], K_displacement[ind], x0)
-
-        loopend = timer()
-        print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
-    end = timer()
-    print('Total Time: {:.2f}'.format(end - runstart))
-
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
-
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    # # taskCount = len(jobList); taskID = 4
-
-    # if(taskCount > len(jobList)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     sys.exit()
-    # else:
-    #     tup = jobList[taskID]
+    # for ind, tup in enumerate(jobList):
+    #     if ind != 1:
+    #         continue
+    #     print('aIB: {0}a0'.format(aIBexp_Vals[ind]))
+    #     loopstart = timer()
     #     (aIBi, sParams, trapParams, filepath) = tup
+    #     cParams = {'aIBi': aIBi}
+    #     ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    #     ds.to_netcdf(filepath)
 
-    # cParams = {'aIBi': aIBi}
-    # ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
-    # ds.to_netcdf(filepath)
+    #     # v0 = ds['V'].values[0] * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+    #     # print(v0_imp[ind], K_relVel[ind], v0, K_relVel[ind] / v0)
 
+    #     x0 = ds['X'].values[0] * 1e6 / L_exp2th
+    #     print(K_relPos[ind], K_displacement[ind], x0)
+
+    #     loopend = timer()
+    #     print('aIBi: {:.2f}, Time: {:.2f}'.format(aIBi, loopend - loopstart))
     # end = timer()
-    # print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
+    # print('Total Time: {:.2f}'.format(end - runstart))
+
+    # ---- COMPUTE DATA ON CLUSTER ----
+
+    runstart = timer()
+
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = len(jobList); taskID = 4
+
+    if(taskCount > len(jobList)):
+        print('ERROR: TASK COUNT MISMATCH')
+        sys.exit()
+    else:
+        tup = jobList[taskID]
+        (aIBi, sParams, trapParams, filepath) = tup
+
+    cParams = {'aIBi': aIBi}
+    ds = pf_dynamic_sph.zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict)
+    ds.to_netcdf(filepath)
+
+    end = timer()
+    print('Task ID: {:d}, aIBi: {:.2f}, Time: {:.2f}'.format(taskID, aIBi, end - runstart))
