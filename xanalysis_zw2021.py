@@ -39,9 +39,9 @@ if __name__ == "__main__":
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/NoPolPot'
 
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/naivePP'
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/naivePP'
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP'
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP'
 
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
 
@@ -63,13 +63,13 @@ if __name__ == "__main__":
 
     # Load simulation data
 
-    # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-500, -375]
     # aIBList = [-500]
     # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0]
-    aIBList = [20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    # aIBList = [20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = aIBexp_Vals
 
     qds_List = []
@@ -77,11 +77,11 @@ if __name__ == "__main__":
     vBEC_List = []
     xBEC_List = []
     varname_List = []
-    Tot_EnVals_List = []; Kin_EnVals_List = []; MF_EnVals_List = []; DA_Vals_List = []; A_PP_List = []
+    Tot_EnVals_List = []; Kin_EnVals_List = []; MF_EnVals_List = []; DA_Vals_List = []; A_PP_List = []; F_PP_List = []; F_impTrap_List = []
     for inda in np.arange(18):
         if aIBexp_Vals[inda] not in aIBList:
             qds_List.append(0); V_List.append(np.zeros(12001)); vBEC_List.append(0); xBEC_List.append(0)
-            Tot_EnVals_List.append(0); Kin_EnVals_List.append(0); MF_EnVals_List.append(0); DA_Vals_List.append(0); A_PP_List.append(0)
+            Tot_EnVals_List.append(0); Kin_EnVals_List.append(0); MF_EnVals_List.append(0); DA_Vals_List.append(0); A_PP_List.append(0); F_PP_List.append(0); F_impTrap_List.append(0)
             continue
         aIB = aIBexp_Vals[inda]; print('aIB: {0}a0'.format(aIB))
 
@@ -113,6 +113,14 @@ if __name__ == "__main__":
             A_PP_List.append(qds['A_PP'].values)
         else:
             A_PP_List.append(np.zeros(tVals.size))
+        if 'F_PP' in qds.data_vars:
+            F_PP_List.append(qds['F_PP'].values)
+        else:
+            F_PP_List.append(np.zeros(tVals.size))
+        if 'F_impTrap' in qds.data_vars:
+            F_impTrap_List.append(qds['F_impTrap'].values)
+        else:
+            F_impTrap_List.append(np.zeros(tVals.size))
 
         # # Compute/compare polaron potential
 
@@ -233,6 +241,13 @@ if __name__ == "__main__":
         fig5, ax5 = plt.subplots()
         ax5.plot(tVals, A_PP_List[inda])
         ax5.legend()
+
+        fig6, ax6 = plt.subplots()
+        ax6.plot(tVals, F_PP_List[inda], label='PP')
+        ax6.plot(tVals, F_impTrap_List[inda], label='Trap')
+        ax6.plot(tVals, F_PP_List[inda] + F_impTrap_List[inda], label='Total')
+        ax6.legend()
+        ax6.legend()
 
         fig, ax = plt.subplots()
         ax.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
