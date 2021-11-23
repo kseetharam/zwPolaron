@@ -224,11 +224,11 @@ if __name__ == "__main__":
         ax0.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
         ax0.legend()
 
-        fig1, ax1 = plt.subplots()
-        ax1.plot(tVals, xBEC_List[inda])
-        ax1.set_ylabel(r'BEC position ($\mu$m)')
-        ax1.set_xlabel(r'Time (ms)')
-        ax1.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        # fig1, ax1 = plt.subplots()
+        # ax1.plot(tVals, xBEC_List[inda])
+        # ax1.set_ylabel(r'BEC position ($\mu$m)')
+        # ax1.set_xlabel(r'Time (ms)')
+        # ax1.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
 
         fig2, ax2 = plt.subplots()
         ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')

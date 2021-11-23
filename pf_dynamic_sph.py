@@ -635,15 +635,15 @@ def zw2021_quenchDynamics(cParams, gParams, sParams, trapParams, toggleDict):
     gaussian_amp = trapParams['gaussian_amp']
     gaussian_width = trapParams['gaussian_width']
 
-    # import matplotlib
-    # import matplotlib.pyplot as plt
-    # print(-1 * mI * (omega_Imp_x**2), (gaussian_amp / (gaussian_width**2)))
-    # X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 1, trapParams['RTF_BEC'] * 1, 100)
-    # fig, ax = plt.subplots()
-    # ax.plot(X_Vals, F_Imp_trap_harmonic(X_Vals, omega_Imp_x, mI), label='Harmonic')
-    # ax.plot(X_Vals, F_Imp_trap_gaussian(X_Vals, gaussian_amp, gaussian_width), label='Gaussian')
-    # ax.legend()
-    # plt.show()
+    import matplotlib
+    import matplotlib.pyplot as plt
+    print(-1 * mI * (omega_Imp_x**2), (gaussian_amp / (gaussian_width**2)))
+    X_Vals = np.linspace(-1 * trapParams['RTF_BEC'] * 1, trapParams['RTF_BEC'] * 1, 100)
+    fig, ax = plt.subplots()
+    ax.plot(X_Vals, F_Imp_trap_harmonic(X_Vals, omega_Imp_x, mI), label='Harmonic')
+    ax.plot(X_Vals, F_Imp_trap_gaussian(X_Vals, gaussian_amp, gaussian_width), label='Gaussian')
+    ax.legend()
+    plt.show()
 
     if toggleDict['ImpTrap_Type'] == 'harmonic':
         LDA_funcs['F_Imp_trap'] = lambda X: F_Imp_trap_harmonic(X, omega_Imp_x, mI)
