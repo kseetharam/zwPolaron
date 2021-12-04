@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     tMax = 6000; dt = 0.5
     # tMax = 500; dt = 0.5
-    # tMax = 900; dt = 0.5
     # tMax = 0.5; dt = 0.5
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -72,12 +71,6 @@ if __name__ == "__main__":
     K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
     K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
     K_relPos = K_displacement - Na_displacement   # in um
-    # print('init ', K_relPos[0])
-    # K_relPos[0] = 0
-
-    # K_relPos[0] = -15
-    # K_relPos[1] = -15
-    # K_relPos[2] = -7
 
     omega_Na = np.array([465.418650581347, 445.155256942448, 461.691943131414, 480.899902898451, 448.655522184374, 465.195338759998, 460.143258369460, 464.565377197007, 465.206177963899, 471.262139163205, 471.260672147216, 473.122081065092, 454.649394420577, 449.679107889662, 466.770887179217, 470.530355145510, 486.615655444221, 454.601540658640])   # in rad*Hz
     omega_K_raw = np.array([764.649207995890, 829.646158322623, 799.388442120805, 820.831266284088, 796.794204312379, 810.331402280747, 803.823888714144, 811.210511844489, 817.734286423120, 809.089608774626, 807.885837386121, 808.334196591376, 782.788534907910, 756.720677755942, 788.446619623011, 791.774719564856, 783.194731826180, 754.641677886382])   # in rad*Hz
@@ -113,28 +106,9 @@ if __name__ == "__main__":
         return np.sqrt((-4) * hbar * 2 * np.pi * A / (m * (wy_TiSa * 1e-6)**2))
 
     A_TiSa_uK_Na = -1.39; A_TiSa_Hz_Na = kB * A_TiSa_uK_Na * 1e-6 / hbar / (2 * np.pi)
-    # scale_fac = np.array([0.9724906988829373, 0.8896535250404035, 0.9569791653444897, 1.0382627423131257, 0.903699258873818, 0.971557704172668, 0.9505698121511785, 0.9689281438661883, 0.9716029799261697, 0.9970638982528262, 0.9970576906401939, 1.00494970248614, 0.9280067282060056, 0.9078274542675744, 0.9781498957395225, 0.9939697862098377, 1.0630900294469736, 0.9278113852604492])  # fitting the optical trap depth to the BEC oscillation frequencies
     scale_fac = np.array([0.9098942227264171, 1.0711547907567265, 0.9944481656421021, 1.04851392615919, 0.988004117284517, 1.0218608482400438, 1.0055142714988736, 1.0240792367395755, 1.0406168082344183, 1.018731343774692, 1.0157022420144592, 1.0168299405019399, 0.953576047729171, 0.8911229411671369, 0.9674109805434324, 0.9755952647681828, 0.9545659450817384, 0.8862331593152922])  # fitting the optical trap depth to the BEC oscillation frequencies
     A_TiSa_Hz_scaled = A_TiSa_Hz * scale_fac
     A_TiSa_Hz_Na_scaled = A_TiSa_Hz_Na * scale_fac
-    
-    # print(omega_K / (2 * np.pi))
-    # print(omega_gaussian_approx(A_TiSa_Hz, expParams['mI']) / (2 * np.pi))
-    # print(omega_gaussian_approx(A_TiSa_Hz_scaled, expParams['mI']) / (2 * np.pi))
-    # print(omega_Na / (2 * np.pi))
-    # print(omega_gaussian_approx(A_TiSa_Hz_Na, expParams['mB']) / (2 * np.pi))
-    # print(omega_gaussian_approx(A_TiSa_Hz_Na_scaled, expParams['mB']) / (2 * np.pi))
-
-    # from scipy.optimize import root_scalar
-    # sf_List = []
-    # omega_fit = omega_K
-    # # omega_fit = omega_Na
-    # for indw, wy in enumerate(omega_fit):
-    #     def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Hz, expParams['mI']) - wy)
-    #     # def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Hz_Na, expParams['mB']) - wy)
-    #     sol = root_scalar(f, bracket=[0.5, 1.5], method='brentq')
-    #     sf_List.append(sol.root)
-    # print(sf_List)
 
     # # Compute chemical potential of the K gas
 
@@ -176,68 +150,10 @@ if __name__ == "__main__":
     print(1e3 * tgrid[-1] / T_exp2th)
     # print(c_BEC_um_Per_ms)
 
-    # # # Create density splines
-
-    # from scipy import interpolate
-    # yMat = loadmat('zwData/yMat_InMuM.mat')['yMat']  # grid of positions in the BEC oscillation direction ranging from -4*R_TF to +4*R_TF for each interaction strength (given in in um)
-    # densityMat = loadmat('zwData/densityMat_InM-3.mat')['densityMat']  # BEC density for each experimentally measured interaction strength evaluated at each position in yMat (given in in m^(-3))
-    # yMat_th = yMat * 1e-6 * L_exp2th  # converts grid positions from um to m and then converts to theory units
-    # densityMat_th = densityMat / (L_exp2th**3)  # converts BEC density arrays (for each interaction strength) to theory units
-
-    # # for ind, aIB_exp in enumerate(aIBexp_Vals):
-    # #     den_tck = interpolate.splrep(yMat_th[ind, :], densityMat_th[ind, :], s=0)
-    # #     np.save('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), den_tck)
-
-    # import matplotlib
-    # import matplotlib.pyplot as plt
-    # yMat_th_interp = np.zeros((18, 1000))
-    # densityMat_th_interp = np.zeros((18, 1000))
-    # fig, ax = plt.subplots()
-    # for ind, aIB_exp in enumerate(aIBexp_Vals):
-    #     den_tck_load = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIB_exp), allow_pickle=True)
-    #     yMat_th_interp[ind, :] = np.linspace(yMat_th[ind, 0], yMat_th[ind, -1], 1000)
-    #     densityMat_th_interp[ind, :] = interpolate.splev(yMat_th_interp[ind, :], den_tck_load)
-    #     ax.plot(1e6 * yMat_th_interp[ind, :] / L_exp2th, densityMat_th_interp[ind, :] * (L_exp2th**3), label='{0}'.format(aIB_exp))
-    # ax.legend()
-    # plt.show()
-
-    # # # Create thermal distribution of initial conditions
-
-    # from arspy.ars import adaptive_rejection_sampling as ars
-    # import matplotlib.pyplot as plt
-
-    # # gaussian_logpdf = lambda x, sigma=1: np.log(np.exp(-x ** 2 / sigma))
-    # # a, b = -2, 2  # a < b must hold
-    # # domain = (float("-inf"), float("inf"))
-    # # n_samples = 10000
-    # # samples = ars(logpdf=gaussian_logpdf, a=a, b=b, domain=domain, n_samples=n_samples)
-    # # print(np.isclose(np.mean(samples), 0.0, atol=1e-02))
-    # # print(np.min(samples), np.max(samples))
-
-    # # plt.hist(samples, bins=1000)
-    # # plt.show()
-
-    # def Vho_3D(x, y, z, omega_x, omega_y, omega_z, mI):
-    #     return (mI / 2) * ((omega_x * x)**2 + (omega_y * y)**2 + (omega_z * z)**2)
-
-    # def log_f_3D(x, y, z, px, py, pz, mI, mu, Vpot, T):
-    #     return -1 * np.log(1 + np.exp(((px**2 + py**2 + pz**2) / (2 * mI) + Vpot(x, y, z) - mu) / (kB * T)))
-
-    # def log_fxp_1D_slice(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fx_1D_slice(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fxp_1D_int(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fx_1D_int(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
     # Convert experimental parameters to theory parameters
 
-    x0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
+    x0_imp = np.zeros(aIBexp_Vals.size)
+    y0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
     v0_imp = K_relVel * (1e-6 / 1e-3) * (L_exp2th / T_exp2th)  # initial velocities of impurity in BEC frame (relative to BEC)
     RTF_BEC = RTF_BEC_Y * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
 
@@ -245,13 +161,9 @@ if __name__ == "__main__":
     gamma_BEC_osc = gamma_Na / T_exp2th
     phi_BEC_osc = phi_Na
     amp_BEC_osc = (Na_displacement * 1e-6 * L_exp2th) / np.cos(phi_Na)  # BEC oscillation amplitude (carries units of position)
-    # print(amp_BEC_osc[0])
-    # amp_BEC_osc[0] = 0.15 * amp_BEC_osc[0]
-    # print(amp_BEC_osc[0])
 
-    omega_Imp_x = omega_K / T_exp2th
+    omega_Imp_y = omega_K / T_exp2th
 
-    # gaussian_amp = 2 * np.pi * A_TiSa_Hz * np.ones(aIBexp_Vals) / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
     gaussian_amp = 2 * np.pi * A_TiSa_Hz_scaled / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
     gaussian_width = wy_TiSa * 1e-6 * L_exp2th
 
@@ -259,6 +171,8 @@ if __name__ == "__main__":
     aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
 
     P0_scaleFactor = np.array([1.2072257743801846, 1.1304777274446096, 1.53, 1.0693683091221053, 1.0349159867400886, 0.95, 2.0, 1.021253131703251, 0.9713134192266438, 0.9781007832739641, 1.0103135855263197, 1.0403095335853234, 0.910369833990368, 0.9794720983829749, 1.0747443076336567, 0.79, 1.0, 0.8127830658214898])  # scales the momentum of the initial polaron state (scaleFac * mI * v0) so that the initial impurity velocity matches the experiment. aIB= -125a0 and +750a0 have ~8% and ~20% error respectively
+
+    P0_imp = P0_scaleFactor * mI * v0_imp
 
     # Create dicts
 
@@ -294,8 +208,8 @@ if __name__ == "__main__":
     jobList = []
     for ind, aIBi in enumerate(aIBi_Vals):
         sParams = [mI, mB, n0[ind], gBB]
-        den_tck = np.load('zwData/densitySplines/X=0/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
-        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width, 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
+        den_tck = np.load('zwData/densitySplines//nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
+        trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_y': omega_Imp_y[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width, 'X0':x0_imp[ind], 'Y0': y0_imp[ind], 'P0': P0_imp[ind]}
         filepath = innerdatapath + '/aIB_{0}a0.nc'.format(aIBexp_Vals[ind])
         jobList.append((aIBi, sParams, trapParams, filepath))
 

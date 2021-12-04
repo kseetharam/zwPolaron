@@ -232,7 +232,9 @@ if __name__ == "__main__":
 
         fig2, ax2 = plt.subplots()
         ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
-        ax2.fill_between(tVals_exp, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
+        ax2.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
+        ax2.hlines(-3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
+        ax2.hlines(3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
         ax2.set_ylabel(r'Relative impurity position ($\mu$m)')
         ax2.set_xlabel(r'Time (ms)')
         ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
