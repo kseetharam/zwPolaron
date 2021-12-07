@@ -65,7 +65,8 @@ if __name__ == "__main__":
 
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
-    n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
+    # n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
+    n0_BEC = np.array([5.50743315e+19, 5.03889459e+19, 6.04081899e+19, 5.61903369e+19, 6.19914061e+19, 7.11346218e+19, 6.73466436e+19, 6.51920977e+19, 5.73665093e+19, 6.38326341e+19, 5.98486416e+19, 6.11450398e+19, 6.16486935e+19, 5.94439691e+19, 6.08352926e+19, 6.35042149e+19, 5.51802931e+19, 5.93638236e+19])
     RTF_BEC_X = np.array([8.48469347093994, 8.11111072629368, 8.89071272031954, 8.57125199684266, 9.00767433275159, 9.65522167387697, 9.39241266912852, 9.23956650925869, 8.66153179309422, 9.14179769236378, 8.84900230929328, 8.94534024135962, 8.98248647105392, 8.81871271135454, 8.92241777405925, 9.11802005065468, 8.49295023977057, 8.81270137636933])  # Thomas-Fermi radius of BEC in x-direction (given in um)
     RTF_BEC_Y = np.array([11.4543973014280, 11.4485027292274, 12.0994087866866, 11.1987472415996, 12.6147755284164, 13.0408759297917, 12.8251948079726, 12.4963915490121, 11.6984708883771, 12.1884624646191, 11.7981246004719, 11.8796464214276, 12.4136593404667, 12.3220325703494, 12.0104329130883, 12.1756670927480, 10.9661042681457, 12.1803009563806])  # Thomas-Fermi radius of BEC in direction of oscillation (given in um)
     RTF_BEC_Z = np.array([70.7057789244995, 67.5925893857806, 74.0892726693295, 71.4270999736888, 75.0639527729299, 80.4601806156414, 78.2701055760710, 76.9963875771558, 72.1794316091185, 76.1816474363648, 73.7416859107773, 74.5445020113302, 74.8540539254493, 73.4892725946212, 74.3534814504937, 75.9835004221224, 70.7745853314214, 73.4391781364111])  # Thomas-Fermi radius of BEC in z-direction (given in um)
@@ -95,6 +96,11 @@ if __name__ == "__main__":
     T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
     mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below (assumes thermal state is based off E = P^2/2m + 3D harmonic trap)
     # print(mu_div_hbar_K / (2 * np.pi)/1e3)
+
+    # n0_BEC = np.zeros(aIBexp_Vals.size)
+    # for inda, a in enumerate(aIBexp_Vals):
+    #     n0_BEC[inda] = pf_dynamic_sph.becdensity_zw2021(0, 0, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda])  # computes BEC density in experimental units
+    # print(n0_BEC)
 
     # Optical trap experimental parameters (for K gas)
 
@@ -278,7 +284,7 @@ if __name__ == "__main__":
     y0_BEC_lab = (Na_displacement * 1e-6 * L_exp2th)  # starting position of the BEC in the lab frame
     y0_imp_lab = y0_imp + y0_BEC_lab  # starting position of the impurity in the lab frame
 
-    omega_Imp_x = omega_K / T_exp2th
+    omega_Imp_y = omega_K / T_exp2th
 
     # gaussian_amp = 2 * np.pi * A_TiSa_Hz * np.ones(aIBexp_Vals) / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
     gaussian_amp = 2 * np.pi * A_TiSa_Hz_scaled / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
@@ -293,13 +299,15 @@ if __name__ == "__main__":
     # Sample positions and momenta
 
     A_TiSa_th = 2 * np.pi * A_TiSa_Hz_scaled / T_exp2th  # equivalent to gaussian_amp above
-    A_ODT1_th = 2 * np.pi * A_ODT1_Hz / T_exp2th; A_ODT2_th = 2 * np.pi * A_ODT2_Hz / T_exp2th
+    A_ODT1_th = 2 * np.pi * A_ODT1_Hz / T_exp2th
+    # A_ODT1_th = 0
+    A_ODT2_th = 2 * np.pi * A_ODT2_Hz / T_exp2th
     wx_ODT1_th = wx_ODT1 * 1e-6 * L_exp2th; wy_ODT1_th = wy_ODT1 * 1e-6 * L_exp2th; wx_ODT2_th = wx_ODT2 * 1e-6 * L_exp2th; wz_ODT2_th = wz_ODT2 * 1e-6 * L_exp2th; wx_TiSa_th = wx_TiSa * 1e-6 * L_exp2th; wy_TiSa_th = wy_TiSa * 1e-6 * L_exp2th
     beta_exp = 1 / (kB * T / hbar)  # inverse temperature in units of 1/(rad*Hz) = s/rad
     beta_th = beta_exp * T_exp2th
 
     inda = 3
-    sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'L_exp2th': L_exp2th,
+    sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
                     'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
@@ -315,13 +323,22 @@ if __name__ == "__main__":
     pVals = np.linspace(-4 * p0, 4 * p0, 100)
 
     testVals = np.zeros(yVals.size)
+    EPol = np.zeros(yVals.size)
+    UOpt = np.zeros(yVals.size)
+    Vharm = np.zeros(yVals.size)
     for indy, y in enumerate(yVals):
         testVals[indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+        EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+        UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y + sampleParams['y0_BEC'], 0, sampleParams)
+        Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
 
-    print(np.mean(testVals))
+    print(np.sum(testVals * yVals) / np.sum(testVals), y0_imp[inda])
 
     fig, ax = plt.subplots()
-    ax.plot(yVals, testVals)
+    # ax.plot(yVals, testVals)
+    ax.plot(yVals, EPol)
+    ax.plot(yVals, UOpt)
+    ax.plot(yVals, Vharm)
     plt.show()
 
     # # Create dicts

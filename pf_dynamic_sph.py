@@ -376,7 +376,7 @@ def U_TiSa(x, y, A_TiSa, wx_TiSa, wy_TiSa):
 
 
 def U_tot_opt(x, y, z, sampleParams):
-    return U_ODT1(x, y, sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y, sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
+    return -1 * (sampleParams['A_ODT1'] + sampleParams['A_ODT2'] + sampleParams['A_TiSa']) + U_ODT1(x, y, sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y, sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
 
 
 def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
@@ -397,13 +397,19 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
     E_gs = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
 
-    return E_gs
+    n0_exp = sampleParams['n0_BEC_m^-3']  # peak BEC density
+    n0 = n0_exp / (L_exp2th**3)
+
+    aSi_0 = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n0, gBB)
+    PB_0 = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n0, gBB)
+    E_gs_0 = pf_static_sph.Energy(P, PB_0, aIBi, aSi_0, mI, mB, n0)
+
+    return -1 * E_gs_0 + E_gs
 
 
 def E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
-    print(E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams), U_tot_opt(x, y + sampleParams['y0_BEC'], z, sampleParams))
+    # return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) + 0.5 * sParams[0] * (sampleParams['omega_Imp_y']**2) * (y + sampleParams['y0_BEC'])**2
     return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) + U_tot_opt(x, y + sampleParams['y0_BEC'], z, sampleParams)
-    # return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams)
 
 
 def f_thermal(x, y, z, P, Beta, mu, kgrid, cParams, sParams, sampleParams):
@@ -411,8 +417,6 @@ def f_thermal(x, y, z, P, Beta, mu, kgrid, cParams, sParams, sampleParams):
     # Note: (x,y,z) are all given in the frame of the BEC (whose center is shifted by sampleParams['y0_BEC'] in the y-direction w.r.t. the lab frame origin; the other two directions have the same origin)
     # Note: all quantities are given in theory units except for the conversion that is done to compute the BEC density (used in E_Pol_gs)
 
-    print(mu, E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams))
-    # print(Beta * mu, Beta * E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams))
     return 1 / (1 + np.exp(Beta * E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) - Beta * mu))
 
 
