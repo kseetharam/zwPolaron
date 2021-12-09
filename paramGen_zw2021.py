@@ -71,7 +71,7 @@ if __name__ == "__main__":
     RTF_BEC_Y = np.array([11.4543973014280, 11.4485027292274, 12.0994087866866, 11.1987472415996, 12.6147755284164, 13.0408759297917, 12.8251948079726, 12.4963915490121, 11.6984708883771, 12.1884624646191, 11.7981246004719, 11.8796464214276, 12.4136593404667, 12.3220325703494, 12.0104329130883, 12.1756670927480, 10.9661042681457, 12.1803009563806])  # Thomas-Fermi radius of BEC in direction of oscillation (given in um)
     RTF_BEC_Z = np.array([70.7057789244995, 67.5925893857806, 74.0892726693295, 71.4270999736888, 75.0639527729299, 80.4601806156414, 78.2701055760710, 76.9963875771558, 72.1794316091185, 76.1816474363648, 73.7416859107773, 74.5445020113302, 74.8540539254493, 73.4892725946212, 74.3534814504937, 75.9835004221224, 70.7745853314214, 73.4391781364111])  # Thomas-Fermi radius of BEC in z-direction (given in um)
 
-    Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])  # initial position of the BEC (in um)
+    Na_displacement = np.array([26.2969729628679, 22.6668334850173, 18.0950989598699, 20.1069898676222, 14.3011351453467, 18.8126473489499, 17.0373115356076, 18.6684373282353, 18.8357213162278, 19.5036039713438, 21.2438389441807, 18.2089748680659, 18.0433963046778, 8.62940156299093, 16.2007030552903, 23.2646987822343, 24.1115616621798, 28.4351972435186])  # initial position of the BEC (in um) -> assumes that lab frame origin is the center of the TiSa beam (to the left of BEC)
     K_displacement_raw = np.array([0.473502276902047, 0.395634326123081, 8.66936929134637, 11.1470221226478, 9.34778274195669, 16.4370036199872, 19.0938486958001, 18.2135041439547, 21.9211790347041, 20.6591098913628, 19.7281375591975, 17.5425503131171, 17.2460344933717, 11.7179407507981, 12.9845862662090, 9.18113956217101, 11.9396846941782, 4.72461841775226])  # initial position of the impurity (in um)
     K_displacement_scale = np.mean(K_displacement_raw[6:11] / Na_displacement[6:11])
     K_displacement = deepcopy(K_displacement_raw); K_displacement[0:6] = K_displacement_scale * Na_displacement[0:6]; K_displacement[11::] = K_displacement_scale * Na_displacement[11::]   # in um
@@ -104,23 +104,25 @@ if __name__ == "__main__":
 
     # Optical trap experimental parameters (for K gas)
 
-    A_ODT1_uK = -4.25; A_ODT2_uK = -3.44
-    # A_TiSa_uK = -6.9  # Amplitude of each gaussian beam in uK
-    A_TiSa_uK = -6.97  # Amplitude of each gaussian beam in uK
+    A_ODT1_uK = -4.25; A_ODT2_uK = -3.44; A_TiSa_uK = -6.9  # Amplitude of each gaussian beam in uK
     A_ODT1_Hz = kB * A_ODT1_uK * 1e-6 / hbar / (2 * np.pi); A_ODT2_Hz = kB * A_ODT2_uK * 1e-6 / hbar / (2 * np.pi); A_TiSa_Hz = kB * A_TiSa_uK * 1e-6 / hbar / (2 * np.pi)  # Amplitude of each gaussian beam in Hz
     wx_ODT1 = 82; wy_ODT1 = 82  # beam waists of ODT1 in um
     ep_ODT2 = 4  # ellipticity of ODT2 beam
     wx_ODT2 = 144; wz_ODT2 = wx_ODT2 / ep_ODT2  # beam waists of ODT2 in um
     wx_TiSa = 95; wy_TiSa = 95  # beam waists of TiSa in um
 
+    A_ODT1_Na_uK = -1.66; A_ODT2_Na_uK = -1.35; A_TiSa_Na_uK = -1.39  # Amplitude of each gaussian beam in uK (for Na)
+    A_ODT1_Na_Hz = kB * A_ODT1_Na_uK * 1e-6 / hbar / (2 * np.pi); A_ODT2_Na_Hz = kB * A_ODT2_Na_uK * 1e-6 / hbar / (2 * np.pi); A_TiSa_Na_Hz = kB * A_TiSa_Na_uK * 1e-6 / hbar / (2 * np.pi)  # Amplitude of each gaussian beam in Hz
+
     def omega_gaussian_approx(A, m):
         return np.sqrt((-4) * hbar * 2 * np.pi * A / (m * (wy_TiSa * 1e-6)**2))
 
-    A_TiSa_uK_Na = -1.39; A_TiSa_Hz_Na = kB * A_TiSa_uK_Na * 1e-6 / hbar / (2 * np.pi)
-    # scale_fac = np.array([0.9724906988829373, 0.8896535250404035, 0.9569791653444897, 1.0382627423131257, 0.903699258873818, 0.971557704172668, 0.9505698121511785, 0.9689281438661883, 0.9716029799261697, 0.9970638982528262, 0.9970576906401939, 1.00494970248614, 0.9280067282060056, 0.9078274542675744, 0.9781498957395225, 0.9939697862098377, 1.0630900294469736, 0.9278113852604492])  # fitting the optical trap depth to the BEC oscillation frequencies
-    scale_fac = np.array([0.9098942227264171, 1.0711547907567265, 0.9944481656421021, 1.04851392615919, 0.988004117284517, 1.0218608482400438, 1.0055142714988736, 1.0240792367395755, 1.0406168082344183, 1.018731343774692, 1.0157022420144592, 1.0168299405019399, 0.953576047729171, 0.8911229411671369, 0.9674109805434324, 0.9755952647681828, 0.9545659450817384, 0.8862331593152922])  # fitting the optical trap depth to the BEC oscillation frequencies
+    scale_fac = np.array([0.9191250336816127, 1.0820215784890415, 1.0045367702210797, 1.059151023960805, 0.998027347459867, 1.0322275524975513, 1.015715140919877, 1.0344684463876583, 1.0511737903469414, 1.0290662994361741, 1.0260064676580842, 1.027145606565003, 0.9632500076336702, 0.9001633188311512, 0.9772252948388005, 0.9854926080339469, 0.9642499474231473, 0.8952239304967515])  # fitting the optical trap depth to the K oscillation frequencies
+    # scale_fac = np.array([0.9724906988829373, 0.8896535250404035, 0.9569791653444897, 1.0382627423131257, 0.903699258873818, 0.971557704172668, 0.9505698121511785, 0.9689281438661883, 0.9716029799261697, 0.9970638982528262, 0.9970576906401939, 1.00494970248614, 0.9280067282060056, 0.9078274542675744, 0.9781498957395225, 0.9939697862098377, 1.0630900294469736, 0.9278113852604492])  # fitting the optical trap depth to the Na oscillation frequencies
     A_TiSa_Hz_scaled = A_TiSa_Hz * scale_fac
-    A_TiSa_Hz_Na_scaled = A_TiSa_Hz_Na * scale_fac
+    A_TiSa_Na_Hz_scaled = A_TiSa_Na_Hz * scale_fac
+
+    ODT1_displacement = np.array([39.9734769508128, 37.20726134699691, 29.022743967492712, 32.85605962371015, 23.00479821032066, 30.475997313212293, 27.49539761274011, 30.277006179531572, 30.746034106569127, 31.517392916389632, 34.17496197024173, 29.467112794532262, 28.46260872772458, 13.428923709748158, 25.777101525763207, 36.645281366522546, 37.56837023644184, 42.51753230100077])  # initial position of the ODT1 beam (in um) before it is turned off -> assumes that lab frame origin is the center of the TiSa beam (to the left of the ODT1 beam)
 
     # print(omega_K / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz, expParams['mI']) / (2 * np.pi))
@@ -135,10 +137,24 @@ if __name__ == "__main__":
     # # omega_fit = omega_Na
     # for indw, wy in enumerate(omega_fit):
     #     def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Hz, expParams['mI']) - wy)
-    #     # def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Hz_Na, expParams['mB']) - wy)
+    #     # def f(sf): return (omega_gaussian_approx(sf * A_TiSa_Na_Hz, expParams['mB']) - wy)
     #     sol = root_scalar(f, bracket=[0.5, 1.5], method='brentq')
     #     sf_List.append(sol.root)
     # print(sf_List)
+
+    # def UNa_deriv(yODT1, yNa, A_ODT1, w_ODT1, A_TiSa, w_TiSa):
+    #     A_ODT1_en = hbar * 2 * np.pi * A_ODT1
+    #     A_TiSa_en = hbar * 2 * np.pi * A_TiSa
+    #     return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
+
+    # from scipy.optimize import root_scalar
+    # yODT1_List = []
+    # for indy, yNa in enumerate(Na_displacement):
+    #     def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
+    #     # print(indy, f(0 * yNa), f(2 * yNa))
+    #     sol = root_scalar(f, bracket=[0 * yNa, 2 * yNa], method='brentq')
+    #     yODT1_List.append(sol.root)
+    # print(yODT1_List)
 
     # # Compute chemical potential of the K gas
 
@@ -275,14 +291,16 @@ if __name__ == "__main__":
 
     y0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
     v0_imp = K_relVel * (1e-6 / 1e-3) * (L_exp2th / T_exp2th)  # initial velocities of impurity in BEC frame (relative to BEC)
-    RTF_BEC = RTF_BEC_Y * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
+    RTF_BEC_Y_th = RTF_BEC_Y * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
+    RTF_BEC_X_th = RTF_BEC_X * 1e-6 * L_exp2th  # BEC oscillation amplitude (carries units of position)
 
     omega_BEC_osc = omega_Na / T_exp2th
     gamma_BEC_osc = gamma_Na / T_exp2th
     phi_BEC_osc = phi_Na
     amp_BEC_osc = (Na_displacement * 1e-6 * L_exp2th) / np.cos(phi_Na)  # BEC oscillation amplitude (carries units of position)
-    y0_BEC_lab = (Na_displacement * 1e-6 * L_exp2th)  # starting position of the BEC in the lab frame
-    y0_imp_lab = y0_imp + y0_BEC_lab  # starting position of the impurity in the lab frame
+    y0_BEC_lab = Na_displacement * 1e-6 * L_exp2th  # starting position of the BEC in the lab frame (lab frame origin = center of the TiSa beam)
+    y0_imp_lab = y0_imp + y0_BEC_lab  # starting position of the impurity in the lab frame (lab frame origin = center of the TiSa beam)
+    y0_ODT1_lab = ODT1_displacement * 1e-6 * L_exp2th  # starting position of the ODT1 beam in the lab frame (lab frame origin = center of the TiSa beam)
 
     omega_Imp_y = omega_K / T_exp2th
 
@@ -306,9 +324,12 @@ if __name__ == "__main__":
     beta_exp = 1 / (kB * T / hbar)  # inverse temperature in units of 1/(rad*Hz) = s/rad
     beta_th = beta_exp * T_exp2th
 
+    U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341 , -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
+    U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
+
     inda = 3
-    sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
-                    'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
+    sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
+                    'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
@@ -318,28 +339,74 @@ if __name__ == "__main__":
 
     import matplotlib
     import matplotlib.pyplot as plt
+    from scipy.integrate import simpson 
 
-    yVals = np.linspace(-4 * RTF_BEC[inda], 4 * RTF_BEC[inda], 100)
-    pVals = np.linspace(-4 * p0, 4 * p0, 100)
+    nu = pf_dynamic_sph.nu(mB, n0[inda], gBB)
 
-    testVals = np.zeros(yVals.size)
-    EPol = np.zeros(yVals.size)
-    UOpt = np.zeros(yVals.size)
-    Vharm = np.zeros(yVals.size)
-    for indy, y in enumerate(yVals):
-        testVals[indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-        EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
-        UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y + sampleParams['y0_BEC'], 0, sampleParams)
-        Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+    xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
+    yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
+    pVals = np.linspace(0, 10 * p0, 100)
+    print(p0, mI * nu)
 
-    print(np.sum(testVals * yVals) / np.sum(testVals), y0_imp[inda])
+    x_des = 49
+    y_des = 49
+    testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+
+    for indx, x in enumerate(xVals):
+        if indx != x_des:
+            continue
+        print(x)
+        EPol = np.zeros(yVals.size)
+        UOpt = np.zeros(yVals.size)
+        Vharm = np.zeros(yVals.size)
+        for indy, y in enumerate(yVals):
+            if indy != y_des:
+                continue
+            print(y)
+            for indp, p in enumerate(pVals):
+                testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+            # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
+            # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+            # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+
+        # ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+        # ftot = simpson(testVals[indx,:],yVals)
+        # ymean2 = simpson(testVals[indx,:] * yVals)/ftot
+        # print(ftot)
+        # print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+
+    # fig, ax = plt.subplots()
+    # ax.plot(yVals, testVals[x_des,:])
+    # # ax.plot(yVals, EPol)
+    # # ax.plot(yVals, UOpt)
+    # # ax.plot(yVals, Vharm)
+    # plt.show()
 
     fig, ax = plt.subplots()
-    # ax.plot(yVals, testVals)
-    ax.plot(yVals, EPol)
-    ax.plot(yVals, UOpt)
-    ax.plot(yVals, Vharm)
+    ax.plot(pVals, testVals[x_des,y_des,:])
+    # ax.plot(yVals, EPol)
+    # ax.plot(yVals, UOpt)
+    # ax.plot(yVals, Vharm)
     plt.show()
+
+    # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
+    # fig, ax = plt.subplots()
+    # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals * (L_exp2th**3),cmap='RdBu')
+    # ax.set_xlabel('x')
+    # ax.set_ylabel('y')
+    # fig.colorbar(c, ax=ax)
+    # plt.show()
+
+    # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
+    # fig, ax = plt.subplots()
+    # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg, testVals[x_des, :, :] * (L_exp2th**3),cmap='RdBu')
+    # ax.set_xlabel('y')
+    # ax.set_ylabel('p')
+    # fig.colorbar(c, ax=ax)
+    # plt.show()
+
 
     # # Create dicts
 
@@ -347,5 +414,5 @@ if __name__ == "__main__":
     # for ind, aIBi in enumerate(aIBi_Vals):
     #     sParams = [mI, mB, n0[ind], gBB]
     #     den_tck = np.load('zwData/densitySplines/nBEC_aIB_{0}a0.npy'.format(aIBexp_Vals[ind]), allow_pickle=True)
-    #     trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width, 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
+    #     trapParams = {'nBEC_tck': den_tck, 'RTF_BEC': RTF_BEC_Y_th[ind], 'omega_BEC_osc': omega_BEC_osc[ind], 'gamma_BEC_osc': gamma_BEC_osc[ind], 'phi_BEC_osc': phi_BEC_osc[ind], 'amp_BEC_osc': amp_BEC_osc[ind], 'omega_Imp_x': omega_Imp_x[ind], 'gaussian_amp': gaussian_amp[ind], 'gaussian_width': gaussian_width, 'X0': x0_imp[ind], 'P0': P0_scaleFactor[ind] * mI * v0_imp[ind]}
     #     jobList.append((aIBi, sParams, trapParams))

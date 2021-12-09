@@ -376,7 +376,11 @@ def U_TiSa(x, y, A_TiSa, wx_TiSa, wy_TiSa):
 
 
 def U_tot_opt(x, y, z, sampleParams):
-    return -1 * (sampleParams['A_ODT1'] + sampleParams['A_ODT2'] + sampleParams['A_TiSa']) + U_ODT1(x, y, sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y, sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
+    # if sampleParams['A_ODT1'] == 0:
+    #     return -1 * sampleParams['U0_opt_offset'] + U_ODT1(x, y - (sampleParams['y0_ODT1'] - sampleParams['y0_BEC']), sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y + sampleParams['y0_BEC'], sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
+    # else:
+    #     return -1 * sampleParams['U_opt_offset'] + U_ODT1(x, y - (sampleParams['y0_ODT1'] - sampleParams['y0_BEC']), sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y + sampleParams['y0_BEC'], sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
+    return -1 * sampleParams['U_opt_offset'] + U_ODT1(x, y - (sampleParams['y0_ODT1'] - sampleParams['y0_BEC']), sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + U_ODT2(x, z, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + U_TiSa(x, y + sampleParams['y0_BEC'], sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa'])
 
 
 def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
@@ -391,6 +395,11 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; z_MuM = z * (1e6) / L_exp2th  # convert positions in theory units to um
     n_exp = becdensity_zw2021(x_MuM, y_MuM, z_MuM, sampleParams['omegaX_radHz'], sampleParams['omegaY_radHz'], sampleParams['omegaZ_radHz'], sampleParams['temperature_K'], sampleParams['zTF_MuM'])  # computes BEC density in experimental units
     n = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+
+    # Nsteps = 1e2
+    # aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
+    # aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
 
     DP = 0
     aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
@@ -409,7 +418,7 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
 
 def E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     # return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) + 0.5 * sParams[0] * (sampleParams['omega_Imp_y']**2) * (y + sampleParams['y0_BEC'])**2
-    return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) + U_tot_opt(x, y + sampleParams['y0_BEC'], z, sampleParams)
+    return E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) + U_tot_opt(x, y, z, sampleParams)
 
 
 def f_thermal(x, y, z, P, Beta, mu, kgrid, cParams, sParams, sampleParams):
