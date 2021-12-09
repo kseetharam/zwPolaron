@@ -65,6 +65,7 @@ def BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB):
 
 
 def Energy(P, PB, aIBi, aSi, mI, mB, n0):
+    # print((P**2 - PB**2) / (2 * mI), 2 * np.pi * n0 / (ur(mI, mB) * (aIBi - aSi)))
     return ((P**2 - PB**2) / (2 * mI)) + 2 * np.pi * n0 / (ur(mI, mB) * (aIBi - aSi))
 
 
@@ -156,6 +157,7 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
     DP_old = DPi
     DP_new = 0
     lim = np.copy(limit)
+    counter = 0
 
     while True:
 
@@ -172,6 +174,7 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
             DP_old = np.copy(DP_new)
 
         lim = lim - 1
+        counter += 1
 
     return DP_new
 
@@ -182,6 +185,41 @@ def PCrit_grid(kgrid, aIBi, mI, mB, n0, gBB):
     PB = (aIBi - aSi)**(-2) * PB_integral_grid(kgrid, DPc, mI, mB, n0, gBB)
     return DPc + PB
 
+
+def DP_interp_grid(DPi, P, aIBi, kgrid, mI, mB, n0, gBB):
+    # global err, limit, alpha
+
+    err = 1e-5
+    limit = 1e5
+    alpha = 0.005
+
+    DP_old = DPi
+    DP_new = 0
+    lim = np.copy(limit)
+    counter = 0
+
+    while True:
+
+        if lim == 0:
+            print('Loop convergence limit reached')
+            return -1
+
+
+        aSi = aSi_grid(kgrid, DP_old, mI, mB, n0, gBB)
+        PB = (aIBi - aSi)**(-2) * PB_integral_grid(kgrid, DP_old, mI, mB, n0, gBB)
+        DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB)
+        # print(DP_old, DP_new)
+
+        if np.abs(DP_new - DP_old) < err:
+            break
+        else:
+            DP_old = np.copy(DP_new)
+
+        lim = lim - 1
+        counter+=1
+    print(counter)
+
+    return DP_new
 
 # ---- DATA GENERATION ----
 

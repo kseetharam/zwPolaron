@@ -3,6 +3,7 @@ import pandas as pd
 import xarray as xr
 import Grid
 import pf_dynamic_sph
+import pf_static_sph
 from scipy.io import savemat, loadmat
 import os
 from timeit import default_timer as timer
@@ -288,6 +289,7 @@ if __name__ == "__main__":
     mI = expParams['mI'] * M_exp2th
     aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
+    nu = pf_dynamic_sph.nu(mB, n0, gBB)
 
     y0_imp = K_relPos * 1e-6 * L_exp2th  # initial positions of impurity in BEC frame (relative to the BEC)
     v0_imp = K_relVel * (1e-6 / 1e-3) * (L_exp2th / T_exp2th)  # initial velocities of impurity in BEC frame (relative to BEC)
@@ -314,6 +316,22 @@ if __name__ == "__main__":
     P0_scaleFactor = np.array([1.2072257743801846, 1.1304777274446096, 1.53, 1.0693683091221053, 1.0349159867400886, 0.95, 2.0, 1.021253131703251, 0.9713134192266438, 0.9781007832739641, 1.0103135855263197, 1.0403095335853234, 0.910369833990368, 0.9794720983829749, 1.0747443076336567, 0.79, 1.0, 0.8127830658214898])  # scales the momentum of the initial polaron state (scaleFac * mI * v0) so that the initial impurity velocity matches the experiment. aIB= -125a0 and +750a0 have ~8% and ~20% error respectively
     P0_imp = P0_scaleFactor * mI * v0_imp
 
+    # print(P0_imp)
+    # print(mI * nu)
+
+    # # Create density splines (ground state PB and aSi vs DP) for peak BEC density (n0). Also compute the E_pol_gs offset (min(E_pol_gs) occurs at momentum P=0 and BEC density n=max(n)=n0)
+
+    # E_pol_offset = np.zeros(aIBexp_Vals.size)
+    # Nsteps = 1e2
+    # for ind, aIB_exp in enumerate(aIBexp_Vals):
+    #     # aSi0_tck, PBint0_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0[ind], gBB)
+    #     # np.save('zwData/densitySplines/n0/aSi0_aIB_{0}a0.npy'.format(aIB_exp), aSi0_tck)
+    #     # np.save('zwData/densitySplines/n0/PBint0_aIB_{0}a0.npy'.format(aIB_exp), PBint0_tck)
+    #     aSi0 = pf_static_sph.aSi_grid(kgrid, 0, mI, mB, n0[ind], gBB)
+    #     PB0 = pf_static_sph.PB_integral_grid(kgrid, 0, mI, mB, n0[ind], gBB)
+    #     E_pol_offset[ind] = pf_static_sph.Energy(0, PB0, aIBi_Vals[ind], aSi0, mI, mB, n0[ind])
+    # print(E_pol_offset)
+
     # Sample positions and momenta
 
     A_TiSa_th = 2 * np.pi * A_TiSa_Hz_scaled / T_exp2th  # equivalent to gaussian_amp above
@@ -326,10 +344,15 @@ if __name__ == "__main__":
 
     U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341 , -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
     U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
+    E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36,  3.11130148e-02,  7.32152511e-02,  1.88938399e-01, 2.68558712e-01,  3.73587857e-01,  5.83872838e-01,  8.28556730e-01,  1.11273234e+00,  1.66368733e+00])
 
     inda = 3
+
+    # aSi0_tck = np.load('zwData/densitySplines/n0/aSi0_aIB_{0}a0.npy'.format(aIBexp_Vals[inda]), allow_pickle=True)
+    # PBint0_tck = np.load('zwData/densitySplines/n0/PBint0_aIB_{0}a0.npy'.format(aIBexp_Vals[inda]), allow_pickle=True)
+
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
-                    'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
+                    'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda],'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
@@ -341,16 +364,15 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from scipy.integrate import simpson 
 
-    nu = pf_dynamic_sph.nu(mB, n0[inda], gBB)
 
     xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
     yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    pVals = np.linspace(0, 10 * p0, 100)
-    print(p0, mI * nu)
+    pVals = np.linspace(0, mI * nu[inda], 100)
 
-    x_des = 49
-    y_des = 49
-    testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    x_des = 50
+    y_des = 50
+    # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    testVals = np.zeros((xVals.size, yVals.size))
 
     for indx, x in enumerate(xVals):
         if indx != x_des:
@@ -360,32 +382,33 @@ if __name__ == "__main__":
         UOpt = np.zeros(yVals.size)
         Vharm = np.zeros(yVals.size)
         for indy, y in enumerate(yVals):
-            if indy != y_des:
-                continue
-            print(y)
-            for indp, p in enumerate(pVals):
-                testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            # if indy != y_des:
+            #     continue
+            # print(y)
+            start = timer()
+            # for indp, p in enumerate(pVals):
+            #     testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            #     # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
             # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
             # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
             # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
             # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+            print(timer() - start)
 
-        # ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
-        # ftot = simpson(testVals[indx,:],yVals)
-        # ymean2 = simpson(testVals[indx,:] * yVals)/ftot
-        # print(ftot)
-        # print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+        ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+        ftot = simpson(testVals[indx,:],yVals)
+        ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
+        print(ftot)
+        print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
 
-    # fig, ax = plt.subplots()
-    # ax.plot(yVals, testVals[x_des,:])
-    # # ax.plot(yVals, EPol)
-    # # ax.plot(yVals, UOpt)
-    # # ax.plot(yVals, Vharm)
-    # plt.show()
+    # ptot = simpson(testVals[x_des,y_des,:],pVals)
+    # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
+    # print(p0, pmean)
 
     fig, ax = plt.subplots()
-    ax.plot(pVals, testVals[x_des,y_des,:])
+    # ax.plot(pVals, testVals[x_des,y_des,:])
+    ax.plot(yVals, testVals[x_des,:])
     # ax.plot(yVals, EPol)
     # ax.plot(yVals, UOpt)
     # ax.plot(yVals, Vharm)

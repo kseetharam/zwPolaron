@@ -396,24 +396,28 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     n_exp = becdensity_zw2021(x_MuM, y_MuM, z_MuM, sampleParams['omegaX_radHz'], sampleParams['omegaY_radHz'], sampleParams['omegaZ_radHz'], sampleParams['temperature_K'], sampleParams['zTF_MuM'])  # computes BEC density in experimental units
     n = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
 
-    # Nsteps = 1e2
-    # aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
-    # DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
-    # aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+    # DPi = pf_static_sph.DP_interp_grid(DP, P, aIBi, kgrid, mI, mB, n, gBB)  # computing DP self-consistently requires ~500-1000 evaluations of aSi and PB --> better to do this with a spline using 100 calls to the grid integration functions rather than 500-1000 calls to these functions
 
-    DP = 0
-    aSi = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n, gBB)
-    PB = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n, gBB)
+    Nsteps = 1e2
+
+    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n, gBB)
+    DP = pf_static_sph.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+    PB = pf_static_sph.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
     E_gs = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
 
-    n0_exp = sampleParams['n0_BEC_m^-3']  # peak BEC density
-    n0 = n0_exp / (L_exp2th**3)
+    # n0_exp = sampleParams['n0_BEC_m^-3']  # peak BEC density
+    # n0 = n0_exp / (L_exp2th**3)
 
-    aSi_0 = pf_static_sph.aSi_grid(kgrid, DP, mI, mB, n0, gBB)
-    PB_0 = pf_static_sph.PB_integral_grid(kgrid, DP, mI, mB, n0, gBB)
-    E_gs_0 = pf_static_sph.Energy(P, PB_0, aIBi, aSi_0, mI, mB, n0)
+    # aSi0_tck = sampleParams['aSi0_tck']; PBint0_tck = sampleParams['PBint0_tck']
+    # DP0 = pf_static_sph.DP_interp(0, 0, aIBi, aSi0_tck, PBint0_tck)
+    # aSi0 = pf_static_sph.aSi_interp(DP0, aSi0_tck)
+    # PB0 = pf_static_sph.PB_interp(DP0, aIBi, aSi0_tck, PBint0_tck)
+    # E_gs_0 = pf_static_sph.Energy(0, PB0, aIBi, aSi0, mI, mB, n0)
+    # # print(E_gs - E_gs_0)
+    # # return -1 * E_gs_0 + E_gs
 
-    return -1 * E_gs_0 + E_gs
+    return -1 * sampleParams['E_pol_offset'] + E_gs
 
 
 def E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
