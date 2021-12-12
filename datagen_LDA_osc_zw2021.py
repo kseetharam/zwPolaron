@@ -117,7 +117,7 @@ if __name__ == "__main__":
     scale_fac = np.array([0.9098942227264171, 1.0711547907567265, 0.9944481656421021, 1.04851392615919, 0.988004117284517, 1.0218608482400438, 1.0055142714988736, 1.0240792367395755, 1.0406168082344183, 1.018731343774692, 1.0157022420144592, 1.0168299405019399, 0.953576047729171, 0.8911229411671369, 0.9674109805434324, 0.9755952647681828, 0.9545659450817384, 0.8862331593152922])  # fitting the optical trap depth to the BEC oscillation frequencies
     A_TiSa_Hz_scaled = A_TiSa_Hz * scale_fac
     A_TiSa_Hz_Na_scaled = A_TiSa_Hz_Na * scale_fac
-    
+
     # print(omega_K / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz, expParams['mI']) / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz_scaled, expParams['mI']) / (2 * np.pi))

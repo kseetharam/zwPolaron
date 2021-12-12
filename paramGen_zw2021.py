@@ -5,6 +5,7 @@ import Grid
 import pf_dynamic_sph
 import pf_static_sph
 from scipy.io import savemat, loadmat
+from scipy.optimize import root_scalar, minimize_scalar
 import os
 from timeit import default_timer as timer
 import sys
@@ -132,7 +133,6 @@ if __name__ == "__main__":
     # print(omega_gaussian_approx(A_TiSa_Hz_Na, expParams['mB']) / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz_Na_scaled, expParams['mB']) / (2 * np.pi))
 
-    # from scipy.optimize import root_scalar
     # sf_List = []
     # omega_fit = omega_K
     # # omega_fit = omega_Na
@@ -148,7 +148,6 @@ if __name__ == "__main__":
     #     A_TiSa_en = hbar * 2 * np.pi * A_TiSa
     #     return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
 
-    # from scipy.optimize import root_scalar
     # yODT1_List = []
     # for indy, yNa in enumerate(Na_displacement):
     #     def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
@@ -162,8 +161,6 @@ if __name__ == "__main__":
     # # mu_K = -1 * kB * T * np.log(np.exp(N_K) - 1) / hbar  # chemical potential of K gas (in rad*Hz)
     # # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
     # # print(mu_K / (2 * np.pi) * 1e-6)
-
-    # from scipy.optimize import root_scalar
 
     # def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
     #     mu = hbar * mu_div_hbar
@@ -342,94 +339,150 @@ if __name__ == "__main__":
     beta_exp = 1 / (kB * T / hbar)  # inverse temperature in units of 1/(rad*Hz) = s/rad
     beta_th = beta_exp * T_exp2th
 
-    U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341 , -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
+    U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341, -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
     U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
-    E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36,  3.11130148e-02,  7.32152511e-02,  1.88938399e-01, 2.68558712e-01,  3.73587857e-01,  5.83872838e-01,  8.28556730e-01,  1.11273234e+00,  1.66368733e+00])
+    E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36, 3.11130148e-02, 7.32152511e-02, 1.88938399e-01, 2.68558712e-01, 3.73587857e-01, 5.83872838e-01, 8.28556730e-01, 1.11273234e+00, 1.66368733e+00])
+
+    f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
+    y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum
 
     inda = 3
 
-    # aSi0_tck = np.load('zwData/densitySplines/n0/aSi0_aIB_{0}a0.npy'.format(aIBexp_Vals[inda]), allow_pickle=True)
-    # PBint0_tck = np.load('zwData/densitySplines/n0/PBint0_aIB_{0}a0.npy'.format(aIBexp_Vals[inda]), allow_pickle=True)
-
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
-                    'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda],'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
+                    'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
 
     y0 = y0_imp[inda]; p0 = P0_imp[inda]  # desired mean starting position and total momentum of the initial polaron for motion across the x=z=0 slice of the density (in theory units)
+
+    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    fMax = f_thermal_maxVals[inda]
     print(aIBexp_Vals[inda], y0, p0)
+    print(xMax, yMax, pMax, fMax)
 
-    import matplotlib
-    import matplotlib.pyplot as plt
-    from scipy.integrate import simpson 
+    Ns = 1000  # number of desired samples
+    samples = np.zeros((Ns, 3))
+    evals = 0
+    counter = 0
+    start = timer()
+    while counter < Ns:
+        f = np.random.uniform(low=0, high=fMax)
+        x = np.random.uniform(low=xMin, high=xMax)
+        y = np.random.uniform(low=yMin, high=yMax)
+        py = np.random.uniform(low=pMin, high=pMax)
 
+        # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
+        # p = np.sqrt(px**2 + py**2 + pz**2)
+        # if p > pMax:
+        #     continue
 
-    xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
-    yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    pVals = np.linspace(0, mI * nu[inda], 100)
+        f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+        if f < f_eval:
+            samples[counter, :] = [x, y, py]
+            # samples.append((x, y, py))
+            counter += 1
+        evals += 1
+        print(counter, evals, f, f_eval)
+    print(timer() - start)
 
-    x_des = 50
-    y_des = 50
-    # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
-    testVals = np.zeros((xVals.size, yVals.size))
+    # print(samples)
 
-    for indx, x in enumerate(xVals):
-        if indx != x_des:
-            continue
-        print(x)
-        EPol = np.zeros(yVals.size)
-        UOpt = np.zeros(yVals.size)
-        Vharm = np.zeros(yVals.size)
-        for indy, y in enumerate(yVals):
-            # if indy != y_des:
-            #     continue
-            # print(y)
-            start = timer()
-            # for indp, p in enumerate(pVals):
-            #     testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            #     # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
-            # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
-            # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
-            # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
-            print(timer() - start)
+    sample_datapath = 'zwData/samples/'
+    savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
-        ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
-        ftot = simpson(testVals[indx,:],yVals)
-        ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
-        print(ftot)
-        print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+    # Finding max value of distribution for each interaction strength
 
-    # ptot = simpson(testVals[x_des,y_des,:],pVals)
-    # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
-    # print(p0, pmean)
+    # yMax_vals = []
+    # fMax_vals = []
 
-    fig, ax = plt.subplots()
-    # ax.plot(pVals, testVals[x_des,y_des,:])
-    ax.plot(yVals, testVals[x_des,:])
-    # ax.plot(yVals, EPol)
-    # ax.plot(yVals, UOpt)
-    # ax.plot(yVals, Vharm)
-    plt.show()
+    # for inda, aIBi in enumerate(aIBi_Vals):
+    #     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
+    #                     'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda],'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
+    #     cParams = {'aIBi': aIBi_Vals[inda]}
+    #     sParams = [mI, mB, n0[inda], gBB]
+    #     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
 
-    # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
+    #     def f(y): return -1*pf_dynamic_sph.f_thermal(0, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #     sol = minimize_scalar(f, bounds=[-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda]], method='Bounded')
+    #     yMax_vals.append(sol.x)
+    #     fMax_vals.append(-1*sol.fun)
+
+    # print(yMax_vals)
+    # print(fMax_vals)
+
+    # # Testing
+
+    # import matplotlib
+    # import matplotlib.pyplot as plt
+    # from scipy.integrate import simpson
+
+    # xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
+    # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
+    # pVals = np.linspace(0, mI * nu[inda], 100)
+
+    # x_des = 50
+    # y_des = 50
+    # # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    # testVals = np.zeros((xVals.size, yVals.size))
+
+    # for indx, x in enumerate(xVals):
+    #     if indx != x_des:
+    #         continue
+    #     print(x)
+    #     EPol = np.zeros(yVals.size)
+    #     UOpt = np.zeros(yVals.size)
+    #     Vharm = np.zeros(yVals.size)
+    #     for indy, y in enumerate(yVals):
+    #         # if indy != y_des:
+    #         #     continue
+    #         # print(y)
+    #         start = timer()
+    #         # for indp, p in enumerate(pVals):
+    #         #     testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         #     # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+    #         # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
+    #         # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+    #         # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+    #         print(timer() - start)
+
+    #     ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+    #     ftot = simpson(testVals[indx,:],yVals)
+    #     ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
+    #     print(ftot)
+    #     print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+
+    # # ptot = simpson(testVals[x_des,y_des,:],pVals)
+    # # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
+    # # print(p0, pmean)
+
     # fig, ax = plt.subplots()
-    # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals * (L_exp2th**3),cmap='RdBu')
-    # ax.set_xlabel('x')
-    # ax.set_ylabel('y')
-    # fig.colorbar(c, ax=ax)
+    # # ax.plot(pVals, testVals[x_des,y_des,:])
+    # ax.plot(yVals, testVals[x_des,:])
+    # # ax.plot(yVals, EPol)
+    # # ax.plot(yVals, UOpt)
+    # # ax.plot(yVals, Vharm)
     # plt.show()
 
-    # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
-    # fig, ax = plt.subplots()
-    # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg, testVals[x_des, :, :] * (L_exp2th**3),cmap='RdBu')
-    # ax.set_xlabel('y')
-    # ax.set_ylabel('p')
-    # fig.colorbar(c, ax=ax)
-    # plt.show()
+    # # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
+    # # fig, ax = plt.subplots()
+    # # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals * (L_exp2th**3),cmap='RdBu')
+    # # ax.set_xlabel('x')
+    # # ax.set_ylabel('y')
+    # # fig.colorbar(c, ax=ax)
+    # # plt.show()
 
+    # # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
+    # # fig, ax = plt.subplots()
+    # # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg, testVals[x_des, :, :] * (L_exp2th**3),cmap='RdBu')
+    # # ax.set_xlabel('y')
+    # # ax.set_ylabel('p')
+    # # fig.colorbar(c, ax=ax)
+    # # plt.show()
 
     # # Create dicts
 

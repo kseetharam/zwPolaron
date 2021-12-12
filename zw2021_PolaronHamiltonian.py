@@ -58,7 +58,7 @@ class zw2021_PolaronHamiltonian:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
-        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']; F_pol_naive_func = self.LDA_funcs['F_pol_naive']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']
 
         # Update BEC density dependent quantities
 
@@ -105,7 +105,7 @@ class zw2021_PolaronHamiltonian:
             P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
         else:
             if self.PP_Type == 'naive':
-                F_pol = F_pol_naive_func(X)
+                F_pol = self.LDA_funcs['F_pol_naive'](X)
             else:
                 amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
                 Wk2_grid = self.Wk_grid**2; Wk3_grid = self.Wk_grid**3; omegak_grid = pfs.omegak_grid(self.grid, mB, n, gBB)
