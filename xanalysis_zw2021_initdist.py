@@ -66,6 +66,7 @@ if __name__ == "__main__":
 
     qds_List = []
     V_List = []
+    param_List = []
     # vBEC_List = []
     # xBEC_List = []
 
@@ -81,6 +82,9 @@ if __name__ == "__main__":
         # print(c_BEC_exp[inda], c_BEC_um_Per_ms)
         tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
         V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
+        X0 = attrs['X0']; Y0 = attrs['Y0']; P0 = attrs['P0']
+        if np.abs(Y0) < 15 or np.abs(X0) < 15:
+            continue
 
         # xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
         # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
@@ -88,6 +92,8 @@ if __name__ == "__main__":
 
         qds_List.append(qds)
         V_List.append(V)
+        param_List.append((X0, Y0, P0))
+
         # vBEC_List.append(vBEC_conv)
         # xBEC_List.append(xBEC_conv)
 
@@ -175,8 +181,19 @@ if __name__ == "__main__":
     ax.set_xlabel(r'Time (ms)')
     ax.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
     ax.legend()
-    # ax.plot(tVals, qds_List[inda]['XLab'].values * 1e6 / L_exp2th, label='')
-    # ax.set_xlim([0, 16])
     ax.set_ylim([-20, 20])
+
+    fig2, ax2 = plt.subplots()
+    ax2.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
+    paramSlice = param_List[0:-1:75]
+    for indv, V in enumerate(V_List[0:-1:75]):
+        X0, Y0, P0 = paramSlice[indv]
+        ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, P0: {:.2f}'.format(X0, Y0, P0))
+    ax2.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
+    ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
+    ax2.set_xlabel(r'Time (ms)')
+    ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+    ax2.legend()
+    ax2.set_ylim([-20, 20])
 
     plt.show()

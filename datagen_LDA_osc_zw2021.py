@@ -142,7 +142,10 @@ if __name__ == "__main__":
     # # mu_K = -1 * kB * T * N_K / hbar  # chemical potential of K gas (in rad*Hz) -- approximation of above line since np.exp(N_K) >> 1. Get chemical potential ~5 MHz compared to ~1 kHz for Na gas
     # # print(mu_K / (2 * np.pi) * 1e-6)
 
+    # # Fit based on total particle number
+
     # from scipy.optimize import root_scalar
+    # from mpmath import polylog
 
     # def N3D(mu_div_hbar, omega_x, omega_y, omega_z, T):
     #     mu = hbar * mu_div_hbar
@@ -150,15 +153,35 @@ if __name__ == "__main__":
     #     prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
     #     return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
 
-    # mu_div_hbar_List = []
-    # for indw, wy in enumerate(omega_K):
-    #     muScale = 2 * np.pi * 1e3
-    #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
-    #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
-    #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
-    #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
-    #     mu_div_hbar_List.append(sol.root)
+
+    # # # Dipole experiment
+
+    # # mu_div_hbar_List = []
+    # # for indw, wy in enumerate(omega_K):
+    # #     muScale = 2 * np.pi * 1e3
+    # #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
+    # #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
+    # #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
+    # #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
+    # #     mu_div_hbar_List.append(sol.root)
     # # print(mu_div_hbar_List)
+
+    # # # Collective mode experiment
+
+    # # omega_x_K = 2 * np.pi * 125; omega_y_K = 2 * np.pi * 114; omega_z_K = 2 * np.pi * 15
+    # # N_K = np.array([3800, 3800, 8500, 3600, 5000, 2700])  # corresponds to runs 1-6 for different T/Tc
+    # # T_K = np.array([39e-9, 76e-9, 99e-9, 97e-9, 137e-9, 27e-9])
+
+    # # mu_div_hbar_List = np.zeros(N_K.size)
+    # # for ind, N in enumerate(N_K):
+    # #     muScale = 2 * np.pi * 1e3
+    # #     # n = N3D(-10*muScale, omega_x_K, omega_y_K, omega_z_K, T_K[ind])
+    # #     # print(n - N_K[ind])
+    # #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T_K[ind]) - N_K[ind])
+    # #     sol = root_scalar(f, bracket=[-10 * muScale, 10 * muScale], method='brentq')
+    # #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
+    # #     mu_div_hbar_List[ind] = sol.root
+    # # print(mu_div_hbar_List/(2*np.pi))
 
     # Basic parameters
 
@@ -167,6 +190,12 @@ if __name__ == "__main__":
     mI = expParams['mI'] * M_exp2th
     aBB = expParams['aBB'] * L_exp2th
     gBB = (4 * np.pi / mB) * aBB
+
+    # omega_rho = 2*np.pi*100/ T_exp2th
+    # p_rho = np.sqrt(mB*omega_rho)
+    # a_rho = 2*np.pi/p_rho
+    # gB_bar = gBB/(omega_rho*a_rho**3)
+    # print('gB: ', gB_bar)
 
     # # Derived quantities
 
@@ -216,24 +245,6 @@ if __name__ == "__main__":
 
     # # plt.hist(samples, bins=1000)
     # # plt.show()
-
-    # def Vho_3D(x, y, z, omega_x, omega_y, omega_z, mI):
-    #     return (mI / 2) * ((omega_x * x)**2 + (omega_y * y)**2 + (omega_z * z)**2)
-
-    # def log_f_3D(x, y, z, px, py, pz, mI, mu, Vpot, T):
-    #     return -1 * np.log(1 + np.exp(((px**2 + py**2 + pz**2) / (2 * mI) + Vpot(x, y, z) - mu) / (kB * T)))
-
-    # def log_fxp_1D_slice(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fx_1D_slice(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fxp_1D_int(y, py, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
-
-    # def log_fx_1D_int(y, omega_x, omega_y, omega_z, mI, mu_div_hbar, T):
-    #     return
 
     # Convert experimental parameters to theory parameters
 
