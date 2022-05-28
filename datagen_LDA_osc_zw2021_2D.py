@@ -92,7 +92,7 @@ if __name__ == "__main__":
     TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
     T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
     T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
-    mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below (assumes thermal state is based off E = P^2/2m + 3D harmonic trap)
+    mu_div_hbar_K = -1 * np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi)/1e3)
 
     # Optical trap experimental parameters (for K gas)
@@ -176,7 +176,8 @@ if __name__ == "__main__":
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
 
-    samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
     Ns = samples.shape[0]
     xmean = np.mean(samples[:, 0]); ymean = np.mean(samples[:, 1]); pmean = np.mean(samples[:, 2])
     print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])

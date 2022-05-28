@@ -96,7 +96,7 @@ if __name__ == "__main__":
     TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
     T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
     T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
-    mu_div_hbar_K = np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below (assumes thermal state is based off E = P^2/2m + 3D harmonic trap)
+    mu_div_hbar_K = -1 * np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi)/1e3)
 
     # n0_BEC = np.zeros(aIBexp_Vals.size)
@@ -166,14 +166,14 @@ if __name__ == "__main__":
     #     mu = hbar * mu_div_hbar
     #     beta = 1 / (kB * T)
     #     prefac = 1 / ((hbar**3) * (beta**3) * np.sqrt((omega_x**2) * (omega_y**2) * (omega_z**2)))
-    #     return -1 * prefac * polylog(3, -1 * np.exp(-1 * beta * mu))
+    #     return -1 * prefac * polylog(3, -1 * np.exp(beta * mu))
 
     # mu_div_hbar_List = []
     # for indw, wy in enumerate(omega_K):
     #     muScale = 2 * np.pi * 1e3
     #     # n = N3D(muScale, omega_x_K, omega_y_K, omega_z_K, T)
     #     def f(mu): return (N3D(mu, omega_x_K, omega_y_K, omega_z_K, T) - N_K[indw])
-    #     sol = root_scalar(f, bracket=[0.1 * muScale, 10 * muScale], method='brentq')
+    #     sol = root_scalar(f, bracket=[-10 * muScale, 10 * muScale], method='brentq')
     #     # print(sol.root / (2 * np.pi)); n = N3D(sol.root, omega_x_K, omega_y_K, omega_z_K, T); print(N_K[indw], n)
     #     mu_div_hbar_List.append(sol.root)
     # print(mu_div_hbar_List)
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
     y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum
 
-    inda = 17
+    inda = 2
 
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
                     'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
@@ -393,6 +393,50 @@ if __name__ == "__main__":
     sample_datapath = 'zwData/samples/'
     savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
+    # # Visualize distribution of samples (***Unrelated: check whether F_imp_trap in the dynamics should depend on the fixed X value of the impurity)
+
+    # import matplotlib
+    # import matplotlib.pyplot as plt
+
+    # cmap = 'gist_heat_r'
+    # my_cmap = matplotlib.cm.get_cmap(cmap)
+    # my_cmap.set_under('w')
+
+    # inda = 2
+
+    # xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    # yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    # pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+
+    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+
+    # Ns = samples.shape[0]
+    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
+    # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
+
+    # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
+    # H = H.T
+    # fig, ax = plt.subplots()
+    # X, Y = np.meshgrid(xedges, yedges)
+    # quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
+    # ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
+    # ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
+    # ax.set_xlim([xMin, xMax])
+    # ax.set_ylim([yMin, yMax])
+    # fig.colorbar(quad,extend='max')
+
+    # fig2, ax2 = plt.subplots()
+    # ax2.hist(pSamples, bins=1000, color='k')
+    # ax2.axvline(x=pmean, ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    # ax2.axvline(x=P0_imp[inda], ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    # ax2.set_xlim([pMin, pMax])
+    # # ax2.set_ylim([])    
+
+    # plt.show()
+
+
     # Finding max value of distribution for each interaction strength
 
     # yMax_vals = []
@@ -411,7 +455,7 @@ if __name__ == "__main__":
     #     fMax_vals.append(-1*sol.fun)
 
     # print(yMax_vals)
-    # print(fMax_vals)
+    # print(fMax_vals) 
 
     # # Testing
 
