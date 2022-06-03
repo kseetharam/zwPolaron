@@ -3,7 +3,7 @@ import pandas as pd
 import xarray as xr
 from scipy import interpolate
 
-err = 1e-5
+err = 1e-8
 limit = 1e5
 alpha = 0.005
 
@@ -126,8 +126,9 @@ def PB_integral_grid(kgrid, DP, mI, mB, n0, gBB):
 
 def createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB):
     DP_max = mI * nu(mB, n0, gBB)
-    DP_step = DP_max / Nsteps
-    DPVals = np.arange(0, DP_max, DP_step)
+    # DP_step = DP_max / Nsteps
+    # DPVals = np.arange(0, DP_max, DP_step)
+    DPVals = np.linspace(-1*DP_max, DP_max, 2*int(Nsteps))
     aSiVals = np.zeros(DPVals.size)
     PBintVals = np.zeros(DPVals.size)
 
@@ -165,10 +166,11 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
             print('Loop convergence limit reached')
             return -1
 
-        DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB_interp(DP_old, aIBi, aSi_tck, PBint_tck))
-        # print(DP_old, DP_new)
+        # DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB_interp(DP_old, aIBi, aSi_tck, PBint_tck))
+        DP_new = DP_old * (1 - alpha) + alpha * (P - PB_interp(DP_old, aIBi, aSi_tck, PBint_tck))
 
         if np.abs(DP_new - DP_old) < err:
+            # print(np.abs(DP_new - DP_old), np.abs(DP_new-(P - PB_interp(DP_new, aIBi, aSi_tck, PBint_tck))))
             break
         else:
             DP_old = np.copy(DP_new)
@@ -207,7 +209,8 @@ def DP_interp_grid(DPi, P, aIBi, kgrid, mI, mB, n0, gBB):
 
         aSi = aSi_grid(kgrid, DP_old, mI, mB, n0, gBB)
         PB = (aIBi - aSi)**(-2) * PB_integral_grid(kgrid, DP_old, mI, mB, n0, gBB)
-        DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB)
+        # DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB)
+        DP_new = DP_old * (1 - alpha) + alpha * (P - PB)
         # print(DP_old, DP_new)
 
         if np.abs(DP_new - DP_old) < err:

@@ -406,6 +406,8 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     PB = pf_static_sph.PB_interp(DP, aIBi, aSi_tck, PBint_tck)
     E_gs = pf_static_sph.Energy(P, PB, aIBi, aSi, mI, mB, n)
 
+    # print(P, DP, np.abs(DP-(P-PB)))
+
     # n0_exp = sampleParams['n0_BEC_m^-3']  # peak BEC density
     # n0 = n0_exp / (L_exp2th**3)
 
