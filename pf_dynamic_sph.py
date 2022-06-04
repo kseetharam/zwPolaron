@@ -362,6 +362,10 @@ def F_Imp_trap_gaussian(X, gaussian_amp, gaussian_width):
     # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
     return 4 * (gaussian_amp / (gaussian_width**2)) * X * np.exp(-2 * (X / gaussian_width)**2)
 
+def F_Imp_trap_gaussian_2D(X, Y, gaussian_amp, gaussian_width_x, gaussian_width_y):
+    # returns function describing force on impurity from harmonic potential confining impurity in the direction of motion
+    return 4 * (Y / (gaussian_width_y**2)) * U_TiSa(X, Y, gaussian_amp, gaussian_width_x, gaussian_width_y)
+
 
 def U_ODT1(x, y, A_ODT1, wx_ODT1, wy_ODT1):
     return A_ODT1 * np.exp(-2 * (x / wx_ODT1)**2) * np.exp(-2 * (y / wy_ODT1)**2)
@@ -893,12 +897,14 @@ def zw2021_quenchDynamics_2D(cParams, gParams, sParams, trapParams, toggleDict):
 
     omega_Imp_y = trapParams['omega_Imp_y']
     gaussian_amp = trapParams['gaussian_amp']
-    gaussian_width = trapParams['gaussian_width']
+    gaussian_width_x = trapParams['gaussian_width_x']
+    gaussian_width_y = trapParams['gaussian_width_y']
 
     if toggleDict['ImpTrap_Type'] == 'harmonic':
         LDA_funcs['F_Imp_trap'] = lambda Y: F_Imp_trap_harmonic(Y, omega_Imp_y, mI)
     else:
-        LDA_funcs['F_Imp_trap'] = lambda Y: F_Imp_trap_gaussian(Y, gaussian_amp, gaussian_width)
+        # LDA_funcs['F_Imp_trap'] = lambda Y: F_Imp_trap_gaussian(Y, gaussian_amp, gaussian_width)
+        LDA_funcs['F_Imp_trap'] = lambda Y: F_Imp_trap_gaussian_2D(X0, Y, gaussian_amp, gaussian_width_x, gaussian_width_y)
 
     # Initialization CoherentState
     cs = LDA_CoherentState.LDA_CoherentState(kgrid, xgrid)

@@ -140,7 +140,8 @@ if __name__ == "__main__":
 
     # gaussian_amp = 2 * np.pi * A_TiSa_Hz * np.ones(aIBexp_Vals) / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
     gaussian_amp = 2 * np.pi * A_TiSa_Hz_scaled / T_exp2th  # converts optical potential amplitude to radHz, then converts this frequency to theory units. As we choose hbar = 1 in theory units, this is also units of energy.
-    gaussian_width = wy_TiSa * 1e-6 * L_exp2th
+    gaussian_width_y = wy_TiSa * 1e-6 * L_exp2th
+    gaussian_width_x = wx_TiSa * 1e-6 * L_exp2th
 
     a0_exp = 5.29e-11  # Bohr radius (m)
     aIBi_Vals = 1 / (aIBexp_Vals * a0_exp * L_exp2th)
@@ -195,7 +196,7 @@ if __name__ == "__main__":
     if toggleDict['Location'] == 'personal':
         datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021'
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/holyscratch01/demler_lab/kis/data/ZwierleinExp_data/2021'
+        datapath = '/n/holyscratch01/jaffe_lab/Everyone/kis/data/ZwierleinExp_data/2021'
 
     # if toggleDict['BEC_density'] == 'off':
     #     innerdatapath = innerdatapath + '/HomogBEC'
@@ -219,11 +220,11 @@ if __name__ == "__main__":
     jobList = []
     for inds in np.arange(Ns):
         x0 = samples[inds, 0]; y0 = samples[inds, 1]; p0 = samples[inds, 2]
-        trapParams = {'RTF_BEC': RTF_BEC_Y_th[inda], 'omega_BEC_osc': omega_BEC_osc[inda], 'gamma_BEC_osc': gamma_BEC_osc[inda], 'phi_BEC_osc': phi_BEC_osc[inda], 'amp_BEC_osc': amp_BEC_osc[inda], 'omega_Imp_y': omega_Imp_y[inda], 'gaussian_amp': gaussian_amp[inda], 'gaussian_width': gaussian_width, 'X0': x0, 'Y0': y0, 'P0': p0, 'L_exp2th': L_exp2th, 'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda]}
+        trapParams = {'RTF_BEC': RTF_BEC_Y_th[inda], 'omega_BEC_osc': omega_BEC_osc[inda], 'gamma_BEC_osc': gamma_BEC_osc[inda], 'phi_BEC_osc': phi_BEC_osc[inda], 'amp_BEC_osc': amp_BEC_osc[inda], 'omega_Imp_y': omega_Imp_y[inda], 'gaussian_amp': gaussian_amp[inda], 'gaussian_width_x': gaussian_width_x, 'gaussian_width_y': gaussian_width_y, 'X0': x0, 'Y0': y0, 'P0': p0, 'L_exp2th': L_exp2th, 'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda]}
         filepath = innerdatapath + '/initdist/aIB_{0}a0_{1}.nc'.format(aIB_exp, inds)
         jobList.append((aIBi, sParams, trapParams, filepath))
 
-    # print(len(jobList))
+    print(len(jobList))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 

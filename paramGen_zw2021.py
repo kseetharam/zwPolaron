@@ -97,7 +97,8 @@ if __name__ == "__main__":
     N_K = np.array([2114.31716217314, 3040.54086059863, 3788.54290366850, 2687.53370686094, 2846.49206660163, 1692.49722769915, 1813.12703968803, 2386.60764443984, 2532.45824159990, 2361.26046445201, 2466.63648224567, 2206.34584323146, 2113.15620874362, 3755.19098529495, 2163.29615872937, 2042.58962172497, 4836.09854876457, 3044.93792941312])  # total number of fermions in K gas
     TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
     T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
-    T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
+    # T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
+    T = 10e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
     mu_div_hbar_K = -1 * np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi)/1e3)
 
@@ -391,7 +392,8 @@ if __name__ == "__main__":
     print(timer() - start)
 
     sample_datapath = 'zwData/samples/'
-    savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    savemat(sample_datapath + 'aIB_{0}a0_T_10nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
     # # Visualize distribution of samples
 
@@ -414,8 +416,9 @@ if __name__ == "__main__":
 
     # Ns = samples.shape[0]
     # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # # pSamples = np.abs(pSamples)
     # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
+    # print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
 
     # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
     # H = H.T
@@ -429,10 +432,10 @@ if __name__ == "__main__":
     # fig.colorbar(quad,extend='max')
 
     # fig2, ax2 = plt.subplots()
-    # ax2.hist(pSamples, bins=1000, color='k')
-    # ax2.axvline(x=pmean, ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
-    # ax2.axvline(x=P0_imp[inda], ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
-    # ax2.set_xlim([pMin, pMax])
+    # ax2.hist(pSamples/(mI * nu[inda]), bins=1000, color='k')
+    # ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    # ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    # ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
     # # ax2.set_ylim([])    
 
     # plt.show()
