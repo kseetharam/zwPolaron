@@ -6,6 +6,7 @@ import pf_dynamic_sph
 import pf_static_sph
 from scipy.io import savemat, loadmat
 from scipy.optimize import root_scalar, minimize_scalar
+from scipy.integrate import simpson
 import os
 from timeit import default_timer as timer
 import sys
@@ -97,10 +98,10 @@ if __name__ == "__main__":
     N_K = np.array([2114.31716217314, 3040.54086059863, 3788.54290366850, 2687.53370686094, 2846.49206660163, 1692.49722769915, 1813.12703968803, 2386.60764443984, 2532.45824159990, 2361.26046445201, 2466.63648224567, 2206.34584323146, 2113.15620874362, 3755.19098529495, 2163.29615872937, 2042.58962172497, 4836.09854876457, 3044.93792941312])  # total number of fermions in K gas
     TFermi = np.array([6.83976585132807e-08, 7.93313829893224e-08, 8.43154444077350e-08, 7.58635297351284e-08, 7.65683267650816e-08, 6.47481434584840e-08, 6.60734255262424e-08, 7.26332216239745e-08, 7.42817184102838e-08, 7.23120402195269e-08, 7.33357082077064e-08, 7.06727442566945e-08, 6.89216704173642e-08, 8.25441536498287e-08, 6.96294877404586e-08, 6.84055531750863e-08, 9.08417325299114e-08, 7.69018614503965e-08])  # Fermi temperature of K gas (in K)
     T_K_ratio = np.array([1.16963068237879, 1.00842815271187, 0.948817865599258, 1.05452514903161, 1.04481844360328, 1.23555666196507, 1.21077421615179, 1.10142436492992, 1.07698100841087, 1.10631645514542, 1.09087376334348, 1.13197811746813, 1.16073797276748, 0.969178269600757, 1.14893851148521, 1.16949569569648, 0.880652512584549, 1.04028691232139])  # Ratio of temperature T to Fermi temperature T_Fermi of K gas
-    # T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
-    T = 10e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
+    T = 80e-9  # Temperature T of K gas (in K) --> equivalent to T_K_ratio * T_Fermi
     mu_div_hbar_K = -1 * np.array([21527.623521898644, 17656.025221467124, 15298.569367268587, 18973.981143581444, 18360.701066883277, 23888.301168354345, 23158.661546706127, 20239.341737009476, 19607.6059603436, 20352.99023696009, 19888.153905968644, 21074.805169679148, 21533.45904566066, 15393.579214021502, 21284.26382771103, 21894.22770364862, 12666.509194815215, 17640.573345313787])  # Chemical potential of the K gas (in rad*Hz) - computed using the code below
     # print(mu_div_hbar_K / (2 * np.pi)/1e3)
+    print(T)
 
     # n0_BEC = np.zeros(aIBexp_Vals.size)
     # for inda, a in enumerate(aIBexp_Vals):
@@ -345,8 +346,16 @@ if __name__ == "__main__":
     U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341, -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
     U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
     E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36, 3.11130148e-02, 7.32152511e-02, 1.88938399e-01, 2.68558712e-01, 3.73587857e-01, 5.83872838e-01, 8.28556730e-01, 1.11273234e+00, 1.66368733e+00])
-    f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
-    y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum
+
+    # f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
+    # y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum
+
+    f_thermal_maxVals = np.array([0.04371091507791199, 0.07475837588152232, 0.13625255887903176, 0.09222453506832799, 0.13076334263340406, 0.07859344842990887, 0.09244448365158987, 0.1225636725220138, 0.1337588086527938, 0.13055540035829122, 0.14737558497429884, 0.15235876040489293, 0.16029655986623156, 0.20675607487658249, 0.3972825025010302, 0.8684560204142703, 0.9907473907238571, 0.9993631937004797])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 80 nK]
+    y_thermal_maxVals = np.array([-12.358738846077586, -15.14212490509725, -13.144260921615512, -16.58972888463607, -13.283761360003684, -21.15224703048301, -20.742905297539455, -24.997818472525328, -26.498896331698784, -28.469197495859653, -33.97009782737399, -33.66816330606461, -36.2296200495234, -18.449504042252958, -55.6547478236438, -56.53625335500957, -50.994739542476275, -56.75799513288452])  # the y values y=yMax at which f_thermal has a maximum [T = 80 nK]
+
+    # f_thermal_maxVals = np.array([3.6378912844041568e-06, 3.652290496943756e-05, 0.0005640245814312913, 9.857039995630772e-05, 0.0004881293664369387, 5.171451969872132e-05, 0.00010638286166695999, 0.0003789391523830838, 0.0005681819252681373, 0.0005104871818073756, 0.0009037638619273189, 0.001077650557330782, 0.0013902800196785602, 0.004857527551207323, 0.19032061782479667, 0.9996093970094144, 0.9999999951103646, 0.9999999999999079])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 20 nK]
+    # y_thermal_maxVals = np.array([-12.313756173386173, -15.092081246922893, -13.115154653923879, -16.55256620596325, -13.266519101775238, -21.135281524323595, -20.733909803778854, -24.993339840222134, -26.498895611802926, -28.475590509794532, -33.99651731075096, -33.74027937637036, -36.34859113208791, -18.51735283512218, -55.740980406094394, -56.51580566054858, -50.90619908248219, -56.54844009927777])  # the y values y=yMax at which f_thermal has a maximum [T = 20 nK]
+
 
     inda = 3
 
@@ -366,7 +375,7 @@ if __name__ == "__main__":
     print(aIBexp_Vals[inda], y0, p0)
     print(xMax, yMax, pMax, fMax)
 
-    Ns = 1000  # number of desired samples
+    Ns = 10000  # number of desired samples
     samples = np.zeros((Ns, 3))
     evals = 0
     counter = 0
@@ -382,6 +391,8 @@ if __name__ == "__main__":
         # if p > pMax:
         #     continue
 
+        x = 0
+
         f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
         if f < f_eval:
             samples[counter, :] = [x, y, py]
@@ -393,52 +404,62 @@ if __name__ == "__main__":
 
     sample_datapath = 'zwData/samples/'
     # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    savemat(sample_datapath + 'aIB_{0}a0_T_10nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
-    # # Visualize distribution of samples
+    # Visualize distribution of samples
 
-    # cmap = 'gist_heat_r'
-    # my_cmap = matplotlib.cm.get_cmap(cmap)
-    # my_cmap.set_under('w')
+    cmap = 'gist_heat_r'
+    my_cmap = matplotlib.cm.get_cmap(cmap)
+    my_cmap.set_under('w')
 
-    # inda = 3
+    inda = 3
 
-    # xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
-    # yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
 
-    # pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
-    # # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
     # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # # pMin = 0; pMax = mI * nu[inda]
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_zero.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
+    Ns = samples.shape[0]
+    xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # pSamples = np.abs(pSamples)
+    xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
+    print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
 
-    # Ns = samples.shape[0]
-    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
-    # # pSamples = np.abs(pSamples)
-    # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    # print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    H, xedges, yedges = np.histogram2d(xSamples, ySamples)
+    H = H.T
+    fig, ax = plt.subplots()
+    X, Y = np.meshgrid(xedges, yedges)
+    quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
+    ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
+    ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
+    ax.set_xlim([xMin, xMax])
+    ax.set_ylim([yMin, yMax])
+    fig.colorbar(quad,extend='max')
 
-    # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
-    # H = H.T
-    # fig, ax = plt.subplots()
-    # X, Y = np.meshgrid(xedges, yedges)
-    # quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
-    # ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
-    # ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
-    # ax.set_xlim([xMin, xMax])
-    # ax.set_ylim([yMin, yMax])
-    # fig.colorbar(quad,extend='max')
+    fig2, ax2 = plt.subplots()
+    ax2.hist(pSamples/(mI * nu[inda]), bins=1000, color='k')
+    ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
+    # ax2.set_ylim([])
 
-    # fig2, ax2 = plt.subplots()
-    # ax2.hist(pSamples/(mI * nu[inda]), bins=1000, color='k')
-    # ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
-    # ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
-    # ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
-    # # ax2.set_ylim([])    
+    my_cmap='RdBu'
 
-    # plt.show()
+    H, yedges, pedges = np.histogram2d(ySamples, pSamples)
+    H = H.T
+    fig, ax = plt.subplots()
+    Y, P = np.meshgrid(yedges, pedges)
+    quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
+    ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
+    ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
+    fig.colorbar(quad,extend='max')
+
+    plt.show()
 
     # # Polaron energy exploration
 
@@ -482,7 +503,7 @@ if __name__ == "__main__":
     # plt.show()
 
 
-    # Finding max value of distribution for each interaction strength
+    # # Finding max value of distribution for each interaction strength
 
     # yMax_vals = []
     # fMax_vals = []
@@ -504,23 +525,22 @@ if __name__ == "__main__":
 
     # # Testing
 
-    # import matplotlib
-    # import matplotlib.pyplot as plt
-    # from scipy.integrate import simpson
+    # inda = 3
 
     # xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
     # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    # pVals = np.linspace(0, mI * nu[inda], 100)
+    # pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
 
     # x_des = 50
     # y_des = 50
     # # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
-    # testVals = np.zeros((xVals.size, yVals.size))
+    # # testVals = np.zeros((xVals.size, yVals.size))
+    # testVals = np.zeros((yVals.size, pVals.size))
 
     # for indx, x in enumerate(xVals):
     #     if indx != x_des:
     #         continue
-    #     print(x)
+    #     # print(x)
     #     EPol = np.zeros(yVals.size)
     #     UOpt = np.zeros(yVals.size)
     #     Vharm = np.zeros(yVals.size)
@@ -529,10 +549,11 @@ if __name__ == "__main__":
     #         #     continue
     #         # print(y)
     #         start = timer()
-    #         # for indp, p in enumerate(pVals):
-    #         #     testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(x, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #         #     # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #         testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         for indp, p in enumerate(pVals):
+    #             testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #             # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
     #         # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
     #         # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
     #         # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
@@ -549,29 +570,29 @@ if __name__ == "__main__":
     # # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
     # # print(p0, pmean)
 
-    # fig, ax = plt.subplots()
-    # # ax.plot(pVals, testVals[x_des,y_des,:])
-    # ax.plot(yVals, testVals[x_des,:])
-    # # ax.plot(yVals, EPol)
-    # # ax.plot(yVals, UOpt)
-    # # ax.plot(yVals, Vharm)
-    # plt.show()
+    # # fig, ax = plt.subplots()
+    # # # ax.plot(pVals, testVals[x_des,y_des,:])
+    # # ax.plot(yVals, testVals[x_des,:])
+    # # # ax.plot(yVals, EPol)
+    # # # ax.plot(yVals, UOpt)
+    # # # ax.plot(yVals, Vharm)
+    # # plt.show()
 
     # # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
     # # fig, ax = plt.subplots()
-    # # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals * (L_exp2th**3),cmap='RdBu')
+    # # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
     # # ax.set_xlabel('x')
     # # ax.set_ylabel('y')
     # # fig.colorbar(c, ax=ax)
     # # plt.show()
 
-    # # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
-    # # fig, ax = plt.subplots()
-    # # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg, testVals[x_des, :, :] * (L_exp2th**3),cmap='RdBu')
-    # # ax.set_xlabel('y')
-    # # ax.set_ylabel('p')
-    # # fig.colorbar(c, ax=ax)
-    # # plt.show()
+    # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
+    # fig, ax = plt.subplots()
+    # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg/(mI * nu[inda]), testVals,cmap='RdBu')
+    # ax.set_xlabel('y')
+    # ax.set_ylabel('p')
+    # fig.colorbar(c, ax=ax)
+    # plt.show()
 
     # # Create dicts
 

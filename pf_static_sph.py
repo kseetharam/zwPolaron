@@ -164,7 +164,7 @@ def DP_interp(DPi, P, aIBi, aSi_tck, PBint_tck):
 
         if lim == 0:
             print('Loop convergence limit reached')
-            return -1
+            return DP_new
 
         # DP_new = DP_old * (1 - alpha) + alpha * np.abs(P - PB_interp(DP_old, aIBi, aSi_tck, PBint_tck))
         DP_new = DP_old * (1 - alpha) + alpha * (P - PB_interp(DP_old, aIBi, aSi_tck, PBint_tck))
