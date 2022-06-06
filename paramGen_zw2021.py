@@ -375,37 +375,37 @@ if __name__ == "__main__":
     print(aIBexp_Vals[inda], y0, p0)
     print(xMax, yMax, pMax, fMax)
 
-    Ns = 10000  # number of desired samples
-    samples = np.zeros((Ns, 3))
-    evals = 0
-    counter = 0
-    start = timer()
-    while counter < Ns:
-        f = np.random.uniform(low=0, high=fMax)
-        x = np.random.uniform(low=xMin, high=xMax)
-        y = np.random.uniform(low=yMin, high=yMax)
-        py = np.random.uniform(low=pMin, high=pMax)
+    # Ns = 1000  # number of desired samples
+    # samples = np.zeros((Ns, 3))
+    # evals = 0
+    # counter = 0
+    # start = timer()
+    # while counter < Ns:
+    #     f = np.random.uniform(low=0, high=fMax)
+    #     x = np.random.uniform(low=xMin, high=xMax)
+    #     y = np.random.uniform(low=yMin, high=yMax)
+    #     py = np.random.uniform(low=pMin, high=pMax)
 
-        # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
-        # p = np.sqrt(px**2 + py**2 + pz**2)
-        # if p > pMax:
-        #     continue
+    #     # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
+    #     # p = np.sqrt(px**2 + py**2 + pz**2)
+    #     # if p > pMax:
+    #     #     continue
 
-        x = 0
+    #     # x = 0
 
-        f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-        if f < f_eval:
-            samples[counter, :] = [x, y, py]
-            # samples.append((x, y, py))
-            counter += 1
-        evals += 1
-        print(counter, evals, f, f_eval)
-    print(timer() - start)
+    #     f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+    #     if f < f_eval:
+    #         samples[counter, :] = [x, y, py]
+    #         # samples.append((x, y, py))
+    #         counter += 1
+    #     evals += 1
+    #     print(counter, evals, f, f_eval)
+    # print(timer() - start)
 
-    sample_datapath = 'zwData/samples/'
+    # sample_datapath = 'zwData/samples/'
     # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
     # Visualize distribution of samples
 
@@ -420,9 +420,11 @@ if __name__ == "__main__":
 
     pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
     # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+
+    # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
     Ns = samples.shape[0]
     xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
@@ -442,7 +444,7 @@ if __name__ == "__main__":
     fig.colorbar(quad,extend='max')
 
     fig2, ax2 = plt.subplots()
-    ax2.hist(pSamples/(mI * nu[inda]), bins=1000, color='k')
+    ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
     ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
     ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
     ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
@@ -450,7 +452,7 @@ if __name__ == "__main__":
 
     my_cmap='RdBu'
 
-    H, yedges, pedges = np.histogram2d(ySamples, pSamples)
+    H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
     H = H.T
     fig, ax = plt.subplots()
     Y, P = np.meshgrid(yedges, pedges)
