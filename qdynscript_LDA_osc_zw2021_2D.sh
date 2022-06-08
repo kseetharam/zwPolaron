@@ -2,7 +2,7 @@
 #SBATCH -J quenchLDAosc
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 6-23:59
+#SBATCH -t 3-00:00
 #SBATCH -p shared
 #SBATCH --mem=12000
 #SBATCH --mail-type=ALL
