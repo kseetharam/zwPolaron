@@ -372,7 +372,7 @@ if __name__ == "__main__":
     pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
 
     fMax = f_thermal_maxVals[inda]
-    print(aIBexp_Vals[inda], y0, p0)
+    print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
     print(xMax, yMax, pMax, fMax)
 
     # Ns = 1000  # number of desired samples
@@ -392,6 +392,8 @@ if __name__ == "__main__":
     #     #     continue
 
     #     # x = 0
+    #     # y = y0
+    #     # py = p0
 
     #     f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
     #     if f < f_eval:
@@ -404,6 +406,8 @@ if __name__ == "__main__":
 
     # sample_datapath = 'zwData/samples/'
     # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
@@ -420,7 +424,9 @@ if __name__ == "__main__":
 
     pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
     # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
     # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
