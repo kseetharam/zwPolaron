@@ -83,8 +83,8 @@ if __name__ == "__main__":
         tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
         V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
         X0 = attrs['X0']; Y0 = attrs['Y0']; P0 = attrs['P0']
-        if np.abs(Y0) < 15 or np.abs(X0) < 15:
-            continue
+        # if np.abs(Y0) < 15 or np.abs(X0) < 15:
+        #     continue
 
         # xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
         # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
@@ -98,6 +98,7 @@ if __name__ == "__main__":
         # xBEC_List.append(xBEC_conv)
 
     V_mean = np.mean(np.array(V_List), axis=0)
+    print(len(V_List))
     print(tVals.size)
     print(V_mean.shape)
 
