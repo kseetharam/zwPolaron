@@ -38,6 +38,8 @@ if __name__ == "__main__":
     legendsize = 10
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0_Y_Y0'
 
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
 
@@ -71,9 +73,14 @@ if __name__ == "__main__":
     # xBEC_List = []
 
     for ind, filename in enumerate(os.listdir(datapath)):
+        # print(filename)
         if filename == '.DS_Store':
             continue
+        if filename == 'aIB_-375a0_632.nc':
+            continue
+
         qds = xr.open_dataset(datapath + '/' + filename)
+        # print(qds)
 
         attrs = qds.attrs
         mI = attrs['mI']; mB = attrs['mB']; nu = attrs['nu']; xi = attrs['xi']; gBB = attrs['gBB']; tscale = xi / nu; aIBi = attrs['aIBi']
@@ -85,6 +92,10 @@ if __name__ == "__main__":
         X0 = attrs['X0']; Y0 = attrs['Y0']; P0 = attrs['P0']
         # if np.abs(Y0) < 15 or np.abs(X0) < 15:
         #     continue
+
+        if Y0 < 3:
+            continue
+
 
         # xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
         # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
@@ -186,15 +197,17 @@ if __name__ == "__main__":
 
     fig2, ax2 = plt.subplots()
     ax2.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
-    paramSlice = param_List[0:-1:75]
-    for indv, V in enumerate(V_List[0:-1:75]):
+    # paramSlice = param_List[0:-1:75]
+    paramSlice = param_List[0:-1]
+    # for indv, V in enumerate(V_List[0:-1:75]):
+    for indv, V in enumerate(V_List[0:-1]):
         X0, Y0, P0 = paramSlice[indv]
         ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, P0: {:.2f}'.format(X0, Y0, P0))
     ax2.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
     ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax2.set_xlabel(r'Time (ms)')
     ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
-    ax2.legend()
+    # ax2.legend()
     ax2.set_ylim([-20, 20])
 
     plt.show()

@@ -101,6 +101,7 @@ if __name__ == "__main__":
         tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
         V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
 
+        # phi_BEC_osc = phi_BEC_osc + np.pi/4
         xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
         vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
         # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(np.linspace(0, 100, 1000) * 1e-3 * T_exp2th, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
@@ -158,7 +159,7 @@ if __name__ == "__main__":
     # phiVals = []
     # gammaVals = []
     # for ind in np.arange(18):
-    #     if ind != 4:
+    #     if ind != 3:
     #         continue
     #     print(aIBexp_Vals[ind])
     #     NaV = NaV_exp[ind]
@@ -181,6 +182,7 @@ if __name__ == "__main__":
     #     phiVals.append(phiFit); gammaVals.append(gammaFit)
     #     print(omega_Na[ind] / (2 * np.pi), gammaFit, phiFit / np.pi)
     #     NaV_cf = v_decayOsc(tVals_interp * 1e-3, phiFit, gammaFit) * 1e6 / 1e3  # converts m/s velocity into um/ms
+    #     # NaV_cf = v_decayOsc(tVals_interp * 1e-3, phiFit + np.pi, gammaFit) * 1e6 / 1e3  # converts m/s velocity into um/ms
 
     #     def a_decayOsc(t, omega, x0, phi, gamma):
     #         # takes t in s, omega in radHz, x0 (=initial Na displacement) in m, phi in rad, gamma in Hz and outputs acceleration in m/s^2
@@ -193,7 +195,7 @@ if __name__ == "__main__":
     #     # ax2.plot(tVals_interp, NaV_interp, 'r-')
     #     ax2.plot(tVals_interp, NaV_cf, 'g-')
     #     # ax2.plot(tVals_interp, NaV_cf, 'r-')
-    #     ax2.plot(np.linspace(0, 100, 1000), vBEC_conv, 'r-')
+    #     # ax2.plot(np.linspace(0, 100, 1000), vBEC_conv, 'r-')
 
     #     # ax2.plot(tVals_interp, aOsc_interp, 'b-')
     #     # ax2.plot(tVals_interp, a_cf, 'r-')
@@ -224,32 +226,32 @@ if __name__ == "__main__":
         ax0.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
         ax0.legend()
 
-        # fig1, ax1 = plt.subplots()
-        # ax1.plot(tVals, xBEC_List[inda])
-        # ax1.set_ylabel(r'BEC position ($\mu$m)')
-        # ax1.set_xlabel(r'Time (ms)')
-        # ax1.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        fig1, ax1 = plt.subplots()
+        ax1.plot(tVals, xBEC_List[inda])
+        ax1.set_ylabel(r'BEC position ($\mu$m)')
+        ax1.set_xlabel(r'Time (ms)')
+        ax1.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
 
-        fig2, ax2 = plt.subplots()
-        ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
-        ax2.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
-        ax2.hlines(-3 * RTF_BEC_Y[inda], np.min(tVals), np.max(tVals), 'k', '--')
-        ax2.hlines(3 * RTF_BEC_Y[inda], np.min(tVals), np.max(tVals), 'k', '--')
-        ax2.set_ylabel(r'Relative impurity position ($\mu$m)')
-        ax2.set_xlabel(r'Time (ms)')
-        ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
-        ax2.legend()
+        # fig2, ax2 = plt.subplots()
+        # ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
+        # ax2.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
+        # ax2.hlines(-3 * RTF_BEC_Y[inda], np.min(tVals), np.max(tVals), 'k', '--')
+        # ax2.hlines(3 * RTF_BEC_Y[inda], np.min(tVals), np.max(tVals), 'k', '--')
+        # ax2.set_ylabel(r'Relative impurity position ($\mu$m)')
+        # ax2.set_xlabel(r'Time (ms)')
+        # ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+        # ax2.legend()
 
-        fig5, ax5 = plt.subplots()
-        ax5.plot(tVals, A_PP_List[inda])
-        ax5.legend()
+        # fig5, ax5 = plt.subplots()
+        # ax5.plot(tVals, A_PP_List[inda])
+        # ax5.legend()
 
-        fig6, ax6 = plt.subplots()
-        ax6.plot(tVals, F_PP_List[inda], label='PP')
-        ax6.plot(tVals, F_impTrap_List[inda], label='Trap')
-        ax6.plot(tVals, F_PP_List[inda] + F_impTrap_List[inda], label='Total')
-        ax6.legend()
-        ax6.legend()
+        # fig6, ax6 = plt.subplots()
+        # ax6.plot(tVals, F_PP_List[inda], label='PP')
+        # ax6.plot(tVals, F_impTrap_List[inda], label='Trap')
+        # ax6.plot(tVals, F_PP_List[inda] + F_impTrap_List[inda], label='Total')
+        # ax6.legend()
+        # ax6.legend()
 
         fig, ax = plt.subplots()
         ax.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
