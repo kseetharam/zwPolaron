@@ -28,7 +28,6 @@ class zw2021_PolaronHamiltonian:
         self.Pol_Potential = toggleDict['Polaron_Potential']
         self.PP_Type = toggleDict['PP_Type']
         self.CS_Dyn = toggleDict['CS_Dyn']
-        self.X0 = self.trapParams['X0']
 
         if self.couplingType == 'frohlich':
             [aIBi, mI, mB, n0, gBB] = self.Params
@@ -51,20 +50,26 @@ class zw2021_PolaronHamiltonian:
     # @profile
     def update(self, t, system_vars, coherent_state):
 
-        amplitude = system_vars[0:-3]
-        phase = system_vars[-3].real.astype(float)
-        P = system_vars[-2].real.astype(float)
-        Y = system_vars[-1].real.astype(float)
+        amplitude = system_vars[0:-5]
+        phase = system_vars[-5].real.astype(float)
+        X = system_vars[-4].real.astype(float)
+        PX = system_vars[-3].real.astype(float)
+        Y = system_vars[-2].real.astype(float)
+        PY = system_vars[-1].real.astype(float)
         YLab = Y + pfs.x_BEC_osc_zw2021(t, self.trapParams['omega_BEC_osc'], self.trapParams['gamma_BEC_osc'], self.trapParams['phi_BEC_osc'], self.trapParams['amp_BEC_osc'])
 
         [aIBi, mI, mB, n0, gBB] = self.Params
-        RTF_BEC = self.trapParams['RTF_BEC']; nBEC_tck = self.trapParams['nBEC_tck']
-        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_func = self.LDA_funcs['F_Imp_trap']; F_pol_naive_func = self.LDA_funcs['F_pol_naive']
+        RTF_BEC_X = self.trapParams['RTF_BEC_X']; RTF_BEC_Y = self.trapParams['RTF_BEC_Y']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_Y_func = self.LDA_funcs['F_Imp_trap_Y']
+        densityFunc = self.trapParams['densityFunc']; densityGradFunc = self.trapParams['densityGradFunc']
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            n = interpolate.bisplev(self.X0, Y, nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+            n = densityFunc(X, Y)
+            nGrad = densityGradFunc(X, Y)
+            dndx = nGrad[0]; dndy = nGrad[1]
+
             if(self.coordinate_system == "SPHERICAL_2D"):
                 self.Omega0_grid = pfs.Omega(self.grid, 0, mI, mB, n, gBB)
                 self.Wk_grid = pfs.Wk(self.grid, mB, n, gBB)
@@ -100,36 +105,31 @@ class zw2021_PolaronHamiltonian:
         amplitude_new_temp = -1j * (self.gnum * np.sqrt(n) * self.Wk_grid +
                                     amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-        phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (P**2 - PB**2) / (2 * mI)
+        phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (PY**2 - PB**2) / (2 * mI)
 
         if self.Pol_Potential == 'off':
-            P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
+            P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_Y_func(YLab)
         else:
             amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
             Wk2_grid = self.Wk_grid**2; Wk3_grid = self.Wk_grid**3; omegak_grid = pfs.omegak_grid(self.grid, mB, n, gBB)
             eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_grid) * amp_re, dVk); eta3 = np.dot((self.Wk_grid / omegak_grid) * amp_im, dVk)
             xp_re = 0.5 * np.dot(self.Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(self.Wki_grid * amp_im, dVk)
             A_PP = self.gnum * (1 + 2 * xp_re / n) + gBB * eta1 - self.gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
-            dndx = interpolate.splev(X, nBEC_tck, der=1)
-            F_pol = -1 * A_PP * dndx
+            F_pol = -1 * A_PP * dndy
 
-            P_new_temp = F_pol - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-
-        X_new_temp = (P - PB) / mI
+            PY_new_temp = F_pol - F_BEC_osc_func(t) + F_Imp_trap_Y_func(X, YLab)
+            PX_new_temp = -1 * self.gnum * dndx + F_Imp_trap_X_func(X, YLab)
+        
 
         if self.BEC_density_var == 'on':
-            if np.abs(X) >= RTF_BEC:
+            if np.isclose(np.heaviside(1 - X ** 2 / RTF_BEC_Y ** 2 - Y ** 2 / RTF_BEC_Y ** 2, 1 / 2) , 0)
                 amplitude_new_temp = 0 * amplitude_new_temp
                 phase_new_temp = 0 * phase_new_temp
-                P_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_func(XLab)
-                X_new_temp = (P - PB) / mI
+                PY_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_Y_func(X, YLab)
+                PX_new_temp = F_Imp_trap_X_func(X, YLab)
 
-        if self.dynamicsType == 'imaginary':
-            # FOR IMAGINARY TIME DYNAMICS
-            amplitude_new_temp = -1 * amplitude_new_temp
-            phase_new_temp = -1j * phase_new_temp
-            P_new_temp = -1j * P_new_temp
-            X_new_temp = -1j * X_new_temp
+        X_new_temp = PX / mI
+        Y_new_temp = (PY - PB) / mI
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
 
@@ -139,9 +139,11 @@ class zw2021_PolaronHamiltonian:
 
         # Assign updates
 
-        system_vars_new[0:-3] = amplitude_new_temp
-        system_vars_new[-3] = phase_new_temp
-        system_vars_new[-2] = P_new_temp
-        system_vars_new[-1] = X_new_temp
+        system_vars_new[0:-5] = amplitude_new_temp
+        system_vars_new[-5] = phase_new_temp
+        system_vars_new[-4] = X_new_temp
+        system_vars_new[-3] = PX_new_temp
+        system_vars_new[-2] = Y_new_temp
+        system_vars_new[-1] = PY_new_temp
 
         return system_vars_new

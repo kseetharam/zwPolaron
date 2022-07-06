@@ -4,12 +4,12 @@ from scipy.integrate import ode
 from copy import copy
 
 
-class LDA_CoherentState:
+class LDA_CoherentState_2D:
     # """ This is a class that stores information about coherent state with local density approximation to include confining potentials, nonuniform BEC density, and force"""
 
     def __init__(self, kgrid, xgrid):
 
-        self.system_vars = np.zeros(kgrid.size() + 3, dtype=complex)  # indices [0:-3] is the coherent state amplitude, index [-3] is the coherent state phase, index [-2] is total system momentum P, and index [-1] is average impurity position X=(P-Pph)/mI
+        self.system_vars = np.zeros(kgrid.size() + 5, dtype=complex)  # indices [0:-5] is the coherent state amplitude, index [-5] is the coherent state phase, index [-4] and index [-3] are the 'classical' position X and momentum PX, index [-2] and index [-1] are the 'quantum' position Y and momentum PY
         self.time = 0
 
         self.kgrid = kgrid
@@ -44,11 +44,13 @@ class LDA_CoherentState:
 
     # SET INITIAL CONDITION
 
-    def set_initState(self, amplitude, phase, P, Y):
-        self.system_vars[0:-3] = amplitude
-        self.system_vars[-3] = phase
-        self.system_vars[-2] = P
-        self.system_vars[-1] = Y
+    def set_initState(self, amplitude, phase, X, PX, Y, PY):
+        self.system_vars[0:-5] = amplitude
+        self.system_vars[-5] = phase
+        self.system_vars[-4] = X
+        self.system_vars[-3] = PX
+        self.system_vars[-2] = Y
+        self.system_vars[-1] = PY
         return
 
     # EVOLUTION
@@ -68,15 +70,21 @@ class LDA_CoherentState:
     # CHARACTERISTICS
 
     def get_Amplitude(self):
-        return self.system_vars[0:-3]
+        return self.system_vars[0:-5]
 
     def get_Phase(self):
+        return self.system_vars[-5].real.astype(float)
+
+    def get_impPosX(self):
+        return self.system_vars[-4].real.astype(float)
+
+    def get_totMomX(self):
         return self.system_vars[-3].real.astype(float)
 
-    def get_totMom(self):
+    def get_impPosY(self):
         return self.system_vars[-2].real.astype(float)
 
-    def get_impPos(self):
+    def get_totMomY(self):
         return self.system_vars[-1].real.astype(float)
 
     # MOMENTUM SPACE DEPENDENT OBSERVABLES

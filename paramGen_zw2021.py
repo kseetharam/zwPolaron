@@ -7,6 +7,7 @@ import pf_static_sph
 from scipy.io import savemat, loadmat
 from scipy.optimize import root_scalar, minimize_scalar
 from scipy.integrate import simpson
+from scipy import interpolate
 import os
 from timeit import default_timer as timer
 import sys
@@ -147,18 +148,20 @@ if __name__ == "__main__":
     #     sf_List.append(sol.root)
     # print(sf_List)
 
-    # def UNa_deriv(yODT1, yNa, A_ODT1, w_ODT1, A_TiSa, w_TiSa):
-    #     A_ODT1_en = hbar * 2 * np.pi * A_ODT1
-    #     A_TiSa_en = hbar * 2 * np.pi * A_TiSa
-    #     return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
+    def UNa_deriv(yODT1, yNa, A_ODT1, w_ODT1, A_TiSa, w_TiSa):
+        A_ODT1_en = hbar * 2 * np.pi * A_ODT1
+        A_TiSa_en = hbar * 2 * np.pi * A_TiSa
+        return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
 
-    # yODT1_List = []
-    # for indy, yNa in enumerate(Na_displacement):
-    #     def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
-    #     # print(indy, f(0 * yNa), f(2 * yNa))
-    #     sol = root_scalar(f, bracket=[0 * yNa, 2 * yNa], method='brentq')
-    #     yODT1_List.append(sol.root)
-    # print(yODT1_List)
+    yODT1_List = []
+    for indy, yNa in enumerate(Na_displacement*np.cos(phi_Na)):
+        def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
+        # print(indy, f(0 * yNa), f(2 * yNa))
+        sol = root_scalar(f, bracket=[0 * yNa, 2 * yNa], method='brentq')
+        yODT1_List.append(sol.root)
+    print(yODT1_List)
+    print(A_ODT1_Hz/A_ODT1_Na_Hz)
+    print(A_TiSa_Hz/A_TiSa_Na_Hz_scaled)
 
     # # Compute chemical potential of the K gas
 
@@ -283,6 +286,86 @@ if __name__ == "__main__":
 
     #     plt.show()
 
+    # # Test density gradient evaluation
+
+    # import numdifftools as nd
+
+    # inda = 3
+
+    # RTF_BEC_X_th = RTF_BEC_X[inda] * 1e-6 * L_exp2th
+    # RTF_BEC_Y_th = RTF_BEC_Y[inda] * 1e-6 * L_exp2th 
+
+    # omegaX = omega_x_Na
+    # omegaY = omega_Na[inda]
+    # omegaZ = omega_z_Na
+    # zTF = RTF_BEC_Z[inda]
+    # xTF = zTF * omegaZ / omegaX
+    # yTF = zTF * omegaZ / omegaY
+
+    # fun = lambda coords: pf_dynamic_sph.becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)
+    # dfun = nd.Gradient(fun, method='central')
+
+    # # # Check slices along x
+
+    # # xVals = np.linspace(-2 * RTF_BEC_X_th, 2 * RTF_BEC_X_th, 5)
+    # # yVals = np.linspace(-2.5 * RTF_BEC_Y_th, 2.5 * RTF_BEC_Y_th, 1000)
+
+    # # for indx, x in enumerate(xVals):
+    # #     denVals = np.zeros(yVals.size)
+    # #     ndVals = np.zeros(yVals.size)
+    # #     for indy, y in enumerate(yVals):
+    # #         x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; 
+    # #         n_exp = pf_dynamic_sph.becdensity_zw2021(x_MuM, y_MuM, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda])  # computes BEC density in experimental units
+    # #         denVals[indy] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         ndVals[indy] = dfun([x,y])[1]
+
+    # #     nBEC_tck = interpolate.splrep(yVals, denVals, s=0)
+
+    # #     print(x_MuM / RTF_BEC_X[inda])
+    # #     n = interpolate.splev(yVals, nBEC_tck)
+    # #     dndy = interpolate.splev(yVals, nBEC_tck, der=1)
+    # #     dgrad = np.gradient(denVals, yVals)
+    # #     print(np.max(ndVals)/np.max(dndy), np.max(ndVals)/np.max(dgrad), np.max(dndy)/np.max(dgrad))
+    # #     fig, ax = plt.subplots(ncols=2)
+    # #     ax[0].plot(yVals/RTF_BEC_Y_th, n)
+    # #     ax[0].plot(yVals/RTF_BEC_Y_th, denVals,'--')
+    # #     ax[1].plot(yVals/RTF_BEC_Y_th,dndy)
+    # #     ax[1].plot(yVals/RTF_BEC_Y_th,ndVals,'--')
+    # #     ax[1].plot(yVals/RTF_BEC_Y_th,dgrad,'--')
+
+    # #     plt.show()
+
+    # # # Check slices along y
+
+    # # xVals = np.linspace(-2.5 * RTF_BEC_X_th, 2.5 * RTF_BEC_X_th, 1000)
+    # # yVals = np.linspace(-2 * RTF_BEC_Y_th, 2 * RTF_BEC_Y_th, 5)
+
+    # # for indy, y in enumerate(yVals):
+    # #     denVals = np.zeros(xVals.size)
+    # #     ndVals = np.zeros(xVals.size)
+    # #     for indx, x in enumerate(xVals):
+    # #         x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; 
+    # #         n_exp = pf_dynamic_sph.becdensity_zw2021(x_MuM, y_MuM, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda])  # computes BEC density in experimental units
+    # #         denVals[indx] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         ndVals[indx] = dfun([x,y])[0]
+
+    # #     nBEC_tck = interpolate.splrep(xVals, denVals, s=0)
+
+    # #     print(y / RTF_BEC_Y_th)
+    # #     n = interpolate.splev(xVals, nBEC_tck)
+    # #     dndx = interpolate.splev(xVals, nBEC_tck, der=1)
+    # #     dgrad = np.gradient(denVals, xVals)
+    # #     print(np.max(ndVals)/np.max(dndx), np.max(ndVals)/np.max(dgrad), np.max(dndx)/np.max(dgrad))
+    # #     fig, ax = plt.subplots(ncols=2)
+    # #     ax[0].plot(xVals/RTF_BEC_X_th, n)
+    # #     ax[0].plot(xVals/RTF_BEC_X_th, denVals,'--')
+    # #     ax[1].plot(xVals/RTF_BEC_X_th,dndx)
+    # #     ax[1].plot(xVals/RTF_BEC_X_th,ndVals,'--')
+    # #     ax[1].plot(xVals/RTF_BEC_X_th,dgrad,'--')
+
+    # #     plt.show()
+
+
     # Convert experimental parameters to theory parameters
 
     n0 = n0_BEC / (L_exp2th**3)  # converts peak BEC density (for each interaction strength) to theory units
@@ -319,6 +402,9 @@ if __name__ == "__main__":
 
     # print(P0_imp)
     # print(mI * nu)
+
+    # print(K_relPos)
+    # print(y0_imp)
 
     # # Create density splines (ground state PB and aSi vs DP) for peak BEC density (n0). Also compute the E_pol_gs offset (min(E_pol_gs) occurs at momentum P=0 and BEC density n=max(n)=n0)
 
@@ -411,63 +497,63 @@ if __name__ == "__main__":
     # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
-    # Visualize distribution of samples
+    # # Visualize distribution of samples
 
-    cmap = 'gist_heat_r'
-    my_cmap = matplotlib.cm.get_cmap(cmap)
-    my_cmap.set_under('w')
+    # cmap = 'gist_heat_r'
+    # my_cmap = matplotlib.cm.get_cmap(cmap)
+    # my_cmap.set_under('w')
 
-    inda = 3
+    # inda = 3
 
-    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
-    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    # xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    # yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
 
-    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
-    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    # # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    Ns = samples.shape[0]
-    xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
-    # pSamples = np.abs(pSamples)
-    xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    # Ns = samples.shape[0]
+    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # # pSamples = np.abs(pSamples)
+    # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
+    # print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
 
-    H, xedges, yedges = np.histogram2d(xSamples, ySamples)
-    H = H.T
-    fig, ax = plt.subplots()
-    X, Y = np.meshgrid(xedges, yedges)
-    quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
-    ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
-    ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
-    ax.set_xlim([xMin, xMax])
-    ax.set_ylim([yMin, yMax])
-    fig.colorbar(quad,extend='max')
+    # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
+    # H = H.T
+    # fig, ax = plt.subplots()
+    # X, Y = np.meshgrid(xedges, yedges)
+    # quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
+    # ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
+    # ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
+    # ax.set_xlim([xMin, xMax])
+    # ax.set_ylim([yMin, yMax])
+    # fig.colorbar(quad,extend='max')
 
-    fig2, ax2 = plt.subplots()
-    ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
-    ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
-    ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
-    ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
-    # ax2.set_ylim([])
+    # fig2, ax2 = plt.subplots()
+    # ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
+    # ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    # ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    # ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
+    # # ax2.set_ylim([])
 
-    my_cmap='RdBu'
+    # my_cmap='RdBu'
 
-    H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
-    H = H.T
-    fig, ax = plt.subplots()
-    Y, P = np.meshgrid(yedges, pedges)
-    quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
-    ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
-    ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
-    fig.colorbar(quad,extend='max')
+    # H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
+    # H = H.T
+    # fig, ax = plt.subplots()
+    # Y, P = np.meshgrid(yedges, pedges)
+    # quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
+    # ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
+    # ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
+    # fig.colorbar(quad,extend='max')
 
-    plt.show()
+    # plt.show()
 
     # # Polaron energy exploration
 

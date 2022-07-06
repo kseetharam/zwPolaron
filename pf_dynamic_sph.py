@@ -7,6 +7,7 @@ import pf_static_sph
 from scipy import interpolate
 from timeit import default_timer as timer
 import mpmath as mpm
+import numdifftools as nd
 
 # ---- HELPER FUNCTIONS ----
 
@@ -437,6 +438,12 @@ def f_thermal(x, y, z, P, Beta, mu, kgrid, cParams, sParams, sampleParams):
     # Note: all quantities are given in theory units except for the conversion that is done to compute the BEC density (used in E_Pol_gs)
 
     return 1 / (1 + np.exp(Beta * E_tot_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams) - Beta * mu))
+
+def f_thermal_true2D(x, y, z, Px, Py, Beta, mu, kgrid, cParams, sParams, sampleParams):
+    # Computes the ground state occupation probability of the initial polaron having coordinates (x,y,z,Py) at temperature Beta = 1/(kB*T) and chemical potential mu. Adds a 'classical' kinetic energy Px^2/2mI term.
+    # Note: (x,y,z) are all given in the frame of the BEC (whose center is shifted by sampleParams['y0_BEC'] in the y-direction w.r.t. the lab frame origin; the other two directions have the same origin)
+    # Note: all quantities are given in theory units except for the conversion that is done to compute the BEC density (used in E_Pol_gs)
+    return 1 / (1 + np.exp(Beta * (E_tot_gs(x, y, z, Py, kgrid, cParams, sParams, sampleParams) + Px**2/(2*sParams[0])) - Beta * mu))
 
 
 # ---- OTHER FUNCTIONS ----
@@ -880,7 +887,7 @@ def zw2021_quenchDynamics_2D(cParams, gParams, sParams, trapParams, toggleDict):
     yVals = np.linspace(-4 * trapParams['RTF_BEC'], 4 * trapParams['RTF_BEC'], 1000)
     denVals = np.zeros(yVals.size)
     L_exp2th = trapParams['L_exp2th']
-    x0_MuM = X0 * (1e6) / L_exp2th; yVals_MuM = yVals * (1e6) / L_exp2th  # convert positions in theory units to um
+    x0_MuM = X0 * (1e6) / L_exp2th; y0_MuM = Y0 * (1e6) / L_exp2th; yVals_MuM = yVals * (1e6) / L_exp2th  # convert positions in theory units to um
 
     for indy, y in enumerate(yVals_MuM):
         n_exp = becdensity_zw2021(x0_MuM, y, 0, trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM'])  # computes BEC density in experimental units
@@ -915,11 +922,14 @@ def zw2021_quenchDynamics_2D(cParams, gParams, sParams, trapParams, toggleDict):
     ham = zw2021_PolaronHamiltonian.zw2021_PolaronHamiltonian(cs, Params, LDA_funcs, trapParams, toggleDict)
     gnum = ham.gnum
 
+    n_exp = becdensity_zw2021(x0_MuM, y0_MuM, 0, trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM'])  # computes BEC density in experimental units
+    n_initial = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+
     Nsteps = 1e2
-    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n_initial, gBB)
     DP = pf_static_sph.DP_interp(0, P0, aIBi, aSi_tck, PBint_tck)
     aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
-    CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+    CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n_initial, gBB)
     cs.set_initState(amplitude=CSAmp, phase=0, P=P0, X=Y0)
 
     # Time evolution
@@ -983,6 +993,132 @@ def zw2021_quenchDynamics_2D(cParams, gParams, sParams, trapParams, toggleDict):
 
     return dynsph_ds
 
+def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDict):
+    #
+    # do not run this inside CoherentState or PolaronHamiltonian
+    import LDA_CoherentState
+    import zw2021_PolaronHamiltonian
+    # takes parameters, performs dynamics, and outputs desired observables
+    aIBi = cParams['aIBi']
+    [xgrid, kgrid, tgrid] = gParams
+    [mI, mB, n0, gBB] = sParams
+    PX0 = trapParams['PX0']; PY0 = trapParams['PY0']; X0 = trapParams['X0']; Y0 = trapParams['Y0']
+
+    NGridPoints = kgrid.size()
+    k_max = kgrid.getArray('k')[-1]
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+
+    # calculate some parameters
+    nu_const = nu(mB, n0, gBB)
+    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+
+    L_exp2th = trapParams['L_exp2th']
+
+    densityFunc = lambda coords: pf_dynamic_sph.becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    densityGradFunc = nd.Gradient(densityFunc, method='central')  # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+
+    trapParams['densityFunc'] = densityFunc
+    trapParams['densityGradFunc'] = densityGradFunc
+
+    # LDA Force functions
+    LDA_funcs = {}
+
+    omega_BEC_osc = trapParams['omega_BEC_osc']; gamma_BEC_osc = trapParams['gamma_BEC_osc']; phi_BEC_osc = trapParams['phi_BEC_osc']; amp_BEC_osc = trapParams['amp_BEC_osc']
+    LDA_funcs['F_BEC_osc'] = lambda t: F_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc, mI)
+
+    omega_Imp_y = trapParams['omega_Imp_y']
+    gaussian_amp_TiSa = trapParams['gaussian_amp_TiSa']; gaussian_width_x_TiSa = trapParams['gaussian_width_x_TiSa']; gaussian_width_y_TiSa = trapParams['gaussian_width_y_TiSa']
+    gaussian_amp_ODT2 = trapParams['gaussian_amp_ODT2']; gaussian_width_x_ODT2 = trapParams['gaussian_width_x_ODT2']; gaussian_width_z_ODT2 = trapParams['gaussian_width_z_ODT2']
+
+    LDA_funcs['F_Imp_trap_Y'] = lambda X, Y: F_Imp_trap_gaussian_2D(X, Y, gaussian_amp_TiSa, gaussian_width_x_TiSa, gaussian_width_y_TiSa)
+    LDA_funcs['F_Imp_trap_X'] = lambda X, Y: (4 * X / (gaussian_width_x_TiSa**2) * U_TiSa(X, Y, gaussian_amp_TiSa, gaussian_width_x_TiSa, gaussian_width_y_TiSa) + 4 * X / (gaussian_width_x_ODT2**2) * U_ODT2(X, 0, gaussian_amp_ODT2, gaussian_width_x_ODT2, gaussian_width_z_ODT2))
+
+    # Initialization CoherentState
+    cs = LDA_CoherentState.LDA_CoherentState_2D(kgrid, xgrid)
+    dVk = cs.dVk
+
+    # Initialization PolaronHamiltonian
+    Params = [aIBi, mI, mB, n0, gBB]
+    ham = zw2021_PolaronHamiltonian.zw2021_PolaronHamiltonian_2D(cs, Params, LDA_funcs, trapParams, toggleDict)
+    gnum = ham.gnum
+
+    n_initial = densityFunc(X0, Y0)
+
+    Nsteps = 1e2
+    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n_initial, gBB)
+    DP = pf_static_sph.DP_interp(0, PY0, aIBi, aSi_tck, PBint_tck)
+    aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+    CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n_initial, gBB)
+    cs.set_initState(amplitude=CSAmp, phase=0, X=X0, PX=PX0, Y=Y0, PY=PY0)
+
+    # Time evolution
+
+    # Initialize observable Data Arrays
+    Pph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Nph_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    PY_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Y_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    YLab_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    
+    X_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    PX_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    A_PP_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    F_PP_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    F_impTrap_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+
+    start = timer()
+    for ind, t in enumerate(tgrid):
+        if ind == 0:
+            dt = t
+            cs.evolve(dt, ham)
+        else:
+            dt = t - tgrid[ind - 1]
+            cs.evolve(dt, ham)
+
+        Pph_da[ind] = cs.get_PhononMomentum()
+        Nph_da[ind] = cs.get_PhononNumber()
+        Phase_da[ind] = cs.get_Phase()
+        PY_da[ind] = cs.get_totMomY()
+        Y_da[ind] = cs.get_impPosY()
+        YLab_da[ind] = cs.get_impPosY() + x_BEC_osc_zw2021(t, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc)
+        X_da[ind] = cs.get_impPosX()
+        PX_da[ind] = cs.get_totMomX()
+
+        # Compute time-varying amplitude of 'smarter' polaron potential. Also compute force from smarter polaron potential and bare impurity trap potential at each step
+        amplitude = cs.get_Amplitude()
+        amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
+        n = interpolate.splev(Y_da[ind], nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        Wk_grid = Wk(kgrid, mB, n, gBB)
+        Wki_grid = 1 / Wk_grid
+        Wk2_grid = Wk_grid**2; Wk3_grid = Wk_grid**3; omegak_g = omegak_grid(kgrid, mB, n, gBB)
+        eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_g) * amp_re, dVk); eta3 = np.dot((Wk_grid / omegak_g) * amp_im, dVk)
+        xp_re = 0.5 * np.dot(Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(Wki_grid * amp_im, dVk)
+        A_PP_da[ind] = gnum * (1 + 2 * xp_re / n) + gBB * eta1 - gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
+        dndx = interpolate.splev(Y_da[ind], nBEC_tck, der=1)
+        F_PP_da[ind] = -1 * A_PP_da[ind] * dndx
+        F_impTrap_da[ind] = LDA_funcs['F_Imp_trap'](YLab_da[ind])
+
+        end = timer()
+        print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
+        start = timer()
+
+    V_da = xr.DataArray(np.gradient(Y_da.values, tgrid), coords=[tgrid], dims=['t'])
+
+    # Create Data Set
+
+    data_dict = {'Pph': Pph_da, 'Nph': Nph_da, 'Phase': Phase_da, 'PY': PY_da, 'Y': Y_da, 'YLab': YLab_da, 'V': V_da, 'X': X_da, 'PX': PX_da, 'A_PP': A_PP_da, 'F_PP': F_PP_da, 'F_impTrap': F_impTrap_da}
+    coords_dict = {'t': tgrid}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB, 'xi': xi, 'omega_BEC_osc': omega_BEC_osc, 'gamma_BEC_osc': gamma_BEC_osc, 'phi_BEC_osc': phi_BEC_osc, 'amp_BEC_osc': amp_BEC_osc, 'X0': X0, 'Y0': Y0, 'PX0': PX0, 'PY0': PY0, 'omega_Imp_y': omega_Imp_y}
+
+    dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+
+    return dynsph_ds
 
 # def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 #     #
