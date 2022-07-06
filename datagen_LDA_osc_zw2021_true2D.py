@@ -183,9 +183,11 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0[inda], gBB]
 
     samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples[0, :] = [0, y0_imp[inda], 0, P0_imp[inda]]
+
     Ns = samples.shape[0]
-    xmean = np.mean(samples[:, 0]); ymean = np.mean(samples[:, 1]); pmean = np.mean(samples[:, 2])
-    print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
+    xmean = np.mean(samples[:, 0]); ymean = np.mean(samples[:, 1]); pxmean = np.mean(samples[:, 2]); pymean = np.mean(samples[:, 3])
+    print(xmean, 0, ymean, y0_imp[inda], pxmean, 0, pymean, P0_imp[inda])
 
     # sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
     #                 'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
@@ -251,10 +253,10 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(jobList); taskID = 4
+    taskCount = len(jobList); taskID = 0
 
     if(taskCount > len(jobList)):
         print('ERROR: TASK COUNT MISMATCH')

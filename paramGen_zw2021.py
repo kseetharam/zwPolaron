@@ -444,6 +444,7 @@ if __name__ == "__main__":
 
 
     inda = 3
+    true2D = True
 
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
                     'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda], 'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
@@ -461,41 +462,55 @@ if __name__ == "__main__":
     print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
     print(xMax, yMax, pMax, fMax)
 
-    # Ns = 1000  # number of desired samples
-    # samples = np.zeros((Ns, 3))
-    # evals = 0
-    # counter = 0
-    # start = timer()
-    # while counter < Ns:
-    #     f = np.random.uniform(low=0, high=fMax)
-    #     x = np.random.uniform(low=xMin, high=xMax)
-    #     y = np.random.uniform(low=yMin, high=yMax)
-    #     py = np.random.uniform(low=pMin, high=pMax)
+    Ns = 1000  # number of desired samples
+    evals = 0
+    counter = 0
+    if true2D:
+        samples = np.zeros((Ns, 4))
+    else:
+        samples = np.zeros((Ns, 3))
 
-    #     # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
-    #     # p = np.sqrt(px**2 + py**2 + pz**2)
-    #     # if p > pMax:
-    #     #     continue
+    start = timer()
+    while counter < Ns:
+        f = np.random.uniform(low=0, high=fMax)
+        x = np.random.uniform(low=xMin, high=xMax)
+        y = np.random.uniform(low=yMin, high=yMax)
+        py = np.random.uniform(low=pMin, high=pMax)
+        px = np.random.uniform(low=pMin, high=pMax)
 
-    #     # x = 0
-    #     # y = y0
-    #     # py = p0
+        # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
+        # p = np.sqrt(px**2 + py**2 + pz**2)
+        # if p > pMax:
+        #     continue
 
-    #     f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-    #     if f < f_eval:
-    #         samples[counter, :] = [x, y, py]
-    #         # samples.append((x, y, py))
-    #         counter += 1
-    #     evals += 1
-    #     print(counter, evals, f, f_eval)
-    # print(timer() - start)
+        # x = 0
+        # y = y0
+        # py = p0
+        # px = 0
 
-    # sample_datapath = 'zwData/samples/'
+        if true2D:
+            f_eval = pf_dynamic_sph.f_thermal_true2D(x, y, 0, px, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+            if f < f_eval:
+                samples[counter, :] = [x, y, px, py]
+                counter += 1
+
+        else:
+            f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+            if f < f_eval:
+                samples[counter, :] = [x, y, py]
+                counter += 1
+
+        evals += 1
+        print(counter, evals, f, f_eval)
+    print(timer() - start)
+
+    sample_datapath = 'zwData/samples/'
+    savemat(sample_datapath + 'aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
     # # Visualize distribution of samples
 
@@ -609,7 +624,8 @@ if __name__ == "__main__":
     #     sParams = [mI, mB, n0[inda], gBB]
     #     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
 
-    #     def f(y): return -1*pf_dynamic_sph.f_thermal(0, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #     # def f(y): return -1*pf_dynamic_sph.f_thermal(0, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #     def f(y): return -1*pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
     #     sol = minimize_scalar(f, bounds=[-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda]], method='Bounded')
     #     yMax_vals.append(sol.x)
     #     fMax_vals.append(-1*sol.fun)

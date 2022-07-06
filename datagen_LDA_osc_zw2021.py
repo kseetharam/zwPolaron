@@ -312,6 +312,8 @@ if __name__ == "__main__":
 
     # print(len(jobList))
 
+    print(x0_imp[3], P0_scaleFactor[3] * mI * v0_imp[3])
+
     # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()

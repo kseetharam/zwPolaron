@@ -4,7 +4,7 @@ import pf_dynamic_cart as pfc
 from scipy import interpolate
 
 
-class zw2021_PolaronHamiltonian:
+class zw2021_PolaronHamiltonian_2D:
         # """ This is a class that stores information about the Hamiltonian"""
 
     def __init__(self, coherent_state, Params, LDA_funcs, trapParams, toggleDict):
@@ -122,7 +122,7 @@ class zw2021_PolaronHamiltonian:
         
 
         if self.BEC_density_var == 'on':
-            if np.isclose(np.heaviside(1 - X ** 2 / RTF_BEC_Y ** 2 - Y ** 2 / RTF_BEC_Y ** 2, 1 / 2) , 0)
+            if np.isclose(np.heaviside(1 - X ** 2 / RTF_BEC_Y ** 2 - Y ** 2 / RTF_BEC_Y ** 2, 1 / 2), 0):
                 amplitude_new_temp = 0 * amplitude_new_temp
                 phase_new_temp = 0 * phase_new_temp
                 PY_new_temp = - F_BEC_osc_func(t) + F_Imp_trap_Y_func(X, YLab)

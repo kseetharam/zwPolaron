@@ -996,8 +996,8 @@ def zw2021_quenchDynamics_2D(cParams, gParams, sParams, trapParams, toggleDict):
 def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian
-    import LDA_CoherentState
-    import zw2021_PolaronHamiltonian
+    import LDA_CoherentState_2D
+    import zw2021_PolaronHamiltonian_2D
     # takes parameters, performs dynamics, and outputs desired observables
     aIBi = cParams['aIBi']
     [xgrid, kgrid, tgrid] = gParams
@@ -1017,7 +1017,7 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
 
     L_exp2th = trapParams['L_exp2th']
 
-    densityFunc = lambda coords: pf_dynamic_sph.becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    densityFunc = lambda X, Y: becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
     densityGradFunc = nd.Gradient(densityFunc, method='central')  # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
 
     trapParams['densityFunc'] = densityFunc
@@ -1037,12 +1037,12 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
     LDA_funcs['F_Imp_trap_X'] = lambda X, Y: (4 * X / (gaussian_width_x_TiSa**2) * U_TiSa(X, Y, gaussian_amp_TiSa, gaussian_width_x_TiSa, gaussian_width_y_TiSa) + 4 * X / (gaussian_width_x_ODT2**2) * U_ODT2(X, 0, gaussian_amp_ODT2, gaussian_width_x_ODT2, gaussian_width_z_ODT2))
 
     # Initialization CoherentState
-    cs = LDA_CoherentState.LDA_CoherentState_2D(kgrid, xgrid)
+    cs = LDA_CoherentState_2D.LDA_CoherentState_2D(kgrid, xgrid)
     dVk = cs.dVk
 
     # Initialization PolaronHamiltonian
     Params = [aIBi, mI, mB, n0, gBB]
-    ham = zw2021_PolaronHamiltonian.zw2021_PolaronHamiltonian_2D(cs, Params, LDA_funcs, trapParams, toggleDict)
+    ham = zw2021_PolaronHamiltonian_2D.zw2021_PolaronHamiltonian_2D(cs, Params, LDA_funcs, trapParams, toggleDict)
     gnum = ham.gnum
 
     n_initial = densityFunc(X0, Y0)
@@ -1093,15 +1093,15 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
         # Compute time-varying amplitude of 'smarter' polaron potential. Also compute force from smarter polaron potential and bare impurity trap potential at each step
         amplitude = cs.get_Amplitude()
         amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
-        n = interpolate.splev(Y_da[ind], nBEC_tck)  # ASSUMING PARTICLE IS IN CENTER OF TRAP IN Y AND Z DIRECTIONS
+        n = densityFunc(cs.get_impPosX(), cs.get_impPosY())
         Wk_grid = Wk(kgrid, mB, n, gBB)
         Wki_grid = 1 / Wk_grid
         Wk2_grid = Wk_grid**2; Wk3_grid = Wk_grid**3; omegak_g = omegak_grid(kgrid, mB, n, gBB)
         eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_g) * amp_re, dVk); eta3 = np.dot((Wk_grid / omegak_g) * amp_im, dVk)
         xp_re = 0.5 * np.dot(Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(Wki_grid * amp_im, dVk)
         A_PP_da[ind] = gnum * (1 + 2 * xp_re / n) + gBB * eta1 - gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
-        dndx = interpolate.splev(Y_da[ind], nBEC_tck, der=1)
-        F_PP_da[ind] = -1 * A_PP_da[ind] * dndx
+        dndy = densityGradFunc(cs.get_impPosX(), cs.get_impPosY())[1]
+        F_PP_da[ind] = -1 * A_PP_da[ind] * dndy
         F_impTrap_da[ind] = LDA_funcs['F_Imp_trap'](YLab_da[ind])
 
         end = timer()
