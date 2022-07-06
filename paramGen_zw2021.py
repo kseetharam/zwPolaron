@@ -72,7 +72,8 @@ if __name__ == "__main__":
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
     # n0_BEC = np.array([5.51533197e+19, 5.04612835e+19, 6.04947525e+19, 5.62709096e+19, 6.20802175e+19, 7.12364194e+19, 6.74430590e+19, 6.52854564e+19, 5.74487521e+19, 6.39240612e+19, 5.99344093e+19, 6.12326489e+19, 6.17370181e+19, 5.95291621e+19, 6.09224617e+19, 6.35951755e+19, 5.52594316e+19, 5.94489028e+19])  # peak BEC density (given in in m^(-3))
-    n0_BEC = np.array([5.50743315e+19, 5.03889459e+19, 6.04081899e+19, 5.61903369e+19, 6.19914061e+19, 7.11346218e+19, 6.73466436e+19, 6.51920977e+19, 5.73665093e+19, 6.38326341e+19, 5.98486416e+19, 6.11450398e+19, 6.16486935e+19, 5.94439691e+19, 6.08352926e+19, 6.35042149e+19, 5.51802931e+19, 5.93638236e+19])
+    # n0_BEC = np.array([5.50743315e+19, 5.03889459e+19, 6.04081899e+19, 5.61903369e+19, 6.19914061e+19, 7.11346218e+19, 6.73466436e+19, 6.51920977e+19, 5.73665093e+19, 6.38326341e+19, 5.98486416e+19, 6.11450398e+19, 6.16486935e+19, 5.94439691e+19, 6.08352926e+19, 6.35042149e+19, 5.51802931e+19, 5.93638236e+19])  # peak density including both condensate and thermal cloud
+    n0_BEC = np.array([5.46880416e+19, 4.99782123e+19, 6.00472624e+19, 5.58095582e+19, 6.16375560e+19, 7.08181465e+19, 6.70153652e+19, 6.48519814e+19, 5.69914183e+19, 6.34867755e+19, 5.94851655e+19, 6.07874304e+19, 6.12933278e+19, 5.90786343e+19, 6.04762935e+19, 6.31569492e+19, 5.47945313e+19, 5.89981190e+19])  # peak density of condensate
     RTF_BEC_X = np.array([8.48469347093994, 8.11111072629368, 8.89071272031954, 8.57125199684266, 9.00767433275159, 9.65522167387697, 9.39241266912852, 9.23956650925869, 8.66153179309422, 9.14179769236378, 8.84900230929328, 8.94534024135962, 8.98248647105392, 8.81871271135454, 8.92241777405925, 9.11802005065468, 8.49295023977057, 8.81270137636933])  # Thomas-Fermi radius of BEC in x-direction (given in um)
     RTF_BEC_Y = np.array([11.4543973014280, 11.4485027292274, 12.0994087866866, 11.1987472415996, 12.6147755284164, 13.0408759297917, 12.8251948079726, 12.4963915490121, 11.6984708883771, 12.1884624646191, 11.7981246004719, 11.8796464214276, 12.4136593404667, 12.3220325703494, 12.0104329130883, 12.1756670927480, 10.9661042681457, 12.1803009563806])  # Thomas-Fermi radius of BEC in direction of oscillation (given in um)
     RTF_BEC_Z = np.array([70.7057789244995, 67.5925893857806, 74.0892726693295, 71.4270999736888, 75.0639527729299, 80.4601806156414, 78.2701055760710, 76.9963875771558, 72.1794316091185, 76.1816474363648, 73.7416859107773, 74.5445020113302, 74.8540539254493, 73.4892725946212, 74.3534814504937, 75.9835004221224, 70.7745853314214, 73.4391781364111])  # Thomas-Fermi radius of BEC in z-direction (given in um)
@@ -302,13 +303,16 @@ if __name__ == "__main__":
     # xTF = zTF * omegaZ / omegaX
     # yTF = zTF * omegaZ / omegaY
 
+    # # fun = lambda coords: pf_dynamic_sph.becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)
+    # # dfun = nd.Gradient(fun, method='central')
+
     # fun = lambda coords: pf_dynamic_sph.becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)
-    # dfun = nd.Gradient(fun, method='central')
+    # dfun = lambda coords: pf_dynamic_sph.becdensityGrad_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**4)
 
     # # # Check slices along x
 
-    # # xVals = np.linspace(-2 * RTF_BEC_X_th, 2 * RTF_BEC_X_th, 5)
-    # # yVals = np.linspace(-2.5 * RTF_BEC_Y_th, 2.5 * RTF_BEC_Y_th, 1000)
+    # # xVals = np.linspace(-0.9 * RTF_BEC_X_th, 0.9 * RTF_BEC_X_th, 3)
+    # # yVals = np.linspace(-2 * RTF_BEC_Y_th, 2 * RTF_BEC_Y_th, 1000)
 
     # # for indx, x in enumerate(xVals):
     # #     denVals = np.zeros(yVals.size)
@@ -316,7 +320,8 @@ if __name__ == "__main__":
     # #     for indy, y in enumerate(yVals):
     # #         x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; 
     # #         n_exp = pf_dynamic_sph.becdensity_zw2021(x_MuM, y_MuM, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda])  # computes BEC density in experimental units
-    # #         denVals[indy] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         # denVals[indy] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         denVals[indy] = fun([x, y])
     # #         ndVals[indy] = dfun([x,y])[1]
 
     # #     nBEC_tck = interpolate.splrep(yVals, denVals, s=0)
@@ -337,8 +342,8 @@ if __name__ == "__main__":
 
     # # # Check slices along y
 
-    # # xVals = np.linspace(-2.5 * RTF_BEC_X_th, 2.5 * RTF_BEC_X_th, 1000)
-    # # yVals = np.linspace(-2 * RTF_BEC_Y_th, 2 * RTF_BEC_Y_th, 5)
+    # # xVals = np.linspace(-2 * RTF_BEC_X_th, 2 * RTF_BEC_X_th, 1000)
+    # # yVals = np.linspace(-0.9 * RTF_BEC_Y_th, 0.9 * RTF_BEC_Y_th, 5)
 
     # # for indy, y in enumerate(yVals):
     # #     denVals = np.zeros(xVals.size)
@@ -346,7 +351,8 @@ if __name__ == "__main__":
     # #     for indx, x in enumerate(xVals):
     # #         x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; 
     # #         n_exp = pf_dynamic_sph.becdensity_zw2021(x_MuM, y_MuM, 0, omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda])  # computes BEC density in experimental units
-    # #         denVals[indx] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         # denVals[indx] = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+    # #         denVals[indx] = fun([x, y])
     # #         ndVals[indx] = dfun([x,y])[0]
 
     # #     nBEC_tck = interpolate.splrep(xVals, denVals, s=0)
@@ -429,15 +435,20 @@ if __name__ == "__main__":
     beta_exp = 1 / (kB * T / hbar)  # inverse temperature in units of 1/(rad*Hz) = s/rad
     beta_th = beta_exp * T_exp2th
 
-    U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341, -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
+    # U_opt_offset = np.array([-28.60814655, -31.21901016, -30.87067425, -31.3245341, -31.22762206, -31.15045883, -31.15850962, -31.20071966, -31.40204218, -31.0106113, -30.71828868, -31.16363115, -30.31259895, -30.27470958, -30.72544145, -29.89234401, -29.49573856, -28.0016819])  # (density is condensate and thermal gas) constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
+    U_opt_offset = np.array([-28.60825064869891, -31.21994067822379, -30.8707107193229, -31.325119904209522, -31.228746220118186, -31.150586511632262, -31.15897717819624, -31.200727683513215, -31.403029121814292, -31.011718680361117, -30.718864141323024, -31.163711698459377, -30.313300309127857, -30.275118254553636, -30.72567395606398, -29.892556211531456, -29.495819535657738, -28.00228060325752])  # (density is just condensate) constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
     U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
-    E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36, 3.11130148e-02, 7.32152511e-02, 1.88938399e-01, 2.68558712e-01, 3.73587857e-01, 5.83872838e-01, 8.28556730e-01, 1.11273234e+00, 1.66368733e+00])
+    # E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36, 3.11130148e-02, 7.32152511e-02, 1.88938399e-01, 2.68558712e-01, 3.73587857e-01, 5.83872838e-01, 8.28556730e-01, 1.11273234e+00, 1.66368733e+00])  # when density includes condensate and thermal gas
+    E_pol_offset = np.array([-1.17876723e+00, -8.34604734e-01, -6.84013469e-01, -4.85201407e-01, -3.62255174e-01, -2.11318340e-01, -9.69039151e-02, -3.14356780e-02, -5.28352867e-37,  3.09442108e-02,  7.27691389e-02,  1.87824142e-01, 2.66992312e-01,  3.71253309e-01,  5.80338018e-01,  8.23862869e-01, 1.10454958e+00,  1.65267226e+00])  # when density is just of the condensate
 
     # f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
-    # y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum
+    # y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum (positive Mu)
 
-    f_thermal_maxVals = np.array([0.04371091507791199, 0.07475837588152232, 0.13625255887903176, 0.09222453506832799, 0.13076334263340406, 0.07859344842990887, 0.09244448365158987, 0.1225636725220138, 0.1337588086527938, 0.13055540035829122, 0.14737558497429884, 0.15235876040489293, 0.16029655986623156, 0.20675607487658249, 0.3972825025010302, 0.8684560204142703, 0.9907473907238571, 0.9993631937004797])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 80 nK]
-    y_thermal_maxVals = np.array([-12.358738846077586, -15.14212490509725, -13.144260921615512, -16.58972888463607, -13.283761360003684, -21.15224703048301, -20.742905297539455, -24.997818472525328, -26.498896331698784, -28.469197495859653, -33.97009782737399, -33.66816330606461, -36.2296200495234, -18.449504042252958, -55.6547478236438, -56.53625335500957, -50.994739542476275, -56.75799513288452])  # the y values y=yMax at which f_thermal has a maximum [T = 80 nK]
+    # f_thermal_maxVals = np.array([0.04371091507791199, 0.07475837588152232, 0.13625255887903176, 0.09222453506832799, 0.13076334263340406, 0.07859344842990887, 0.09244448365158987, 0.1225636725220138, 0.1337588086527938, 0.13055540035829122, 0.14737558497429884, 0.15235876040489293, 0.16029655986623156, 0.20675607487658249, 0.3972825025010302, 0.8684560204142703, 0.9907473907238571, 0.9993631937004797])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 80 nK]
+    # y_thermal_maxVals = np.array([-12.358738846077586, -15.14212490509725, -13.144260921615512, -16.58972888463607, -13.283761360003684, -21.15224703048301, -20.742905297539455, -24.997818472525328, -26.498896331698784, -28.469197495859653, -33.97009782737399, -33.66816330606461, -36.2296200495234, -18.449504042252958, -55.6547478236438, -56.53625335500957, -50.994739542476275, -56.75799513288452])  # the y values y=yMax at which f_thermal has a maximum [T = 80 nK] (density is condensate + thermal)
+
+    f_thermal_maxVals = np.array([0.04360501531188545, 0.07423627004068983, 0.13610859139446085, 0.09182274260636307, 0.12998302782024626, 0.07849750955959393, 0.09219732158187448, 0.12254222660907568, 0.13310938618629403, 0.12986652280788644, 0.1470784775705773, 0.15258326647475098, 0.16020672201743388, 0.20654702353157303, 0.40463678278705134, 0.8685179744643099, 0.9906004824193367, 0.9993326857041089])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 80 nK]
+    y_thermal_maxVals = np.array([-12.310607736190837, -15.088006758036995, -13.113276449372993, -16.549741670703483, -13.265427968228, -21.13428630190987, -20.733336045364, -24.993011705445387, -26.498896082566567, -28.476128183706134, -33.999400717547196, -33.7479660563224, -36.36171863701398, -18.5225207508263, -55.19001187934648, -55.949291403532044, -50.39113955063414, -55.97058158931767])  # the y values y=yMax at which f_thermal has a maximum [T = 80 nK] (density is just condensate)
 
     # f_thermal_maxVals = np.array([3.6378912844041568e-06, 3.652290496943756e-05, 0.0005640245814312913, 9.857039995630772e-05, 0.0004881293664369387, 5.171451969872132e-05, 0.00010638286166695999, 0.0003789391523830838, 0.0005681819252681373, 0.0005104871818073756, 0.0009037638619273189, 0.001077650557330782, 0.0013902800196785602, 0.004857527551207323, 0.19032061782479667, 0.9996093970094144, 0.9999999951103646, 0.9999999999999079])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below) [T = 20 nK]
     # y_thermal_maxVals = np.array([-12.313756173386173, -15.092081246922893, -13.115154653923879, -16.55256620596325, -13.266519101775238, -21.135281524323595, -20.733909803778854, -24.993339840222134, -26.498895611802926, -28.475590509794532, -33.99651731075096, -33.74027937637036, -36.34859113208791, -18.51735283512218, -55.740980406094394, -56.51580566054858, -50.90619908248219, -56.54844009927777])  # the y values y=yMax at which f_thermal has a maximum [T = 20 nK]
@@ -452,65 +463,65 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0[inda], gBB]
     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
 
-    y0 = y0_imp[inda]; p0 = P0_imp[inda]  # desired mean starting position and total momentum of the initial polaron for motion across the x=z=0 slice of the density (in theory units)
+    # y0 = y0_imp[inda]; p0 = P0_imp[inda]  # desired mean starting position and total momentum of the initial polaron for motion across the x=z=0 slice of the density (in theory units)
 
-    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
-    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
-    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    # xMin = -1 * RTF_BEC_X_th[inda]; xMax = 1 * RTF_BEC_X_th[inda]
+    # yMin = -1 * RTF_BEC_Y_th[inda]; yMax = 1 * RTF_BEC_Y_th[inda]
+    # pMin = -1 * mI * nu[inda]; pMax = 1 * mI * nu[inda]
 
-    fMax = f_thermal_maxVals[inda]
-    print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
-    print(xMax, yMax, pMax, fMax)
+    # fMax = f_thermal_maxVals[inda]
+    # print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
+    # print(xMax, yMax, pMax, fMax)
 
-    Ns = 1000  # number of desired samples
-    evals = 0
-    counter = 0
-    if true2D:
-        samples = np.zeros((Ns, 4))
-    else:
-        samples = np.zeros((Ns, 3))
+    # Ns = 1000  # number of desired samples
+    # evals = 0
+    # counter = 0
+    # if true2D:
+    #     samples = np.zeros((Ns, 4))
+    # else:
+    #     samples = np.zeros((Ns, 3))
 
-    start = timer()
-    while counter < Ns:
-        f = np.random.uniform(low=0, high=fMax)
-        x = np.random.uniform(low=xMin, high=xMax)
-        y = np.random.uniform(low=yMin, high=yMax)
-        py = np.random.uniform(low=pMin, high=pMax)
-        px = np.random.uniform(low=pMin, high=pMax)
+    # start = timer()
+    # while counter < Ns:
+    #     f = np.random.uniform(low=0, high=fMax)
+    #     x = np.random.uniform(low=xMin, high=xMax)
+    #     y = np.random.uniform(low=yMin, high=yMax)
+    #     py = np.random.uniform(low=pMin, high=pMax)
+    #     px = np.random.uniform(low=pMin, high=pMax)
 
-        # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
-        # p = np.sqrt(px**2 + py**2 + pz**2)
-        # if p > pMax:
-        #     continue
+    #     # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
+    #     # p = np.sqrt(px**2 + py**2 + pz**2)
+    #     # if p > pMax:
+    #     #     continue
 
-        # x = 0
-        # y = y0
-        # py = p0
-        # px = 0
+    #     # x = 0
+    #     # y = y0
+    #     # py = p0
+    #     # px = 0
 
-        if true2D:
-            f_eval = pf_dynamic_sph.f_thermal_true2D(x, y, 0, px, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-            if f < f_eval:
-                samples[counter, :] = [x, y, px, py]
-                counter += 1
+    #     if true2D:
+    #         f_eval = pf_dynamic_sph.f_thermal_true2D(x, y, 0, px, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+    #         if f < f_eval:
+    #             samples[counter, :] = [x, y, px, py]
+    #             counter += 1
 
-        else:
-            f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-            if f < f_eval:
-                samples[counter, :] = [x, y, py]
-                counter += 1
+    #     else:
+    #         f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+    #         if f < f_eval:
+    #             samples[counter, :] = [x, y, py]
+    #             counter += 1
 
-        evals += 1
-        print(counter, evals, f, f_eval)
-    print(timer() - start)
+    #     evals += 1
+    #     print(counter, evals, f, f_eval)
+    # print(timer() - start)
 
-    sample_datapath = 'zwData/samples/'
-    savemat(sample_datapath + 'aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # sample_datapath = 'zwData/samples/'
+    # savemat(sample_datapath + 'aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
     # # Visualize distribution of samples
 
@@ -527,17 +538,21 @@ if __name__ == "__main__":
     # # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
     # # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
     # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
     # # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
     # # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
     # Ns = samples.shape[0]
-    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pxSamples = samples[:, 2]; pySamples = samples[:, 3]
+    # pSamples = pySamples
+
     # # pSamples = np.abs(pSamples)
     # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    # print(xmean, 0, ymean, y0_imp[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    # print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
 
     # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
     # H = H.T
@@ -611,11 +626,30 @@ if __name__ == "__main__":
     # ax.plot(pVals,EVals)
     # plt.show()
 
+    # # Finding minimum value of Uopt_tot for each interaction strength
+
+    # yMin_vals = [] # location of minimum of Uopt_tot
+    # Uopt_offset_vals = []  # minimum value of Uopt_tot
+
+    # for inda, aIBi in enumerate(aIBi_Vals):
+    #     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
+    #                     'U_opt_offset': U_opt_offset[inda], 'U0_opt_offset': U0_opt_offset[inda],'E_pol_offset': E_pol_offset[inda], 'A_ODT1': A_ODT1_th, 'wx_ODT1': wx_ODT1_th, 'wy_ODT1': wy_ODT1_th, 'A_ODT2': A_ODT2_th, 'wx_ODT2': wx_ODT2_th, 'wz_ODT2': wz_ODT2_th, 'A_TiSa': A_TiSa_th[inda], 'wx_TiSa': wx_TiSa_th, 'wy_TiSa': wy_TiSa_th}
+    #     cParams = {'aIBi': aIBi_Vals[inda]}
+    #     sParams = [mI, mB, n0[inda], gBB]
+    #     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
+
+    #     def g(y): return (pf_dynamic_sph.U_ODT1(0, y - (sampleParams['y0_ODT1'] - sampleParams['y0_BEC']), sampleParams['A_ODT1'], sampleParams['wx_ODT1'], sampleParams['wy_ODT1']) + pf_dynamic_sph.U_ODT2(0, 0, sampleParams['A_ODT2'], sampleParams['wx_ODT2'], sampleParams['wz_ODT2']) + pf_dynamic_sph.U_TiSa(0, y + sampleParams['y0_BEC'], sampleParams['A_TiSa'], sampleParams['wx_TiSa'], sampleParams['wy_TiSa']))
+    #     sol_U = minimize_scalar(g, bounds=[-4 * RTF_BEC_Y_th[inda], 4 * RTF_BEC_Y_th[inda]], method='Bounded')
+    #     yMin_vals.append(sol_U.x)
+    #     Uopt_offset_vals.append(sol_U.fun)
+
+    # print(yMin_vals)
+    # print(Uopt_offset_vals) 
 
     # # Finding max value of distribution for each interaction strength
 
-    # yMax_vals = []
-    # fMax_vals = []
+    # yMax_vals = []  # location of maximum value of thermal distribution
+    # fMax_vals = []  # maximum value of thermal distribution
 
     # for inda, aIBi in enumerate(aIBi_Vals):
     #     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
@@ -626,83 +660,90 @@ if __name__ == "__main__":
 
     #     # def f(y): return -1*pf_dynamic_sph.f_thermal(0, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
     #     def f(y): return -1*pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #     sol = minimize_scalar(f, bounds=[-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda]], method='Bounded')
+    #     # sol = minimize_scalar(f, bounds=[-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda]], method='Bounded')
+    #     sol = minimize_scalar(f, bounds=[-0.99 * RTF_BEC_Y_th[inda], 0.99 * RTF_BEC_Y_th[inda]], method='Bounded')
     #     yMax_vals.append(sol.x)
     #     fMax_vals.append(-1*sol.fun)
 
     # print(yMax_vals)
     # print(fMax_vals) 
 
-    # # Testing
+    # Testing
 
-    # inda = 3
+    inda = 3
 
-    # xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
+    true2D = True
+
+    xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
     # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    # pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
+    yVals = np.linspace(-1.5 * RTF_BEC_Y_th[inda], 1.5 * RTF_BEC_Y_th[inda], 100)
+    pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
 
-    # x_des = 50
-    # y_des = 50
-    # # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
-    # # testVals = np.zeros((xVals.size, yVals.size))
-    # testVals = np.zeros((yVals.size, pVals.size))
+    x_des = 50
+    y_des = 50
+    # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    # testVals = np.zeros((xVals.size, yVals.size))
+    testVals = np.zeros((yVals.size, pVals.size))
 
-    # for indx, x in enumerate(xVals):
-    #     if indx != x_des:
-    #         continue
-    #     # print(x)
-    #     EPol = np.zeros(yVals.size)
-    #     UOpt = np.zeros(yVals.size)
-    #     Vharm = np.zeros(yVals.size)
-    #     for indy, y in enumerate(yVals):
-    #         # if indy != y_des:
-    #         #     continue
-    #         # print(y)
-    #         start = timer()
-    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #         for indp, p in enumerate(pVals):
-    #             testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #             # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-    #         # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
-    #         # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
-    #         # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
-    #         # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
-    #         print(timer() - start)
+    for indx, x in enumerate(xVals):
+        if indx != x_des:
+            continue
+        # print(x)
+        EPol = np.zeros(yVals.size)
+        UOpt = np.zeros(yVals.size)
+        Vharm = np.zeros(yVals.size)
+        for indy, y in enumerate(yVals):
+            # if indy != y_des:
+            #     continue
+            # print(y)
+            start = timer()
+            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            for indp, p in enumerate(pVals):
+                if true2D:
+                    testVals[indy, indp] = pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+                else:
+                    testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+                    # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+            # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+            # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
+            # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+            # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+            print(timer() - start)
 
-    #     ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
-    #     ftot = simpson(testVals[indx,:],yVals)
-    #     ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
-    #     print(ftot)
-    #     print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+        ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+        ftot = simpson(testVals[indx,:],yVals)
+        ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
+        print(ftot)
+        print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
 
-    # # ptot = simpson(testVals[x_des,y_des,:],pVals)
-    # # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
-    # # print(p0, pmean)
+    # ptot = simpson(testVals[x_des,y_des,:],pVals)
+    # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
+    # print(p0, pmean)
 
-    # # fig, ax = plt.subplots()
-    # # # ax.plot(pVals, testVals[x_des,y_des,:])
-    # # ax.plot(yVals, testVals[x_des,:])
-    # # # ax.plot(yVals, EPol)
-    # # # ax.plot(yVals, UOpt)
-    # # # ax.plot(yVals, Vharm)
-    # # plt.show()
-
-    # # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
-    # # fig, ax = plt.subplots()
-    # # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
-    # # ax.set_xlabel('x')
-    # # ax.set_ylabel('y')
-    # # fig.colorbar(c, ax=ax)
-    # # plt.show()
-
-    # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
     # fig, ax = plt.subplots()
-    # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg/(mI * nu[inda]), testVals,cmap='RdBu')
-    # ax.set_xlabel('y')
-    # ax.set_ylabel('p')
+    # # ax.plot(pVals, testVals[x_des,y_des,:])
+    # ax.plot(yVals, testVals[x_des,:])
+    # # ax.plot(yVals, EPol)
+    # # ax.plot(yVals, UOpt)
+    # # ax.plot(yVals, Vharm)
+    # plt.show()
+
+    # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
+    # fig, ax = plt.subplots()
+    # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
+    # ax.set_xlabel('x')
+    # ax.set_ylabel('y')
     # fig.colorbar(c, ax=ax)
     # plt.show()
+
+    yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
+    fig, ax = plt.subplots()
+    c = ax.pcolormesh(1e6 * yg / L_exp2th, pg/(mI * nu[inda]), testVals,cmap='RdBu')
+    ax.set_xlabel('y')
+    ax.set_ylabel('p')
+    fig.colorbar(c, ax=ax)
+    plt.show()
 
     # # Create dicts
 

@@ -214,6 +214,55 @@ def den_ThermU(x, y, z, omegaX, omegaY, omegaZ, mNa, beta, chemicalPotential):
     return np.real(complex(arg))
 
 
+# def becdensity_zw2021(x, y, z, omegaX, omegaY, omegaZ, temperature, zTF):
+
+#     # Note: Follows convention of experiment where z is the widest direction of the cloud, y is the oscillation direction, and x is the narrowest direction (slightly narrower than y) that is integrated out by the camera
+#     # (x, y, z) provided in uM; (omegaX, omegaY, omegeaZ) provided in rad*Hz; temperature provided in K; zTF provided in um
+#     # density is output in m^-3
+#     # Taken and slightly modified from MATLAB function provided by Zwierlein group.
+
+#     a0 = 5.29e-11  # Bohr radius (m)
+#     hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+#     PlanckConst = 2 * np.pi * hbar
+#     kB = 1.38064852e-23
+#     mNeutron = 1.674927471e-27
+#     mProton = 1.672621898e-27
+#     mNa = 12 * mNeutron + 11 * mProton
+#     # mK = 19 * mProton + 21 * mNeutron
+#     # mReduced = mK * mNa / (mK + mNa)
+
+#     xTF = zTF * omegaZ / omegaX
+#     yTF = zTF * omegaZ / omegaY
+
+#     chemicalPotential_kHz = 1 / 2 * mNa * omegaZ ** 2 * (zTF / 10 ** 6) ** 2 / (PlanckConst * 1000)
+
+#     chemicalPotential = chemicalPotential_kHz * 1000 * PlanckConst
+
+#     omegabar = (omegaX * omegaY * omegaZ) ** (1 / 3)
+#     a_s = 52 * a0  # Sodium F=1 scattering length, away from FB resonance
+#     # prefactorEn = hbar ** 2 / 4 / mReduced * (6 * np.pi ** 2) ** (2 / 3)  # prefer REDUCED MASS, not Boson mass
+#     Nc = (2 * chemicalPotential) ** (2.5) / (15 * hbar ** 2 * np.sqrt(mNa) * omegabar ** 3 * a_s)
+#     beta = 1 / kB / temperature
+#     lambdaDB = PlanckConst / np.sqrt(2 * np.pi * mNa * kB * temperature) * 10 ** 6  # lambda is de Broglie wavelength in um
+
+#     # normBose = 8 * integral3(den_ThermU, 0, xTF * 10, 0, yTF * 10, 0, zTF * 10, 'RelTol', 1e-3)
+#     # NThermalBosons = normBose / lambdaDB ** 3
+
+#     # # ToverTcGlobal=(1-Nc/(Nc+NThermalBosons))**(1/3)
+#     # Tc = .94 * PlanckConst / 2 / np.pi * omegabar / kB * (Nc + NThermalBosons) ** (1 / 3)
+#     # ToverTcGlobal = temperature / Tc
+
+#     # params = {}
+#     # params['ToverTc'] = ToverTcGlobal
+#     # params['nc0'] = Nc * den_BEC(0, 0, 0) * (1e6) ** 3  # m**-3
+#     # params['nthermal0'] = NThermalBosons * (den_ThermU(0, 0, 0) / normBose) * (1e6) ** 3  # m**-3
+#     # params['chemicalPotential'] = chemicalPotential / PlanckConst * 1e-3  # kHz
+#     # densityArray = (NThermalBosons * (den_ThermU(x, y, z, omegaX, omegaY, omegaZ, mNa, beta, chemicalPotential) / normBose) + Nc * den_BEC(x, y, z, xTF, yTF, zTF)) * (1e6) ** 3  # m**-3
+
+#     density = ((den_ThermU(x, y, z, omegaX, omegaY, omegaZ, mNa, beta, chemicalPotential) / lambdaDB**3) + Nc * den_BEC(x, y, z, xTF, yTF, zTF)) * (1e6) ** 3  # m**-3
+
+#     return density
+
 def becdensity_zw2021(x, y, z, omegaX, omegaY, omegaZ, temperature, zTF):
 
     # Note: Follows convention of experiment where z is the widest direction of the cloud, y is the oscillation direction, and x is the narrowest direction (slightly narrower than y) that is integrated out by the camera
@@ -242,27 +291,44 @@ def becdensity_zw2021(x, y, z, omegaX, omegaY, omegaZ, temperature, zTF):
     a_s = 52 * a0  # Sodium F=1 scattering length, away from FB resonance
     # prefactorEn = hbar ** 2 / 4 / mReduced * (6 * np.pi ** 2) ** (2 / 3)  # prefer REDUCED MASS, not Boson mass
     Nc = (2 * chemicalPotential) ** (2.5) / (15 * hbar ** 2 * np.sqrt(mNa) * omegabar ** 3 * a_s)
-    beta = 1 / kB / temperature
-    lambdaDB = PlanckConst / np.sqrt(2 * np.pi * mNa * kB * temperature) * 10 ** 6  # lambda is de Broglie wavelength in um
 
-    # normBose = 8 * integral3(den_ThermU, 0, xTF * 10, 0, yTF * 10, 0, zTF * 10, 'RelTol', 1e-3)
-    # NThermalBosons = normBose / lambdaDB ** 3
-
-    # # ToverTcGlobal=(1-Nc/(Nc+NThermalBosons))**(1/3)
-    # Tc = .94 * PlanckConst / 2 / np.pi * omegabar / kB * (Nc + NThermalBosons) ** (1 / 3)
-    # ToverTcGlobal = temperature / Tc
-
-    # params = {}
-    # params['ToverTc'] = ToverTcGlobal
-    # params['nc0'] = Nc * den_BEC(0, 0, 0) * (1e6) ** 3  # m**-3
-    # params['nthermal0'] = NThermalBosons * (den_ThermU(0, 0, 0) / normBose) * (1e6) ** 3  # m**-3
-    # params['chemicalPotential'] = chemicalPotential / PlanckConst * 1e-3  # kHz
-    # densityArray = (NThermalBosons * (den_ThermU(x, y, z, omegaX, omegaY, omegaZ, mNa, beta, chemicalPotential) / normBose) + Nc * den_BEC(x, y, z, xTF, yTF, zTF)) * (1e6) ** 3  # m**-3
-
-    density = ((den_ThermU(x, y, z, omegaX, omegaY, omegaZ, mNa, beta, chemicalPotential) / lambdaDB**3) + Nc * den_BEC(x, y, z, xTF, yTF, zTF)) * (1e6) ** 3  # m**-3
+    density = Nc * den_BEC(x, y, z, xTF, yTF, zTF) * (1e6) ** 3  # m**-3
 
     return density
 
+def becdensityGrad_zw2021(x, y, z, omegaX, omegaY, omegaZ, temperature, zTF):
+
+    # Note: Follows convention of experiment where z is the widest direction of the cloud, y is the oscillation direction, and x is the narrowest direction (slightly narrower than y) that is integrated out by the camera
+    # (x, y, z) provided in uM; (omegaX, omegaY, omegeaZ) provided in rad*Hz; temperature provided in K; zTF provided in um
+    # density is output in m^-3
+    # Taken and slightly modified from MATLAB function provided by Zwierlein group.
+
+    a0 = 5.29e-11  # Bohr radius (m)
+    hbar = 1.0555e-34  # reduced Planck's constant (J*s/rad)
+    PlanckConst = 2 * np.pi * hbar
+    kB = 1.38064852e-23
+    mNeutron = 1.674927471e-27
+    mProton = 1.672621898e-27
+    mNa = 12 * mNeutron + 11 * mProton
+    # mK = 19 * mProton + 21 * mNeutron
+    # mReduced = mK * mNa / (mK + mNa)
+
+    xTF = zTF * omegaZ / omegaX
+    yTF = zTF * omegaZ / omegaY
+
+    chemicalPotential_kHz = 1 / 2 * mNa * omegaZ ** 2 * (zTF / 10 ** 6) ** 2 / (PlanckConst * 1000)
+
+    chemicalPotential = chemicalPotential_kHz * 1000 * PlanckConst
+
+    omegabar = (omegaX * omegaY * omegaZ) ** (1 / 3)
+    a_s = 52 * a0  # Sodium F=1 scattering length, away from FB resonance
+    # prefactorEn = hbar ** 2 / 4 / mReduced * (6 * np.pi ** 2) ** (2 / 3)  # prefer REDUCED MASS, not Boson mass
+    Nc = (2 * chemicalPotential) ** (2.5) / (15 * hbar ** 2 * np.sqrt(mNa) * omegabar ** 3 * a_s)
+
+    dndx = Nc * 15 / (8 * np.pi * xTF * yTF * zTF) * (-2 * x / xTF ** 2) * np.heaviside(1 - x ** 2 / xTF ** 2 - y ** 2 / yTF ** 2 - z ** 2 / zTF ** 2, 1 / 2) * (1e6) ** 3  * (1e6)  # in m^-3 / m = m^-4 
+    dndy = Nc * 15 / (8 * np.pi * xTF * yTF * zTF) * (-2 * y / yTF ** 2) * np.heaviside(1 - x ** 2 / xTF ** 2 - y ** 2 / yTF ** 2 - z ** 2 / zTF ** 2, 1 / 2) * (1e6) ** 3  * (1e6)  # in m^-3 / m = m^-4
+
+    return np.array([dndx, dndy])
 
 def V_Pol_interp(kgrid, X_Vals, cParams, sParams, trapParams):
     # returns an interpolation function for the polaron energy
@@ -400,6 +466,9 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     x_MuM = x * (1e6) / L_exp2th; y_MuM = y * (1e6) / L_exp2th; z_MuM = z * (1e6) / L_exp2th  # convert positions in theory units to um
     n_exp = becdensity_zw2021(x_MuM, y_MuM, z_MuM, sampleParams['omegaX_radHz'], sampleParams['omegaY_radHz'], sampleParams['omegaZ_radHz'], sampleParams['temperature_K'], sampleParams['zTF_MuM'])  # computes BEC density in experimental units
     n = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
+
+    if np.isclose(n,0):
+        return np.nan
 
     # DPi = pf_static_sph.DP_interp_grid(DP, P, aIBi, kgrid, mI, mB, n, gBB)  # computing DP self-consistently requires ~500-1000 evaluations of aSi and PB --> better to do this with a spline using 100 calls to the grid integration functions rather than 500-1000 calls to these functions
 
@@ -1017,8 +1086,13 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
 
     L_exp2th = trapParams['L_exp2th']
 
+    # # To use with full density (thermal gas + condensate)
+    # densityFunc = lambda coords: becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    # densityGradFunc = nd.Gradient(densityFunc, method='central')  # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+
+    # To use with when density is just of the condensate
     densityFunc = lambda coords: becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
-    densityGradFunc = nd.Gradient(densityFunc, method='central')  # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    densityGradFunc = lambda coords: becdensityGrad_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**4)   # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
 
     trapParams['densityFunc'] = densityFunc
     trapParams['densityGradFunc'] = densityGradFunc
