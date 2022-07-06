@@ -60,14 +60,14 @@ class zw2021_PolaronHamiltonian_2D:
 
         [aIBi, mI, mB, n0, gBB] = self.Params
         RTF_BEC_X = self.trapParams['RTF_BEC_X']; RTF_BEC_Y = self.trapParams['RTF_BEC_Y']
-        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_Y_func = self.LDA_funcs['F_Imp_trap_Y']
+        F_BEC_osc_func = self.LDA_funcs['F_BEC_osc']; F_Imp_trap_X_func = self.LDA_funcs['F_Imp_trap_X']; F_Imp_trap_Y_func = self.LDA_funcs['F_Imp_trap_Y']
         densityFunc = self.trapParams['densityFunc']; densityGradFunc = self.trapParams['densityGradFunc']
 
         # Update BEC density dependent quantities
 
         if self.BEC_density_var == 'on':
-            n = densityFunc(X, Y)
-            nGrad = densityGradFunc(X, Y)
+            n = densityFunc([X, Y])
+            nGrad = densityGradFunc([X, Y])
             dndx = nGrad[0]; dndy = nGrad[1]
 
             if(self.coordinate_system == "SPHERICAL_2D"):
@@ -103,7 +103,7 @@ class zw2021_PolaronHamiltonian_2D:
 
         # FOR REAL TIME DYNAMICS:
         amplitude_new_temp = -1j * (self.gnum * np.sqrt(n) * self.Wk_grid +
-                                    amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                    amplitude * (self.Omega0_grid - self.kz * (PY - PB) / mI) +
                                     self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
         phase_new_temp = self.gnum * n + self.gnum * np.sqrt(n) * xp + (PY**2 - PB**2) / (2 * mI)
 

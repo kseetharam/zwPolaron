@@ -1017,7 +1017,7 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
 
     L_exp2th = trapParams['L_exp2th']
 
-    densityFunc = lambda X, Y: becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    densityFunc = lambda coords: becdensity_zw2021(coords[0] * (1e6) / L_exp2th, coords[1] * (1e6) / L_exp2th, 0,trapParams['omegaX_radHz'], trapParams['omegaY_radHz'], trapParams['omegaZ_radHz'], trapParams['temperature_K'], trapParams['zTF_MuM']) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
     densityGradFunc = nd.Gradient(densityFunc, method='central')  # function that gives the gradient of the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
 
     trapParams['densityFunc'] = densityFunc
@@ -1045,7 +1045,7 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
     ham = zw2021_PolaronHamiltonian_2D.zw2021_PolaronHamiltonian_2D(cs, Params, LDA_funcs, trapParams, toggleDict)
     gnum = ham.gnum
 
-    n_initial = densityFunc(X0, Y0)
+    n_initial = densityFunc([X0, Y0])
 
     Nsteps = 1e2
     aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n_initial, gBB)
@@ -1093,16 +1093,16 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
         # Compute time-varying amplitude of 'smarter' polaron potential. Also compute force from smarter polaron potential and bare impurity trap potential at each step
         amplitude = cs.get_Amplitude()
         amp_re = np.real(amplitude); amp_im = np.imag(amplitude)
-        n = densityFunc(cs.get_impPosX(), cs.get_impPosY())
+        n = densityFunc([cs.get_impPosX(), cs.get_impPosY()])
         Wk_grid = Wk(kgrid, mB, n, gBB)
         Wki_grid = 1 / Wk_grid
         Wk2_grid = Wk_grid**2; Wk3_grid = Wk_grid**3; omegak_g = omegak_grid(kgrid, mB, n, gBB)
         eta1 = np.dot(Wk2_grid * np.abs(amplitude)**2, dVk); eta2 = np.dot((Wk3_grid / omegak_g) * amp_re, dVk); eta3 = np.dot((Wk_grid / omegak_g) * amp_im, dVk)
         xp_re = 0.5 * np.dot(Wk_grid * amp_re, dVk); xm_im = 0.5 * np.dot(Wki_grid * amp_im, dVk)
         A_PP_da[ind] = gnum * (1 + 2 * xp_re / n) + gBB * eta1 - gnum * gBB * ((np.sqrt(n) + 2 * xp_re) * eta2 + 2 * xm_im * eta3)
-        dndy = densityGradFunc(cs.get_impPosX(), cs.get_impPosY())[1]
+        dndy = densityGradFunc([cs.get_impPosX(), cs.get_impPosY()])[1]
         F_PP_da[ind] = -1 * A_PP_da[ind] * dndy
-        F_impTrap_da[ind] = LDA_funcs['F_Imp_trap'](YLab_da[ind])
+        F_impTrap_da[ind] = LDA_funcs['F_Imp_trap_Y'](X_da[ind], YLab_da[ind])
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))

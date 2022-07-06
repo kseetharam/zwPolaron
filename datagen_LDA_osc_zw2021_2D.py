@@ -177,10 +177,12 @@ if __name__ == "__main__":
     cParams = {'aIBi': aIBi_Vals[inda]}
     sParams = [mI, mB, n0[inda], gBB]
 
-    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
     # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIB_exp))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+
+    samples[0, :] = [0, y0_imp[inda], P0_imp[inda]]
+
     Ns = samples.shape[0]
     xmean = np.mean(samples[:, 0]); ymean = np.mean(samples[:, 1]); pmean = np.mean(samples[:, 2])
     print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
@@ -249,10 +251,10 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(jobList); taskID = 4
+    taskCount = len(jobList); taskID = 0
 
     if(taskCount > len(jobList)):
         print('ERROR: TASK COUNT MISMATCH')
