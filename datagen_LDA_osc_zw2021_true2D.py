@@ -253,10 +253,10 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(jobList); taskID = 0
+    taskCount = len(jobList); taskID = 0
 
     if(taskCount > len(jobList)):
         print('ERROR: TASK COUNT MISMATCH')

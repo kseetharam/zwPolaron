@@ -138,6 +138,8 @@ if __name__ == "__main__":
     # print(omega_Na / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz_Na, expParams['mB']) / (2 * np.pi))
     # print(omega_gaussian_approx(A_TiSa_Hz_Na_scaled, expParams['mB']) / (2 * np.pi))
+    # print(np.sqrt((-4) * hbar * 2 * np.pi * A_TiSa_Hz / (expParams['mI'] * (wx_TiSa * 1e-6)**2)) / (2 * np.pi))
+    # print(np.sqrt((-4) * hbar * 2 * np.pi * A_ODT2_Hz / (expParams['mI'] * (wx_ODT2 * 1e-6)**2)) / (2 * np.pi))
 
     # sf_List = []
     # omega_fit = omega_K
@@ -149,20 +151,20 @@ if __name__ == "__main__":
     #     sf_List.append(sol.root)
     # print(sf_List)
 
-    def UNa_deriv(yODT1, yNa, A_ODT1, w_ODT1, A_TiSa, w_TiSa):
-        A_ODT1_en = hbar * 2 * np.pi * A_ODT1
-        A_TiSa_en = hbar * 2 * np.pi * A_TiSa
-        return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
+    # def UNa_deriv(yODT1, yNa, A_ODT1, w_ODT1, A_TiSa, w_TiSa):
+    #     A_ODT1_en = hbar * 2 * np.pi * A_ODT1
+    #     A_TiSa_en = hbar * 2 * np.pi * A_TiSa
+    #     return (-4 * A_TiSa_en / (w_TiSa**2)) * yNa * np.exp(-2 * (yNa / w_TiSa)**2) + (-4 * A_ODT1_en / (w_ODT1**2)) * (yNa - yODT1) * np.exp(-2 * ((yNa - yODT1) / w_ODT1)**2)
 
-    yODT1_List = []
-    for indy, yNa in enumerate(Na_displacement*np.cos(phi_Na)):
-        def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
-        # print(indy, f(0 * yNa), f(2 * yNa))
-        sol = root_scalar(f, bracket=[0 * yNa, 2 * yNa], method='brentq')
-        yODT1_List.append(sol.root)
-    print(yODT1_List)
-    print(A_ODT1_Hz/A_ODT1_Na_Hz)
-    print(A_TiSa_Hz/A_TiSa_Na_Hz_scaled)
+    # yODT1_List = []
+    # for indy, yNa in enumerate(Na_displacement*np.cos(phi_Na)):
+    #     def f(yODT1): return UNa_deriv(yODT1 * 1e-6, yNa * 1e-6, A_ODT1_Na_Hz, wy_ODT1 * 1e-6, A_TiSa_Na_Hz_scaled[indy], wy_TiSa * 1e-6)
+    #     # print(indy, f(0 * yNa), f(2 * yNa))
+    #     sol = root_scalar(f, bracket=[0 * yNa, 2 * yNa], method='brentq')
+    #     yODT1_List.append(sol.root)
+    # print(yODT1_List)
+    # print(A_ODT1_Hz/A_ODT1_Na_Hz)
+    # print(A_TiSa_Hz/A_TiSa_Na_Hz_scaled)
 
     # # Compute chemical potential of the K gas
 
@@ -626,6 +628,63 @@ if __name__ == "__main__":
     # ax.plot(pVals,EVals)
     # plt.show()
 
+    # X Potential exploration
+
+    from scipy.optimize import curve_fit
+
+    inda = 3
+    aIBi = aIBi_Vals[inda]
+    gnum = (2 * np.pi / pf_dynamic_sph.ur(mI, mB)) * (1 / aIBi)
+    # gnum = 0
+
+    A_TiSa_th = 2 * np.pi * A_TiSa_Hz_scaled[inda] / T_exp2th  # equivalent to gaussian_amp above
+    A_ODT1_th = 2 * np.pi * A_ODT1_Hz / T_exp2th
+    # A_ODT1_th = 0
+    A_ODT2_th = 2 * np.pi * A_ODT2_Hz / T_exp2th
+    wx_ODT1_th = wx_ODT1 * 1e-6 * L_exp2th; wy_ODT1_th = wy_ODT1 * 1e-6 * L_exp2th; wx_ODT2_th = wx_ODT2 * 1e-6 * L_exp2th; wz_ODT2_th = wz_ODT2 * 1e-6 * L_exp2th; wx_TiSa_th = wx_TiSa * 1e-6 * L_exp2th; wy_TiSa_th = wy_TiSa * 1e-6 * L_exp2th
+    RTF_BEC_X_th = RTF_BEC_X[inda] * 1e-6 * L_exp2th
+
+    U0_dens = gnum * pf_dynamic_sph.becdensity_zw2021(0, 0, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    U0_trap = pf_dynamic_sph.U_TiSa(0, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(0, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
+    print(U0_trap, U0_dens)
+
+    # def U_Imp_trap_X(X, Y):
+    #         U_dens = -1*U0_dens + gnum * pf_dynamic_sph.becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    #         U_trap = -1*U0_trap + pf_dynamic_sph.U_TiSa(X, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(X, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
+    #         return U_trap + U_dens
+
+    def U_trap_X(X, Y):
+            U_trap = -1*U0_trap + pf_dynamic_sph.U_TiSa(X, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(X, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
+            return U_trap
+
+    def U_dens_X(X, Y):
+            U_dens = -1*U0_dens + gnum * pf_dynamic_sph.becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+            return U_dens
+
+    def U_Imp_trap_X(X, Y):
+            return U_trap_X(X,Y) + U_dens_X(X, Y)
+
+    def harmonic_approx(X, A, omega):
+        return A + 0.5 * mI * omega**2 * X**2 
+
+
+    Y0_vals = [4.6, -27.8, -17.7, -24.4, 0]
+    Y0 = Y0_vals[-1]
+    xVals = np.linspace(-1*RTF_BEC_X_th, 1*RTF_BEC_X_th, 1000)
+    data = U_Imp_trap_X(xVals, Y0)
+
+    popt, cov = curve_fit(harmonic_approx, xVals, data)
+    omega_x_fit = popt[1]*T_exp2th / (2 * np.pi)
+    print(omega_x_fit)
+
+    fig, ax = plt.subplots()
+    ax.plot(xVals, data)
+    ax.plot(xVals, harmonic_approx(xVals, *popt))
+    # ax.plot(xVals, U_trap_X(xVals,Y0))
+    # ax.plot(xVals, U_dens_X(xVals,Y0))
+
+    plt.show()
+
     # # Finding minimum value of Uopt_tot for each interaction strength
 
     # yMin_vals = [] # location of minimum of Uopt_tot
@@ -668,82 +727,82 @@ if __name__ == "__main__":
     # print(yMax_vals)
     # print(fMax_vals) 
 
-    # Testing
+    # # Testing
 
-    inda = 3
+    # inda = 3
 
-    true2D = True
+    # true2D = True
 
-    xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
-    # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    yVals = np.linspace(-1.5 * RTF_BEC_Y_th[inda], 1.5 * RTF_BEC_Y_th[inda], 100)
-    pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
+    # xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
+    # # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
+    # yVals = np.linspace(-1.5 * RTF_BEC_Y_th[inda], 1.5 * RTF_BEC_Y_th[inda], 100)
+    # pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
 
-    x_des = 50
-    y_des = 50
-    # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
-    # testVals = np.zeros((xVals.size, yVals.size))
-    testVals = np.zeros((yVals.size, pVals.size))
+    # x_des = 50
+    # y_des = 50
+    # # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    # # testVals = np.zeros((xVals.size, yVals.size))
+    # testVals = np.zeros((yVals.size, pVals.size))
 
-    for indx, x in enumerate(xVals):
-        if indx != x_des:
-            continue
-        # print(x)
-        EPol = np.zeros(yVals.size)
-        UOpt = np.zeros(yVals.size)
-        Vharm = np.zeros(yVals.size)
-        for indy, y in enumerate(yVals):
-            # if indy != y_des:
-            #     continue
-            # print(y)
-            start = timer()
-            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            for indp, p in enumerate(pVals):
-                if true2D:
-                    testVals[indy, indp] = pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-                else:
-                    testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-                    # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
-            # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
-            # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
-            # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
-            print(timer() - start)
+    # for indx, x in enumerate(xVals):
+    #     if indx != x_des:
+    #         continue
+    #     # print(x)
+    #     EPol = np.zeros(yVals.size)
+    #     UOpt = np.zeros(yVals.size)
+    #     Vharm = np.zeros(yVals.size)
+    #     for indy, y in enumerate(yVals):
+    #         # if indy != y_des:
+    #         #     continue
+    #         # print(y)
+    #         start = timer()
+    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(x, y, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         for indp, p in enumerate(pVals):
+    #             if true2D:
+    #                 testVals[indy, indp] = pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #             else:
+    #                 testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #                 # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+    #         # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
+    #         # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+    #         # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+    #         print(timer() - start)
 
-        ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
-        ftot = simpson(testVals[indx,:],yVals)
-        ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
-        print(ftot)
-        print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+    #     ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+    #     ftot = simpson(testVals[indx,:],yVals)
+    #     ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
+    #     print(ftot)
+    #     print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
 
-    # ptot = simpson(testVals[x_des,y_des,:],pVals)
-    # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
-    # print(p0, pmean)
+    # # ptot = simpson(testVals[x_des,y_des,:],pVals)
+    # # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
+    # # print(p0, pmean)
 
+    # # fig, ax = plt.subplots()
+    # # # ax.plot(pVals, testVals[x_des,y_des,:])
+    # # ax.plot(yVals, testVals[x_des,:])
+    # # # ax.plot(yVals, EPol)
+    # # # ax.plot(yVals, UOpt)
+    # # # ax.plot(yVals, Vharm)
+    # # plt.show()
+
+    # # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
+    # # fig, ax = plt.subplots()
+    # # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
+    # # ax.set_xlabel('x')
+    # # ax.set_ylabel('y')
+    # # fig.colorbar(c, ax=ax)
+    # # plt.show()
+
+    # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
     # fig, ax = plt.subplots()
-    # # ax.plot(pVals, testVals[x_des,y_des,:])
-    # ax.plot(yVals, testVals[x_des,:])
-    # # ax.plot(yVals, EPol)
-    # # ax.plot(yVals, UOpt)
-    # # ax.plot(yVals, Vharm)
-    # plt.show()
-
-    # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
-    # fig, ax = plt.subplots()
-    # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
-    # ax.set_xlabel('x')
-    # ax.set_ylabel('y')
+    # c = ax.pcolormesh(1e6 * yg / L_exp2th, pg/(mI * nu[inda]), testVals,cmap='RdBu')
+    # ax.set_xlabel('y')
+    # ax.set_ylabel('p')
     # fig.colorbar(c, ax=ax)
     # plt.show()
-
-    yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
-    fig, ax = plt.subplots()
-    c = ax.pcolormesh(1e6 * yg / L_exp2th, pg/(mI * nu[inda]), testVals,cmap='RdBu')
-    ax.set_xlabel('y')
-    ax.set_ylabel('p')
-    fig.colorbar(c, ax=ax)
-    plt.show()
 
     # # Create dicts
 
