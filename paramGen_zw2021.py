@@ -628,62 +628,58 @@ if __name__ == "__main__":
     # ax.plot(pVals,EVals)
     # plt.show()
 
-    # X Potential exploration
+    # # X Potential exploration
 
-    from scipy.optimize import curve_fit
+    # from scipy.optimize import curve_fit
 
-    inda = 3
-    aIBi = aIBi_Vals[inda]
-    gnum = (2 * np.pi / pf_dynamic_sph.ur(mI, mB)) * (1 / aIBi)
-    # gnum = 0
+    # inda = 3
+    # aIBi = aIBi_Vals[inda]
+    # gnum = pf_dynamic_sph.g(kgrid, aIBi, mI, mB, n0, gBB)
+    # # gnum = 0
 
-    A_TiSa_th = 2 * np.pi * A_TiSa_Hz_scaled[inda] / T_exp2th  # equivalent to gaussian_amp above
-    A_ODT1_th = 2 * np.pi * A_ODT1_Hz / T_exp2th
-    # A_ODT1_th = 0
-    A_ODT2_th = 2 * np.pi * A_ODT2_Hz / T_exp2th
-    wx_ODT1_th = wx_ODT1 * 1e-6 * L_exp2th; wy_ODT1_th = wy_ODT1 * 1e-6 * L_exp2th; wx_ODT2_th = wx_ODT2 * 1e-6 * L_exp2th; wz_ODT2_th = wz_ODT2 * 1e-6 * L_exp2th; wx_TiSa_th = wx_TiSa * 1e-6 * L_exp2th; wy_TiSa_th = wy_TiSa * 1e-6 * L_exp2th
-    RTF_BEC_X_th = RTF_BEC_X[inda] * 1e-6 * L_exp2th
 
-    U0_dens = gnum * pf_dynamic_sph.becdensity_zw2021(0, 0, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
-    U0_trap = pf_dynamic_sph.U_TiSa(0, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(0, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
-    print(U0_trap, U0_dens)
+    # A_TiSa_th = 2 * np.pi * A_TiSa_Hz_scaled[inda] / T_exp2th  # equivalent to gaussian_amp above
+    # A_ODT1_th = 2 * np.pi * A_ODT1_Hz / T_exp2th
+    # # A_ODT1_th = 0
+    # A_ODT2_th = 2 * np.pi * A_ODT2_Hz / T_exp2th
+    # wx_ODT1_th = wx_ODT1 * 1e-6 * L_exp2th; wy_ODT1_th = wy_ODT1 * 1e-6 * L_exp2th; wx_ODT2_th = wx_ODT2 * 1e-6 * L_exp2th; wz_ODT2_th = wz_ODT2 * 1e-6 * L_exp2th; wx_TiSa_th = wx_TiSa * 1e-6 * L_exp2th; wy_TiSa_th = wy_TiSa * 1e-6 * L_exp2th
+    # RTF_BEC_X_th = RTF_BEC_X[inda] * 1e-6 * L_exp2th
+
+    # U0_dens = gnum * pf_dynamic_sph.becdensity_zw2021(0, 0, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    # U0_trap = pf_dynamic_sph.U_TiSa(0, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(0, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
+
+
+    # def U_trap_X(X, Y):
+    #         U_trap = -1*U0_trap + pf_dynamic_sph.U_TiSa(X, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(X, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
+    #         return U_trap
+
+    # def U_dens_X(X, Y):
+    #         U_dens = -1*U0_dens + gnum * pf_dynamic_sph.becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
+    #         return U_dens
 
     # def U_Imp_trap_X(X, Y):
-    #         U_dens = -1*U0_dens + gnum * pf_dynamic_sph.becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
-    #         U_trap = -1*U0_trap + pf_dynamic_sph.U_TiSa(X, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(X, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
-    #         return U_trap + U_dens
+    #         return U_trap_X(X,Y) + U_dens_X(X, Y)
 
-    def U_trap_X(X, Y):
-            U_trap = -1*U0_trap + pf_dynamic_sph.U_TiSa(X, 0, A_TiSa_th, wx_TiSa_th, wy_TiSa_th) + pf_dynamic_sph.U_ODT2(X, 0, A_ODT2_th, wx_ODT2_th, wz_ODT2_th)
-            return U_trap
-
-    def U_dens_X(X, Y):
-            U_dens = -1*U0_dens + gnum * pf_dynamic_sph.becdensity_zw2021(X * (1e6) / L_exp2th, Y * (1e6) / L_exp2th, 0,omega_x_Na, omega_Na[inda], omega_z_Na, T, RTF_BEC_Z[inda]) / (L_exp2th**3)  # function that gives the BEC density (expressed in theory units) given a coordinates (x,y) (expressed in theory units)
-            return U_dens
-
-    def U_Imp_trap_X(X, Y):
-            return U_trap_X(X,Y) + U_dens_X(X, Y)
-
-    def harmonic_approx(X, A, omega):
-        return A + 0.5 * mI * omega**2 * X**2 
+    # def harmonic_approx(X, A, omega):
+    #     return A + 0.5 * mI * omega**2 * X**2 
 
 
-    Y0_vals = [4.6, -27.8, -17.7, -24.4, 0]
-    Y0 = Y0_vals[-1]
-    xVals = np.linspace(-1*RTF_BEC_X_th, 1*RTF_BEC_X_th, 1000)
-    data = U_Imp_trap_X(xVals, Y0)
+    # Y0_vals = [4.6, -27.8, -17.7, -24.4, 0]
+    # Y0 = Y0_vals[-1]
+    # xVals = np.linspace(-1*RTF_BEC_X_th, 1*RTF_BEC_X_th, 1000)
+    # data = U_Imp_trap_X(xVals, Y0)
 
-    popt, cov = curve_fit(harmonic_approx, xVals, data)
-    omega_x_fit = popt[1]*T_exp2th / (2 * np.pi)
-    print(omega_x_fit)
+    # popt, cov = curve_fit(harmonic_approx, xVals, data)
+    # omega_x_fit = popt[1]*T_exp2th / (2 * np.pi)
+    # print(omega_x_fit)
 
-    fig, ax = plt.subplots()
-    ax.plot(xVals, data)
-    ax.plot(xVals, harmonic_approx(xVals, *popt))
-    # ax.plot(xVals, U_trap_X(xVals,Y0))
-    # ax.plot(xVals, U_dens_X(xVals,Y0))
+    # fig, ax = plt.subplots()
+    # ax.plot(xVals, data)
+    # ax.plot(xVals, harmonic_approx(xVals, *popt))
+    # # ax.plot(xVals, U_trap_X(xVals,Y0))
+    # # ax.plot(xVals, U_dens_X(xVals,Y0))
 
-    plt.show()
+    # plt.show()
 
     # # Finding minimum value of Uopt_tot for each interaction strength
 
