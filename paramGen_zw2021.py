@@ -525,67 +525,68 @@ if __name__ == "__main__":
     # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
-    # # Visualize distribution of samples
+    # Visualize distribution of samples
 
-    # cmap = 'gist_heat_r'
-    # my_cmap = matplotlib.cm.get_cmap(cmap)
-    # my_cmap.set_under('w')
+    cmap = 'gist_heat_r'
+    my_cmap = matplotlib.cm.get_cmap(cmap)
+    my_cmap.set_under('w')
 
-    # inda = 3
+    inda = 3
 
-    # xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
-    # yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
 
-    # pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
-    # # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # Ns = samples.shape[0]
-    # # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
-    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pxSamples = samples[:, 2]; pySamples = samples[:, 3]
-    # pSamples = pySamples
+    Ns = samples.shape[0]
+    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    xSamples = samples[:, 0]; ySamples = samples[:, 1]; pxSamples = samples[:, 2]; pySamples = samples[:, 3]
+    pSamples = pySamples
 
-    # # pSamples = np.abs(pSamples)
-    # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    # print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    # pSamples = np.abs(pSamples)
+    xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
+    print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
 
-    # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
-    # H = H.T
-    # fig, ax = plt.subplots()
-    # X, Y = np.meshgrid(xedges, yedges)
-    # quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
-    # ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
-    # ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
-    # ax.set_xlim([xMin, xMax])
-    # ax.set_ylim([yMin, yMax])
-    # fig.colorbar(quad,extend='max')
+    H, xedges, yedges = np.histogram2d(xSamples, ySamples)
+    H = H.T
+    fig, ax = plt.subplots()
+    X, Y = np.meshgrid(xedges, yedges)
+    quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
+    ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
+    ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
+    ax.set_xlim([xMin, xMax])
+    ax.set_ylim([yMin, yMax])
+    fig.colorbar(quad,extend='max')
 
-    # fig2, ax2 = plt.subplots()
-    # ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
-    # ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
-    # ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
-    # ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
-    # # ax2.set_ylim([])
+    fig2, ax2 = plt.subplots()
+    ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
+    ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
+    # ax2.set_ylim([])
 
-    # my_cmap='RdBu'
+    my_cmap='RdBu'
 
-    # H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
-    # H = H.T
-    # fig, ax = plt.subplots()
-    # Y, P = np.meshgrid(yedges, pedges)
-    # quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
-    # ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
-    # ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
-    # fig.colorbar(quad,extend='max')
+    H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
+    H = H.T
+    fig, ax = plt.subplots()
+    Y, P = np.meshgrid(yedges, pedges)
+    quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
+    ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
+    ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
+    fig.colorbar(quad,extend='max')
 
-    # plt.show()
+    plt.show()
 
     # # Polaron energy exploration
 
