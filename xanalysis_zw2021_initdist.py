@@ -40,7 +40,7 @@ if __name__ == "__main__":
     true2D = True
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_2D'
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist'
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_negMu'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0_Y_Y0'
 
@@ -86,8 +86,10 @@ if __name__ == "__main__":
         # print(filename)
         if filename == '.DS_Store':
             continue
-        if filename == 'aIB_-375a0_632.nc':
-            continue
+        # if filename == 'aIB_-375a0_632.nc':
+        #     continue
+        # if filename =='aIB_-375a0_1.nc':
+        #     continue
 
         qds = xr.open_dataset(datapath + '/' + filename)
         # print(qds)
@@ -115,6 +117,8 @@ if __name__ == "__main__":
         # if Y0 < 3:
         #     continue
 
+        # if Y0 > -5:
+        #     continue
 
         # xBEC = pf_dynamic_sph.x_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); xBEC_conv = 1e6 * xBEC / L_exp2th
         # vBEC = pf_dynamic_sph.v_BEC_osc_zw2021(qds['t'].values, omega_BEC_osc, gamma_BEC_osc, phi_BEC_osc, amp_BEC_osc); vBEC_conv = (vBEC * T_exp2th / L_exp2th) * (1e6 / 1e3)
@@ -202,10 +206,15 @@ if __name__ == "__main__":
     # ax2.legend()
 
     inda = 3
+    c_rat = c_BEC_exp[inda]/c_BEC_um_Per_ms
+    print(c_rat)
+    v_rat = np.max(V_exp[inda])/np.max(V_mean)
+    print(v_rat)
+
     aIB = aIBexp_Vals[inda]
     fig, ax = plt.subplots()
     ax.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
-    ax.plot(tVals, V_mean, label='Simulation')
+    ax.plot(tVals, v_rat*V_mean, label='Simulation')
     ax.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
     ax.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax.set_xlabel(r'Time (ms)')
@@ -229,15 +238,15 @@ if __name__ == "__main__":
     ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax2.set_xlabel(r'Time (ms)')
     ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
-    ax2.legend()
+    # ax2.legend()
     ax2.set_ylim([-20, 20])
-    ax2.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
     ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax2.set_xlabel(r'Time (ms)')
 
     if true2D:
-        fig3, ax3 = plt.subplots()
-        fig4, ax4 = plt.subplots()
+        ax2.legend()
+        # fig3, ax3 = plt.subplots()
+        # fig4, ax4 = plt.subplots()
         fig5, ax5, = plt.subplots()
         dt = 1e-3*(tVals[1]-tVals[0])
         fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / (dt))
@@ -245,14 +254,16 @@ if __name__ == "__main__":
         for indx, X in enumerate(X_List):
             X0, Y0, PX0, PY0 = param_List[indx]
             FTVals = np.real(np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(X))))
-            ax3.plot(tVals, X_List[indx] / 1e6 * L_exp2th, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             print(np.allclose(np.heaviside(1 - X_List[indx] ** 2 / RTF_BEC_X_th[inda] ** 2 - Y_List[indx] ** 2 / RTF_BEC_Y_th[inda] ** 2, 1 / 2),1))
-            # ax3.fill_between(tVals, -RTF_BEC_X[inda] / 1e6 * L_exp2th, RTF_BEC_X[inda] / 1e6 * L_exp2th, facecolor='orange', alpha=0.1, label='')
-            ax3.legend()
-            ax4.plot(tVals, PX_List[indx], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
-            ax4.legend()
-            ax5.plot(fVals[fVals>0], FTVals[fVals>0], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             print(fVals[fVals>0][np.argmax(FTVals[fVals>0])])
+
+            # ax3.plot(tVals, X_List[indx] / 1e6 * L_exp2th, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+            # # ax3.fill_between(tVals, -RTF_BEC_X[inda] / 1e6 * L_exp2th, RTF_BEC_X[inda] / 1e6 * L_exp2th, facecolor='orange', alpha=0.1, label='')
+            # ax3.legend()
+            # ax4.plot(tVals, PX_List[indx], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+            # ax4.legend()
+
+            ax5.plot(fVals[fVals>0], FTVals[fVals>0], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             ax5.set_xlabel('Hz')
             ax5.set_xlim([0,500])
             ax5.legend()
