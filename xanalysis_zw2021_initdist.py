@@ -208,7 +208,8 @@ if __name__ == "__main__":
     inda = 3
     c_rat = c_BEC_exp[inda]/c_BEC_um_Per_ms
     print(c_rat)
-    v_rat = np.max(V_exp[inda])/np.max(V_mean)
+    v_rat = np.max(V_exp[inda][0:int(tVals.size/4)])/np.max(V_mean[0:int(tVals.size/4)])
+    v_rat = 2
     print(v_rat)
 
     aIB = aIBexp_Vals[inda]
@@ -244,7 +245,7 @@ if __name__ == "__main__":
     ax2.set_xlabel(r'Time (ms)')
 
     if true2D:
-        ax2.legend()
+        # ax2.legend()
         # fig3, ax3 = plt.subplots()
         # fig4, ax4 = plt.subplots()
         fig5, ax5, = plt.subplots()
@@ -253,9 +254,9 @@ if __name__ == "__main__":
 
         for indx, X in enumerate(X_List):
             X0, Y0, PX0, PY0 = param_List[indx]
-            FTVals = np.real(np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(X))))
-            print(np.allclose(np.heaviside(1 - X_List[indx] ** 2 / RTF_BEC_X_th[inda] ** 2 - Y_List[indx] ** 2 / RTF_BEC_Y_th[inda] ** 2, 1 / 2),1))
-            print(fVals[fVals>0][np.argmax(FTVals[fVals>0])])
+            FTVals = np.abs(np.fft.fftshift(dt * np.fft.fft(np.fft.fftshift(X))))
+            # print(np.allclose(np.heaviside(1 - X_List[indx] ** 2 / RTF_BEC_X_th[inda] ** 2 - Y_List[indx] ** 2 / RTF_BEC_Y_th[inda] ** 2, 1 / 2),1))
+            # print(fVals[fVals>0][np.argmax(FTVals[fVals>0])])
 
             # ax3.plot(tVals, X_List[indx] / 1e6 * L_exp2th, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             # # ax3.fill_between(tVals, -RTF_BEC_X[inda] / 1e6 * L_exp2th, RTF_BEC_X[inda] / 1e6 * L_exp2th, facecolor='orange', alpha=0.1, label='')
@@ -266,7 +267,7 @@ if __name__ == "__main__":
             ax5.plot(fVals[fVals>0], FTVals[fVals>0], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             ax5.set_xlabel('Hz')
             ax5.set_xlim([0,500])
-            ax5.legend()
+            # ax5.legend()
 
 
     plt.show()

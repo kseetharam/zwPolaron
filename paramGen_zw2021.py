@@ -419,6 +419,9 @@ if __name__ == "__main__":
     # E_pol_offset = np.zeros(aIBexp_Vals.size)
     # Nsteps = 1e2
     # for ind, aIB_exp in enumerate(aIBexp_Vals):
+    #     if aIB_exp >= 0:
+    #         E_pol_offset[ind] = 0
+    #         continue
     #     # aSi0_tck, PBint0_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n0[ind], gBB)
     #     # np.save('zwData/densitySplines/n0/aSi0_aIB_{0}a0.npy'.format(aIB_exp), aSi0_tck)
     #     # np.save('zwData/densitySplines/n0/PBint0_aIB_{0}a0.npy'.format(aIB_exp), PBint0_tck)
@@ -441,7 +444,8 @@ if __name__ == "__main__":
     U_opt_offset = np.array([-28.60825064869891, -31.21994067822379, -30.8707107193229, -31.325119904209522, -31.228746220118186, -31.150586511632262, -31.15897717819624, -31.200727683513215, -31.403029121814292, -31.011718680361117, -30.718864141323024, -31.163711698459377, -30.313300309127857, -30.275118254553636, -30.72567395606398, -29.892556211531456, -29.495819535657738, -28.00228060325752])  # (density is just condensate) constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0. This offset is determined by numerically determining min(U_tot_opt(0,y,0))
     U0_opt_offset = A_ODT1_th + A_ODT2_th + A_TiSa_th  # constant energy offset (theory units) of U_tot_opt to make sure the minimum value U_tot_opt(0,ymin,0) = 0 when AODT1 = 0 (the ODT1 beam is turned off)
     # E_pol_offset = np.array([-1.18662877e+00, -8.41179486e-01, -6.87998107e-01, -4.88436591e-01, -3.64301316e-01, -2.12254441e-01, -9.73809669e-02, -3.16003180e-02, -8.62356415e-36, 3.11130148e-02, 7.32152511e-02, 1.88938399e-01, 2.68558712e-01, 3.73587857e-01, 5.83872838e-01, 8.28556730e-01, 1.11273234e+00, 1.66368733e+00])  # when density includes condensate and thermal gas
-    E_pol_offset = np.array([-1.17876723e+00, -8.34604734e-01, -6.84013469e-01, -4.85201407e-01, -3.62255174e-01, -2.11318340e-01, -9.69039151e-02, -3.14356780e-02, -5.28352867e-37,  3.09442108e-02,  7.27691389e-02,  1.87824142e-01, 2.66992312e-01,  3.71253309e-01,  5.80338018e-01,  8.23862869e-01, 1.10454958e+00,  1.65267226e+00])  # when density is just of the condensate
+    # E_pol_offset = np.array([-1.17876723e+00, -8.34604734e-01, -6.84013469e-01, -4.85201407e-01, -3.62255174e-01, -2.11318340e-01, -9.69039151e-02, -3.14356780e-02, -5.28352867e-37,  3.09442108e-02,  7.27691389e-02,  1.87824142e-01, 2.66992312e-01,  3.71253309e-01,  5.80338018e-01,  8.23862869e-01, 1.10454958e+00,  1.65267226e+00])  # when density is just of the condensate
+    E_pol_offset = np.array([-1.17876723e+00, -8.34604734e-01, -6.84013469e-01, -4.85201407e-01, -3.62255174e-01, -2.11318340e-01, -9.69039151e-02, -3.14356780e-02, 0,  0,  0,  0, 0,  0,  0,  0, 0,  0])  # when density is just of the condensate
 
     # f_thermal_maxVals = np.array([0.7367184970676869, 0.7023880636086897, 0.7459548034386865, 0.79242602587235, 0.8340965891576568, 0.8912926562637322, 0.8949215118953942, 0.8698744612202944, 0.8675373653753994, 0.8801537515385071, 0.885519273327338, 0.9098398084573248, 0.9212560518600181, 0.8316673727452937, 0.9746952226616081, 0.997698493028504, 0.9991709720238214, 0.9999781206212883])  # Numerically determined maximum value of f_thermal for each interaction (occurs at x=0, y=yMax, z=0, p=0 where yMax is given below)
     # y_thermal_maxVals = np.array([-12.358738440529192, -15.142125013161545, -13.144260996614438, -16.589728903343367, -13.283761232947477, -21.15224812723023, -20.742902013227198, -24.997818462639284, -26.498895342912757, -28.469193967012014, -33.970099935372986, -33.66816313625496, -36.2296199300486, -18.44950460158087, -55.65474817181998, -56.536254230789034, -50.99473895410588, -56.758005648192395])  # the y values y=yMax at which f_thermal has a maximum (positive Mu)
@@ -456,7 +460,7 @@ if __name__ == "__main__":
     # y_thermal_maxVals = np.array([-12.313756173386173, -15.092081246922893, -13.115154653923879, -16.55256620596325, -13.266519101775238, -21.135281524323595, -20.733909803778854, -24.993339840222134, -26.498895611802926, -28.475590509794532, -33.99651731075096, -33.74027937637036, -36.34859113208791, -18.51735283512218, -55.740980406094394, -56.51580566054858, -50.90619908248219, -56.54844009927777])  # the y values y=yMax at which f_thermal has a maximum [T = 20 nK]
 
 
-    inda = 3
+    inda = 1
     true2D = True
 
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
@@ -465,65 +469,69 @@ if __name__ == "__main__":
     sParams = [mI, mB, n0[inda], gBB]
     mu_th = mu_div_hbar_K[inda] / T_exp2th  # converts chemical potential in rad*Hz to theory units
 
-    # y0 = y0_imp[inda]; p0 = P0_imp[inda]  # desired mean starting position and total momentum of the initial polaron for motion across the x=z=0 slice of the density (in theory units)
+    y0 = y0_imp[inda]; p0 = P0_imp[inda]  # desired mean starting position and total momentum of the initial polaron for motion across the x=z=0 slice of the density (in theory units)
 
     # xMin = -1 * RTF_BEC_X_th[inda]; xMax = 1 * RTF_BEC_X_th[inda]
     # yMin = -1 * RTF_BEC_Y_th[inda]; yMax = 1 * RTF_BEC_Y_th[inda]
-    # pMin = -1 * mI * nu[inda]; pMax = 1 * mI * nu[inda]
+    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
 
-    # fMax = f_thermal_maxVals[inda]
-    # print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
-    # print(xMax, yMax, pMax, fMax)
 
-    # Ns = 1000  # number of desired samples
-    # evals = 0
-    # counter = 0
-    # if true2D:
-    #     samples = np.zeros((Ns, 4))
-    # else:
-    #     samples = np.zeros((Ns, 3))
+    pMin = -1 * mI * nu[inda]; pMax = 1 * mI * nu[inda]
 
-    # start = timer()
-    # while counter < Ns:
-    #     f = np.random.uniform(low=0, high=fMax)
-    #     x = np.random.uniform(low=xMin, high=xMax)
-    #     y = np.random.uniform(low=yMin, high=yMax)
-    #     py = np.random.uniform(low=pMin, high=pMax)
-    #     px = np.random.uniform(low=pMin, high=pMax)
+    fMax = f_thermal_maxVals[inda]
+    print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
+    print(xMax, yMax, pMax, fMax)
 
-    #     # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
-    #     # p = np.sqrt(px**2 + py**2 + pz**2)
-    #     # if p > pMax:
-    #     #     continue
+    Ns = 1000  # number of desired samples
+    evals = 0
+    counter = 0
+    if true2D:
+        samples = np.zeros((Ns, 4))
+    else:
+        samples = np.zeros((Ns, 3))
 
-    #     # x = 0
-    #     # y = y0
-    #     # py = p0
-    #     # px = 0
+    start = timer()
+    while counter < Ns:
+        f = np.random.uniform(low=0, high=fMax)
+        x = np.random.uniform(low=xMin, high=xMax)
+        y = np.random.uniform(low=yMin, high=yMax)
+        py = np.random.uniform(low=pMin, high=pMax)
+        px = np.random.uniform(low=pMin, high=pMax)
 
-    #     if true2D:
-    #         f_eval = pf_dynamic_sph.f_thermal_true2D(x, y, 0, px, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-    #         if f < f_eval:
-    #             samples[counter, :] = [x, y, px, py]
-    #             counter += 1
+        # px, py, pz = np.random.uniform(low=pMin,high=pMax, size=3)
+        # p = np.sqrt(px**2 + py**2 + pz**2)
+        # if p > pMax:
+        #     continue
 
-    #     else:
-    #         f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
-    #         if f < f_eval:
-    #             samples[counter, :] = [x, y, py]
-    #             counter += 1
+        # x = 0
+        # y = y0
+        # py = p0
+        # px = 0
 
-    #     evals += 1
-    #     print(counter, evals, f, f_eval)
-    # print(timer() - start)
+        if true2D:
+            f_eval = pf_dynamic_sph.f_thermal_true2D(x, y, 0, px, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+            if f < f_eval:
+                samples[counter, :] = [x, y, px, py]
+                counter += 1
 
-    # sample_datapath = 'zwData/samples/'
-    # savemat(sample_datapath + 'aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
-    # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+        else:
+            f_eval = pf_dynamic_sph.f_thermal(x, y, 0, py, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)  # we assume we only sample initial particles with z=0, px=0, pz=0 (so p=sqrt(px^2+py^2+pz^2)=py)
+            if f < f_eval:
+                samples[counter, :] = [x, y, py]
+                counter += 1
+
+        evals += 1
+        print(counter, evals, f, f_eval)
+    print(timer() - start)
+
+    sample_datapath = 'zwData/samples/'
+    savemat(sample_datapath + 'aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
+    # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
     # Visualize distribution of samples
 
@@ -531,7 +539,8 @@ if __name__ == "__main__":
     my_cmap = matplotlib.cm.get_cmap(cmap)
     my_cmap.set_under('w')
 
-    inda = 3
+    inda = 1
+    print(aIBexp_Vals[inda])
 
     xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
     yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]

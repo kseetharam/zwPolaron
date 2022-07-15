@@ -468,7 +468,11 @@ def E_Pol_gs(x, y, z, P, kgrid, cParams, sParams, sampleParams):
     n = n_exp / (L_exp2th**3)  # converts density in SI units to theory units
 
     if np.isclose(n,0):
-        return np.nan
+        return -1 * sampleParams['E_pol_offset'] + (P**2)/(2*mI)
+        # if aIBi > 0:
+        #     return (P**2)/(2*mI)
+        # else:
+        #     return np.nan
 
     # DPi = pf_static_sph.DP_interp_grid(DP, P, aIBi, kgrid, mI, mB, n, gBB)  # computing DP self-consistently requires ~500-1000 evaluations of aSi and PB --> better to do this with a spline using 100 calls to the grid integration functions rather than 500-1000 calls to these functions
 
