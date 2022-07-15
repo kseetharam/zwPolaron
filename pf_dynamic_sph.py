@@ -1123,14 +1123,16 @@ def zw2021_quenchDynamics_true2D(cParams, gParams, sParams, trapParams, toggleDi
     ham = zw2021_PolaronHamiltonian_2D.zw2021_PolaronHamiltonian_2D(cs, Params, LDA_funcs, trapParams, toggleDict)
     gnum = ham.gnum
 
-    n_initial = densityFunc([X0, Y0])
-
-    Nsteps = 1e2
-    aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n_initial, gBB)
-    DP = pf_static_sph.DP_interp(0, PY0, aIBi, aSi_tck, PBint_tck)
-    aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
-    CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n_initial, gBB)
-    cs.set_initState(amplitude=CSAmp, phase=0, X=X0, PX=PX0, Y=Y0, PY=PY0)
+    if np.isclose(np.heaviside(1 - X0 ** 2 / trapParams['RTF_BEC_X'] ** 2 - Y0 ** 2 / trapParams['RTF_BEC_Y'] ** 2, 1 / 2), 0):
+        print('INITIALLY OUTSIDE')
+    else:
+        n_initial = densityFunc([X0, Y0])
+        Nsteps = 1e2
+        aSi_tck, PBint_tck = pf_static_sph.createSpline_grid(Nsteps, kgrid, mI, mB, n_initial, gBB)
+        DP = pf_static_sph.DP_interp(0, PY0, aIBi, aSi_tck, PBint_tck)
+        aSi = pf_static_sph.aSi_interp(DP, aSi_tck)
+        CSAmp = pf_static_sph.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n_initial, gBB)
+        cs.set_initState(amplitude=CSAmp, phase=0, X=X0, PX=PX0, Y=Y0, PY=PY0)
 
     # Time evolution
 
