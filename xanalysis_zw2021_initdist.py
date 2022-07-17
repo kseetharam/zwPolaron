@@ -39,7 +39,11 @@ if __name__ == "__main__":
 
     true2D = True
 
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_2D'
+    aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
+
+    inda = 3
+
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_2D/aIB_{0}a0'.format(aIBexp_Vals[inda])
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_negMu'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_P_P0_Y_Y0'
@@ -81,6 +85,7 @@ if __name__ == "__main__":
     X_List = []
     Y_List = []
     PX_List = []
+    filename_List = []
 
     for ind, filename in enumerate(os.listdir(datapath)):
         # print(filename)
@@ -126,6 +131,7 @@ if __name__ == "__main__":
 
         qds_List.append(qds)
         V_List.append(V)
+        filename_List.append(filename)
 
         # vBEC_List.append(vBEC_conv)
         # xBEC_List.append(xBEC_conv)
@@ -209,7 +215,7 @@ if __name__ == "__main__":
     c_rat = c_BEC_exp[inda]/c_BEC_um_Per_ms
     print(c_rat)
     v_rat = np.max(V_exp[inda][0:int(tVals.size/4)])/np.max(V_mean[0:int(tVals.size/4)])
-    v_rat = 2
+    v_rat = 2.5
     print(v_rat)
 
     aIB = aIBexp_Vals[inda]
@@ -230,8 +236,11 @@ if __name__ == "__main__":
     # for indv, V in enumerate(V_List[0:-1:75]):
     for indv, V in enumerate(V_List):
         if true2D:
-            X0, Y0, PX0, PY0 = paramSlice[indv]
-            ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+            X0, Y0, PX0, PY0 = param_List[indv]
+            ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
+            # if np.max(np.abs(V[0::])) > 3 * c_BEC_exp[inda]:
+            #     print(indv, filename_List[indv])
+            #     ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
         else:
             X0, Y0, P0 = paramSlice[indv]
             ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, P0: {:.2f}'.format(X0, Y0, P0))
@@ -263,6 +272,11 @@ if __name__ == "__main__":
             # ax3.legend()
             # ax4.plot(tVals, PX_List[indx], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             # ax4.legend()
+
+            # indmax = np.argmax(FTVals[fVals>0])
+            # if fVals[fVals>0][indmax] < 100:
+            #     print(fVals[fVals>0][indmax])
+            #     print(filename_List[indx])
 
             ax5.plot(fVals[fVals>0], FTVals[fVals>0], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             ax5.set_xlabel('Hz')
