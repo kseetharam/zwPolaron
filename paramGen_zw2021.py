@@ -467,7 +467,7 @@ if __name__ == "__main__":
     # y_thermal_maxVals = np.array([-12.313756173386173, -15.092081246922893, -13.115154653923879, -16.55256620596325, -13.266519101775238, -21.135281524323595, -20.733909803778854, -24.993339840222134, -26.498895611802926, -28.475590509794532, -33.99651731075096, -33.74027937637036, -36.34859113208791, -18.51735283512218, -55.740980406094394, -56.51580566054858, -50.90619908248219, -56.54844009927777])  # the y values y=yMax at which f_thermal has a maximum [T = 20 nK]
 
 
-    inda = 3
+    inda = 14
     true2D = True
 
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
@@ -490,13 +490,13 @@ if __name__ == "__main__":
     print(aIBexp_Vals[inda], y0, p0/(mI * nu[inda]))
     print(xMax, yMax, pMax, fMax)
 
-    Ns = 1000  # number of desired samples
-    evals = 0
-    counter = 0
-    if true2D:
-        samples = np.zeros((Ns, 4))
-    else:
-        samples = np.zeros((Ns, 3))
+    # Ns = 1000  # number of desired samples
+    # evals = 0
+    # counter = 0
+    # if true2D:
+    #     samples = np.zeros((Ns, 4))
+    # else:
+    #     samples = np.zeros((Ns, 3))
 
     # start = timer()
     # while counter < Ns:
@@ -540,69 +540,69 @@ if __name__ == "__main__":
     # # savemat(sample_datapath + 'aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
     # # savemat(sample_datapath + 'aIB_{0}a0_T_20nk.mat'.format(aIBexp_Vals[inda]), {'samples': samples})
 
-    # # Visualize distribution of samples
+    # Visualize distribution of samples
 
-    # cmap = 'gist_heat_r'
-    # my_cmap = matplotlib.cm.get_cmap(cmap)
-    # my_cmap.set_under('w')
+    cmap = 'gist_heat_r'
+    my_cmap = matplotlib.cm.get_cmap(cmap)
+    my_cmap.set_under('w')
 
     # inda = 3
-    # print(aIBexp_Vals[inda])
+    print(aIBexp_Vals[inda])
 
-    # xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
-    # yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
+    xMin = -2 * RTF_BEC_X_th[inda]; xMax = 2 * RTF_BEC_X_th[inda]
+    yMin = -2 * RTF_BEC_Y_th[inda]; yMax = 2 * RTF_BEC_Y_th[inda]
 
-    # pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
-    # # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
-    # samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    pMin = -1 * mI * nu[inda]; pMax = mI * nu[inda]
+    # samples = loadmat('zwData/samples/posMu/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_P_P0_Y_Y0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    samples = loadmat('zwData/samples/aIB_{0}a0_true2D.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_fMaxLarge.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
+    # samples = loadmat('zwData/samples/aIB_{0}a0_X_0.mat'.format(aIBexp_Vals[inda]))['samples']  # loads matrix representing samples of initial conditions: each row is a different initial condition and the columns represent (x0, y0, p0) in theory units
 
-    # Ns = samples.shape[0]
-    # # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
-    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pxSamples = samples[:, 2]; pySamples = samples[:, 3]
-    # pSamples = pySamples
+    Ns = samples.shape[0]
+    # xSamples = samples[:, 0]; ySamples = samples[:, 1]; pSamples = samples[:, 2]
+    xSamples = samples[:, 0]; ySamples = samples[:, 1]; pxSamples = samples[:, 2]; pySamples = samples[:, 3]
+    pSamples = pySamples
 
-    # # pSamples = np.abs(pSamples)
-    # xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    # print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
-    # # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
+    # pSamples = np.abs(pSamples)
+    xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
+    print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
 
-    # H, xedges, yedges = np.histogram2d(xSamples, ySamples)
-    # H = H.T
-    # fig, ax = plt.subplots()
-    # X, Y = np.meshgrid(xedges, yedges)
-    # quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
-    # ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
-    # ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
-    # ax.set_xlim([xMin, xMax])
-    # ax.set_ylim([yMin, yMax])
-    # fig.colorbar(quad,extend='max')
+    H, xedges, yedges = np.histogram2d(xSamples, ySamples)
+    H = H.T
+    fig, ax = plt.subplots()
+    X, Y = np.meshgrid(xedges, yedges)
+    quad = ax.pcolormesh(X, Y, H, cmap=my_cmap, rasterized=True)
+    ax.plot(xmean, ymean, marker='x', markersize=10, zorder=11, color="blue")[0]
+    ax.plot(0, y0_imp[inda], marker='x', markersize=10, zorder=11, color="green")[0]
+    ax.set_xlim([xMin, xMax])
+    ax.set_ylim([yMin, yMax])
+    fig.colorbar(quad,extend='max')
 
-    # fig2, ax2 = plt.subplots()
-    # ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
-    # ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
-    # ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
-    # ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
-    # # ax2.set_ylim([])
+    fig2, ax2 = plt.subplots()
+    ax2.hist(pSamples/(mI * nu[inda]), bins=100, color='k')
+    ax2.axvline(x=pmean/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="blue", lw=2)
+    ax2.axvline(x=P0_imp[inda]/(mI * nu[inda]), ymin=0, ymax=Ns, linestyle=':', color="green", lw=2)
+    ax2.set_xlim([pMin/(mI * nu[inda]), pMax/(mI * nu[inda])])
+    # ax2.set_ylim([])
 
-    # my_cmap='RdBu'
+    my_cmap='RdBu'
 
-    # H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
-    # H = H.T
-    # fig, ax = plt.subplots()
-    # Y, P = np.meshgrid(yedges, pedges)
-    # quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
-    # ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
-    # ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
-    # fig.colorbar(quad,extend='max')
+    H, yedges, pedges = np.histogram2d(ySamples, pSamples, bins=15)
+    H = H.T
+    fig, ax = plt.subplots()
+    Y, P = np.meshgrid(yedges, pedges)
+    quad = ax.pcolormesh(Y * 1e6 / L_exp2th, P / (mI * nu[inda]), H / Ns, cmap=my_cmap, rasterized=True)
+    ax.set_xlim([yMin * 1e6 / L_exp2th, yMax * 1e6 / L_exp2th])
+    ax.set_ylim([pMin / (mI * nu[inda]), pMax / (mI * nu[inda])])
+    fig.colorbar(quad,extend='max')
 
-    # plt.show()
+    plt.show()
 
     # # Polaron energy exploration
 
@@ -770,75 +770,73 @@ if __name__ == "__main__":
     # print(yMax_vals)
     # print(fMax_vals) 
 
-    # Testing
+    # # Testing
 
-    inda = 3
+    # true2D = True
 
-    true2D = True
+    # xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
+    # yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
+    # # yVals = np.linspace(-1.5 * RTF_BEC_Y_th[inda], 1.5 * RTF_BEC_Y_th[inda], 100)
+    # pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
 
-    xVals = np.linspace(-2 * RTF_BEC_X_th[inda], 2 * RTF_BEC_X_th[inda], 100)
-    yVals = np.linspace(-2 * RTF_BEC_Y_th[inda], 2 * RTF_BEC_Y_th[inda], 100)
-    # yVals = np.linspace(-1.5 * RTF_BEC_Y_th[inda], 1.5 * RTF_BEC_Y_th[inda], 100)
-    pVals = np.linspace(-1*mI * nu[inda], mI * nu[inda], 100)
+    # x_des = 50
+    # y_des = 50
+    # # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
+    # testVals = np.zeros((xVals.size, yVals.size))
+    # # testVals = np.zeros((yVals.size, pVals.size))
 
-    x_des = 50
-    y_des = 50
-    # testVals = np.zeros((xVals.size, yVals.size, pVals.size))
-    testVals = np.zeros((xVals.size, yVals.size))
-    # testVals = np.zeros((yVals.size, pVals.size))
+    # for indx, x in enumerate(xVals):
+    #     # if indx != x_des:
+    #     #     continue
+    #     # # print(x)
+    #     EPol = np.zeros(yVals.size)
+    #     UOpt = np.zeros(yVals.size)
+    #     Vharm = np.zeros(yVals.size)
+    #     start = timer()
+    #     for indy, y in enumerate(yVals):
+    #         # if indy != y_des:
+    #         #     continue
+    #         # print(y)
+    #         # start = timer()
+    #         testVals[indx, indy] = pf_dynamic_sph.f_thermal_true2D(x, y, 0, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # for indp, p in enumerate(pVals):
+    #         #     if true2D:
+    #         #         testVals[indy, indp] = pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         #     else:
+    #         #         testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         #         # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
+    #         # # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
+    #         # # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
+    #         # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
+    #         # # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
+    #         # print(timer() - start)
+    #     print(timer() - start)
+    #     # ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
+    #     # ftot = simpson(testVals[indx,:],yVals)
+    #     # ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
+    #     # print(ftot)
+    #     # print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
 
-    for indx, x in enumerate(xVals):
-        # if indx != x_des:
-        #     continue
-        # # print(x)
-        EPol = np.zeros(yVals.size)
-        UOpt = np.zeros(yVals.size)
-        Vharm = np.zeros(yVals.size)
-        start = timer()
-        for indy, y in enumerate(yVals):
-            # if indy != y_des:
-            #     continue
-            # print(y)
-            # start = timer()
-            testVals[indx, indy] = pf_dynamic_sph.f_thermal_true2D(x, y, 0, 0, 0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # for indp, p in enumerate(pVals):
-            #     if true2D:
-            #         testVals[indy, indp] = pf_dynamic_sph.f_thermal_true2D(0, y, 0, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            #     else:
-            #         testVals[indy, indp] = pf_dynamic_sph.f_thermal(0, y, 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            #         # testVals[indx, indy, indp] = pf_dynamic_sph.f_thermal(0, y0_imp[inda], 0, p, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # # testVals[indx, indy] = pf_dynamic_sph.f_thermal(0, y, 0, p0, beta_th, mu_th, kgrid, cParams, sParams, sampleParams)
-            # # EPol[indy] = pf_dynamic_sph.E_Pol_gs(0, y, 0, p0, kgrid, cParams, sParams, sampleParams)
-            # # UOpt[indy] = pf_dynamic_sph.U_tot_opt(0, y, 0, sampleParams)
-            # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * (y + sampleParams['y0_BEC'])**2
-            # # # Vharm[indy] = 0.5 * mI * (omega_Imp_y[inda]**2) * y**2
-            # print(timer() - start)
-        print(timer() - start)
-        # ymean = np.sum(testVals[indx,:] * yVals) / np.sum(testVals)
-        # ftot = simpson(testVals[indx,:],yVals)
-        # ymean2 = simpson(testVals[indx,:] * yVals,yVals)/ftot
-        # print(ftot)
-        # print(ymean2 * 1e6 / L_exp2th,  y0_imp[inda] * 1e6 / L_exp2th)
+    # # ptot = simpson(testVals[x_des,y_des,:],pVals)
+    # # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
+    # # print(p0, pmean)
 
-    # ptot = simpson(testVals[x_des,y_des,:],pVals)
-    # pmean = simpson(testVals[x_des,y_des,:] * pVals,pVals)/ptot
-    # print(p0, pmean)
+    # # fig, ax = plt.subplots()
+    # # # ax.plot(pVals, testVals[x_des,y_des,:])
+    # # ax.plot(yVals, testVals[x_des,:])
+    # # # ax.plot(yVals, EPol)
+    # # # ax.plot(yVals, UOpt)
+    # # # ax.plot(yVals, Vharm)
+    # # plt.show()
 
+    # xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
     # fig, ax = plt.subplots()
-    # # ax.plot(pVals, testVals[x_des,y_des,:])
-    # ax.plot(yVals, testVals[x_des,:])
-    # # ax.plot(yVals, EPol)
-    # # ax.plot(yVals, UOpt)
-    # # ax.plot(yVals, Vharm)
+    # c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
+    # ax.set_xlabel('x')
+    # ax.set_ylabel('y')
+    # fig.colorbar(c, ax=ax)
     # plt.show()
-
-    xg, yg = np.meshgrid(xVals, yVals, indexing='ij')
-    fig, ax = plt.subplots()
-    c = ax.pcolormesh(1e6 * xg / L_exp2th, 1e6 * yg / L_exp2th, testVals, cmap='RdBu')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    fig.colorbar(c, ax=ax)
-    plt.show()
 
     # yg, pg = np.meshgrid(yVals, pVals, indexing='ij')
     # fig, ax = plt.subplots()
