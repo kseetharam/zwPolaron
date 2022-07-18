@@ -467,7 +467,7 @@ if __name__ == "__main__":
     # y_thermal_maxVals = np.array([-12.313756173386173, -15.092081246922893, -13.115154653923879, -16.55256620596325, -13.266519101775238, -21.135281524323595, -20.733909803778854, -24.993339840222134, -26.498895611802926, -28.475590509794532, -33.99651731075096, -33.74027937637036, -36.34859113208791, -18.51735283512218, -55.740980406094394, -56.51580566054858, -50.90619908248219, -56.54844009927777])  # the y values y=yMax at which f_thermal has a maximum [T = 20 nK]
 
 
-    inda = 14
+    inda = 1
     true2D = True
 
     sampleParams = {'omegaX_radHz': omega_x_Na, 'omegaY_radHz': omega_Na[inda], 'omegaZ_radHz': omega_z_Na, 'temperature_K': T, 'zTF_MuM': RTF_BEC_Z[inda], 'y0_BEC': y0_BEC_lab[inda], 'y0_ODT1': y0_ODT1_lab[inda], 'omega_Imp_y': omega_Imp_y[inda], 'n0_BEC_m^-3': n0_BEC[inda], 'L_exp2th': L_exp2th,
@@ -570,7 +570,8 @@ if __name__ == "__main__":
 
     # pSamples = np.abs(pSamples)
     xmean = np.mean(xSamples); ymean = np.mean(ySamples); pmean = np.mean(pSamples)
-    print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
+    print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
+    # print(xmean/RTF_BEC_X_th[inda], 0, ymean/RTF_BEC_Y_th[inda], y0_imp[inda]/RTF_BEC_Y_th[inda], pmean/(mI * nu[inda]), P0_imp[inda]/(mI * nu[inda]))
     # print(xmean, 0, ymean, y0_imp[inda], pmean, P0_imp[inda])
 
     H, xedges, yedges = np.histogram2d(xSamples, ySamples)
