@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
-    inda = 3
+    inda = 1
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_2D/aIB_{0}a0'.format(aIBexp_Vals[inda])
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_negMu'
@@ -211,11 +211,12 @@ if __name__ == "__main__":
     # ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
     # ax2.legend()
 
-    inda = 3
+    # inda = 1
     c_rat = c_BEC_exp[inda]/c_BEC_um_Per_ms
     print(c_rat)
-    v_rat = np.max(V_exp[inda][0:int(tVals.size/4)])/np.max(V_mean[0:int(tVals.size/4)])
-    v_rat = 2.5
+    # v_rat = np.max(V_exp[inda][0:int(tVals.size/4)])/np.max(V_mean[0:int(tVals.size/4)])
+    # v_rat = 1.2
+    v_rat = 1.0
     print(v_rat)
 
     aIB = aIBexp_Vals[inda]
