@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     # Load data
 
-    inda = 6
+    inda = 14
     aIB_exp = aIBexp_Vals[inda]; aIBi = aIBi_Vals[inda]
     print('aIB: {0}'.format(aIB_exp))
 
