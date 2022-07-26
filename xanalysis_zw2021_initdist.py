@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     aIBexp_Vals = np.array([-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000])
 
-    inda = 1
+    inda = 14
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_2D/aIB_{0}a0'.format(aIBexp_Vals[inda])
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP/initdist_negMu'
@@ -107,12 +107,23 @@ if __name__ == "__main__":
         tVals = 1e3 * qds['t'].values / T_exp2th  # time grid for simulation data in ms
         V = qds['V'].values * (T_exp2th / L_exp2th) * (1e6 / 1e3)
         X0 = attrs['X0']; Y0 = attrs['Y0']
+        if np.any(np.isnan(V)):
+            print(filename)
+            continue
         if true2D:
+            X = qds['X'].values * 1e6 / L_exp2th
+            Y = qds['Y'].values * 1e6 / L_exp2th
+            # if np.max(np.abs(Y)) > 20 * RTF_BEC_Y[inda]:
+            #     print('RUNAWAY', filename)
+            #     continue
+            # if np.isclose(np.mean(V[int(0.9*tVals.size)::]), 0):
+            #     print('FLAT', filename)
+            #     continue
             PX0 = attrs['PX0']
             PY0 = attrs['PY0']
             param_List.append((X0, Y0, PX0, PY0))
-            X_List.append(qds['X'].values * 1e6 / L_exp2th)
-            Y_List.append(qds['X'].values * 1e6 / L_exp2th)
+            X_List.append(X)
+            Y_List.append(Y)
             PX_List.append(qds['PX'].values)
 
         else:
@@ -201,15 +212,16 @@ if __name__ == "__main__":
     # # RELATIVE VELOCITY
     # #############################################################################################################################
 
-    # fig2, ax2 = plt.subplots()
-    # ax2.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
-    # ax2.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
-    # ax2.hlines(-3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
-    # ax2.hlines(3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
-    # ax2.set_ylabel(r'Relative impurity position ($\mu$m)')
-    # ax2.set_xlabel(r'Time (ms)')
-    # ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
-    # ax2.legend()
+    # fig0, ax0 = plt.subplots()
+    # # ax0.plot(tVals, qds_List[inda]['X'].values * 1e6 / L_exp2th, label='Simulation')
+    # ax0.plot(tVals, qds_List[inda]['Y'].values * 1e6 / L_exp2th, label='Simulation')
+    # ax0.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1, label='Thomas-Fermi radius')
+    # ax0.hlines(-3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
+    # ax0.hlines(3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
+    # ax0.set_ylabel(r'Relative impurity position ($\mu$m)')
+    # ax0.set_xlabel(r'Time (ms)')
+    # # ax0.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
+    # ax0.legend()
 
     # inda = 1
     c_rat = c_BEC_exp[inda]/c_BEC_um_Per_ms
@@ -218,6 +230,9 @@ if __name__ == "__main__":
     # v_rat = 1.2
     v_rat = 1.0
     print(v_rat)
+    V_shift = np.mean(V_mean[int(tVals.size/2)::])
+    print(V_shift)
+    V_mean = V_mean - V_shift
 
     aIB = aIBexp_Vals[inda]
     fig, ax = plt.subplots()
@@ -228,36 +243,39 @@ if __name__ == "__main__":
     ax.set_xlabel(r'Time (ms)')
     ax.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
     ax.legend()
-    ax.set_ylim([-20, 20])
+    # ax.set_ylim([-20, 20])
 
     fig2, ax2 = plt.subplots()
-    ax2.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
+    # ax2.plot(tVals_exp, V_exp[inda], 'kd-', label='Experiment')
     # paramSlice = param_List[0:-1:75]
     paramSlice = param_List
     # for indv, V in enumerate(V_List[0:-1:75]):
     for indv, V in enumerate(V_List):
         if true2D:
             X0, Y0, PX0, PY0 = param_List[indv]
-            ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
+            ax2.plot(tVals, V/c_BEC_exp[inda], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
+            # ax2.plot(tVals[int(0.75*tVals.size)::], V[int(0.75*tVals.size)::], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
             # if np.max(np.abs(V[0::])) > 3 * c_BEC_exp[inda]:
+            # if np.max(np.abs(V[0::])) > 100 * c_BEC_exp[inda]:
+            # if np.max(np.abs(V[0::])) > 50 * c_BEC_exp[inda]:
             #     print(indv, filename_List[indv])
             #     ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}, ind: {:d}'.format(X0, Y0, PX0, PY0, indv))
         else:
             X0, Y0, P0 = paramSlice[indv]
             ax2.plot(tVals, V, label='X0: {:.1f}, Y0: {:.1f}, P0: {:.2f}'.format(X0, Y0, P0))
-    ax2.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
+    # ax2.fill_between(tVals_exp, -c_BEC_exp[inda], c_BEC_exp[inda], facecolor='red', alpha=0.1, label='Subsonic regime')
     ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax2.set_xlabel(r'Time (ms)')
     ax2.set_title(r'$a_\mathrm{BF}=$' + '{0}'.format(aIB) + r'$a_\mathrm{Bohr}$')
     # ax2.legend()
-    ax2.set_ylim([-20, 20])
+    # ax2.set_ylim([-20, 20])
     ax2.set_ylabel(r'Impurity velocity ($\mu$m/ms)')
     ax2.set_xlabel(r'Time (ms)')
 
     if true2D:
         # ax2.legend()
-        # fig3, ax3 = plt.subplots()
-        # fig4, ax4 = plt.subplots()
+        fig3, ax3 = plt.subplots()
+        fig4, ax4 = plt.subplots()
         fig5, ax5, = plt.subplots()
         dt = 1e-3*(tVals[1]-tVals[0])
         fVals = np.fft.fftshift(np.fft.fftfreq(tVals.size) / (dt))
@@ -268,10 +286,10 @@ if __name__ == "__main__":
             # print(np.allclose(np.heaviside(1 - X_List[indx] ** 2 / RTF_BEC_X_th[inda] ** 2 - Y_List[indx] ** 2 / RTF_BEC_Y_th[inda] ** 2, 1 / 2),1))
             # print(fVals[fVals>0][np.argmax(FTVals[fVals>0])])
 
-            # ax3.plot(tVals, X_List[indx] / 1e6 * L_exp2th, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
-            # # ax3.fill_between(tVals, -RTF_BEC_X[inda] / 1e6 * L_exp2th, RTF_BEC_X[inda] / 1e6 * L_exp2th, facecolor='orange', alpha=0.1, label='')
+            ax3.plot(tVals, X_List[indx] / 1e6 * L_exp2th, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+            # ax3.fill_between(tVals, -RTF_BEC_X[inda] / 1e6 * L_exp2th, RTF_BEC_X[inda] / 1e6 * L_exp2th, facecolor='orange', alpha=0.1, label='')
             # ax3.legend()
-            # ax4.plot(tVals, PX_List[indx], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+            ax4.plot(tVals, PX_List[indx], label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
             # ax4.legend()
 
             # indmax = np.argmax(FTVals[fVals>0])
@@ -283,6 +301,22 @@ if __name__ == "__main__":
             ax5.set_xlabel('Hz')
             ax5.set_xlim([0,500])
             # ax5.legend()
+
+        fig6, ax6 = plt.subplots()
+        ax6.fill_between(tVals, -RTF_BEC_Y[inda], RTF_BEC_Y[inda], facecolor='orange', alpha=0.1)
+        ax6.hlines(-3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
+        ax6.hlines(3*RTF_BEC_Y[inda],np.min(tVals),np.max(tVals),'k','--')
+        ax6.set_ylabel(r'Relative impurity position ($\mu$m)')
+        ax6.set_xlabel(r'Time (ms)')
+        # ax6.set_ylim([-20*RTF_BEC_Y[inda], 20*RTF_BEC_Y[inda]])
+        ax6.set_ylim([-4*RTF_BEC_Y[inda], 4*RTF_BEC_Y[inda]])
+        # ax6.legend()
+        for indy, Y in enumerate(Y_List):
+            X0, Y0, PX0, PY0 = param_List[indy]
+            ax6.plot(tVals, Y, label='X0: {:.1f}, Y0: {:.1f}, PX0: {:.2f}, PY0: {:.2f}'.format(X0, Y0, PX0, PY0))
+
+
+
 
 
     plt.show()

@@ -40,7 +40,6 @@ if __name__ == "__main__":
 
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/naivePP'
     # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/harmonicTrap/PolPot/smarterPP'
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/naivePP'
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/ZwierleinExp_data/2021/gaussianTrap/PolPot/smarterPP'
 
     figdatapath = '/Users/kis/KIS Dropbox/Kushal Seetharam/ZwierleinExp/2021/figures'
@@ -65,9 +64,8 @@ if __name__ == "__main__":
 
     # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0, 20, 50, 125, 175, 250, 375, 500, 750, 1000]
     # aIBList = [-1000, -750, -500, -375, -250, -125, -60, -20, 0]
-    # aIBList = [20, 50, 125, 175, 250, 375, 500, 750, 1000]
-    aIBList = [-750, -375, -60, 125, 375, 1000]
-    # aIBList = [1000]
+    aIBList = [20, 50, 125, 175, 250, 375, 500, 750, 1000]
+    # aIBList = [-750, -375, -60, 125, 375, 1000]
     # aIBList = aIBexp_Vals
 
     qds_List = []
